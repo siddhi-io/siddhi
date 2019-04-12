@@ -1,4 +1,4 @@
-\# Siddhi 5.x User Guide
+# Siddhi 5.x User Guide
 
 ## System Requirements
 1. **Memory**   - 128 MB (minimum), 500 MB (recommended), higher memory might be needed based on in-memory data stored for processing
@@ -74,10 +74,10 @@ Following SiddhiApp collects events via HTTP and logs the number of events arriv
     <li>Run the SiddhiApp by executing following commands from the distribution directory
         <ul>
             <li>Linux/Mac :
-            <pre style="white-space:pre-wrap;">./bin/runner.sh -Dapps=<absolute-siddhi-file-path>/CountOverTime.siddhi</pre>
+            <pre style="white-space:pre-wrap;">./bin/runner.sh -Dapps=&lt;absolute-siddhi-file-path&gt;/CountOverTime.siddhi</pre>
             </li>
             <li>Windows :
-            <pre style="white-space:pre-wrap;">bin\runner.bat -Dapps=<absolute-siddhi-file-path>\CountOverTime.siddhi</pre>
+            <pre style="white-space:pre-wrap;">bin\runner.bat -Dapps=&lt;absolute-siddhi-file-path&gt;\CountOverTime.siddhi</pre>
             </li>
         </ul>
     </li>
@@ -133,12 +133,12 @@ The runner config can by configured with the relevant datasource information and
     <li>Run the SiddhiApp by executing following commands from the distribution directory
         <ul>
             <li>Linux/Mac :
-            <pre style="white-space:pre-wrap;">./bin/runner.sh -Dapps=<absolute-siddhi-file-path>/ConsumeAndStore.siddhi \
-  -Dconfig=<absolute-config-yaml-path>/TestDb.yaml</pre>
+            <pre style="white-space:pre-wrap;">./bin/runner.sh -Dapps=&lt;absolute-siddhi-file-path&gt;/ConsumeAndStore.siddhi \
+  -Dconfig=&lt;absolute-config-yaml-path&gt;/TestDb.yaml</pre>
             </li>
             <li>Windows :
-            <pre style="white-space:pre-wrap;">bin\runner.sh -Dapps=<absolute-siddhi-file-path>\ConsumeAndStore.siddhi ^
-  -Dconfig=<absolute-config-yaml-path>\TestDb.yaml</pre>
+            <pre style="white-space:pre-wrap;">bin\runner.sh -Dapps=&lt;absolute-siddhi-file-path&gt;\ConsumeAndStore.siddhi ^
+  -Dconfig=&lt;absolute-config-yaml-path&gt;\TestDb.yaml</pre>
             </li>
         </ul>
     </li>
@@ -224,25 +224,26 @@ The runner config is configured with a gmail account to send email messages in `
     <li>Set environment variables by running following in the termial Siddhi is about to run: 
          <pre style="white-space:pre-wrap;">
 export THRESHOLD=20
-export TO_EMAIL=<to email address>
-export EMAIL_ADDRESS=<gmail address>
-export EMAIL_USERNAME=<gmail username>
-export EMAIL_PASSWORD=<gmail password>
-         </pre>
-        Or they can also be passed as system variables by adding <code>-DTHRESHOLD=20 -DTO_EMAIL=<to email address> -DEMAIL_ADDRESS=<gmail address> -DEMAIL_USERNAME=<gmail username> -DEMAIL_PASSWORD=<gmail password></code>
+export TO_EMAIL=&lt;to email address&gt; 
+export EMAIL_ADDRESS=&lt;gmail address&gt;
+export EMAIL_USERNAME=&lt;gmail username&gt;
+export EMAIL_PASSWORD=&lt;gmail password&gt;</pre>
+        Or they can also be passed as system variables by adding 
+        <pre style="white-space:pre-wrap;">-DTHRESHOLD=20 -DTO_EMAIL=&gt;to email address&gt; -DEMAIL_ADDRESS=&lt;gmail address&gt; 
+ -DEMAIL_USERNAME=&lt;gmail username&gt; -DEMAIL_PASSWORD=&lt;gmail password&gt;</pre>
         to the end of the runner startup script.
     </li>
         <li>Run the SiddhiApp by executing following commands from the distribution directory
         <ul>
             <li>Linux/Mac :
             <pre style="white-space:pre-wrap;">
-./bin/runner.sh -Dapps=<absolute-file-path>/TemplatedFilterAndEmail.siddhi \
-  -Dconfig=<absolute-config-yaml-path>/EmailConfig.yaml</pre>
+./bin/runner.sh -Dapps=&lt;absolute-file-path&gt;/TemplatedFilterAndEmail.siddhi \
+  -Dconfig=&lt;absolute-config-yaml-path&gt;/EmailConfig.yaml</pre>
             </li>
             <li>Windows :
             <pre style="white-space:pre-wrap;">
-bin\runner.bat -Dapps=<absolute-file-path>\TemplatedFilterAndEmail.siddhi ^
-  -Dconfig=<absolute-config-yaml-path>\EmailConfig.yaml</pre>
+bin\runner.bat -Dapps=&lt;absolute-file-path&gt;\TemplatedFilterAndEmail.siddhi ^
+  -Dconfig=&lt;absolute-config-yaml-path&gt;\EmailConfig.yaml</pre>
             </li>
         </ul>
     </li>

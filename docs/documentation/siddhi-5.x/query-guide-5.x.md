@@ -48,9 +48,9 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 | ------------- |-------------|
 | Stream    | A logical series of events ordered in time with a uniquely identifiable name, and a defined set of typed attributes defining its schema. |
 | Event     | An event is a single event object associated with a stream. All events of a stream contains a timestamp and an identical set of typed attributes based on the schema of the stream they belong to.|
-| Table     | A structured representation of data stored with a defined schema. Stored data can be backed by `In-Memory`, or external data stores such as `RDBMs`, `MongoDB`, etc. The tables can be accessed and manipulated at runtime.
-| Window     | A structured representation of data stored with a defined schema and eviction policy. Window data is stored `In-Memory` and automatically cleared by the defined window constrain. Other siddhi elements can only query the values in windows at runtime but they cannot modify them.
-| Aggregation     | A structured representation of data that's incrementally aggregated and stored with a defined schema and aggregation granularity such as seconds, minutes, hours, etc. Aggregation data is stored both `In-Memory`and in external data stores such as `RDBMs`. Other siddhi elements can only query the values in windows at runtime but they cannot modify them.
+| Table     | A structured representation of data stored with a defined schema. Stored data can be backed by `In-Memory`, or external data stores such as `RDBMS`, `MongoDB`, etc. The tables can be accessed and manipulated at runtime.
+| Named Window     | A structured representation of data stored with a defined schema and eviction policy. Window data is stored `In-Memory` and automatically cleared by the named window constrain. Other siddhi elements can only query the values in windows at runtime but they cannot modify them.
+| Named Aggregation     | A structured representation of data that's incrementally aggregated and stored with a defined schema and aggregation granularity such as seconds, minutes, hours, etc. Aggregation data is stored both `In-Memory` and in external data stores such as `RDBMS`. Other siddhi elements can only query the values in windows at runtime but they cannot modify them.
 | Query	    | A logical construct that processes events in streaming manner by by consuming data from one or more streams, tables, windows and aggregations, and publishes output events into a stream, table or a window.
 | Source    | A construct that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc) with various event formats such as `XML`, `JSON`, `binary`, etc, convert then to Siddhi events, and passes into streams for processing.
 | Sink      | A construct that consumes events arriving at a stream, maps them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publishes them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
@@ -62,7 +62,7 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 **Grammar**
 
 SiddhiApp is a collection of Siddhi Streaming SQL elements composed together as a script.
-Here each Siddhi element must be separated by a semicolon `( ; )`.
+Here each Siddhi element must be separated by a semicolon `;`.
 
 Hight level syntax of SiddhiApp is as follows.
 
@@ -669,7 +669,7 @@ insert into IgnoreStream;
 
 ## Query
 
-Query defines the processing logic in Siddhi. It consumes events from one or more streams, [defined-windows](#defined-window), [tables](#table), and/or [aggregations](#aggregation), process the events in a streaming manner, and generate output events into a [stream](#stream), [defined-window](#defined-window), or [table](#table).
+Query defines the processing logic in Siddhi. It consumes events from one or more streams, [named-windows](#named-window), [tables](#table), and/or [named-aggregations](#named-aggregation), process the events in a streaming manner, and generate output events into a [stream](#stream), [named-window](#named-window), or [table](#table).
 
 **Purpose**
 
@@ -690,7 +690,7 @@ The following parameters are used to configure a stream definition.
 | Parameter&nbsp;&nbsp;&nbsp;&nbsp;| Description |
 | ------------- |-------------|
 | `query name`  | The name of the query. Since naming the query (i.e the `@name('<query name>')` annotation) is optional, when the name is not provided Siddhi assign a system generated name for the query. |
-| `input`   | Defines the means of event consumption via [streams](#stream), [named-windows](#named-window), [tables](#table), and/or [named-aggregations](#named-aggregation), and defines the processing logic using [filters](#filter), [windows](#window), [stream-functions](#stream-function), [joins](#join), [patterns](#pattern) and [sequences](#sequence). |
+| `input`   | Defines the means of event consumption via [streams](#stream), [named-windows](#named-window), [tables](#table), and/or [named-aggregations](#named-aggregations), and defines the processing logic using [filters](#filter), [windows](#window), [stream-functions](#stream-function), [joins](#join), [patterns](#pattern) and [sequences](#sequence). |
 | `projection`    | Generates output event attributes using [select](#select), [functions](#function), [aggregation-functions](#aggregation-function), and [group by](#group-by) operations, and filters the generated the output using [having](#having), [limit & offset](#limit-offset), [order by](#order-by), and [output rate limiting](#output-rate-limiting) operations before sending them out. Here the projection is optional and when it is omitted all the input events will be sent to the output as it is. |
 |`output action`| Defines output action (such as `insert into`, `update`, `delete`, etc) that needs to be performed by the generated events on a [stream](#stream), [named-window](#named-window), or [table](#table)  |
 
@@ -710,6 +710,137 @@ insert into AnotherRoomTempStream;
 ```
 !!! tip "Inferred Stream"
     Here, the `RoomTempStream` and `AnotherRoomTempStream` streams are an inferred streams, which means their stream definitions are inferred from the queries and they can be used same as any other defined stream without any restrictions.  
+
+###Value
+
+Values are typed data, that can be manipulated, transferred and stored. Values can be referred by the attributes defined in definitions such as streams, and tables.
+
+Siddhi supports values of type `STRING`, `INT` (Integer), `LONG`, `DOUBLE`, `FLOAT`, `BOOL` (Boolean) and `OBJECT`.
+The syntax of each type and their example use as a constant value is as follows,
+
+<table style="width:100%">
+    <tr>
+        <th style="width:10%">Attribute Type</th>
+        <th style="width:50%">Format</th>
+        <th style="width:40%">Example</th>
+    </tr>
+    <tr>
+        <td>int</td>
+        <td><code>&ltdigit&gt+</code></td>
+        <td><code>123</code>, <code>-75</code>, <code>+95</code></td>
+    </tr>
+    <tr>
+        <td>long</td>
+        <td><code>&ltdigit&gt+L</code></td>
+        <td><code>123000L</code>, <code>-750l</code>, <code>+154L</code></td>
+    </tr>
+    <tr>
+        <td>float</td>
+        <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?F</code></td>
+        <td><code>123.0f</code>, <code>-75.0e-10F</code>,<br/><code>+95.789f</code></td>
+    </tr>
+    <tr>
+        <td>double</td>
+        <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?D?</code></td>
+        <td><code>123.0</code>,<code>123.0D</code>,<br/><code>-75.0e-10D</code>,<code>+95.789d</code></td>
+    </tr>
+    <tr>
+        <td>bool</td>
+        <td><code>(true|false)</code></td>
+        <td><code>true</code>, <code>false</code>, <code>TRUE</code>, <code>FALSE</code></td>
+    </tr>
+    <tr>
+        <td>string</td>
+        <td><code>'(&lt;char&gt;* !('|"|"""|&ltnew line&gt))'</code> or <br/> <code>"(&lt;char&gt;* !("|"""|&ltnew line&gt))"</code> or <br/><code>"""(&lt;char&gt;* !("""))"""</code> </td>
+        <td><code>'Any text.'</code>, <br/><code>"Text with 'single' quotes."</code>, <br/><pre>"""
+Text with 'single' quotes,
+"double" quotes, and new lines.
+"""</pre></td>
+    </tr>
+</table>
+
+**_Time_**
+
+Time is a special type of `LONG` value that denotes time using digits and their unit in the format `(<digit>+ <unit>)+`. At execution, the `time` gets converted into **milliseconds** and returns a `LONG` value.
+
+<table style="width:100%">
+    <tr>
+        <th>
+            Unit  
+        </th>
+        <th>
+            Syntax
+        </th>
+    </tr>
+    <tr>
+        <td>
+            Year
+        </td>
+        <td>
+            <code>year</code> | <code>years</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Month
+        </td>
+        <td>
+            <code>month</code> | <code>months</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Week
+        </td>
+        <td>
+            <code>week</code> | <code>weeks</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Day
+        </td>
+        <td>
+            <code>day</code> | <code>days</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Hour
+        </td>
+        <td>
+           <code>hour</code> | <code>hours</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Minutes
+        </td>
+        <td>
+           <code>minute</code> | <code>minutes</code> | <code>min</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Seconds
+        </td>
+        <td>
+           <code>second</code> | <code>seconds</code> | <code>sec</code>
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Milliseconds
+        </td>
+        <td>
+           <code>millisecond</code> | <code>milliseconds</code>
+        </td>
+    </tr>
+</table>
+
+**Example**
+
+1 hour and 25 minutes can by written as `1 hour and 25 minutes` which is equal to the `LONG` value `5100000`.
 
 ###Select
 
@@ -750,48 +881,8 @@ The select clause in Siddhi query defines the output event attributes of the que
         <td>Constant values as attributes</td>
         <td>Creates output attributes with a constant value.
             <br></br>
-            The constant values can be defined as follows.
-            <table style="width:100%">
-                <tr>
-                    <th style="width:10%">Attribute Type</th>
-                    <th style="width:50%">Format</th>
-                    <th style="width:40%">Example</th>
-                </tr>
-                <tr>
-                    <td>int</td>
-                    <td><code>&ltdigit&gt+</code></td>
-                    <td><code>123</code>, <code>-75</code>, <code>+95</code></td>
-                </tr>
-                <tr>
-                    <td>long</td>
-                    <td><code>&ltdigit&gt+L</code></td>
-                    <td><code>123000L</code>, <code>-750l</code>, <code>+154L</code></td>
-                </tr>
-                <tr>
-                    <td>float</td>
-                    <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?F</code></td>
-                    <td><code>123.0f</code>, <code>-75.0e-10F</code>,<br/><code>+95.789f</code></td>
-                </tr>
-                <tr>
-                    <td>double</td>
-                    <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?D?</code></td>
-                    <td><code>123.0</code>,<code>123.0D</code>,<br/><code>-75.0e-10D</code>,<code>+95.789d</code></td>
-                </tr>
-                <tr>
-                    <td>bool</td>
-                    <td><code>(true|false)</code></td>
-                    <td><code>true</code>, <code>false</code>, <code>TRUE</code>, <code>FALSE</code></td>
-                </tr>
-                <tr>
-                    <td>string</td>
-                    <td><code>'(<char>* !('|"|"""|&ltnew line&gt))'</code> or <br/> <code>"(<char>* !("|"""|&ltnew line&gt))"</code> or <br/><code>"""(<char>* !("""))"""</code> </td>
-                    <td><code>'Any text.'</code>, <br/><code>"Text with 'single' quotes."</code>, <br/><pre>"""
-Text with 'single' quotes,
-"double" quotes, and new lines.
-"""</pre></td>
-                </tr>
-            </table>
-
+            Any constant value of type <code>STRING</code>, <code>INT</code>, <code>LONG</code>, <code>DOUBLE</code>, <code>FLOAT</code>, <code>BOOL</code>, and <code>time</code> as given in the <a href="#value">values section</a> can be defined.
+            </br>
             E.g., Query specifying <code>'C'</code> as the constant value for the <code>scale</code> attribute.
             <pre>from TempStream<br/>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>    
         </td>
@@ -872,95 +963,35 @@ Function are pre-configured operations that can consumes zero, or more parameter
 
 Functions encapsulate pre-configured reusable execution logic allowing users to execute the logic anywhere just by calling the function. This also make writing SiddhiApps simple and easy to understand.
 
-**Function Parameters**
+**Syntax**
 
-Functions parameters are the input to the function. They can be attributes, constant values, results of other functions, results of mathematical or logical expressions, or time values. The number and type of parameters a function accepts depend on the function itself.
+The syntax of function is as follows,
+
+```sql
+<function name>( <parameter>* )
+```
+
+Here `<function name>` uniquely identifies the function. The `<parameter>` defined input parameters the function can accept. The input parameters can be attributes, constant values, results of other functions, results of mathematical or logical expressions, or time values. The number and type of parameters a function accepts depend on the function itself.
 
 !!! note
     Functions, mathematical expressions, and logical expressions can be used in a nested manner.
 
-*Time*
+**Example 1**
 
-Time is a special parameter that denotes time using digits and their unit in the format `(<digit>+ <unit>)+`. During the execution, the time parameters get converted into milliseconds and return as long values.
+Function name `add` accepting two input parameters, is called with an attribute named `input` and a constant value `75`.  
+```
+add(input, 75)
+```
 
-<table style="width:100%">
-    <tr>
-        <th>
-            Unit  
-        </th>
-        <th>
-            Syntax
-        </th>
-    </tr>
-    <tr>
-        <td>
-            Year
-        </td>
-        <td>
-            <code>year</code> | <code>years</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Month
-        </td>
-        <td>
-            <code>month</code> | <code>months</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Week
-        </td>
-        <td>
-            <code>week</code> | <code>weeks</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Day
-        </td>
-        <td>
-            <code>day</code> | <code>days</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Hour
-        </td>
-        <td>
-           <code>hour</code> | <code>hours</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-           Minutes
-        </td>
-        <td>
-           <code>minute</code> | <code>minutes</code> | <code>min</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-           Seconds
-        </td>
-        <td>
-           <code>second</code> | <code>seconds</code> | <code>sec</code>
-        </td>
-    </tr>
-    <tr>
-        <td>
-           Milliseconds
-        </td>
-        <td>
-           <code>millisecond</code> | <code>milliseconds</code>
-        </td>
-    </tr>
-</table>
+**Example 2**
 
-E.g. Pass `1 hour and 25 minutes` as the input for `test()` function. <br/>
+Function name `alertAfter` accepting two input parameters, is called with a time value of `1 hour and 25 minutes` and a mathematical addition operation of `startTime` + `56`.
 
-<code>test(1 hour 25 min)</code>
+```
+add(1 hour and 25 minutes, startTime + 56)
+```
+
+**Inbuilt functions**
 
 Following are some inbuilt Siddhi functions, for more functions refer [execution extensions](http://siddhi.io/extensions/) .
 
@@ -990,21 +1021,23 @@ Following are some inbuilt Siddhi functions, for more functions refer [execution
 Query that converts the `roomNo` to `string` using `convert` function, finds the maximum temperature reading with `maximum` function, and adds a unique `messageID` using the `UUID` function.
 ```sql
 from TempStream
-select convert(roomNo, 'string') as roomNo, maximum(tempReading1, tempReading2) as temp, UUID() as messageID
+select convert(roomNo, 'string') as roomNo,
+       maximum(tempReading1, tempReading2) as temp,
+       UUID() as messageID
 insert into RoomTempStream;
 ```
 
 ### Filter
 
-Filters are included in queries to filter information from input streams based on a specified condition.
+Filters provide a way of filtering input stream events based on a specified condition. It accepts any type of condition including a combination of functions and/or attributes  that produces a Boolean result. Filters allow events to pass through if the condition results in `true`, and drops if it results in a `false`.  
 
 **Purpose**
 
-A filter allows you to separate events that match a specific condition as the output, or for further processing.
+Filter helps to select the events that are relevant for the processing and omit the ones that are not needed.
 
 **Syntax**
 
-Filter conditions should be defined in square brackets next to the input stream name as shown below.
+Filter conditions should be defined in square brackets next to the input stream as shown below.
 
 ```sql
 from <input stream>[<filter condition>]
@@ -1014,8 +1047,8 @@ insert into <output stream>
 
 **Example**
 
-This query filters all server rooms of which the room number is within the range of 100-210, and having temperature greater than 40 degrees
-from the `TempStream` stream, and inserts the results into the `HighTempStream` stream.
+Query to filter `TempStream` stream events, having `roomNo` within the range of 100-210 and temperature greater than 40 degrees,
+and insert them into `HighTempStream` stream.
 
 ```sql
 from TempStream[(roomNo >= 100 and roomNo < 210) and temp > 40]
@@ -1312,7 +1345,7 @@ During the joining process each incoming event of each stream is matched against
 stream's window based on the given condition, and the output events are generated for all the matching event pairs.
 
 !!! Note
-    Join can also be performed with [stored data](#join-table), [aggregation](#join-aggregation) or externally [defined windows](#join-window).
+    Join can also be performed with [stored data](#join-table), [aggregation](#join-aggregation) or externally [named windows](#join-window).
 
 **Syntax**
 
@@ -2016,7 +2049,7 @@ insert into TempTable;
 This allows a stream to retrieve information from a table in a streaming manner.
 
 !!! Note
-    Joins can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or against externally [defined windows](#join-window).
+    Joins can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or against externally [named windows](#join-window).
 
 **Syntax**
 
@@ -2218,14 +2251,14 @@ from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
 insert into ServerRoomTempStream;
 ```
 
-## Incremental Aggregation
+## Named Aggregation
 
-Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
+Named aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
- Incremental aggregation granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the incremental aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
+ Named aggregation's granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the named aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
 
 |Granularity           |Default retention      |Minimum retention
 ---------------        |--------------         |------------------  
@@ -2238,7 +2271,7 @@ This not only allows you to calculate aggregations with varied time granularity,
 
 **Purpose**
 
-Incremental aggregation allows you to retrieve the aggregate values for different time durations.
+Named aggregation allows you to retrieve the aggregate values for different time durations.
 That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, `count` and `distinctCount`
 of stream attributes for durations such as `sec`, `min`, `hour`, etc.
 
@@ -2337,7 +2370,7 @@ partitionById| This allows user to enable/disable distributed aggregation for al
 This allows a stream to retrieve calculated aggregate values from the aggregation.
 
 !!! Note
-    A join can also be performed with [two streams](#join-stream), with a [table](#join-table) and a stream, or with a stream against externally [defined windows](#join-window).
+    A join can also be performed with [two streams](#join-stream), with a [table](#join-table) and a stream, or with a stream against externally [named windows](#join-window).
 
 
 **Syntax**
@@ -2439,14 +2472,14 @@ Aggregation join supports following join operations.
     It returns all the events of the right stream even if there are no matching events in the left aggregation.
 
 
-## _(Defined)_ Window
+##Named Window
 
-A defined window is a window that can be shared across multiple queries.
-Events can be inserted to a defined window from one or more queries and it can produce output events based on the defined window type.
+A named window is a window that can be shared across multiple queries.
+Events can be inserted to a named window from one or more queries and it can produce output events based on the named window type.
 
 **Syntax**
 
-The syntax for a defined window is as follows:
+The syntax for a named window is as follows:
 
 ```sql
 define window <window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <output event type>;
@@ -2481,9 +2514,9 @@ The following parameters are configured in a table definition:
 ```
 
 
-**Operators on Defined Windows**
+**Operators on Named Windows**
 
-The following operators can be performed on defined windows.
+The following operators can be performed on named windows.
 
 ### Insert
 
