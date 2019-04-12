@@ -6,7 +6,7 @@ extra_css:
 - stylesheets/extra.css
 repo_name: Siddhi
 repo_url: https://github.com/wso2/siddhi
-copyright: Copyright &copy; 2011 - 2018 WSO2
+copyright: Copyright &copy; 2011 - 2019 WSO2
 theme:
   name: material
   logo: images/siddhi-logo-w.svg
@@ -47,18 +47,6 @@ pages:
 - Contribute: contribution.md
 - Extensions: extensions.md
 - API Docs:
-  - 5.0.0-m12: api/5.0.0-m12.md
-  - 5.0.0-m11: api/5.0.0-m11.md
-  - 5.0.0-m10: api/5.0.0-m10.md
-  - 5.0.0-m9: api/5.0.0-m9.md
-  - 5.0.0-m8: api/5.0.0-m8.md
-  - 5.0.0-m7: api/5.0.0-m7.md
-  - 5.0.0-m6: api/5.0.0-m6.md
-  - 5.0.0-m5: api/5.0.0-m5.md
-  - 5.0.0-m4: api/5.0.0-m4.md
-  - 5.0.0-m3: api/5.0.0-m3.md
-  - 5.0.0-m2: api/5.0.0-m2.md
-  - 5.0.0-m1: api/5.0.0-m1.md
   - 5.0.0: api/5.0.0.md
   - 4.4.8: api/4.4.8.md
   - 4.4.0: api/4.4.0.md
