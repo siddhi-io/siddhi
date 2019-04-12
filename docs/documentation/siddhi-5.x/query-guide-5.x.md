@@ -103,10 +103,12 @@ Stream groups common types of events together with a schema. This helps in vario
 **Syntax**
 
 The syntax for defining a new stream is as follows.
+
 ```sql
 define stream <stream name> (<attribute name> <attribute type>,
                              <attribute name> <attribute type>, ... );
 ```
+
 The following parameters are used to configure a stream definition.
 
 | Parameter     | Description |
@@ -667,25 +669,34 @@ insert into IgnoreStream;
 
 ## Query
 
-Each Siddhi query can consume one or more streams, and 0-1 tables, process the events in a streaming manner, and then generate an
- output event to a stream or perform a CRUD operation to a table.
+Query defines the processing logic in Siddhi. It consumes events from one or more streams, [defined-windows](#defined-window), [tables](#table), and/or [aggregations](#aggregation), process the events in a streaming manner, and generate output events into a [stream](#stream), [defined-window](#defined-window), or [table](#table).
 
 **Purpose**
 
-A query enables you to perform complex event processing and stream processing operations by processing incoming events one by one in the order they arrive.
+A query provides a way to process the events in the order they arrive and produce output using both stateful and stateless complex event processing and stream processing operations.
 
 **Syntax**
 
-All queries contain an input and an output section. Some also contain a projection section. A simple query with all three sections is as follows.
+The high level query syntax for defining processing logics is as follows:
 
 ```sql
-from <input stream>
-select <attribute name>, <attribute name>, ...
-insert into <output stream/table>
+@name('<query name>')
+from <input>
+<projection>
+<output action>
 ```
+The following parameters are used to configure a stream definition.
+
+| Parameter&nbsp;&nbsp;&nbsp;&nbsp;| Description |
+| ------------- |-------------|
+| `query name`  | The name of the query. Since naming the query (i.e the `@name('<query name>')` annotation) is optional, when the name is not provided Siddhi assign a system generated name for the query. |
+| `input`   | Defines the means of event consumption via [streams](#stream), [named-windows](#named-window), [tables](#table), and/or [named-aggregations](#named-aggregation), and defines the processing logic using [filters](#filter), [windows](#window), [stream-functions](#stream-function), [joins](#join), [patterns](#pattern) and [sequences](#sequence). |
+| `projection`    | Generates output event attributes using [select](#select), [functions](#function), [aggregation-functions](#aggregation-function), and [group by](#group-by) operations, and filters the generated the output using [having](#having), [limit & offset](#limit-offset), [order by](#order-by), and [output rate limiting](#output-rate-limiting) operations before sending them out. Here the projection is optional and when it is omitted all the input events will be sent to the output as it is. |
+|`output action`| Defines output action (such as `insert into`, `update`, `delete`, etc) that needs to be performed by the generated events on a [stream](#stream), [named-window](#named-window), or [table](#table)  |
+
 **Example**
 
-This query included in a Siddhi Application consumes events from the `TempStream` stream (that is already defined) and outputs the room temperature and the room number to the `RoomTempStream` stream.
+A query consumes events from the `TempStream` stream and output only the `roomNo` and `temp` attributes to the `RoomTempStream` stream, from which another query consumes the events and sends all its attributes to `AnotherRoomTempStream` stream.
 
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
@@ -693,15 +704,16 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 from TempStream
 select roomNo, temp
 insert into RoomTempStream;
+
+from RoomTempStream
+insert into AnotherRoomTempStream;
 ```
 !!! tip "Inferred Stream"
-    Here, the `RoomTempStream` is an inferred Stream, which means it can be used as any other defined stream
-    without explicitly defining its stream definition. The definition of the `RoomTempStream` is inferred from the
-    first query that produces the stream.  
+    Here, the `RoomTempStream` and `AnotherRoomTempStream` streams are an inferred streams, which means their stream definitions are inferred from the queries and they can be used same as any other defined stream without any restrictions.  
 
-###Query Projection
+###Select
 
-Siddhi queries supports the following for query projections.
+The select clause in Siddhi query defines the output event attributes of the query. Following are some basic query projection operations supported by select.
 
 <table style="width:100%">
     <tr>
@@ -709,183 +721,167 @@ Siddhi queries supports the following for query projections.
         <th>Description</th>
     </tr>
     <tr>
-        <td>Selecting required objects for projection</td>
-        <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
+        <td>Select specific attributes for projection</td>
+        <td>Only select some of the input attributes as query output attributes.
             <br><br>
-            E.g., The following query selects only the `roomNo` and `temp` attributes from the `TempStream` stream.
+            E.g., Select and output only <code>roomNo</code> and <code>temp</code> attributes from the <code>TempStream</code> stream.
             <pre style="align:left">from TempStream<br>select roomNo, temp<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
-        <td>Selecting all attributes for projection</td>
-        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
+        <td>Select all attributes for projection</td>
+        <td>Select all input attributes as query output attributes. This can be done by using asterisk (<code> * </code>) or by omitting the <code>select</code> clause itself.
             <br><br>
-            E.g., Both the following queries select all the attributes in the `NewTempStream` stream.
-            <pre>from TempStream<br>select *<br>insert into NewTempStream;</pre>
+            E.g., Both following queries select all attributes of <code>TempStream</code> input stream and output all attributes to <code>NewTempStream</code> stream.
+            <pre>from TempStream<br/>select * <br/>insert into NewTempStream;</pre>
             or
-            <pre>from TempStream<br>insert into NewTempStream;</pre>
+            <pre>from TempStream<br/>insert into NewTempStream;</pre>
         </td>
     </tr>
     <tr>
-        <td>Renaming attributes</td>
-        <td>This selects attributes from the input streams and inserts them into the output stream with different names.
-            <br><br>
-            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
-            <pre>from TempStream <br>select roomNo as roomNumber, temp as temperature<br>insert into RoomTempStream;</pre>
+        <td>Name attribute</td>
+        <td>Provide a unique name for each output attribute generated by the query. This can help to rename the selected input attributes or assign an attribute name to a projection operation such as function, aggregate-function, mathematical operation, etc, using <code>as</code> keyword.
+            <br/><br/>
+            E.g., Query that renames input attribute <code>temp</code> to <code>temperature</code> and function <code>currentTimeMillis()</code> as <code>time</code>.
+            <pre>from TempStream <br/>select roomNo, temp as temperature, currentTimeMillis() as time</br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
-        <td>Introducing the constant value</td>
-        <td>This adds constant values by assigning it to an attribute using `as`.
+        <td>Constant values as attributes</td>
+        <td>Creates output attributes with a constant value.
             <br></br>
-            E.g., This query specifies 'C' to be used as the constant value for `scale` attribute.
-            <pre>from TempStream<br>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>
+            The constant values can be defined as follows.
+            <table style="width:100%">
+                <tr>
+                    <th style="width:10%">Attribute Type</th>
+                    <th style="width:50%">Format</th>
+                    <th style="width:40%">Example</th>
+                </tr>
+                <tr>
+                    <td>int</td>
+                    <td><code>&ltdigit&gt+</code></td>
+                    <td><code>123</code>, <code>-75</code>, <code>+95</code></td>
+                </tr>
+                <tr>
+                    <td>long</td>
+                    <td><code>&ltdigit&gt+L</code></td>
+                    <td><code>123000L</code>, <code>-750l</code>, <code>+154L</code></td>
+                </tr>
+                <tr>
+                    <td>float</td>
+                    <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?F</code></td>
+                    <td><code>123.0f</code>, <code>-75.0e-10F</code>,<br/><code>+95.789f</code></td>
+                </tr>
+                <tr>
+                    <td>double</td>
+                    <td><code>(&ltdigit&gt+)?('.'&ltdigit&gt*)?<br/>(E(-|+)?&ltdigit&gt+)?D?</code></td>
+                    <td><code>123.0</code>,<code>123.0D</code>,<br/><code>-75.0e-10D</code>,<code>+95.789d</code></td>
+                </tr>
+                <tr>
+                    <td>bool</td>
+                    <td><code>(true|false)</code></td>
+                    <td><code>true</code>, <code>false</code>, <code>TRUE</code>, <code>FALSE</code></td>
+                </tr>
+                <tr>
+                    <td>string</td>
+                    <td><code>'(<char>* !('|"|"""|&ltnew line&gt))'</code> or <br/> <code>"(<char>* !("|"""|&ltnew line&gt))"</code> or <br/><code>"""(<char>* !("""))"""</code> </td>
+                    <td><code>'Any text.'</code>, <br/><code>"Text with 'single' quotes."</code>, <br/><pre>"""
+Text with 'single' quotes,
+"double" quotes, and new lines.
+"""</pre></td>
+                </tr>
+            </table>
+
+            E.g., Query specifying <code>'C'</code> as the constant value for the <code>scale</code> attribute.
+            <pre>from TempStream<br/>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>    
         </td>
     </tr>
     <tr>
-        <td>Using mathematical and logical expressions</td>
-        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assigns them to the output attribute using `as`.
+        <td>Mathematical and logical expressions in attributes</td>
+        <td>Defines the mathematical and logical operations that need to be performed to generating output attribute values. These expressions are executed in the precedence order given below.
             <br><br>
             <b>Operator precedence</b><br>
             <table style="width:100%">
                 <tr>
-                    <th>Operator</th>
-                    <th>Distribution</th>
-                    <th>Example</th>
+                    <th style="width:10%">Operator</th>
+                    <th style="width:40%">Distribution</th>
+                    <th style="width:50%">Example</th>
                 </tr>
                 <tr>
-                    <td>
-                        ()
-                    </td>
-                    <td>
-                        Scope
-                    </td>
-                    <td>
-                        <pre>(cost + tax) * 0.05</pre>
-                    </td>
+                    <td><code>()</code></td>
+                    <td>Scope</td>
+                    <td><code>(cost + tax) * 0.05</code></td>
                 </tr>
                 <tr>
-                    <td>
-                         IS NULL
-                    </td>
-                    <td>
-                        Null check
-                    </td>
-                    <td>
-                        <pre>deviceID is null</pre>
-                    </td>
+                    <td><code>IS NULL</code></td>
+                    <td>Null check</td>
+                    <td><code>deviceID is null</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        NOT
-                    </td>
-                    <td>
-                        Logical NOT
-                    </td>
-                    <td>
-                        <pre>not (price > 10)</pre>
-                    </td>
+                    <td><code>NOT</code></td>
+                    <td>Logical NOT</td>
+                    <td><code>not (price > 10)</code></td>
                 </tr>
                 <tr>
-                    <td>
-                         *   /   %  
-                    </td>
-                    <td>
-                        Multiplication, division, modulo
-                    </td>
-                    <td>
-                        <pre>temp * 9/5 + 32</pre>
-                    </td>
+                    <td><code> * </code>,<code>/</code>,<code>%</code></td>
+                    <td>Multiplication, division, modulus</td>
+                    <td><code>temp * 9/5 + 32</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        +   -  
-                    </td>
-                    <td>
-                        Addition, substraction
-                    </td>
-                    <td>
-                        <pre>temp * 9/5 - 32</pre>
-                    </td>
+                    <td><code>+</code>,<code>-</code></td>
+                    <td>Addition, subtraction</td>
+                    <td><code>temp * 9/5 - 32</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        <   <=   >   >=
-                    </td>
-                    <td>
-                        Comparators: less-than, greater-than-equal, greater-than, less-than-equal
-                    </td>
-                    <td>
-                        <pre>totalCost >= price * quantity</pre>
-                    </td>
+                    <td><code><</code>,<code><=</code>,<br/><code>></code>,<code>>=</code></td>
+                    <td>Comparators: less-than, greater-than-equal, greater-than, less-than-equal</td>
+                    <td><code>totalCost >= price * quantity</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        ==   !=  
-                    </td>
-                    <td>
-                        Comparisons: equal, not equal
-                    </td>
-                    <td>
-                        <pre>totalCost !=  price * quantity</pre>
-                    </td>
+                    <td><code>==</code>,<code>!=</code></td>
+                    <td>Comparisons: equal, not equal</td>
+                    <td><code>totalCost !=  price * quantity</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        IN
-                    </td>
-                    <td>
-                        Contains in table
-                    </td>
-                    <td>
-                        <pre>roomNo in ServerRoomsTable</pre>
-                    </td>
+                    <td><code>IN</code></td>
+                    <td>Checks if value exist in the table</td>
+                    <td><code>roomNo in ServerRoomsTable</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        AND
-                    </td>
-                    <td>
-                        Logical AND
-                    </td>
-                    <td>
-                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
-                    </td>
+                    <td><code>AND</code></td>
+                    <td>Logical AND</td>
+                    <td><code>temp < 40 and humidity < 40</code></td>
                 </tr>
                 <tr>
-                    <td>
-                        OR
-                    </td>
-                    <td>
-                        Logical OR
-                    </td>
-                    <td>
-                        <pre>temp < 40 or (humidity < 40 and humidity >= 60)</pre>
-                    </td>
+                    <td><code>OR</code></td>
+                    <td>Logical OR</td>
+                    <td><code>humidity < 40 or humidity >= 60</code></td>
                 </tr>
             </table>
-            E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
-            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 and roomNo < 15 as isServerRoom<br>insert into RoomTempStream;</pre>       
+            E.g., Query converts temperature from Celsius to Fahrenheit, and identifies rooms with room number between 10 and 15 as server rooms.
+            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale,<br>       roomNo > 10 and roomNo < 15 as isServerRoom<br>insert into RoomTempStream;</pre>       
     </tr>
 
 </table>
 
 ###Function
 
-A function consumes zero, one or more parameters and always produces a result value. It can be used in any location where
- an attribute can be used.
+Function are pre-configured operations that can consumes zero, or more parameters and always produce a single value as result. It can be used anywhere an attribute can be used.
 
 **Purpose**
 
-Functions encapsulates complex execution logic that makes Siddhi applications simple and easy to understand.
+Functions encapsulate pre-configured reusable execution logic allowing users to execute the logic anywhere just by calling the function. This also make writing SiddhiApps simple and easy to understand.
 
 **Function Parameters**
 
-Functions parameters can be attributes, constant values, results of other functions, results of mathematical or logical expressions or time parameters.
-Function parameters vary depending on the function being called.
+Functions parameters are the input to the function. They can be attributes, constant values, results of other functions, results of mathematical or logical expressions, or time values. The number and type of parameters a function accepts depend on the function itself.
 
-Time is a special parameter that can be defined using the integer time value followed by its unit as `<int> <unit>`.
-Following are the supported unit types. Upon execution, time returns the value in the scale of milliseconds as a long value.
+!!! note
+    Functions, mathematical expressions, and logical expressions can be used in a nested manner.
+
+*Time*
+
+Time is a special parameter that denotes time using digits and their unit in the format `(<digit>+ <unit>)+`. During the execution, the time parameters get converted into milliseconds and return as long values.
 
 <table style="width:100%">
     <tr>
@@ -901,7 +897,7 @@ Following are the supported unit types. Upon execution, time returns the value i
             Year
         </td>
         <td>
-            year | years
+            <code>year</code> | <code>years</code>
         </td>
     </tr>
     <tr>
@@ -909,7 +905,7 @@ Following are the supported unit types. Upon execution, time returns the value i
             Month
         </td>
         <td>
-            month | months
+            <code>month</code> | <code>months</code>
         </td>
     </tr>
     <tr>
@@ -917,7 +913,7 @@ Following are the supported unit types. Upon execution, time returns the value i
             Week
         </td>
         <td>
-            week | weeks
+            <code>week</code> | <code>weeks</code>
         </td>
     </tr>
     <tr>
@@ -925,7 +921,7 @@ Following are the supported unit types. Upon execution, time returns the value i
             Day
         </td>
         <td>
-            day | days
+            <code>day</code> | <code>days</code>
         </td>
     </tr>
     <tr>
@@ -933,7 +929,7 @@ Following are the supported unit types. Upon execution, time returns the value i
             Hour
         </td>
         <td>
-           hour | hours
+           <code>hour</code> | <code>hours</code>
         </td>
     </tr>
     <tr>
@@ -941,7 +937,7 @@ Following are the supported unit types. Upon execution, time returns the value i
            Minutes
         </td>
         <td>
-           minute | minutes | min
+           <code>minute</code> | <code>minutes</code> | <code>min</code>
         </td>
     </tr>
     <tr>
@@ -949,7 +945,7 @@ Following are the supported unit types. Upon execution, time returns the value i
            Seconds
         </td>
         <td>
-           second | seconds | sec
+           <code>second</code> | <code>seconds</code> | <code>sec</code>
         </td>
     </tr>
     <tr>
@@ -957,43 +953,44 @@ Following are the supported unit types. Upon execution, time returns the value i
            Milliseconds
         </td>
         <td>
-           millisecond | milliseconds
+           <code>millisecond</code> | <code>milliseconds</code>
         </td>
     </tr>
 </table>
 
-E.g. Passing 1 hour and 25 minutes to `test()` function.
+E.g. Pass `1 hour and 25 minutes` as the input for `test()` function. <br/>
 
-<pre>test(1 hour 25 min)</pre>
+<code>test(1 hour 25 min)</code>
 
-!!! note
-    Functions, mathematical expressions, and logical expressions can be used in a nested manner.
+Following are some inbuilt Siddhi functions, for more functions refer [execution extensions](http://siddhi.io/extensions/) .
 
-Following are some inbuilt functions shipped with Siddhi, for more functions refer execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
-
-+ [eventTimestamp](http://siddhi.io/api/latest/#eventtimestamp-function)
-+ [log](http://siddhi.io/api/latest/#log-stream-processor)
-+ [UUID](http://siddhi.io/api/latest/#uuid-function)
-+ [default](http://siddhi.io/api/latest/#default-function)
-+ [cast](http://siddhi.io/api/latest/#cast-function)
-+ [convert](http://siddhi.io/api/latest/#convert-function)
-+ [ifThenElse](http://siddhi.io/api/latest/#ifthenelse-function)
-+ [minimum](http://siddhi.io/api/latest/#minimum-function)
-+ [maximum](http://siddhi.io/api/latest/#maximum-function)
-+ [coalesce](http://siddhi.io/api/latest/#coalesce-function)
-+ [instanceOfBoolean](http://siddhi.io/api/latest/#instanceofboolean-function)
-+ [instanceOfDouble](http://siddhi.io/api/latest/#instanceofdouble-function)
-+ [instanceOfFloat](http://siddhi.io/api/latest/#instanceoffloat-function)
-+ [instanceOfInteger](http://siddhi.io/api/latest/#instanceofinteger-function)
-+ [instanceOfLong](http://siddhi.io/api/latest/#instanceoflong-function)
-+ [instanceOfString](http://siddhi.io/api/latest/#instanceofstring-function)
+|Inbuilt function | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#eventtimestamp-function">eventTimestamp</a> | Returns event's timestamp. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#currenttimemillis-function">currentTimeMillis</a> | Returns current time of SiddhiApp runtime. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#default-function">default</a> | Returns a default value if the parameter is null. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#ifthenelse-function">ifThenElse</a> | Returns parameters based on a conditional parameter. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#uuid-function">UUID</a> | Generates a UUID. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#cast-function">cast</a> | Casts parameter type. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#convert-function">convert</a> | Converts parameter type. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#coalesce-function">coalesce</a> | Returns first not null input parameter. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#maximum-function">maximum</a> | Returns the maximum value of all parameters. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#minimum-function">minimum</a> | Returns the minimum value of all parameters. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceofboolean-function">instanceOfBoolean</a> | Checks if the parameter is an instance of Boolean. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceofdouble-function">instanceOfDouble</a> | Checks if the parameter is an instance of Double. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceoffloat-function">instanceOfFloat</a> | Checks if the parameter is an instance of Float. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceofinteger-function">instanceOfInteger</a> | Checks if the parameter is an instance of Integer. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceoflong-function">instanceOfLong</a> | Checks if the parameter is an instance of Long. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#instanceofstring-function">instanceOfString</a> | Checks if the parameter is an instance of String. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#createset-function">createSet</a> | Creates  HashSet with given input parameters. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#minimum-function">sizeOfSet</a> | Returns number of items in the HashSet, that's passed as a parameter. |
 
 **Example**
 
-The following configuration converts the `roomNo` to `string` and adds a `messageID` to each event using the `convert` and `UUID` functions.
+Query that converts the `roomNo` to `string` using `convert` function, finds the maximum temperature reading with `maximum` function, and adds a unique `messageID` using the `UUID` function.
 ```sql
 from TempStream
-select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
+select convert(roomNo, 'string') as roomNo, maximum(tempReading1, tempReading2) as temp, UUID() as messageID
 insert into RoomTempStream;
 ```
 
