@@ -101,9 +101,9 @@ For more information please contact us via <a target="_blank" href="http://wso2.
 
  <a target="_blank" href=""></a> 
  
-* **Active development version of Siddhi** : **v5.0.0-SNAPSHOT**  _built on Java 8 & 11._ 
+* **Active development version of Siddhi** : **v5.0.0**  _built on Java 8 & 11._ 
      
-    Find the released Siddhi libraries <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/siddhi-core">here</a>.
+    Find the released Siddhi libraries <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/">here</a>.
 
     <a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/">Siddhi Query Guide</a> for Siddhi v5.x.x
     
