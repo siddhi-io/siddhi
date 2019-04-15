@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.processor.stream;
 
-import io.siddhi.core.annotation.ProcessorAnnotationValidator;
+//import io.siddhi.core.annotation.ProcessorAnnotationValidator;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
