@@ -41,20 +41,6 @@ import java.lang.annotation.Target;
  *                           {@literal @}ParameterOverload(parameterNames={"firstParameterName","secondParameterName"}),
  *                           {@literal @}ParameterOverload(parameterNames={"firstParameterName"})
  *                       },
- *                       parametersConstraints1 = {
- *                           {@literal @}ParameterOverload1(
- *                               parameters = {
- *                                   {@literal @}Parameter(name = "firstParameterName", type = {DataType.INT,
- *                                   DataType.LONG}),
- *                                   {@literal @}Parameter(name = "SecondParameterName", type = {DataType.STRING})
- *                               }
- *                            ),
- *                           {@literal @}ParameterOverload1(
- *                               parameters = {
- *                                   {@literal @}Parameter(name = "thirdParameterName", type = {DataType.STRING})
- *                               }
- *                           )
- *                       },
  *                      returnAttributes = {@literal @}ReturnAttribute(type = {DataType.INT, DataType.LONG}),
  *                      examples = {{@literal @}Example({"Example of the CustomExtension usage 1"}),
  *                                  {@literal @}Example({"Example of the CustomExtension usage 2"})}
@@ -77,8 +63,6 @@ public @interface Extension {
     Parameter[] parameters() default {};
 
     ParameterOverload[] parameterOverloads() default {};
-
-    ParameterOverload1[] parameterOverloads1() default {};
 
     SystemParameter[] systemParameter() default {};
 
