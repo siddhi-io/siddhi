@@ -96,20 +96,17 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
 
     @Override
     public Scheduler getScheduler() {
-
         return scheduler;
     }
 
     @Override
     public void setScheduler(Scheduler scheduler) {
-
         this.scheduler = scheduler;
     }
 
     @Override
     protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                 SiddhiQueryContext siddhiQueryContext) {
-
         this.siddhiQueryContext = siddhiQueryContext;
         if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
@@ -196,7 +193,6 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, WindowState state,
                                               SiddhiQueryContext siddhiQueryContext) {
-
         return OperatorParser.constructOperator(state.expiredEventQueue, condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
@@ -204,7 +200,6 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
                             StreamEventCloner streamEventCloner, WindowState state) {
-
         return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventQueue, streamEventCloner);
     }
 
@@ -215,25 +210,21 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
 
     @Override
     public void stop() {
-
         if (scheduler != null) {
             scheduler.stop();
         }
     }
 
     class WindowState extends State {
-
         private SnapshotableStreamEventQueue expiredEventQueue;
         private int count = 0;
 
         WindowState(StreamEventClonerHolder streamEventClonerHolder) {
-
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
 
         @Override
         public Map<String, Object> snapshot() {
-
             Map<String, Object> state = new HashMap<>();
             state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
             state.put("Count", count);
@@ -241,14 +232,12 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
         }
 
         public void restore(Map<String, Object> state) {
-
             expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
             count = (Integer) state.get("ExpiredEventQueue");
         }
 
         @Override
         public boolean canDestroy() {
-
             return expiredEventQueue.getFirst() == null && count == 0;
         }
     }
