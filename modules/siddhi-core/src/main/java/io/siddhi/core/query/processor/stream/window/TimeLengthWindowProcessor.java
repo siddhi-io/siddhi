@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -68,6 +69,9 @@ import java.util.Map;
                         description = "The number of events that should be be included in a sliding length window..",
                         type = {DataType.INT})
         },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"window.time","window.length"})
+        },
         examples = @Example(
                 syntax = "define stream cseEventStream (symbol string, price float, volume int);\n" +
                         "define window cseEventWindow (symbol string, price float, volume int) " +
@@ -104,30 +108,30 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
     protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                 SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
-        if (attributeExpressionExecutors.length == 2) {
+//        if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
+//            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
+//                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
                     timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                             .getValue();
 
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
-                } else {
-                    throw new SiddhiAppValidationException("TimeLength window's first parameter attribute should " +
-                            "be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
-                }
-            } else {
-                throw new SiddhiAppValidationException("TimeLength window should have constant parameter " +
-                        "attributes but found a dynamic attribute " + attributeExpressionExecutors[0].getClass()
-                        .getCanonicalName());
-            }
-        } else {
-            throw new SiddhiAppValidationException("TimeLength window should only have two parameters (<int> " +
-                    "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
-                    "attributes");
-        }
+//                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+//                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
+//                            .getValue();
+//                } else {
+//                    throw new SiddhiAppValidationException("TimeLength window's first parameter attribute should " +
+//                            "be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
+//                }
+//            } else {
+//                throw new SiddhiAppValidationException("TimeLength window should have constant parameter " +
+//                        "attributes but found a dynamic attribute " + attributeExpressionExecutors[0].getClass()
+//                        .getCanonicalName());
+//            }
+//        } else {
+//            throw new SiddhiAppValidationException("TimeLength window should only have two parameters (<int> " +
+//                    "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
+//                    "attributes");
+//        }
         return () -> new WindowState(streamEventClonerHolder);
 
     }
