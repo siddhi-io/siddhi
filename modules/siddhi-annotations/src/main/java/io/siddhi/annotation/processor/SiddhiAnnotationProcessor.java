@@ -20,6 +20,8 @@ package io.siddhi.annotation.processor;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
+import io.siddhi.annotation.ParameterOverload1;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.AnnotationConstants;
@@ -64,6 +66,8 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
         // Populating the supported annotations class.
         annotationsClasses.add(Extension.class);
         annotationsClasses.add(Parameter.class);
+        annotationsClasses.add(ParameterOverload.class);
+        annotationsClasses.add(ParameterOverload1.class);
         annotationsClasses.add(ReturnAttribute.class);
         annotationsClasses.add(SystemParameter.class);
         annotationsClasses.add(Example.class);
@@ -95,6 +99,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
                 String description = annotation.description();
                 String namespace = annotation.namespace();
                 Parameter[] parameters = annotation.parameters();
+                ParameterOverload[] parameterOverloads = annotation.parameterOverloads();
                 ReturnAttribute[] returnAttributes = annotation.returnAttributes();
                 SystemParameter[] systemParameters = annotation.systemParameter();
                 Example[] examples = annotation.examples();
@@ -165,6 +170,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
                         try {
                             abstractAnnotationProcessor.basicParameterValidation(name, description, namespace);
                             abstractAnnotationProcessor.parameterValidation(parameters);
+                            abstractAnnotationProcessor.parameterOverloadValidation(parameterOverloads);
                             abstractAnnotationProcessor.returnAttributesValidation(returnAttributes);
                             abstractAnnotationProcessor.systemParametersValidation(systemParameters);
                             abstractAnnotationProcessor.examplesValidation(examples);
