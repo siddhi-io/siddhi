@@ -80,8 +80,8 @@ import java.util.Map;
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"window.time"}),
-                @ParameterOverload(parameterNames = {"window.time","start.time"}),
-                @ParameterOverload(parameterNames = {"window.time","start.time","stream.current.event"})
+                @ParameterOverload(parameterNames = {"window.time", "start.time"}),
+                @ParameterOverload(parameterNames = {"window.time", "start.time", "stream.current.event"})
         },
         examples = {
                 @Example(
@@ -132,16 +132,19 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
     private long startTime = 0;
 
     public void setTimeInMilliSeconds(long timeInMilliSeconds) {
+
         this.timeInMilliSeconds = timeInMilliSeconds;
     }
 
     @Override
     public Scheduler getScheduler() {
+
         return scheduler;
     }
 
     @Override
     public void setScheduler(Scheduler scheduler) {
+
         this.scheduler = scheduler;
     }
 
@@ -150,6 +153,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
                                 StreamEventClonerHolder streamEventClonerHolder, boolean
                                         outputExpectsExpiredEvents, boolean findToBeExecuted,
                                 SiddhiQueryContext siddhiQueryContext) {
+
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiQueryContext = siddhiQueryContext;
         if (attributeExpressionExecutors.length == 1) {
@@ -228,6 +232,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
     }
 
     private void initTimeParameter(ExpressionExecutor attributeExpressionExecutor) {
+
         if (attributeExpressionExecutor instanceof ConstantExpressionExecutor) {
             if (attributeExpressionExecutor.getReturnType() == Attribute.Type.INT) {
                 timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutor)
@@ -250,6 +255,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, WindowState state) {
+
         synchronized (state) {
             if (nextEmitTime == -1) {
                 long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
@@ -336,7 +342,6 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
         return emitTime;
     }
 
-
     @Override
     public void start() {
         //Do nothing
@@ -344,6 +349,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
 
     @Override
     public void stop() {
+
         if (scheduler != null) {
             scheduler.stop();
         }
@@ -354,24 +360,27 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, WindowState state,
                                               SiddhiQueryContext siddhiQueryContext) {
+
         return OperatorParser.constructOperator(state.expiredEventQueue, condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
-
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
                             StreamEventCloner streamEventCloner, WindowState state) {
+
         return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventQueue, streamEventCloner);
     }
 
     class WindowState extends State {
+
         private SnapshotableStreamEventQueue currentEventQueue;
         private SnapshotableStreamEventQueue expiredEventQueue;
         private StreamEvent resetEvent = null;
 
         WindowState(StreamEventClonerHolder streamEventClonerHolder,
                     boolean outputExpectsExpiredEvents, boolean findToBeExecuted) {
+
             if (!isStreamCurrentEvents) {
                 this.currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
             }
@@ -382,6 +391,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
 
         @Override
         public Map<String, Object> snapshot() {
+
             Map<String, Object> state = new HashMap<>();
             state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
             state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
@@ -390,6 +400,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
         }
 
         public void restore(Map<String, Object> state) {
+
             if (expiredEventQueue != null) {
                 expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
             }
@@ -401,6 +412,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
 
         @Override
         public boolean canDestroy() {
+
             return (currentEventQueue == null || currentEventQueue.getFirst() == null)
                     && (expiredEventQueue == null || expiredEventQueue.getFirst() == null)
                     && resetEvent == null;
