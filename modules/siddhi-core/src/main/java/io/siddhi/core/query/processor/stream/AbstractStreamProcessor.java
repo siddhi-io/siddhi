@@ -79,7 +79,7 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
             StateFactory<S> stateFactory = init(metaStreamEvent, metaStreamEvent.getLastInputDefinition(),
                     attributeExpressionExecutors, configReader, streamEventClonerHolder, outputExpectsExpiredEvents,
                     findToBeExecuted, siddhiQueryContext);
-            ProcessorAnnotationValidator.validateAnnotation(this, attributeExpressionExecutors);
+//            ProcessorAnnotationValidator.validateAnnotation(this, attributeExpressionExecutors);
             this.additionalAttributes = getReturnAttributes();
             this.stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, stateFactory);
             siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(this);
