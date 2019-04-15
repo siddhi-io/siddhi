@@ -21,7 +21,6 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ParameterOverload;
-import io.siddhi.annotation.ParameterOverload1;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.AnnotationConstants;
@@ -67,7 +66,6 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
         annotationsClasses.add(Extension.class);
         annotationsClasses.add(Parameter.class);
         annotationsClasses.add(ParameterOverload.class);
-        annotationsClasses.add(ParameterOverload1.class);
         annotationsClasses.add(ReturnAttribute.class);
         annotationsClasses.add(SystemParameter.class);
         annotationsClasses.add(Example.class);
