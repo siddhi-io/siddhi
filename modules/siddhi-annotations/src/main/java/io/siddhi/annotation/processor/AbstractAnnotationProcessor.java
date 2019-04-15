@@ -19,6 +19,8 @@ package io.siddhi.annotation.processor;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
+import io.siddhi.annotation.ParameterOverload1;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.AnnotationValidationException;
@@ -113,6 +115,43 @@ public class AbstractAnnotationProcessor {
                             "name:{0} -> defaultValue annotated in class {1} cannot be null or empty for the " +
                             "optional parameter.", parameterName, extensionClassFullName));
                 }
+            }
+        }
+    }
+
+    /**
+     * This method uses for validate @Extension / @ParameterOverload element.
+     *
+     * @param parameterOverloads parameter array which needs to be validate.
+     */
+    public void parameterOverloadValidation(ParameterOverload[] parameterOverloads) throws AnnotationValidationException {
+        for (ParameterOverload parameterOverload : parameterOverloads) {
+            String[] parameterNames = parameterOverload.parameterNames();
+            for (String parameterName : parameterNames) {
+                //Check if the @Parameter name is empty.
+                if (parameterName.isEmpty()) {
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
+                            "name annotated in class {0} is null or empty.", extensionClassFullName));
+                } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+                    //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
+                                    "name {0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
+                            parameterName, extensionClassFullName));
+                }
+            }
+        }
+    }
+
+    /**
+     * This method uses for validate @Extension / @ParameterOverload1 element.
+     *
+     * @param parameterOverloads parameter array which needs to be validate.
+     */
+    public void parameterOverload1Validation(ParameterOverload1[] parameterOverloads) throws AnnotationValidationException {
+        for (ParameterOverload1 parameterOverload : parameterOverloads) {
+            Parameter[] parameters = parameterOverload.parameters();
+            for (Parameter parameter : parameters) {
+
             }
         }
     }
