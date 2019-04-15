@@ -123,7 +123,8 @@ public class AbstractAnnotationProcessor {
      *
      * @param parameterOverloads parameter array which needs to be validate.
      */
-    public void parameterOverloadValidation(ParameterOverload[] parameterOverloads) throws AnnotationValidationException {
+    public void parameterOverloadValidation(ParameterOverload[] parameterOverloads)
+            throws AnnotationValidationException {
         for (ParameterOverload parameterOverload : parameterOverloads) {
             String[] parameterNames = parameterOverload.parameterNames();
             for (String parameterName : parameterNames) {
