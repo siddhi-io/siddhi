@@ -19,9 +19,8 @@ public class ProcessorAnnotationValidator {
      * The method which validates the extension specific parameters of siddhi App with the pattern specified in the
      * {@link ParameterOverload} annotation in the extension class
      *
-     * @param s                             the object which extends AbstractStreamProcessor
-     * @param attributeExpressionExecutors  the executors of each function parameters
-     *
+     * @param s                            the object which extends AbstractStreamProcessor
+     * @param attributeExpressionExecutors the executors of each function parameters
      * @throws SiddhiAppValidationException SiddhiAppValidation exception
      */
     public static void validateAnnotation(AbstractStreamProcessor s, ExpressionExecutor[] attributeExpressionExecutors)
@@ -34,21 +33,21 @@ public class ProcessorAnnotationValidator {
         int maxCount = 0;
         for (ParameterOverload parameterOverload : parameterOverloads) {
             String[] parameterNames = parameterOverload.parameterNames();
-            if(parameterNames.length > maxCount) {
+            if (parameterNames.length > maxCount) {
                 maxCount = parameterNames.length;
             }
         }
         //Count the mandatory number of parameters specified in @Extension
         int mandatoryCount = 0;
         for (Parameter parameter : parameters) {
-            if(!parameter.optional()) {
+            if (!parameter.optional()) {
                 mandatoryCount++;
             }
         }
 
         //Check if parameter Count is greater than or equal to the mandatory number of fields
         //and less than or equal to the maximum number of parameter names specified in @ParameterOverload
-        if((attributeExpressionExecutors.length >= mandatoryCount) &&
+        if ((attributeExpressionExecutors.length >= mandatoryCount) &&
                 (attributeExpressionExecutors.length <= maxCount)) {
 
             //Check if dynamic properties of parameters match atleast one pattern specified in @ParameterOverload
@@ -72,7 +71,7 @@ public class ProcessorAnnotationValidator {
                 String[] parameterNames = parameterOverload.parameterNames();
                 if (parameterNames.length == attributeExpressionExecutors.length) {
                     for (String parameterName : parameterNames) {
-                        if(isCorrect) {
+                        if (isCorrect) {
                             m++;
                             for (Parameter parameter : parameters) {
                                 String parameterName1 = parameter.name();
@@ -86,10 +85,12 @@ public class ProcessorAnnotationValidator {
                         }
                     }
                     m = -1;
-                    if(isCorrect) { atleastOne = true; }
+                    if (isCorrect) {
+                        atleastOne = true;
+                    }
                 }
             }
-            if(!atleastOne){
+            if (!atleastOne) {
                 throw new SiddhiAppValidationException("Input parameters dynamic property doesn't match");
             }
 
@@ -102,7 +103,7 @@ public class ProcessorAnnotationValidator {
                 String[] parameterNames = parameterOverload.parameterNames();
                 if (parameterNames.length == attributeExpressionExecutors.length) {
                     for (String parameterName : parameterNames) {
-                        if(isCorrectOne) {
+                        if (isCorrectOne) {
                             n++;
                             boolean found = false;
                             for (Parameter parameter : parameters) {
@@ -121,11 +122,13 @@ public class ProcessorAnnotationValidator {
                         }
                     }
                     n = -1;
-                    if(isCorrectOne) { atleastOnce = true; }
+                    if (isCorrectOne) {
+                        atleastOnce = true;
+                    }
                 }
 
             }
-            if(!atleastOnce){
+            if (!atleastOnce) {
                 throw new SiddhiAppValidationException("Input parameters data type doesn't match");
             }
 
