@@ -122,6 +122,8 @@ public class AbstractAnnotationProcessor {
      * This method uses for validate @Extension / @ParameterOverload element.
      *
      * @param parameterOverloads parameter array which needs to be validate.
+     * @throws AnnotationValidationException whenever if the validate rule violate, throws the annotation validate
+     *                                       exception with proper message.
      */
     public void parameterOverloadValidation(ParameterOverload[] parameterOverloads)
             throws AnnotationValidationException {
@@ -130,12 +132,12 @@ public class AbstractAnnotationProcessor {
             for (String parameterName : parameterNames) {
                 //Check if the @Parameter name is empty.
                 if (parameterName.isEmpty()) {
-                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
-                            "name annotated in class {0} is null or empty.", extensionClassFullName));
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension-> @Parameter" +
+                            "-> name annotated in class {0} is null or empty.", extensionClassFullName));
                 } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
                     //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
-                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
-                                    "name {0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension-> @Parameter" +
+                                    "-> name {0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
                             parameterName, extensionClassFullName));
                 }
             }
