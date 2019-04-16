@@ -310,6 +310,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     public void clearExecutor() {
         if (isGroupBy) {
+            for (BaseIncrementalValueStore baseIncrementalValueStore : this.baseIncrementalValueStoreGroupByMap.values()) {
+                baseIncrementalValueStore.clean();
+            }
             this.baseIncrementalValueStoreGroupByMap.clear();
         } else {
             cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
