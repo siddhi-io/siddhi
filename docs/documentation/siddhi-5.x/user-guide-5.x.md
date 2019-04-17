@@ -329,8 +329,8 @@ After the execution of these commands, you will see the following deployments in
 ```
 $ kubectl get deploy
 NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-siddhi-operator   1         1         1            1           1d
-siddhi-parser     1         1         1            1           1d
+siddhi-operator   1         1         1            1           1m
+siddhi-parser     1         1         1            1           1m
 
 ```
 
@@ -351,15 +351,15 @@ If the example siddhi app deployed successfully you can see the created deployme
 $ kubectl get deploy
 NAME                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 example-siddhi-deployment   1         1         1            1           14s
-siddhi-operator             1         1         1            1           1d
-siddhi-parser               1         1         1            1           1d
+siddhi-operator             1         1         1            1           1m
+siddhi-parser               1         1         1            1           1m
 
 $ kubectl get svc
 NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
 example-siddhi-deployment   ClusterIP      10.104.219.74    <none>        8280/TCP         21s
 kubernetes                  ClusterIP      10.96.0.1        <none>        443/TCP          8d
-siddhi-operator             ClusterIP      10.97.2.64       <none>        8383/TCP         1d
-siddhi-parser               LoadBalancer   10.106.121.172   <pending>     9090:30297/TCP   1d
+siddhi-operator             ClusterIP      10.97.2.64       <none>        8383/TCP         1m
+siddhi-parser               LoadBalancer   10.106.121.172   <pending>     9090:30297/TCP   1m
 
 $ kubectl get ing
 NAME      HOSTS     ADDRESS     PORTS     AGE
@@ -385,8 +385,8 @@ When you print the logs, you can see the event that you sent was logged in the p
 $ kubectl get pods
 NAME                                         READY     STATUS    RESTARTS   AGE
 example-siddhi-deployment-668555c85f-6b5bs   1/1       Running   0          48s
-siddhi-operator-76ff98b67-z4jg2              1/1       Running   2          1d
-siddhi-parser-55f9c8764f-sk4kw               1/1       Running   1          1d
+siddhi-operator-76ff98b67-z4jg2              1/1       Running   2          2m
+siddhi-parser-55f9c8764f-sk4kw               1/1       Running   1          2m
 
 $ kubectl logs example-siddhi-deployment-668555c85f-6b5bs
 JAVA_HOME environment variable is set to /opt/java/openjdk
