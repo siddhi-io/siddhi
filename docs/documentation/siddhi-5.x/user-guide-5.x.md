@@ -366,6 +366,7 @@ NAME      HOSTS     ADDRESS     PORTS     AGE
 siddhi    siddhi    10.0.2.15   80, 443   30s
 
 ```
+Obtain the external IP of the ingress load balancer using `kubectl get ing` and add the host `siddhi` along with that external IP as an entry to the `/etc/hosts` file. If you are using `minikube`, use minikube IP as the external IP. Use `minikube ip` command to get the IP of the minikube cluster.
 
 Now you can use following CURL command to send events to your deployed siddhi application.
 
