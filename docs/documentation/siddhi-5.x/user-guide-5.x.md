@@ -386,6 +386,22 @@ curl -X POST \
 	"power": 341
 }'
 ```
+You can use `sp, sps, SiddhiProcess, or SiddhiProcesses` names to view the deployment details of the `SiddhiProcess` custom objects.
+
+```
+$ kubectl get sp
+NAME                        AGE
+example-siddhi-deployment   2m
+$ kubectl get sps
+NAME                        AGE
+example-siddhi-deployment   2m
+$ kubectl get SiddhiProcess
+NAME                        AGE
+example-siddhi-deployment   2m
+$ kubectl get SiddhiProcesses
+NAME                        AGE
+example-siddhi-deployment   2m
+```
 
 When you print the logs, you can see the event that you sent was logged in the pod. 
 ```
