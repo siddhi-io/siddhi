@@ -299,16 +299,19 @@ WIP
    1. [minikube](https://github.com/kubernetes/minikube#installation)
    2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
 
-2. If you are running on a GKE, before installing the siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command in your cluster (replace "your-address@gmail.com" with your account email address). 
-    
-    ```
-    kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=cluster-admin --user=your-address@gmail.com
-    ```
-3. If you are running on minikube you have to enable ingress using the following command.
+##### Google Kubernetes Engine(GKE) Cluster
+If you are running on a GKE, before installing the siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command in your cluster (replace "your-address@gmail.com" with your account email address). 
 
-    ```
-    minikube addons enable ingress
-    ```
+```    
+kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=cluster-admin --user=your-address@gmail.com
+```  
+    
+##### Minikube
+If you are running on minikube you have to enable ingress using the following command.
+
+```
+minikube addons enable ingress
+```
     
 
 #### Install the siddhi operator
@@ -366,7 +369,10 @@ NAME      HOSTS     ADDRESS     PORTS     AGE
 siddhi    siddhi    10.0.2.15   80, 443   30s
 
 ```
-Obtain the external IP of the ingress load balancer using `kubectl get ing` and add the host `siddhi` along with that external IP as an entry to the `/etc/hosts` file. If you are using `minikube`, use minikube IP as the external IP. Use `minikube ip` command to get the IP of the minikube cluster.
+Obtain the external IP of the ingress load balancer using `kubectl get ing` and add the host `siddhi` along with that external IP as an entry to the `/etc/hosts` file.
+
+!!! Note "If you are using `minikube`, use minikube IP as the external IP."
+    Use `minikube ip` command to get the IP of the minikube cluster.
 
 Now you can use following CURL command to send events to your deployed siddhi application.
 
