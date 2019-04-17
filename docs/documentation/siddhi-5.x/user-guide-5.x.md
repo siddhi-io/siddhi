@@ -392,12 +392,15 @@ You can use `sp, sps, SiddhiProcess, or SiddhiProcesses` names to view the deplo
 $ kubectl get sp
 NAME                        AGE
 example-siddhi-deployment   2m
+
 $ kubectl get sps
 NAME                        AGE
 example-siddhi-deployment   2m
+
 $ kubectl get SiddhiProcess
 NAME                        AGE
 example-siddhi-deployment   2m
+
 $ kubectl get SiddhiProcesses
 NAME                        AGE
 example-siddhi-deployment   2m
