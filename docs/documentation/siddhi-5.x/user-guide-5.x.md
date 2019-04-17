@@ -300,7 +300,7 @@ WIP
    2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
 
 ##### Google Kubernetes Engine(GKE) Cluster
-If you are running on a GKE, before installing the siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command in your cluster (replace "your-address@gmail.com" with your account email address). 
+If you are running on a GKE, before installing the siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command (replace "your-address@gmail.com" with your account email address). 
 
 ```    
 kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=cluster-admin --user=your-address@gmail.com
