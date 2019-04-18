@@ -386,7 +386,12 @@ curl -X POST \
 	"power": 341
 }'
 ```
-You can use `sp, sps, SiddhiProcess, or SiddhiProcesses` names to view the deployment details of the `SiddhiProcess` custom objects.
+
+#### Monitoring the status
+
+##### Listing the siddhi processes
+
+You can use `sp, sps, SiddhiProcess, or SiddhiProcesses` names to list the `SiddhiProcess` custom objects.
 
 ```
 $ kubectl get sp
@@ -406,15 +411,124 @@ NAME                        AGE
 example-siddhi-deployment   2m
 ```
 
-When you print the logs, you can see the event that you sent was logged in the pod. 
+##### View siddhi process configs
+
+You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` as follow.
+
+```
+$ kubectl describe sps example-siddhi-deployment
+
+Name:         example-siddhi-deployment
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+API Version:  siddhi.io/v1alpha1
+Kind:         SiddhiProcess
+Metadata:
+  Creation Timestamp:  2019-04-17T10:14:19Z
+  Generation:          1
+  Resource Version:    417512
+  Self Link:           /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/example-siddhi-deployment
+  UID:                 904c526f-60f9-11e9-90dc-0800279e6dba
+Spec:
+  Env:
+    Name:   RECEIVER_URL
+    Value:  http://0.0.0.0:8006/foo
+    Name:   BASIC_AUTH_ENABLED
+    Value:  false
+  Pod:
+    Image:      siddhiio/siddhi-runner-alpine
+    Image Tag:  v0.1.0
+  Query:        @App:name("Example-Siddhi")
+@App:description("Description of the plan") 
+
+@sink(type='log', prefix='LOGGER')
+@source(type='http', receiver.url='http://0.0.0.0:8280/example', basic.auth.enabled='false', @map(type='json'))
+define stream DevicePowerStream (type string, deviceID string, power int);
+
+
+define stream MonitorDevicesPowerStream(deviceID string, power int);
+
+@info(name='monitored-filter')
+from DevicePowerStream[type == 'monitored']
+select deviceID, power
+insert into MonitorDevicesPowerStream;
+
+  Siddhi . Runner . Configs:  state.persistence:
+  enabled: true
+  intervalInMin: 5
+  revisionsToKeep: 2
+  persistenceStore: io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+  config:
+    location: siddhi-app-persistence
+
+Status:
+  Nodes:   <nil>
+  Status:  Running
+Events:    <none>
+
+```
+
+```
+$ kubectl get sps example-siddhi-deployment -o yaml
+
+apiVersion: siddhi.io/v1alpha1
+kind: SiddhiProcess
+metadata:
+  creationTimestamp: 2019-04-17T10:14:19Z
+  generation: 1
+  name: example-siddhi-deployment
+  namespace: default
+  resourceVersion: "417512"
+  selfLink: /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/example-siddhi-deployment
+  uid: 904c526f-60f9-11e9-90dc-0800279e6dba
+spec:
+  env:
+  - name: RECEIVER_URL
+    value: http://0.0.0.0:8006/foo
+  - name: BASIC_AUTH_ENABLED
+    value: "false"
+  pod:
+    image: siddhiio/siddhi-runner-alpine
+    imageTag: v0.1.0
+  query: "@App:name(\"Example-Siddhi\")\n@App:description(\"Description of the plan\")
+    \n\n@sink(type='log', prefix='LOGGER')\n@source(type='http', receiver.url='http://0.0.0.0:8280/example',
+    basic.auth.enabled='false', @map(type='json'))\ndefine stream DevicePowerStream
+    (type string, deviceID string, power int);\n\n\ndefine stream MonitorDevicesPowerStream(deviceID
+    string, power int);\n\n@info(name='monitored-filter')\nfrom DevicePowerStream[type
+    == 'monitored']\nselect deviceID, power\ninsert into MonitorDevicesPowerStream;\n"
+  siddhi.runner.configs: |
+    state.persistence:
+      enabled: true
+      intervalInMin: 5
+      revisionsToKeep: 2
+      persistenceStore: io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+      config:
+        location: siddhi-app-persistence
+status:
+  nodes: null
+  status: Running
+
+```
+
+##### View siddhi process logs
+
+You can list the deployed pods.
+
 ```
 $ kubectl get pods
+
 NAME                                         READY     STATUS    RESTARTS   AGE
 example-siddhi-deployment-668555c85f-6b5bs   1/1       Running   0          48s
 siddhi-operator-76ff98b67-z4jg2              1/1       Running   2          2m
 siddhi-parser-55f9c8764f-sk4kw               1/1       Running   1          2m
+```
 
+Then you can view the logs of that deployed pod. This log shows you the event that you sent using the previous POST request
+
+```
 $ kubectl logs example-siddhi-deployment-668555c85f-6b5bs
+
 JAVA_HOME environment variable is set to /opt/java/openjdk
 CARBON_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0
 RUNTIME_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0/wso2/runner
