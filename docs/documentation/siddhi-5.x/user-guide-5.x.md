@@ -298,7 +298,7 @@ docker pull siddhiio/siddhi-runner-alpine:latest
 ```
 * Start SiddhiApps with the runner config by executing the following docker command.<br/>
 ```
-docker run -it -v <local-siddhi-file-dir>:<mounted-siddhi-file-dir> -v <local-conf-file-path>:<mounted-conf-file-path> siddhiio/siddhi-runner-ubuntu:latest -Dapps=<mounted-siddhi-file-dir> -Dconfig=<config-yaml-file>
+docker run -it -v <local-siddhi-file-path>:<siddhi-file-mount-path> -v <local-conf-file-path>:<conf-file-mount-path> siddhiio/siddhi-runner-ubuntu:latest -Dapps=<siddhi-file-mount-path> -Dconfig=<conf-file-mount-path>
 ```
 
 !!! Tip "Running Multiple SiddhiApps in one runner instance."
