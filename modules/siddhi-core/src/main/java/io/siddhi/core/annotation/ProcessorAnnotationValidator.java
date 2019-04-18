@@ -132,6 +132,7 @@ public class ProcessorAnnotationValidator {
                                         if (attributeExpressionExecutors[n].getReturnType().toString().
                                                 equals(type.toString())) {
                                             found = true;
+                                            break;
                                         }
                                     }
                                 }
