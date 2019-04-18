@@ -290,7 +290,7 @@ Thank you</pre>
 
 ### **Using Siddhi as Docker Micro Service**
 
-Siddhi can also run on Docker on bare metal by passing the SiddhiApps and required configurations to it.
+Siddhi can also run on Docker by passing the SiddhiApps and required configurations to it.
 
 * Pull the the latest Siddhi Runner image from [Docker Hub](https://hub.docker.com/).
 ```
@@ -298,10 +298,14 @@ docker pull siddhiio/siddhi-runner-alpine:latest
 ```
 * Start SiddhiApps with the runner config by executing the following docker command.<br/>
 ```
-docker run -it -v <local-siddhi-file-path>:<siddhi-file-mount-path> -v <local-conf-file-path>:<conf-file-mount-path> siddhiio/siddhi-runner-ubuntu:latest -Dapps=<siddhi-file-mount-path> -Dconfig=<conf-file-mount-path>
+docker run -it -v <local-siddhi-file-path>:<siddhi-file-mount-path> -v <local-conf-file-path>:<conf-file-mount-path> siddhiio/siddhi-runner-alpine:latest -Dapps=<siddhi-file-mount-path> -Dconfig=<conf-file-mount-path>
+```
+E.g.,
+```
+docker run -it -v /home/me/siddhi-apps:/apps -v /home/me/siddhi-configs:/configs siddhiio/siddhi-runner-alpine:latest -Dapps=/apps/Foo.siddhi -Dconfig=/configs/siddhi-config.yaml
 ```
 
-!!! Tip "Running Multiple SiddhiApps in one runner instance."
+!!! Tip "Running multiple SiddhiApps in one runner instance."
     To run multiple SiddhiApps in one runtime instance, have all SiddhiApps in a directory, mount the directory and pass its location through `-Dapps` parameter as follows,<br/>
     `-Dapps=<siddhi-apps-directory>`
 
