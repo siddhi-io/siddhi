@@ -136,7 +136,7 @@ public class ProcessorAnnotationValidator {
                                     }
                                 }
                             }
-                            isCorrectOne = (found);
+                            isCorrectOne = found;
                         }
                     }
                     n = -1;
