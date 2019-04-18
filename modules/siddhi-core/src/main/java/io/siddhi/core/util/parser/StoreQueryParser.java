@@ -45,6 +45,7 @@ import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
@@ -347,9 +348,22 @@ public class StoreQueryParser {
                 storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
 
+
         StoreQueryRuntime storeQueryRuntime =
                 new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
                         compiledSelection, expectedOutputAttributes, siddhiQueryContext.getName());
+//        try {
+        AbstractQueryableRecordTable.CompiledSelectionAggregation compiledSelectionAggregation =
+                (AbstractQueryableRecordTable.CompiledSelectionAggregation) compiledSelection;
+        storeQueryRuntime.setSelector(compiledSelectionAggregation.getQuerySelector());
+        storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
+        storeQueryRuntime.setStateEventFactory(new StateEventFactory(
+                matchingMetaInfoHolderForSelection.getMetaStateEvent()));
+
+//        } catch (Exception e) {
+//
+//        }
+
         QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
         QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
                 variableExpressionExecutors);

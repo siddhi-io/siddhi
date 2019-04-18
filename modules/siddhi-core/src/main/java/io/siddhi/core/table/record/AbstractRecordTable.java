@@ -68,7 +68,12 @@ public abstract class AbstractRecordTable extends Table {
         this.recordTableHandler = recordTableHandler;
         this.storeEventPool = storeEventPool;
         init(tableDefinition, configReader);
+        init(tableDefinition, siddhiAppContext, storeEventCloner, configReader);
     }
+
+    protected abstract void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
+                                 StreamEventCloner storeEventCloner, ConfigReader configReader);
+
 
     /**
      * Initializing the Record Table
@@ -77,6 +82,35 @@ public abstract class AbstractRecordTable extends Table {
      * @param configReader    this hold the {@link AbstractRecordTable} configuration reader.
      */
     protected abstract void init(TableDefinition tableDefinition, ConfigReader configReader);
+
+    @Override
+    protected void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException {
+//        System.out.println("my connect new");
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        connectToDatasource();
+//        CompiledCondition compileCondition = new RecordStoreCompiledCondition();
+
+
+//        Map<String, Object> findConditionParameterMap;
+//        RecordIterator myRecordIterator = find(findConditionParameterMap, compileCondition);
+
+
+
+//        CompiledCondition myCondition = compileCondition();
+
+//        siddhiManager = new SiddhiManager();
+//        String streams = "define trigger MyTrigger at 'start';";
+//        String query =  "from MyTrigger as s join SweetProductionTable as sp\n" +
+//                "on s.name == sp.name\n" +
+//                "select sp.name, sp.amount\n" +
+//                "insert into logStream;";
+//
+//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+//        System.out.println("hi");
+    }
+
+//    protected abstract void connectToDatasource() throws ConnectionUnavailableException;
+
 
     @Override
     public TableDefinition getTableDefinition() {
@@ -348,9 +382,55 @@ public abstract class AbstractRecordTable extends Table {
         ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
+
+        //for cache com cond.
+
+        CompiledCondition cacheCompileCondition = generateCacheCompileCondition(condition, matchingMetaInfoHolder,
+                siddhiQueryContext, variableExpressionExecutors, tableMap);
+
+        CompiledCondition CompiledConditionAggregation = new CompiledConditionAggregation(compileCondition, cacheCompileCondition);
+
+        // write function to create a compile condition for cache table also. implement that method in abstractqueryable
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
-        return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
+        return new RecordStoreCompiledCondition(expressionExecutorMap, CompiledConditionAggregation);
     }
+
+    public class CompiledConditionAggregation implements CompiledCondition {
+
+        CompiledCondition storeCompileCondition;
+        CompiledCondition cacheCompileCondition;
+
+
+
+        public CompiledConditionAggregation(CompiledCondition storeCompileCondition, CompiledCondition cacheCompileCondition) {
+            this.storeCompileCondition = storeCompileCondition;
+            this.cacheCompileCondition = cacheCompileCondition;
+        }
+
+
+//        @Override
+//        public CompiledCondition cloneCompilation(String key) {
+//            return
+//                    new CompiledConditionAggregation(storeCompileCondition.cloneCompilation(key),
+//                            cacheCompileCondition.cloneCompilation(key));
+//        }
+
+        public CompiledCondition getStoreCompileCondition() {
+            return storeCompileCondition;
+        }
+
+        public CompiledCondition getCacheCompileCondition() {
+            return cacheCompileCondition;
+        }
+    }
+
+    protected abstract CompiledCondition generateCacheCompileCondition(Expression condition,
+                                                                       MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                                                       SiddhiQueryContext siddhiQueryContext,
+                                                                       List<VariableExpressionExecutor>
+                                                                               variableExpressionExecutors,
+                                                                       Map<String, Table> tableMap);
+
 
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,

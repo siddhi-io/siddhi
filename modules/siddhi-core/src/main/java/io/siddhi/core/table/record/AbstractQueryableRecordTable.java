@@ -18,11 +18,18 @@
 
 package io.siddhi.core.table.record;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.state.StateEventFactory;
+import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
@@ -30,18 +37,30 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
+import io.siddhi.core.query.selector.QuerySelector;
+import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.parser.SelectorParser;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.query.api.annotation.Annotation;
+import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.execution.query.StoreQuery;
+import io.siddhi.query.api.execution.query.output.stream.OutputStream;
+import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.OutputAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
+import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -49,6 +68,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An abstract implementation of table. Abstract implementation will handle {@link ComplexEventChunk} so that
@@ -56,7 +76,205 @@ import java.util.Map;
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
 
+    //todo: design decision: shall we make a class cachetable extending inmemorytable?
+
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
+    protected int cacheSize;
+//    protected TableDefinition tableDefinition;
+    protected SiddhiAppContext siddhiAppContext; //todo dont store siddhi app context. Try to get it from connect function
+    protected InMemoryTable cachedTable;
+    protected Boolean isCacheEnabled = Boolean.FALSE;
+    protected Boolean isTableSmallerThanCache = Boolean.FALSE;
+    protected TableDefinition cacheTableDefinition;
+
+    @Override
+    public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
+                     StreamEventCloner storeEventCloner, ConfigReader configReader) {
+        this.tableDefinition = tableDefinition;
+        this.siddhiAppContext = siddhiAppContext;
+        System.out.println("my new init");
+
+        System.out.println("hi from cache");
+        List<Annotation> annotationList = tableDefinition.getAnnotations();
+        List<Annotation> storeAnnotationList = annotationList.get(0).getAnnotations();
+//        String a = storeAnnotationList.get(0).getName();
+        for (Annotation b: storeAnnotationList) {
+            if (b.getName().equals("Cache")){
+                isCacheEnabled = Boolean.TRUE;
+                cacheSize = Integer.parseInt(b.getElements().get(0).getValue());
+            }
+        }
+
+        if (isCacheEnabled) {
+            System.out.println("cache is enabled");
+
+//            storeAnnotationList.removeIf(annotation -> annotation.getName().equals("Cache"));
+            cachedTable = new InMemoryTable();
+            String defineCache = generateCacheTableDefinitionString(tableDefinition);
+            cacheTableDefinition = SiddhiCompiler.parseTableDefinition(defineCache);
+            cachedTable.initTable(cacheTableDefinition, storeEventPool,
+                    storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
+
+//            siddhiManager = new SiddhiManager();
+//            String streams = "";
+//            String query =  "from TriggerStream#rdbms:query('SAMPLE_DB', 'select * from " +
+//                    "Transactions_Table', 'creditcardno string, country string, transaction string," +
+//                    " amount int') \n" +
+//                    "select creditcardno, country, transaction, amount \n" +
+//                    "insert into recordStream;";
+//            Expression compareCondition = Expression.value(true);
+//            MatchingMetaInfoHolder matchingMetaInfoHolder =
+//            ExpressionBuilder myExpressionBuilder = new ExpressionBuilder(compareCondition, matchingMetaInfoHolder,
+//                    siddhiAppContext, variableExpressionExecutors,
+//                    tableMap, queryName);
+
+        }
+
+//        if tableDefinition.
+//        Boolean isCacheEnabled =
+
+    }
+
+    protected String generateCacheTableDefinitionString (TableDefinition tableDefinition) {
+        String defineCache = "define table ";
+        defineCache = defineCache + tableDefinition.getId() + " (";
+
+        for (Attribute attribute: tableDefinition.getAttributeList()) {
+            defineCache = defineCache + attribute.getName() + " " + attribute.getType().name().toLowerCase() + ", ";
+        }
+        defineCache = defineCache.substring(0, defineCache.length() - 2);
+        defineCache = defineCache + "); ";
+
+        return defineCache;
+    }
+
+    @Override
+    protected void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException {
+        connect();
+
+        if (isCacheEnabled) {
+            String queryName = "store_select_query_" + tableDefinition.getId();
+            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+
+            Expression onCondition = Expression.value(true);
+
+            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+            MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+            StoreQuery storeQuery = SiddhiCompiler.parseStoreQuery("from " +
+                    tableDefinition.getId()
+                    + " select * limit " + (cacheSize + 1));
+
+            //        InputStore inputStore = storeQuery.getInputStore();
+            initMetaStreamEvent(metaStreamEvent, tableDefinition);
+            metaStateEvent.addEvent(metaStreamEvent);
+            //        metaStateEvent.addEvent(metaStreamEvent);
+            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent,
+                    -1, 0, tableDefinition, tableDefinition, 0);
+            List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+//            String queryName = "store_select_query_" + tableDefinition.getId();
+
+            CompiledCondition compiledCondition = compileCondition(onCondition, matchingMetaInfoHolder,
+                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+
+//            StateEvent matchingEvent = new StateEvent(1, 0);
+
+            int metaPosition = SiddhiConstants.UNKNOWN_STATE;
+            List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery, siddhiQueryContext,
+                    tableMap, metaPosition, matchingMetaInfoHolder);
+            MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = new MatchingMetaInfoHolder(metaStateEvent,
+                    -1, 0, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes), tableDefinition, 0);
+
+
+            CompiledSelection compiledSelection = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
+                    matchingMetaInfoHolderForSelection, variableExpressionExecutors, tableMap, siddhiQueryContext);
+
+
+            Attribute[] outputAttributes = expectedOutputAttributes.toArray(new Attribute[expectedOutputAttributes.size()]);
+
+            StateEvent stateEvent = new StateEvent(1, 0);
+            StreamEvent myEvent = query(stateEvent, compiledCondition, compiledSelection, outputAttributes);
+            System.out.println("available records loaded");
+
+            int myEventSize = 0;
+            if (myEvent != null) {
+                myEventSize = 1;
+            }
+            StreamEvent myEventCopy = myEvent;
+
+            while (myEventCopy.getNext() != null) {
+                myEventSize = myEventSize + 1;
+                myEventCopy = myEventCopy.getNext();
+            }
+
+            if (myEventSize <= cacheSize) {
+                isTableSmallerThanCache = Boolean.TRUE;
+                ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+                loadedCache.add(myEvent);
+
+                cachedTable.addEvents(loadedCache, myEventSize);
+                System.out.println("cached in cache table");
+            }
+        }
+    }
+
+    protected CompiledCondition generateCacheCompileCondition(Expression condition,
+                                                              MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
+                                                              SiddhiQueryContext siddhiQueryContext,
+                                                              List<VariableExpressionExecutor>
+                                                                      storeVariableExpressionExecutors,
+                                                              Map<String, Table> storeTableMap) {
+        if (isCacheEnabled) {
+            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+            metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
+            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
+                    metaStateEvent, -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
+            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+            Map<String, Table> tableMap = new ConcurrentHashMap<>();
+            tableMap.put(cacheTableDefinition.getId(), cachedTable);
+            List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+
+            return cachedTable.compileCondition(condition, matchingMetaInfoHolder,
+                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+        } else {
+            return null;
+        }
+    }
+
+    private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {//duplicated from org.wso2.siddhi.core.util.parser.StoreQueryParser
+        metaStreamEvent.addInputDefinition(inputDefinition);
+        metaStreamEvent.initializeAfterWindowData();
+        inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
+    }
+
+    private static AbstractDefinition generateTableDefinitionFromStoreQuery(StoreQuery storeQuery, //duplicated from org.wso2.siddhi.core.util.parser.StoreQueryParser
+                                                                            List<Attribute> expectedOutputAttributes) {
+        TableDefinition tableDefinition = TableDefinition.id(storeQuery.getInputStore().getStoreId());
+        for (Attribute attribute: expectedOutputAttributes) {
+            tableDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        return tableDefinition;
+    }
+    private static List<Attribute> buildExpectedOutputAttributes( //duplicated from org.wso2.siddhi.core.util.parser.StoreQueryParser
+                                                                  StoreQuery storeQuery, SiddhiQueryContext siddhiQueryContext, Map<String, Table> tableMap,
+                                                                  int metaPosition, MatchingMetaInfoHolder metaStreamInfoHolder) {
+//        MetaStateEvent selectMetaStateEvent =
+//                new MetaStateEvent(metaStreamInfoHolder.getMetaStateEvent().getMetaStreamEvents());
+//        SelectorParser.parse(storeQuery.getSelector(),
+//                new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), siddhiAppContext,
+//                selectMetaStateEvent, tableMap, new ArrayList<>(), queryName,
+//                metaPosition);
+
+        MetaStateEvent selectMetaStateEvent =
+                new MetaStateEvent(metaStreamInfoHolder.getMetaStateEvent().getMetaStreamEvents());
+        SelectorParser.parse(storeQuery.getSelector(),
+                new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS),
+                selectMetaStateEvent, tableMap, new ArrayList<>(), metaPosition, ProcessingMode.BATCH,
+                false, siddhiQueryContext);
+
+        return selectMetaStateEvent.getOutputStreamDefinition().getAttributeList();
+    }
+
+    protected abstract void connect() throws ConnectionUnavailableException;
 
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
@@ -64,41 +282,113 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return query(matchingEvent, compiledCondition, compiledSelection, null);
     }
 
+    public StreamEvent findInCache(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+        if (isCacheEnabled && !cachedTable.isEmpty()) {
+            StreamEvent cacheResults = cachedTable.find(matchingEvent, compiledCondition);
+            if (cacheResults != null) {
+//                executeSelector(,cacheResults, );
+            }
+            return cacheResults;
+        } else {
+            return null;
+        }
+
+    }
+
+    private Event[] executeSelector(StreamEvent streamEvents, QuerySelector selector, MatchingMetaInfoHolder metaStreamInfoHolder) {
+        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        MetaStreamEvent.EventType eventType = MetaStreamEvent.EventType.TABLE;
+        while (streamEvents != null) {
+
+            StreamEvent streamEvent = streamEvents;
+            streamEvents = streamEvents.getNext();
+            streamEvent.setNext(null);
+
+            StateEventFactory stateEventFactory = new StateEventFactory(metaStreamInfoHolder.getMetaStateEvent());
+
+            StateEvent stateEvent = stateEventFactory.newInstance();
+            if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
+                stateEvent.addEvent(1, streamEvent);
+            } else {
+                stateEvent.addEvent(0, streamEvent);
+            }
+            complexEventChunk.add(stateEvent);
+        }
+        ComplexEventChunk outputComplexEventChunk = selector.execute(complexEventChunk);
+        if (outputComplexEventChunk != null) {
+            List<Event> events = new ArrayList<>();
+            outputComplexEventChunk.reset();
+            while (outputComplexEventChunk.hasNext()) {
+                ComplexEvent complexEvent = outputComplexEventChunk.next();
+                events.add(new Event(complexEvent.getTimestamp(), complexEvent.getOutputData()));
+            }
+            return events.toArray(new Event[0]);
+        } else {
+            return null;
+        }
+
+    }
+
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
-                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+                             CompiledSelection compiledSelectionTemp, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
 
-        RecordStoreCompiledSelection recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
-        RecordStoreCompiledCondition recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
+        RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+        CompiledConditionAggregation compiledConditionAggregation = (CompiledConditionAggregation) compiledConditionTemp.compiledCondition;
 
-        Map<String, Object> parameterMap = new HashMap<>();
-        for (Map.Entry<String, ExpressionExecutor> entry :
-                recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
-            parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-        for (Map.Entry<String, ExpressionExecutor> entry :
-                recordStoreCompiledSelection.variableExpressionExecutorMap.entrySet()) {
-            parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-
-        Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                    recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection);
-        } else {
-            records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
-        }
+        StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(), matchingEvent);
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-        if (records != null) {
-            while (records.hasNext()) {
-                Object[] record = records.next();
+
+        CompiledSelectionAggregation compiledSelectionAggregation = (CompiledSelectionAggregation) compiledSelectionTemp;
+        CompiledSelection compiledSelection = compiledSelectionAggregation.recordStoreCompiledSelection;
+
+        if (cacheResults != null) {
+            System.out.println("sending results from cache");
+            Event[] cacheResultsAfterSelection = executeSelector(cacheResults, compiledSelectionAggregation.querySelector,
+                    compiledSelectionAggregation.metaStreamInfoHolder);
+            for (Event event: cacheResultsAfterSelection) {
+
+                Object[] record = event.getData();
                 StreamEvent streamEvent = storeEventPool.newInstance();
                 streamEvent.setOutputData(new Object[outputAttributes.length]);
                 System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
                 streamEventComplexEventChunk.add(streamEvent);
+            }
+//            streamEventComplexEventChunk.add(cacheResultsAfterSelection);
+        } else {
+
+            RecordStoreCompiledSelection recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
+            RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());;
+
+            Map<String, Object> parameterMap = new HashMap<>();
+            for (Map.Entry<String, ExpressionExecutor> entry :
+                    recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
+                parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
+            }
+            for (Map.Entry<String, ExpressionExecutor> entry :
+                    recordStoreCompiledSelection.variableExpressionExecutorMap.entrySet()) {
+                parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
+            }
+
+            Iterator<Object[]> records;
+            if (recordTableHandler != null) {
+                records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
+                        recordStoreCompiledCondition.compiledCondition,
+                        recordStoreCompiledSelection.compiledSelection);
+            } else {
+                records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
+                        recordStoreCompiledSelection.compiledSelection, outputAttributes);
+            }
+//            ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
+            if (records != null) {
+                while (records.hasNext()) {
+                    Object[] record = records.next();
+                    StreamEvent streamEvent = storeEventPool.newInstance();
+                    streamEvent.setOutputData(new Object[outputAttributes.length]);
+                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                    streamEventComplexEventChunk.add(streamEvent);
+                }
             }
         }
         return streamEventComplexEventChunk.getFirst();
@@ -120,11 +410,61 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                       Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
 
+    public class CompiledSelectionAggregation implements CompiledSelection{
+
+        RecordStoreCompiledSelection recordStoreCompiledSelection;
+
+        public QuerySelector getQuerySelector() {
+            return querySelector;
+        }
+
+        QuerySelector querySelector;
+        MatchingMetaInfoHolder metaStreamInfoHolder;
+
+
+
+        public CompiledSelectionAggregation(RecordStoreCompiledSelection recordStoreCompiledSelection, QuerySelector querySelector,
+                                            MatchingMetaInfoHolder metaStreamInfoHolder) {
+            this.recordStoreCompiledSelection = recordStoreCompiledSelection;
+            this.querySelector = querySelector;
+            this.metaStreamInfoHolder = metaStreamInfoHolder;
+        }
+
+//        @Override
+//        public CompiledSelection cloneCompilation(String key) {
+//            return null;
+//        }
+    }
+
+
+
     public CompiledSelection compileSelection(Selector selector,
                                               List<Attribute> expectedOutputAttributes,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
+        CompiledSelectionAggregation compiledSelectionAggregation;
+
+        ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
+        int metaPosition = SiddhiConstants.UNKNOWN_STATE;
+        List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
+//        MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+//        metaStateEvent.addEvent(matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
+//        MatchingMetaInfoHolder matchingMetaInfoHolderforSelector = new MatchingMetaInfoHolder(
+//                metaStateEvent, -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
+//        metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+
+        QuerySelector querySelector = SelectorParser.parse(selector,
+                returnStream,
+                matchingMetaInfoHolder.getMetaStateEvent(), tableMap, variableExpressionExecutorsForQuerySelector,
+                metaPosition, ProcessingMode.BATCH, false, siddhiQueryContext);
+
+//        QueryParserHelper.reduceMetaComplexEvent(metaStateEvent);
+        QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(), variableExpressionExecutorsForQuerySelector);
+
+        querySelector.setEventPopulator(
+                StateEventPopulatorFactory.constructEventPopulator(matchingMetaInfoHolder.getMetaStateEvent()));
+
         List<OutputAttribute> outputAttributes = selector.getSelectionList();
         if (outputAttributes.size() == 0) {
             MetaStreamEvent metaStreamEvent = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
@@ -221,7 +561,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         orderByAttributeBuilder.getExpressionBuilder().getVariableExpressionExecutorMap());
             }
         }
-        return new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
+        RecordStoreCompiledSelection recordStoreCompiledSelection = new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
+
+        compiledSelectionAggregation = new CompiledSelectionAggregation(recordStoreCompiledSelection, querySelector, matchingMetaInfoHolder);
+        return compiledSelectionAggregation;
     }
 
     /**

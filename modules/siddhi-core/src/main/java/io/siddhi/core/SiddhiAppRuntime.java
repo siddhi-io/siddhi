@@ -408,7 +408,7 @@ public class SiddhiAppRuntime {
                     }
                 }
                 for (Table table : tableMap.values()) {
-                    table.connectWithRetry();
+                    table.connectWithRetry(tableMap);
                 }
                 for (StreamJunction streamJunction : streamJunctionMap.values()) {
                     streamJunction.startProcessing();

@@ -19,15 +19,22 @@ package io.siddhi.core.query.table.util;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.table.Table;
 import io.siddhi.core.table.record.AbstractRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.HashMap;
@@ -54,6 +61,12 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 )
 public class TestStore extends AbstractRecordTable {
     public static Map<String, String> systemConfigs;
+
+    @Override
+    protected void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext, StreamEventCloner
+            storeEventCloner, ConfigReader configReader) {
+
+    }
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
@@ -121,6 +134,16 @@ public class TestStore extends AbstractRecordTable {
     }
 
     @Override
+    protected CompiledCondition generateCacheCompileCondition(Expression condition,
+                                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                                              SiddhiQueryContext siddhiQueryContext,
+                                                              List<VariableExpressionExecutor>
+                                                                          variableExpressionExecutors,
+                                                              Map<String, Table> tableMap) {
+        return null;
+    }
+
+    @Override
     protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
         return null;    //not implemented
     }
@@ -137,10 +160,10 @@ public class TestStore extends AbstractRecordTable {
         return null;
     }
 
-    @Override
-    protected void connect() throws ConnectionUnavailableException {
-        //Not Applicable
-    }
+//    @Override
+//    protected void connect() throws ConnectionUnavailableException {
+//        //Not Applicable
+//    }
 
     @Override
     protected void disconnect() {
