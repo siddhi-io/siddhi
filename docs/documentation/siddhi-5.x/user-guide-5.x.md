@@ -391,18 +391,10 @@ curl -X POST \
 
 ##### Listing the siddhi processes
 
-You can use `sp, sps, SiddhiProcess, or SiddhiProcesses` names to list the `SiddhiProcess` custom objects.
+You can use `sps or SiddhiProcesses` names to list the `SiddhiProcess` custom objects.
 
 ```
-$ kubectl get sp
-NAME                        AGE
-example-siddhi-deployment   2m
-
 $ kubectl get sps
-NAME                        AGE
-example-siddhi-deployment   2m
-
-$ kubectl get SiddhiProcess
 NAME                        AGE
 example-siddhi-deployment   2m
 
@@ -413,10 +405,10 @@ example-siddhi-deployment   2m
 
 ##### View siddhi process configs
 
-You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` as follow.
+You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` as follow using `sp or SiddhiProcess` names.
 
 ```
-$ kubectl describe sps example-siddhi-deployment
+$ kubectl describe sp example-siddhi-deployment
 
 Name:         example-siddhi-deployment
 Namespace:    default
@@ -470,7 +462,7 @@ Events:    <none>
 ```
 
 ```
-$ kubectl get sps example-siddhi-deployment -o yaml
+$ kubectl get sp example-siddhi-deployment -o yaml
 
 apiVersion: siddhi.io/v1alpha1
 kind: SiddhiProcess
