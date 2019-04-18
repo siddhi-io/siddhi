@@ -322,7 +322,7 @@ Following SiddhiApp collects events via HTTP and logs the number of events arriv
     <li>Run the SiddhiApp by executing following commands from the distribution directory
         <ul>
             <li>
-            <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -v &lt;local-absolute-siddhi-file-path&gt;/ConsumeAndStore.siddhi:/apps/CountOverTime.siddhi siddhiio/siddhi-runner-alpine -Dapps=/apps/ConsumeAndStore.siddhi
+            <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -v &lt;local-absolute-siddhi-file-path&gt;/CountOverTime.siddhi:/apps/CountOverTime.siddhi siddhiio/siddhi-runner-alpine -Dapps=/apps/CountOverTime.siddhi
 </pre>
             </li>
         </ul>
@@ -370,16 +370,16 @@ Following SiddhiApp collects events via HTTP and store them in H2 Database.
 
 <script src="https://gist.github.com/suhothayan/2413a6f886219befe736bf4447af02de.js"></script>
 
-The runner config can by configured with the relevant datasource information and passed when starting the runner
+The runner config can be configured with the relevant datasource information and passed when starting the runner
 
 <script src="https://gist.github.com/suhothayan/015ae003d4ba8d4aeaadc19e4c9516fd.js"></script>
 
 <ul>
     <li>Copy the above SiddhiApp, & config yaml, and create corresponding the SiddhiApp file <code>ConsumeAndStore.siddhi</code> and <code>TestDb.yaml</code> files.</li>
-    <li>Run the SiddhiApp by executing following commands from the distribution directory
+    <li>Run the SiddhiApp by executing following command
         <ul>
             <li>
-             <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -v &lt;local-absolute-siddhi-file-path&gt;/ConsumeAndStore.siddhi:/apps/ConsumeAndStore.siddhi -v &lt;local-absolute-config-yaml-path&gt;/TestDb.yaml:/conf/TestDb.yaml siddhiio/siddhi-runner-alpine -Dapps=/apps/ConsumeAndStore.siddhi -Dconfig=/conf/TestDb.yaml</pre>
+             <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -p 9443:9443 -v &lt;local-absolute-siddhi-file-path&gt;/ConsumeAndStore.siddhi:/apps/ConsumeAndStore.siddhi -v &lt;local-absolute-config-yaml-path&gt;/TestDb.yaml:/conf/TestDb.yaml siddhiio/siddhi-runner-alpine -Dapps=/apps/ConsumeAndStore.siddhi -Dconfig=/conf/TestDb.yaml</pre>
             </li>
         </ul>
     </li>
@@ -462,22 +462,22 @@ The runner config is configured with a gmail account to send email messages in `
 <ul>
     <li>Copy the above SiddhiApp, & config yaml, and create corresponding the SiddhiApp file <code>TemplatedFilterAndEmail.siddhi</code> and <code>EmailConfig.yaml</code> files.</li>
     
-    <li>Set environment variables by passing them during the docker run command: 
+    <li>Set the below environment variables by passing them during the docker run command: 
          <pre style="white-space:pre-wrap;">
  THRESHOLD=20
  TO_EMAIL=&lt;to email address&gt; 
  EMAIL_ADDRESS=&lt;gmail address&gt;
  EMAIL_USERNAME=&lt;gmail username&gt;
  EMAIL_PASSWORD=&lt;gmail password&gt;</pre>
-        Or they can also be passed as system variables by adding 
+        Or they can also be passed as system variables by adding them to the end of the docker run command .
         <pre style="white-space:pre-wrap;">-DTHRESHOLD=20 -DTO_EMAIL=&gt;to email address&gt; -DEMAIL_ADDRESS=&lt;gmail address&gt; 
  -DEMAIL_USERNAME=&lt;gmail username&gt; -DEMAIL_PASSWORD=&lt;gmail password&gt;</pre>
-        to the end of the docker run command .
+
     </li>
-        <li>Run the SiddhiApp by executing following commands from the distribution directory
+        <li>Run the SiddhiApp by executing following command.
         <ul>
             <li>
-            <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -v &lt;local-absolute-siddhi-file-path&gt;/TemplatedFilterAndEmail.siddhi:/apps/TemplatedFilterAndEmail.siddhi -v &lt;local-absolute-config-yaml-path&gt;/EmailConfig.yaml:/conf/EmailConfig.yaml -e "THRESHOLD=20" -e "TO_EMAIL=&lt;to email address&gt;" -e "EMAIL_ADDRESS=&lt;gmail address&gt;" -e "EMAIL_USERNAME=&lt;gmail username&gt;" -e "EMAIL_PASSWORD=&lt;gmail password&gt;" siddhiio/siddhi-runner-alpine -Dapps=/apps/ConsumeAndStore.siddhi -Dconfig=/conf/EmailConfig.yaml </pre>
+            <pre style="white-space:pre-wrap;">docker run -it -p 8006:8006 -v &lt;local-absolute-siddhi-file-path&gt;/TemplatedFilterAndEmail.siddhi:/apps/TemplatedFilterAndEmail.siddhi -v &lt;local-absolute-config-yaml-path&gt;/EmailConfig.yaml:/conf/EmailConfig.yaml -e THRESHOLD=20 -e TO_EMAIL=&lt;to email address&gt; -e EMAIL_ADDRESS=&lt;gmail address&gt; -e EMAIL_USERNAME=&lt;gmail username&gt; -e EMAIL_PASSWORD=&lt;gmail password&gt; siddhiio/siddhi-runner-alpine -Dapps=/apps/TemplatedFilterAndEmail.siddhi -Dconfig=/conf/EmailConfig.yaml </pre>
 
             </li>
         </ul>
