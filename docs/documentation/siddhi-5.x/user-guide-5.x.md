@@ -580,31 +580,31 @@ Now you can deploy and run siddhi applications using the deployed siddhi operato
 
 <script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
 
-Copy this YAML file to a file name `example-siddhi-deployment.yaml` and execute the following command to install the siddhi app in your cluster.
+Copy this YAML file to a file name `monitor-app.yaml` and execute the following command to install the siddhi app in your cluster.
 
 ```
-kubectl create -f <absolute-yaml-file-path>/example-siddhi-deployment.yaml
+kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 ```
 
-If the example siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
+If the monitor siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
 
 ```
 $ kubectl get deploy
-NAME                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-example-siddhi-deployment   1         1         1            1           14s
-siddhi-operator             1         1         1            1           1m
-siddhi-parser               1         1         1            1           1m
+NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+monitor-app       1         1         1            1           1m
+siddhi-operator   1         1         1            1           1m
+siddhi-parser     1         1         1            1           1m
 
 $ kubectl get svc
-NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-example-siddhi-deployment   ClusterIP      10.104.219.74    <none>        8280/TCP         21s
-kubernetes                  ClusterIP      10.96.0.1        <none>        443/TCP          8d
-siddhi-operator             ClusterIP      10.97.2.64       <none>        8383/TCP         1m
-siddhi-parser               LoadBalancer   10.106.121.172   <pending>     9090:30297/TCP   1m
+NAME              TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes        ClusterIP      10.96.0.1        <none>        443/TCP          10d
+monitor-app       ClusterIP      10.101.242.132   <none>        8280/TCP         1m
+siddhi-operator   ClusterIP      10.111.138.250   <none>        8383/TCP         1m
+siddhi-parser     LoadBalancer   10.102.172.142   <pending>     9090:31830/TCP   1m
 
 $ kubectl get ing
 NAME      HOSTS     ADDRESS     PORTS     AGE
-siddhi    siddhi    10.0.2.15   80, 443   30s
+siddhi    siddhi    10.0.2.15   80, 443   1m
 
 ```
 Obtain the external IP of the ingress load balancer using `kubectl get ing` and add the host `siddhi` along with that external IP as an entry to the `/etc/hosts` file.
@@ -616,13 +616,14 @@ Now you can use following CURL command to send events to your deployed siddhi ap
 
 ```
 curl -X POST \
-  -L http://siddhi/example-siddhi-deployment/8280/example \
+  http://siddhi/monitor-app/8280/example \
   -H 'Content-Type: application/json' \
   -d '{
 	"type": "monitored",
 	"deviceID": "001",
 	"power": 341
 }'
+
 ```
 
 #### Monitoring the status
@@ -633,12 +634,12 @@ You can use `sps or SiddhiProcesses` names to list the `SiddhiProcess` custom ob
 
 ```
 $ kubectl get sps
-NAME                        AGE
-example-siddhi-deployment   2m
+NAME          AGE
+monitor-app   2m
 
 $ kubectl get SiddhiProcesses
-NAME                        AGE
-example-siddhi-deployment   2m
+NAME          AGE
+monitor-app   2m
 ```
 
 ##### View siddhi process configs
@@ -646,34 +647,34 @@ example-siddhi-deployment   2m
 You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` as follow using `sp or SiddhiProcess` names.
 
 ```
-$ kubectl describe sp example-siddhi-deployment
+$ kubectl describe sp monitor-app
 
-Name:         example-siddhi-deployment
+Name:         monitor-app
 Namespace:    default
 Labels:       <none>
 Annotations:  <none>
 API Version:  siddhi.io/v1alpha1
 Kind:         SiddhiProcess
 Metadata:
-  Creation Timestamp:  2019-04-17T10:14:19Z
+  Creation Timestamp:  2019-04-18T18:05:39Z
   Generation:          1
-  Resource Version:    417512
-  Self Link:           /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/example-siddhi-deployment
-  UID:                 904c526f-60f9-11e9-90dc-0800279e6dba
+  Resource Version:    497702
+  Self Link:           /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/monitor-app
+  UID:                 92b2293b-6204-11e9-996c-0800279e6dba
 Spec:
   Env:
     Name:   RECEIVER_URL
-    Value:  http://0.0.0.0:8006/foo
+    Value:  http://0.0.0.0:8280/example
     Name:   BASIC_AUTH_ENABLED
     Value:  false
   Pod:
     Image:      siddhiio/siddhi-runner-alpine
-    Image Tag:  v0.1.0
-  Query:        @App:name("Example-Siddhi")
+    Image Tag:  0.1.0
+  Query:        @App:name("MonitorApp")
 @App:description("Description of the plan") 
 
 @sink(type='log', prefix='LOGGER')
-@source(type='http', receiver.url='http://0.0.0.0:8280/example', basic.auth.enabled='false', @map(type='json'))
+@source(type='http', receiver.url='${RECEIVER_URL}', basic.auth.enabled='${BASIC_AUTH_ENABLED}', @map(type='json'))
 define stream DevicePowerStream (type string, deviceID string, power int);
 
 
@@ -700,33 +701,33 @@ Events:    <none>
 ```
 
 ```
-$ kubectl get sp example-siddhi-deployment -o yaml
+$ kubectl get sp monitor-app -o yaml
 
 apiVersion: siddhi.io/v1alpha1
 kind: SiddhiProcess
 metadata:
-  creationTimestamp: 2019-04-17T10:14:19Z
+  creationTimestamp: 2019-04-18T18:05:39Z
   generation: 1
-  name: example-siddhi-deployment
+  name: monitor-app
   namespace: default
-  resourceVersion: "417512"
-  selfLink: /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/example-siddhi-deployment
-  uid: 904c526f-60f9-11e9-90dc-0800279e6dba
+  resourceVersion: "497702"
+  selfLink: /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/monitor-app
+  uid: 92b2293b-6204-11e9-996c-0800279e6dba
 spec:
   env:
   - name: RECEIVER_URL
-    value: http://0.0.0.0:8006/foo
+    value: http://0.0.0.0:8280/example
   - name: BASIC_AUTH_ENABLED
     value: "false"
   pod:
     image: siddhiio/siddhi-runner-alpine
-    imageTag: v0.1.0
-  query: "@App:name(\"Example-Siddhi\")\n@App:description(\"Description of the plan\")
-    \n\n@sink(type='log', prefix='LOGGER')\n@source(type='http', receiver.url='http://0.0.0.0:8280/example',
-    basic.auth.enabled='false', @map(type='json'))\ndefine stream DevicePowerStream
-    (type string, deviceID string, power int);\n\n\ndefine stream MonitorDevicesPowerStream(deviceID
-    string, power int);\n\n@info(name='monitored-filter')\nfrom DevicePowerStream[type
-    == 'monitored']\nselect deviceID, power\ninsert into MonitorDevicesPowerStream;\n"
+    imageTag: 0.1.0
+  query: "@App:name(\"MonitorApp\")\n@App:description(\"Description of the plan\")
+    \n\n@sink(type='log', prefix='LOGGER')\n@source(type='http', receiver.url='${RECEIVER_URL}',
+    basic.auth.enabled='${BASIC_AUTH_ENABLED}', @map(type='json'))\ndefine stream
+    DevicePowerStream (type string, deviceID string, power int);\n\n\ndefine stream
+    MonitorDevicesPowerStream(deviceID string, power int);\n\n@info(name='monitored-filter')\nfrom
+    DevicePowerStream[type == 'monitored']\nselect deviceID, power\ninsert into MonitorDevicesPowerStream;\n"
   siddhi.runner.configs: |
     state.persistence:
       enabled: true
@@ -748,46 +749,47 @@ You can list the deployed pods.
 ```
 $ kubectl get pods
 
-NAME                                         READY     STATUS    RESTARTS   AGE
-example-siddhi-deployment-668555c85f-6b5bs   1/1       Running   0          48s
-siddhi-operator-76ff98b67-z4jg2              1/1       Running   2          2m
-siddhi-parser-55f9c8764f-sk4kw               1/1       Running   1          2m
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
 ```
 
 Then you can view the logs of that deployed pod. This log shows you the event that you sent using the previous POST request
 
 ```
-$ kubectl logs example-siddhi-deployment-668555c85f-6b5bs
-
+$ kubectl logs monitor-app-7f8584875f-krz6t
 JAVA_HOME environment variable is set to /opt/java/openjdk
 CARBON_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0
 RUNTIME_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0/wso2/runner
 Picked up JAVA_TOOL_OPTIONS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
-[2019-04-17 10:14:24,752]  INFO {org.wso2.carbon.launcher.extensions.OSGiLibBundleDeployerUtils updateOSGiLib} - Successfully updated the OSGi bundle information of Carbon Runtime: runner  
-osgi> [2019-04-17 10:14:26,969]  INFO {org.wso2.carbon.config.reader.ConfigFileReader} - Default deployment configuration updated with provided custom configuration file example-siddhi-deployment-deployment.yaml
-[2019-04-17 10:14:27,461]  INFO {org.wso2.msf4j.internal.websocket.WebSocketServerSC} - All required capabilities are available of WebSocket service component is available.
-[2019-04-17 10:14:27,488]  INFO {org.wso2.carbon.metrics.core.config.model.JmxReporterConfig} - Creating JMX reporter for Metrics with domain 'org.wso2.carbon.metrics'
-[2019-04-17 10:14:27,503]  INFO {org.wso2.msf4j.analytics.metrics.MetricsComponent} - Metrics Component is activated
-[2019-04-17 10:14:27,508]  INFO {org.wso2.carbon.databridge.agent.internal.DataAgentDS} - Successfully deployed Agent Server 
-[2019-04-17 10:14:28,026]  INFO {io.siddhi.distribution.core.internal.ServiceComponent} - Periodic state persistence started with an interval of 5 using io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
-[2019-04-17 10:14:28,033]  INFO {io.siddhi.distribution.event.simulator.core.service.CSVFileDeployer} - CSV file deployer initiated.
-[2019-04-17 10:14:28,036]  INFO {io.siddhi.distribution.event.simulator.core.service.SimulationConfigDeployer} - Simulation config deployer initiated.
-[2019-04-17 10:14:28,080]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiverServiceComponent} - org.wso2.carbon.databridge.receiver.binary.internal.Service Component is activated
-[2019-04-17 10:14:28,102]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary SSL Transport on port : 9712
-[2019-04-17 10:14:28,106]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary TCP Transport on port : 9612
-[2019-04-17 10:14:28,108]  INFO {org.wso2.carbon.databridge.receiver.thrift.internal.ThriftDataReceiverDS} - Service Component is activated
-[2019-04-17 10:14:28,141]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift Server started at 0.0.0.0
-[2019-04-17 10:14:28,165]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift SSL port : 7711
-[2019-04-17 10:14:28,170]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift port : 7611
-[2019-04-17 10:14:28,349]  INFO {org.wso2.msf4j.internal.MicroservicesServerSC} - All microservices are available
-[2019-04-17 10:14:28,414]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9443
-[2019-04-17 10:14:28,420]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9090
-[2019-04-17 10:14:28,783]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Periodic State persistence enabled. Restoring last persisted state of Example-Siddhi
-[2019-04-17 10:14:28,788]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 8280
-[2019-04-17 10:14:28,789]  INFO {org.wso2.extension.siddhi.io.http.source.HttpConnectorPortBindingListener} - HTTP source 0.0.0.0:8280 has been started
-[2019-04-17 10:14:28,790]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Siddhi App Example-Siddhi deployed successfully
-[2019-04-17 10:14:28,807]  INFO {org.wso2.carbon.kernel.internal.CarbonStartupHandler} - Siddhi Runner Distribution started in 4.529 sec
-[2019-04-17 10:14:42,401]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555496082398, data=[monitored, 001, 341], isExpired=false}
+[2019-04-20 3:58:57,734]  INFO {org.wso2.carbon.launcher.extensions.OSGiLibBundleDeployerUtils updateOSGiLib} - Successfully updated the OSGi bundle information of Carbon Runtime: runner  
+osgi> [2019-04-20 03:59:00,208]  INFO {org.wso2.carbon.config.reader.ConfigFileReader} - Default deployment configuration updated with provided custom configuration file monitor-app-deployment.yaml
+[2019-04-20 03:59:01,551]  INFO {org.wso2.msf4j.internal.websocket.WebSocketServerSC} - All required capabilities are available of WebSocket service component is available.
+[2019-04-20 03:59:01,584]  INFO {org.wso2.carbon.metrics.core.config.model.JmxReporterConfig} - Creating JMX reporter for Metrics with domain 'org.wso2.carbon.metrics'
+[2019-04-20 03:59:01,609]  INFO {org.wso2.msf4j.analytics.metrics.MetricsComponent} - Metrics Component is activated
+[2019-04-20 03:59:01,614]  INFO {org.wso2.carbon.databridge.agent.internal.DataAgentDS} - Successfully deployed Agent Server 
+[2019-04-20 03:59:02,219]  INFO {io.siddhi.distribution.core.internal.ServiceComponent} - Periodic state persistence started with an interval of 5 using io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+[2019-04-20 03:59:02,229]  INFO {io.siddhi.distribution.event.simulator.core.service.CSVFileDeployer} - CSV file deployer initiated.
+[2019-04-20 03:59:02,233]  INFO {io.siddhi.distribution.event.simulator.core.service.SimulationConfigDeployer} - Simulation config deployer initiated.
+[2019-04-20 03:59:02,279]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiverServiceComponent} - org.wso2.carbon.databridge.receiver.binary.internal.Service Component is activated
+[2019-04-20 03:59:02,312]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary SSL Transport on port : 9712
+[2019-04-20 03:59:02,321]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary TCP Transport on port : 9612
+[2019-04-20 03:59:02,322]  INFO {org.wso2.carbon.databridge.receiver.thrift.internal.ThriftDataReceiverDS} - Service Component is activated
+[2019-04-20 03:59:02,344]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift Server started at 0.0.0.0
+[2019-04-20 03:59:02,356]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift SSL port : 7711
+[2019-04-20 03:59:02,363]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift port : 7611
+[2019-04-20 03:59:02,449]  INFO {org.wso2.msf4j.internal.MicroservicesServerSC} - All microservices are available
+[2019-04-20 03:59:02,516]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9090
+[2019-04-20 03:59:02,520]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9443
+[2019-04-20 03:59:03,068]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Periodic State persistence enabled. Restoring last persisted state of MonitorApp
+[2019-04-20 03:59:03,075]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 8280
+[2019-04-20 03:59:03,077]  INFO {org.wso2.extension.siddhi.io.http.source.HttpConnectorPortBindingListener} - HTTP source 0.0.0.0:8280 has been started
+[2019-04-20 03:59:03,084]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Siddhi App MonitorApp deployed successfully
+[2019-04-20 03:59:03,093]  INFO {org.wso2.carbon.kernel.internal.CarbonStartupHandler} - Siddhi Runner Distribution started in 5.941 sec
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
 ```
 
 
