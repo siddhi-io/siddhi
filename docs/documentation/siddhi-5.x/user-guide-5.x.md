@@ -348,7 +348,7 @@ Copy this YAML file to a file name `monitor-app.yaml` and execute the following 
 kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 ```
 
-If the example siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
+If the monitor siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
 
 ```
 $ kubectl get deploy
