@@ -579,6 +579,17 @@ kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 
 ```
 
+!!! Note "You can deploy multiple siddhi apps by specifying multiple config maps under `apps` entry like below."
+
+```
+apps:
+  - config-map-name1
+  - config-map-name2
+```
+
+!!! Note "You can create a config map using a directory which contains multiple siddhi files instead of specifying a single siddhi file"
+    Use `kubectl create configmap siddhi-apps --from-file=<DIRECTORY_PATH>` command to create config map using a directory.
+
 ##### Disable ingress creation
 
 By default, siddhi operator creates an NGINX ingress and expose your HTTP/HTTPS through that ingress. If you need to disable ingress creation you have to change the `AUTO_INGRESS_CREATION` value in the `operator.yaml` file to `false` or `null` as below.
