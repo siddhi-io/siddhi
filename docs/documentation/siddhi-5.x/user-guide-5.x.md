@@ -47,7 +47,7 @@ Siddhi can be used as a library in any Java program (including OSGi runtimes) ju
 
 Siddhi can also run a standalone program by passing the SiddhiApps and required configurations to it.
 
-* Download the the latest Siddhi distribution from [Github releases](https://github.com/siddhi-io/distribution/releases).
+* Download the latest Siddhi distribution from [Github releases](https://github.com/siddhi-io/distribution/releases).
 * Unzip the siddhi-runner-x.x.x.zip
 * Start SiddhiApps with the runner config by executing the following commands from the distribution directory<br/>
   Linux/Mac : `./bin/runner.sh -Dapps=<siddhi-file> -Dconfig=<config-yaml-file>`<br/>
@@ -792,7 +792,99 @@ osgi> [2019-04-20 03:59:00,208]  INFO {org.wso2.carbon.config.reader.ConfigFileR
 [2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
 ```
 
+#### Samples
 
+##### Deploy siddhi apps using kubernetes config maps
+
+First, you need a sample siddhi app as follow. Here we save this siddhi file as `MonitorApp.siddhi`.
+
+<script src="https://gist.github.com/BuddhiWathsala/8687a2b73bb003a8ae7bcf3d3f63b78e.js"></script>
+
+Use the following command to create the kubernetes config map. Here the `monitor-app-cm` is the name of the config map.
+
+```
+kubectl create configmap monitor-app-cm --from-file=<absolute-file-path>/MonitorApp.siddhi
+```
+
+Hereafter, use the following YAML file to deploy the siddhi app. In this YAML file under the `apps` entry, you have to specify the config map names that contain siddhi apps you want to deploy. Save this YAML file as `monitor-app.yaml`.
+
+<script src="https://gist.github.com/BuddhiWathsala/45019cf093226e4858c931e62e04233f.js"></script>
+
+Now use the following command to deploy the siddhi app.
+
+```
+kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
+
+```
+
+!!! Note "You can deploy multiple siddhi apps by specifying multiple config maps under `apps` entry like below."
+
+```
+apps:
+  - config-map-name1
+  - config-map-name2
+```
+
+!!! Note "You can create a config map using a directory which contains multiple siddhi files instead of specifying a single siddhi file"
+    Use `kubectl create configmap siddhi-apps --from-file=<DIRECTORY_PATH>` command to create config map using a directory.
+
+##### Disable ingress creation
+
+By default, siddhi operator creates an NGINX ingress and expose your HTTP/HTTPS through that ingress. If you need to disable ingress creation you have to change the `AUTO_INGRESS_CREATION` value in the `operator.yaml` file to `false` or `null` as below.
+
+<script src="https://gist.github.com/BuddhiWathsala/c1cadcf9828cfaf46bb909f30497e4ab.js"></script>
+
+##### HTTPS support 
+
+First, you need to create a certificate using the following commands. For more details about the certificate, creation refers to [this](https://superuser.com/questions/73979/how-to-easily-create-a-ssl-certificate-and-configure-it-in-apache2-in-mac-os-x).
+
+```
+# Generating Private Key
+openssl genrsa -des3 -out siddhi.key 1024
+
+# Generating the CSR
+openssl req -new -key siddhi.key -out siddhi.csr
+
+# Generate Self Signed Certificate
+openssl x509 -req -days 365 -in siddhi.csr -signkey siddhi.key -out siddhi.crt
+
+```
+
+Obtain the Base64 encoded values of the key (`siddhi.key`) and certificate (`siddhi.crt`) using the following commands.
+
+```
+$ cat siddhi.key | base64
+$ cat siddhi.crt | base64
+```
+
+After that, add those Base64 encoded values to the following YAML file like below. Save this YAML file as `siddhi-tls.yaml`.
+
+<script src="https://gist.github.com/BuddhiWathsala/73e08ec4870e6b75e4bb3cda81f2de03.js"></script>
+
+For more details about the Ingress TLS, refer [this K8s doc](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+
+Use the following command to create a secret.
+
+```
+kubectl create -f <absolute-yaml-file-path>/siddhi-tls.yaml
+```
+
+You have to add the following YAML block to the `SiddhiProcess` custom object YAML file. Siddhi operator will enable TLS support in ingress. Now, you can access your endpoints via HTTPS.
+
+```
+tls:
+  ingressSecret: siddhi-tls
+```
+
+Sample custom object YAML file.
+
+<script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
+
+Now you can use HTTPS URL to send events.
+
+```
+https://siddhi/monitor-app/8280/example 
+```
 
 ### **Using Siddhi as a Python Library**
 
