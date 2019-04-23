@@ -135,6 +135,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     }
 
+
     protected String generateCacheTableDefinitionString (TableDefinition tableDefinition) {
         String defineCache = "define table ";
         defineCache = defineCache + tableDefinition.getId() + " (";
@@ -224,11 +225,51 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                                       storeVariableExpressionExecutors,
                                                               Map<String, Table> storeTableMap) {
         if (isCacheEnabled) {
+//            MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+//            metaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+//            initMetaStreamEvent(metaStreamEvent, cacheTableDefinition);
+//            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+//            metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
+//            metaStateEvent.addEvent(metaStreamEvent);
+//            for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
+//
+//
+//                MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+////            MetaStreamEvent referenceMetaStreamEvent = storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0);
+//                metaStreamEvent.setOutputDefinition(referenceMetaStreamEvent.getOutputStreamDefinition());
+//                metaStreamEvent.setInputReferenceId(referenceMetaStreamEvent.getInputReferenceId());
+//
+//                for (AbstractDefinition inputDefinition : referenceMetaStreamEvent.getInputDefinitions()) {
+//                    metaStreamEvent.addInputDefinition(inputDefinition);
+//                }
+//
+//                for (Attribute attribute : referenceMetaStreamEvent.getBeforeWindowData()) {
+//                    metaStreamEvent.addOutputData(attribute);
+//                }
+//
+//                metaStreamEvent.initializeAfterWindowData();
+//
+//                for (Attribute attribute : referenceMetaStreamEvent.getOnAfterWindowData()) {
+//                    metaStreamEvent.addOutputData(attribute);
+//                }
+//
+//                metaStateEvent.addEvent(metaStreamEvent);
+//            }
+//            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
+//                    metaStateEvent,
+//                    storeMatchingMetaInfoHolder.getMatchingStreamEventIndex(),
+//                    storeMatchingMetaInfoHolder.getStoreEventIndex(),
+//                    storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
+//                    cacheTableDefinition,
+//                    storeMatchingMetaInfoHolder.getCurrentState());
+//            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+
+            //start of temp
             MetaStateEvent metaStateEvent = new MetaStateEvent(1);
             metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
-            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
-                    metaStateEvent, -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
-            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent,
+                    -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
+            //end of temp
             Map<String, Table> tableMap = new ConcurrentHashMap<>();
             tableMap.put(cacheTableDefinition.getId(), cachedTable);
             List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
@@ -285,9 +326,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public StreamEvent findInCache(CompiledCondition compiledCondition, StateEvent matchingEvent) {
         if (isCacheEnabled && !cachedTable.isEmpty()) {
             StreamEvent cacheResults = cachedTable.find(matchingEvent, compiledCondition);
-            if (cacheResults != null) {
-//                executeSelector(,cacheResults, );
-            }
+//            if (cacheResults != null) {
+////                executeSelector(,cacheResults, );
+//            }
             return cacheResults;
         } else {
             return null;

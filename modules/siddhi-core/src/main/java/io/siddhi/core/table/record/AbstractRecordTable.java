@@ -146,33 +146,48 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
-        RecordStoreCompiledCondition recordStoreCompiledCondition =
-                ((RecordStoreCompiledCondition) compiledCondition);
+        RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+        CompiledConditionAggregation compiledConditionAggregation = (CompiledConditionAggregation) compiledConditionTemp.compiledCondition;
+        RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());;
 
-        Map<String, Object> findConditionParameterMap = new HashMap<>();
-        for (Map.Entry<String, ExpressionExecutor> entry : recordStoreCompiledCondition.variableExpressionExecutorMap
-                .entrySet()) {
-            findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
+        StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(), matchingEvent);
 
-        Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+//        RecordStoreCompiledCondition recordStoreCompiledCondition =
+//                ((RecordStoreCompiledCondition) compiledCondition);
+        if (cacheResults != null) {
+            System.out.println("sending results from cache");
+            return cacheResults;
         } else {
-            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-        }
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-        if (records != null) {
-            while (records.hasNext()) {
-                Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                streamEventComplexEventChunk.add(streamEvent);
+
+            Map<String, Object> findConditionParameterMap = new HashMap<>();
+            for (Map.Entry<String, ExpressionExecutor> entry : recordStoreCompiledCondition.variableExpressionExecutorMap
+                    .entrySet()) {
+                findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
             }
+
+            Iterator<Object[]> records;
+            if (recordTableHandler != null) {
+                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                        recordStoreCompiledCondition.compiledCondition);
+            } else {
+                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            }
+            ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
+            if (records != null) {
+                while (records.hasNext()) {
+                    Object[] record = records.next();
+                    StreamEvent streamEvent = storeEventPool.newInstance();
+                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                    streamEventComplexEventChunk.add(streamEvent);
+                }
+            }
+            return streamEventComplexEventChunk.getFirst();
         }
-        return streamEventComplexEventChunk.getFirst();
     }
+
+    protected abstract StreamEvent findInCache(CompiledCondition compiledCondition,
+                                                            StateEvent matchingEvent)
+            throws ConnectionUnavailableException;
 
     /**
      * Find records matching the compiled condition

@@ -21,6 +21,8 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -80,6 +82,12 @@ public class TestStore extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) throws ConnectionUnavailableException {
         //Not Applicable
+    }
+
+    @Override
+    protected StreamEvent findInCache(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException {
+        return null;
     }
 
     @Override
