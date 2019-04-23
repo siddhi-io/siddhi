@@ -199,21 +199,21 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             int myEventSize = 0;
             if (myEvent != null) {
                 myEventSize = 1;
-            }
-            StreamEvent myEventCopy = myEvent;
+                StreamEvent myEventCopy = myEvent;
 
-            while (myEventCopy.getNext() != null) {
-                myEventSize = myEventSize + 1;
-                myEventCopy = myEventCopy.getNext();
-            }
+                while (myEventCopy.getNext() != null) {
+                    myEventSize = myEventSize + 1;
+                    myEventCopy = myEventCopy.getNext();
+                }
 
-            if (myEventSize <= cacheSize) {
-                isTableSmallerThanCache = Boolean.TRUE;
-                ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
-                loadedCache.add(myEvent);
+                if (myEventSize <= cacheSize) {
+                    isTableSmallerThanCache = Boolean.TRUE;
+                    ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+                    loadedCache.add(myEvent);
 
-                cachedTable.addEvents(loadedCache, myEventSize);
-                System.out.println("cached in cache table");
+                    cachedTable.addEvents(loadedCache, myEventSize);
+                    System.out.println("cached in cache table");
+                }
             }
         }
     }
@@ -225,12 +225,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                                       storeVariableExpressionExecutors,
                                                               Map<String, Table> storeTableMap) {
         if (isCacheEnabled) {
-//            MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
-//            metaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
-//            initMetaStreamEvent(metaStreamEvent, cacheTableDefinition);
-//            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
-//            metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
-//            metaStateEvent.addEvent(metaStreamEvent);
+
 //            for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
 //
 //
@@ -265,17 +260,48 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 //            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
 
             //start of temp
-            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
-            metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
-            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent,
-                    -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
+            //op1
+//            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+//            metaStateEvent.addEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0));
+
+            //op2
+//            MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+//            metaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+//            initMetaStreamEvent(metaStreamEvent, tableDefinition);
+//            MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+//            metaStateEvent.addEvent(metaStreamEvent);
+
+
+
+            //finally
+//            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent,
+//                    -1, 0, cacheTableDefinition, cacheTableDefinition, 0);
+//            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+
+            //op3
+            MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length);
+            for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
+                metaStateEvent.addEvent(referenceMetaStreamEvent);
+            }
+            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
+                    metaStateEvent,
+                    storeMatchingMetaInfoHolder.getMatchingStreamEventIndex(),
+                    storeMatchingMetaInfoHolder.getStoreEventIndex(),
+                    storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
+                    cacheTableDefinition,
+                    storeMatchingMetaInfoHolder.getCurrentState());
+            if (siddhiQueryContext.getName().startsWith("store_select_query_")) {
+                metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+            }
+
             //end of temp
+
             Map<String, Table> tableMap = new ConcurrentHashMap<>();
             tableMap.put(cacheTableDefinition.getId(), cachedTable);
-            List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+//            List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
 
             return cachedTable.compileCondition(condition, matchingMetaInfoHolder,
-                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+                    storeVariableExpressionExecutors, tableMap, siddhiQueryContext);
         } else {
             return null;
         }
