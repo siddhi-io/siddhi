@@ -20,23 +20,18 @@ package io.siddhi.core.query.table.util;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.executor.VariableExpressionExecutor;
-import io.siddhi.core.table.Table;
 import io.siddhi.core.table.record.AbstractRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
-import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
-import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.HashMap;
@@ -139,16 +134,6 @@ public class TestStore extends AbstractRecordTable {
                                List<Object[]> addingRecords)
             throws ConnectionUnavailableException {
         //Not Applicable
-    }
-
-    @Override
-    protected CompiledCondition generateCacheCompileCondition(Expression condition,
-                                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                                              SiddhiQueryContext siddhiQueryContext,
-                                                              List<VariableExpressionExecutor>
-                                                                          variableExpressionExecutors,
-                                                              Map<String, Table> tableMap) {
-        return null;
     }
 
     @Override

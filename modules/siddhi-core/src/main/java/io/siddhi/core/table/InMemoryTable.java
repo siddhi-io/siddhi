@@ -25,7 +25,6 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
-import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -73,13 +72,6 @@ public class InMemoryTable extends Table {
 
         stateHolder = siddhiAppContext.generateStateHolder(tableDefinition.getId(),
                 () -> new TableState(eventHolder));
-    }
-
-    public boolean isEmpty () {
-//        EventHolder eventHolder = (EventHolder) stateHolder.getState().snapshot().get("EventHolder");
-        SnapshotableStreamEventQueue eventQueue = (SnapshotableStreamEventQueue)
-                stateHolder.getState().eventHolder;
-        return eventQueue.getFirst() == null;
     }
 
     @Override

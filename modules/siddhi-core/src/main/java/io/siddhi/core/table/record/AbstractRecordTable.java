@@ -84,35 +84,6 @@ public abstract class AbstractRecordTable extends Table {
     protected abstract void init(TableDefinition tableDefinition, ConfigReader configReader);
 
     @Override
-    protected void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException {
-//        System.out.println("my connect new");
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        connectToDatasource();
-//        CompiledCondition compileCondition = new RecordStoreCompiledCondition();
-
-
-//        Map<String, Object> findConditionParameterMap;
-//        RecordIterator myRecordIterator = find(findConditionParameterMap, compileCondition);
-
-
-
-//        CompiledCondition myCondition = compileCondition();
-
-//        siddhiManager = new SiddhiManager();
-//        String streams = "define trigger MyTrigger at 'start';";
-//        String query =  "from MyTrigger as s join SweetProductionTable as sp\n" +
-//                "on s.name == sp.name\n" +
-//                "select sp.name, sp.amount\n" +
-//                "insert into logStream;";
-//
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-//        System.out.println("hi");
-    }
-
-//    protected abstract void connectToDatasource() throws ConnectionUnavailableException;
-
-
-    @Override
     public TableDefinition getTableDefinition() {
         return tableDefinition;
     }
@@ -146,43 +117,32 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
-        RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-        CompiledConditionAggregation compiledConditionAggregation = (CompiledConditionAggregation) compiledConditionTemp.compiledCondition;
-        RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());;
+        RecordStoreCompiledCondition recordStoreCompiledCondition =
+                ((RecordStoreCompiledCondition) compiledCondition);
 
-        StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(), matchingEvent);
-
-//        RecordStoreCompiledCondition recordStoreCompiledCondition =
-//                ((RecordStoreCompiledCondition) compiledCondition);
-        if (cacheResults != null) {
-            System.out.println("sending results from cache");
-            return cacheResults;
-        } else {
-
-            Map<String, Object> findConditionParameterMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry : recordStoreCompiledCondition.variableExpressionExecutorMap
-                    .entrySet()) {
-                findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-            }
-
-            Iterator<Object[]> records;
-            if (recordTableHandler != null) {
-                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                        recordStoreCompiledCondition.compiledCondition);
-            } else {
-                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-            }
-            ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-            if (records != null) {
-                while (records.hasNext()) {
-                    Object[] record = records.next();
-                    StreamEvent streamEvent = storeEventPool.newInstance();
-                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                    streamEventComplexEventChunk.add(streamEvent);
-                }
-            }
-            return streamEventComplexEventChunk.getFirst();
+        Map<String, Object> findConditionParameterMap = new HashMap<>();
+        for (Map.Entry<String, ExpressionExecutor> entry : recordStoreCompiledCondition.variableExpressionExecutorMap
+                .entrySet()) {
+            findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
         }
+
+        Iterator<Object[]> records;
+        if (recordTableHandler != null) {
+            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                    recordStoreCompiledCondition.compiledCondition);
+        } else {
+            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+        }
+        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
+        if (records != null) {
+            while (records.hasNext()) {
+                Object[] record = records.next();
+                StreamEvent streamEvent = storeEventPool.newInstance();
+                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                streamEventComplexEventChunk.add(streamEvent);
+            }
+        }
+        return streamEventComplexEventChunk.getFirst();
     }
 
     protected abstract StreamEvent findInCache(CompiledCondition compiledCondition,
@@ -397,55 +357,9 @@ public abstract class AbstractRecordTable extends Table {
         ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
-
-        //for cache com cond.
-
-        CompiledCondition cacheCompileCondition = generateCacheCompileCondition(condition, matchingMetaInfoHolder,
-                siddhiQueryContext, variableExpressionExecutors, tableMap);
-
-        CompiledCondition CompiledConditionAggregation = new CompiledConditionAggregation(compileCondition, cacheCompileCondition);
-
-        // write function to create a compile condition for cache table also. implement that method in abstractqueryable
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
-        return new RecordStoreCompiledCondition(expressionExecutorMap, CompiledConditionAggregation);
+        return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
     }
-
-    public class CompiledConditionAggregation implements CompiledCondition {
-
-        CompiledCondition storeCompileCondition;
-        CompiledCondition cacheCompileCondition;
-
-
-
-        public CompiledConditionAggregation(CompiledCondition storeCompileCondition, CompiledCondition cacheCompileCondition) {
-            this.storeCompileCondition = storeCompileCondition;
-            this.cacheCompileCondition = cacheCompileCondition;
-        }
-
-
-//        @Override
-//        public CompiledCondition cloneCompilation(String key) {
-//            return
-//                    new CompiledConditionAggregation(storeCompileCondition.cloneCompilation(key),
-//                            cacheCompileCondition.cloneCompilation(key));
-//        }
-
-        public CompiledCondition getStoreCompileCondition() {
-            return storeCompileCondition;
-        }
-
-        public CompiledCondition getCacheCompileCondition() {
-            return cacheCompileCondition;
-        }
-    }
-
-    protected abstract CompiledCondition generateCacheCompileCondition(Expression condition,
-                                                                       MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                                                       SiddhiQueryContext siddhiQueryContext,
-                                                                       List<VariableExpressionExecutor>
-                                                                               variableExpressionExecutors,
-                                                                       Map<String, Table> tableMap);
-
 
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
