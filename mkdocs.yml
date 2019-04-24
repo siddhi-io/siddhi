@@ -5,7 +5,7 @@ site_url: http://siddhi.io
 extra_css:
 - stylesheets/extra.css
 repo_name: Siddhi
-repo_url: https://github.com/wso2/siddhi
+repo_url: https://github.com/siddhi-io/siddhi
 copyright: Copyright &copy; 2011 - 2019 WSO2
 theme:
   name: material
@@ -17,7 +17,7 @@ theme:
 extra:
   social:
   - type: github
-    link: https://github.com/wso2/siddhi
+    link: https://github.com/siddhi-io/siddhi
   - type: linkedin
     link: https://www.linkedin.com/groups/13553064
 google_analytics:
