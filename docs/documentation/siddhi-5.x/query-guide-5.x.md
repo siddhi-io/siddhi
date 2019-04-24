@@ -2258,17 +2258,6 @@ Named aggregation allows you to obtain aggregates in an incremental manner for a
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
- Named aggregation's granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the named aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
-
-|Granularity           |Default retention      |Minimum retention
----------------        |--------------         |------------------  
-|`second`              |`120` seconds          |`120` seconds
-|`minute`              |`24`  hours            |`120` minutes
-|`hour`                |`30`  days             |`25`  hours
-|`day`                 |`1`   year             |`32`  days
-|`month`               |`All`                  |`13`  month
-|`year`                |`All`                  |`none`
-
 **Purpose**
 
 Named aggregation allows you to retrieve the aggregate values for different time durations.
@@ -2293,8 +2282,6 @@ The above syntax includes the following:
 
 |Item                          |Description
 ---------------                |---------
-|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This identifies the number of expired events to retain in a buffer in order<br/>to handle out of order event processing. This is an optional<br/>parameter that is applicable only if aggregation is based on external<br/>timestamps (because events aggregated based on event arrival<br/>time cannot be out of order). Siddhi determines whether an event is expired or not<br/>based on the timestamp of the latest event and the most granular duration for<br/>which aggregation is calculated.<br/> e.g., If the aggregation is calculated for `sec…year`, the most granular duration is seconds. Therefore, if the buffer size is `3` and events arrive during 51st, 52nd, 53rd and 54th seconds, all of the older aggregations (i.e., for 51st, 52nd and 53rd seconds) are kept in the buffer because the latest event arrived during the 54th second. <br/>The default value is `0`.
-|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this parameter is set to `false` (which is default), any event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>this parameter is set to `true`, any event older than the buffer is dropped. This is an optional annotation.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
 |`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> If this annotation is not provided, the default purging mentioned above is applied.<br/> If you want to disable automatic data purging, you can use this annotation as follows:</br>'@purge(enable=false)</br>/You should disable data purging if the aggregation query in included in the Siddhi application for read-only purposes.
 |`@retentionPeriod`            |This annotation is used to specify the length of time the data needs to be retained when carrying out data purging.<br/> If this annotation is not provided, the default retention period is applied.
@@ -2304,11 +2291,22 @@ The above syntax includes the following:
 |`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
 |`<time periods>`              |Time periods can be specified as a range where the minimum and the maximum value are separated by three dots, or as comma-separated values. <br><br> e.g., A range can be specified as sec...year where aggregation is done per second, minute, hour, day, month and year. Comma-separated values can be specified as min, hour. <br><br> Skipping time durations (e.g., min, day where the hour duration is skipped) when specifying comma-separated values is supported only from v4.1.1 onwards
 
-!!! Note
-    From V4.2.0 onwards, aggregation is carried out at calendar start times for each granularity with the GMT timezone
+ Aggregation's granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the named aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
+
+|Granularity           |Default retention      |Minimum retention
+---------------        |--------------         |------------------  
+|`second`              |`120` seconds          |`120` seconds
+|`minute`              |`24`  hours            |`120` minutes
+|`hour`                |`30`  days             |`25`  hours
+|`day`                 |`1`   year             |`32`  days
+|`month`               |`All`                  |`13`  month
+|`year`                |`All`                  |`none`
 
 !!! Note
-    From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition).
+    Aggregation is carried out at calendar start times for each granularity with the GMT timezone
+
+!!! Note
+    The same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition).
 
 **Example**
 
@@ -2327,8 +2325,6 @@ define aggregation TradeAggregation
 
 ### Distributed Aggregation
 
-!!! Note
-    Distributed Aggregation is only supported after v4.3.0
 
 Distributed Aggregation allows you to partially process aggregations in different shards. This allows Siddhi
 app in one shard to be responsible only for processing a part of the aggregation.
@@ -2360,8 +2356,6 @@ System Property| Description| Possible Values | Optional | Default Value
 shardId| The id of the shard one of the distributed aggregation is running in. This should be unique to a single shard | Any string | No | <Empty_String>
 partitionById| This allows user to enable/disable distributed aggregation for all aggregations running in one siddhi manager .(Available from v4.3.3) | true/false | Yesio | false
 
-
-
 !!! Note
     ShardIds should not be changed after the first configuration in order to keep data consistency.
 
@@ -2391,12 +2385,9 @@ Item|Description
 ---------|---------
 `within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by a comma as `string` or `long` values, or by using the wildcard `string` specifying the data range. For details refer examples.            
 `per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
-`AGG_TIMESTAMP`|This specifies the start time of the aggregations and can be used in the select clause.
 
-`within` and `per` clauses also accept attribute values from the stream.
-
-!!! Note
-    The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
+`within` and `per` clauses also accept attribute values from the stream.<br>
+The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
 
 **Example**
 
