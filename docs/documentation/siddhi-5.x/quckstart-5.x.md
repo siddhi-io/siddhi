@@ -245,7 +245,7 @@ implementations done in Siddhi  to reduce the memory consumption. For more infor
 
 ## 7. Running streaming application as a micro service
 
-This this step we will run above developed Siddhi application as a micro service utilizing docker. For there available options please refer [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-in-various-environments). For this we will use siddhi-runner distribution. Follow below steps.
+This step we will run above developed Siddhi application as a micro service utilizing docker. For othere available options please refer [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-in-various-environments). Here we will use siddhi-runner docker distribution. Follow below steps.
 
 * Install docker in your machine and start the daemon.([https://docs.docker.com/install/](https://docs.docker
 .com/install/))
@@ -273,7 +273,6 @@ curl -X POST http://localhost:8006/cargo \
 [2019-04-24 08:54:51,755]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1556096091751, data=[2, 2, 2.0], isExpired=false}
 [2019-04-24 08:56:25,307]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1556096185307, data=[2, 4, 2.0], isExpired=false}
 ```
-
 
 To learn more about the Siddhi functionality, see [Siddhi Query Guide](http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/).
 
