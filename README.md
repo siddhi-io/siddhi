@@ -138,7 +138,7 @@ Find the detail information on asking questions, providing feedback, reporting i
 - [x] Siddhi Tooling (Editor)
 - [x] Siddhi Kubernetes CRD
 - [x] Periodic incremental state persistence  
-- [ ] Support Prometheus for matrices collection
+- [ ] Support Prometheus for metrics collection
 - [ ] Support high available Siddhi deployment with NATS via Kubernetes CRD
 - [ ] Support distributed Siddhi deployment with NATS via Kubernetes CRD
 
