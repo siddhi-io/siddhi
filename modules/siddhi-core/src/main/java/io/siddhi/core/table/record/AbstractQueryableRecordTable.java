@@ -31,6 +31,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -151,28 +152,32 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         connect();
 
         if (isCacheEnabled) {
-            StateEvent stateEvent = new StateEvent(1, 0);
-            StreamEvent preLoadedData = query(stateEvent, compiledConditionForCaching, compiledSelectionForCaching,
-                    outputAttributesForCaching);
+            try {
+                StateEvent stateEvent = new StateEvent(1, 0);
+                StreamEvent preLoadedData = query(stateEvent, compiledConditionForCaching, compiledSelectionForCaching,
+                        outputAttributesForCaching);
 
-            int preLoadedDataSize;
-            if (preLoadedData != null) {
-                preLoadedDataSize = 1;
-                StreamEvent preLoadedDataCopy = preLoadedData;
+                int preLoadedDataSize;
+                if (preLoadedData != null) {
+                    preLoadedDataSize = 1;
+                    StreamEvent preLoadedDataCopy = preLoadedData;
 
-                while (preLoadedDataCopy.getNext() != null) {
-                    preLoadedDataSize = preLoadedDataSize + 1;
-                    preLoadedDataCopy = preLoadedDataCopy.getNext();
+                    while (preLoadedDataCopy.getNext() != null) {
+                        preLoadedDataSize = preLoadedDataSize + 1;
+                        preLoadedDataCopy = preLoadedDataCopy.getNext();
+                    }
+
+                    if (preLoadedDataSize <= cacheSize) {
+                        ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+                        loadedCache.add(preLoadedData);
+
+                        cachedTable.addEvents(loadedCache, preLoadedDataSize);
+                    } else {
+                        log.warn("Table size bigger than cache table size. So cache is left empty");
+                    }
                 }
+            } catch (SiddhiAppRuntimeException ignore) {
 
-                if (preLoadedDataSize <= cacheSize) {
-                    ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
-                    loadedCache.add(preLoadedData);
-
-                    cachedTable.addEvents(loadedCache, preLoadedDataSize);
-                } else {
-                    log.warn("Table size bigger than cache table size. So cache is left empty");
-                }
             }
         }
     }
@@ -226,6 +231,26 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             return null;
         }
 
+    }
+
+    @Override
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
+        if (isCacheEnabled) {
+            cachedTable.add(addingEventChunk);
+        }
+        List<Object[]> records = new ArrayList<>();
+        addingEventChunk.reset();
+        long timestamp = 0L;
+        while (addingEventChunk.hasNext()) {
+            StreamEvent event = addingEventChunk.next();
+            records.add(event.getOutputData());
+            timestamp = event.getTimestamp();
+        }
+        if (recordTableHandler != null) {
+            recordTableHandler.add(timestamp, records);
+        } else {
+            add(records);
+        }
     }
 
     @Override
