@@ -16,7 +16,7 @@ Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/
 
 ## Overview 
 
-![](https://raw.githubusercontent.com/wso2/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
+![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
 **Siddhi supports:**
  
@@ -79,9 +79,12 @@ Get started with Siddhi in a few minutes by following the <a target="_blank" hre
 Siddhi provides siddhi-tooling that supports following features to develop and test stream processing applications: 
 
 * **Text Query Editor** with syntax highlighting and advanced auto completion support.
-* **Graphical Query Editor** with drag and drop query building support.
 * **Event Simulator and Debugger** to test Siddhi Applications.
- 
+    ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/editor/source-editor.png "Source Editor")
+
+* **Graphical Query Editor** with drag and drop query building support.
+    ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/editor/graphical-editor.png "Graphical Query Editor")
+
 **IntelliJ IDEA Plugin** 
 
 Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
