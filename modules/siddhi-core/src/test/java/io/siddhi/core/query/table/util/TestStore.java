@@ -20,8 +20,6 @@ package io.siddhi.core.query.table.util;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.table.record.AbstractRecordTable;
@@ -66,6 +64,11 @@ public class TestStore extends AbstractRecordTable {
     }
 
     @Override
+    protected void connectAndLoadCache() throws ConnectionUnavailableException {
+
+    }
+
+    @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
         systemConfigs = new HashMap<>();
         systemConfigs = AnnotationHelper.getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations())
@@ -77,12 +80,6 @@ public class TestStore extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) throws ConnectionUnavailableException {
         //Not Applicable
-    }
-
-    @Override
-    protected StreamEvent findInCache(CompiledCondition compiledCondition, StateEvent matchingEvent)
-            throws ConnectionUnavailableException {
-        return null;
     }
 
     @Override
@@ -152,11 +149,6 @@ public class TestStore extends AbstractRecordTable {
     protected CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder) {
         return null;
     }
-
-//    @Override
-//    protected void connect() throws ConnectionUnavailableException {
-//        //Not Applicable
-//    }
 
     @Override
     protected void disconnect() {

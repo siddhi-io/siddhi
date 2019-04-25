@@ -401,16 +401,11 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     protected abstract boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException;
 
-    public void connectWithRetry(Map<String, Table> tableMap) {
-        this.tableMap = tableMap;
-        connectWithRetry();
-    }
-
     public void connectWithRetry() {
         if (!isConnected.get()) {
             isTryingToConnect.set(true);
             try {
-                connect(tableMap);
+                connectAndLoadCache();
                 isConnected.set(true);
                 synchronized (this) {
                     isTryingToConnect.set(false);
@@ -475,7 +470,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                                        Map<String, Table> tableMap,
                                                        SiddhiQueryContext siddhiQueryContext);
 
-    protected abstract void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException;
+    protected abstract void connectAndLoadCache() throws ConnectionUnavailableException;
 
     protected abstract void disconnect();
 

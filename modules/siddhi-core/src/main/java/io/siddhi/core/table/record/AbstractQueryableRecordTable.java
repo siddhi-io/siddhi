@@ -133,20 +133,21 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     private TableDefinition generateCacheTableDefinition(TableDefinition tableDefinition) {
-        String defineCache = "define table ";
-        defineCache = defineCache + tableDefinition.getId() + " (";
+        StringBuilder defineCache = new StringBuilder("define table ");
+        defineCache.append(tableDefinition.getId()).append(" (");
 
         for (Attribute attribute: tableDefinition.getAttributeList()) {
-            defineCache = defineCache + attribute.getName() + " " + attribute.getType().name().toLowerCase() + ", ";
+            defineCache.append(attribute.getName()).append(" ").append(attribute.getType().name().toLowerCase()).
+                    append(", ");
         }
-        defineCache = defineCache.substring(0, defineCache.length() - 2);
-        defineCache = defineCache + "); ";
+        defineCache = new StringBuilder(defineCache.substring(0, defineCache.length() - 2));
+        defineCache.append("); ");
 
-        return SiddhiCompiler.parseTableDefinition(defineCache);
+        return SiddhiCompiler.parseTableDefinition(defineCache.toString());
     }
 
     @Override
-    protected void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException {
+    protected void connectAndLoadCache() throws ConnectionUnavailableException {
         connect();
 
         if (isCacheEnabled) {
@@ -234,16 +235,25 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
-
-        CompiledCondition cacheCompileCondition = generateCacheCompileCondition(condition, matchingMetaInfoHolder,
-                siddhiQueryContext, variableExpressionExecutors, tableMap);
-
-        CompiledCondition CompiledConditionAggregation = new CompiledConditionWithCache(compileCondition, cacheCompileCondition); //todo: use CompiledConditionWithCache only when cache is enabled
-
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
-        return new RecordStoreCompiledCondition(expressionExecutorMap, CompiledConditionAggregation);
+
+        if (isCacheEnabled) {
+
+            CompiledCondition cacheCompileCondition = generateCacheCompileCondition(condition, matchingMetaInfoHolder,
+                    siddhiQueryContext, variableExpressionExecutors, tableMap);
+
+            CompiledCondition compiledConditionAggregation = new CompiledConditionWithCache(compileCondition,
+                    cacheCompileCondition);
+
+            return new RecordStoreCompiledCondition(expressionExecutorMap, compiledConditionAggregation);
+        } else {
+            return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
+        }
     }
 
+    /**
+     * Class to hold store compile condition and cache compile condition wrapped
+     */
     public class CompiledConditionWithCache implements CompiledCondition {
 
         CompiledCondition storeCompileCondition;
@@ -251,7 +261,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
 
 
-        public CompiledConditionWithCache(CompiledCondition storeCompileCondition, CompiledCondition cacheCompileCondition) {
+        public CompiledConditionWithCache(CompiledCondition storeCompileCondition,
+                                          CompiledCondition cacheCompileCondition) {
             this.storeCompileCondition = storeCompileCondition;
             this.cacheCompileCondition = cacheCompileCondition;
         }
@@ -272,12 +283,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (isCacheEnabled) {
 
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionAggregation = (CompiledConditionWithCache) compiledConditionTemp.compiledCondition;
-            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());;
+            CompiledConditionWithCache compiledConditionAggregation = (CompiledConditionWithCache)
+                    compiledConditionTemp.compiledCondition;
+            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
+                    variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());
 
-            StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(), matchingEvent);
+            StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(),
+                    matchingEvent);
             if (cacheResults != null) {
-                System.out.println("sending results from cache");
                 return cacheResults;
             }
         } else {
@@ -319,21 +332,24 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
 
-        RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-        CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache) compiledConditionTemp.compiledCondition;
-
-        RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(
-                compiledConditionTemp.variableExpressionExecutorMap,
-                compiledConditionWithCache.getStoreCompileCondition());
+        RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
 
         if (isCacheEnabled) {
+            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+                    compiledConditionTemp.compiledCondition;
+            recordStoreCompiledCondition = new RecordStoreCompiledCondition(
+                    compiledConditionTemp.variableExpressionExecutorMap,
+                    compiledConditionWithCache.getStoreCompileCondition());
+
             CompiledSelectionWithCache compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             recordStoreCompiledSelection = compiledSelectionWithCache.recordStoreCompiledSelection;
-            StreamEvent cacheResults = findInCache(compiledConditionWithCache.getCacheCompileCondition(), matchingEvent);
+            StreamEvent cacheResults = findInCache(compiledConditionWithCache.getCacheCompileCondition(),
+                    matchingEvent);
             if (cacheResults != null) {
-                System.out.println("sending results from cache");
-                StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.metaStreamInfoHolder.getMetaStateEvent());
+                StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
+                        metaStreamInfoHolder.getMetaStateEvent());
                 Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
                         compiledSelectionWithCache.querySelector,
                         stateEventFactory, MetaStreamEvent.EventType.TABLE);
@@ -351,6 +367,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         } else {
             recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
+            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
         }
 
         Map<String, Object> parameterMap = new HashMap<>();
@@ -401,7 +418,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                       Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
 
-    public class CompiledSelectionWithCache implements CompiledSelection{
+    /**
+     * class to hold both store compile selection and cache compile selection wrapped
+     */
+    public class CompiledSelectionWithCache implements CompiledSelection {
 
         RecordStoreCompiledSelection recordStoreCompiledSelection;
 
@@ -414,7 +434,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
 
 
-        CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection, QuerySelector querySelector,
+        CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
+                                   QuerySelector querySelector,
                                    MatchingMetaInfoHolder metaStreamInfoHolder) {
             this.recordStoreCompiledSelection = recordStoreCompiledSelection;
             this.querySelector = querySelector;
@@ -538,14 +559,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     matchingMetaInfoHolder.getMetaStateEvent(), tableMap, variableExpressionExecutorsForQuerySelector,
                     metaPosition, ProcessingMode.BATCH, false, siddhiQueryContext);
 
-            QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(), variableExpressionExecutorsForQuerySelector);
+            QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
+                    variableExpressionExecutorsForQuerySelector);
 
             querySelector.setEventPopulator(
                     StateEventPopulatorFactory.constructEventPopulator(matchingMetaInfoHolder.getMetaStateEvent()));
 
-            RecordStoreCompiledSelection recordStoreCompiledSelection = new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
+            RecordStoreCompiledSelection recordStoreCompiledSelection =
+                    new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
 
-            compiledSelectionWithCache = new CompiledSelectionWithCache(recordStoreCompiledSelection, querySelector, matchingMetaInfoHolder);
+            compiledSelectionWithCache = new CompiledSelectionWithCache(recordStoreCompiledSelection, querySelector,
+                    matchingMetaInfoHolder);
             return compiledSelectionWithCache;
         } else {
             return  new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);

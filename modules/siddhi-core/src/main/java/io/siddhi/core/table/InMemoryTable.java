@@ -209,7 +209,7 @@ public class InMemoryTable extends Table {
     }
 
     @Override
-    protected void connect(Map<String, Table> tableMap) throws ConnectionUnavailableException {
+    protected void connectAndLoadCache() throws ConnectionUnavailableException {
 
     }
 

@@ -74,7 +74,6 @@ public abstract class AbstractRecordTable extends Table {
     protected abstract void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
                                  StreamEventCloner storeEventCloner, ConfigReader configReader);
 
-
     /**
      * Initializing the Record Table
      *
@@ -144,10 +143,6 @@ public abstract class AbstractRecordTable extends Table {
         }
         return streamEventComplexEventChunk.getFirst();
     }
-
-    protected abstract StreamEvent findInCache(CompiledCondition compiledCondition,
-                                                            StateEvent matchingEvent)
-            throws ConnectionUnavailableException;
 
     /**
      * Find records matching the compiled condition
