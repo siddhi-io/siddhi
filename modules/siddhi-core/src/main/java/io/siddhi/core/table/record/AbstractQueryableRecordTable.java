@@ -254,6 +254,44 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
+            throws ConnectionUnavailableException {
+        RecordStoreCompiledCondition recordStoreCompiledCondition;
+        if (isCacheEnabled) {
+            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+            CompiledConditionWithCache compiledConditionAggregation = (CompiledConditionWithCache)
+                    compiledConditionTemp.compiledCondition;
+            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
+                    variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());
+            cachedTable.delete(deletingEventChunk, compiledConditionAggregation.getCacheCompileCondition());
+        } else {
+            recordStoreCompiledCondition =
+                    ((RecordStoreCompiledCondition) compiledCondition);
+        }
+        List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
+        deletingEventChunk.reset();
+        long timestamp = 0L;
+        while (deletingEventChunk.hasNext()) {
+            StateEvent stateEvent = deletingEventChunk.next();
+
+            Map<String, Object> variableMap = new HashMap<>();
+            for (Map.Entry<String, ExpressionExecutor> entry :
+                    recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
+                variableMap.put(entry.getKey(), entry.getValue().execute(stateEvent));
+            }
+
+            deleteConditionParameterMaps.add(variableMap);
+            timestamp = stateEvent.getTimestamp();
+        }
+        if (recordTableHandler != null) {
+            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                    compiledCondition);
+        } else {
+            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+        }
+    }
+
+    @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
