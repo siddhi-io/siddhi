@@ -42,6 +42,7 @@ import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
@@ -375,6 +376,63 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
+    public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                            CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
+                            AddingStreamEventExtractor addingStreamEventExtractor)
+            throws ConnectionUnavailableException {
+        RecordStoreCompiledCondition recordStoreCompiledCondition;
+        RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
+        if (isCacheEnabled) {
+            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+                    compiledConditionTemp.compiledCondition;
+            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+            CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
+            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
+                    compiledUpdateSetWithCache.storeCompiledUpdateSet;
+            cachedTable.updateOrAdd(updateOrAddingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
+                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
+        } else {
+            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
+            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
+        }
+        List<Map<String, Object>> updateConditionParameterMaps = new ArrayList<>();
+        List<Map<String, Object>> updateSetParameterMaps = new ArrayList<>();
+        List<Object[]> addingRecords = new ArrayList<>();
+        updateOrAddingEventChunk.reset();
+        long timestamp = 0L;
+        while (updateOrAddingEventChunk.hasNext()) {
+            StateEvent stateEvent = updateOrAddingEventChunk.next();
+
+            Map<String, Object> variableMap = new HashMap<>();
+            for (Map.Entry<String, ExpressionExecutor> entry :
+                    recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
+                variableMap.put(entry.getKey(), entry.getValue().execute(stateEvent));
+            }
+            updateConditionParameterMaps.add(variableMap);
+
+            Map<String, Object> variableMapForUpdateSet = new HashMap<>();
+            for (Map.Entry<String, ExpressionExecutor> entry :
+                    recordTableCompiledUpdateSet.getExpressionExecutorMap().entrySet()) {
+                variableMapForUpdateSet.put(entry.getKey(), entry.getValue().execute(stateEvent));
+            }
+            updateSetParameterMaps.add(variableMapForUpdateSet);
+            addingRecords.add(stateEvent.getStreamEvent(0).getOutputData());
+            timestamp = stateEvent.getTimestamp();
+        }
+        if (recordTableHandler != null) {
+            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
+                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                    updateSetParameterMaps, addingRecords);
+        } else {
+            updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+        }
+
+    }
+
+    @Override
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
@@ -401,11 +459,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return recordTableCompiledUpdateSet;
     }
 
+    /**
+     * Class to wrap store compile update set and cache compile update set
+     */
     public class CompiledUpdateSetWithCache implements CompiledUpdateSet {
         CompiledUpdateSet storeCompiledUpdateSet;
         CompiledUpdateSet cacheCompiledUpdateSet;
 
-        public CompiledUpdateSetWithCache(CompiledUpdateSet storeCompiledUpdateSet, CompiledUpdateSet cacheCompiledUpdateSet) {
+        public CompiledUpdateSetWithCache(CompiledUpdateSet storeCompiledUpdateSet,
+                                          CompiledUpdateSet cacheCompiledUpdateSet) {
             this.storeCompiledUpdateSet = storeCompiledUpdateSet;
             this.cacheCompiledUpdateSet = cacheCompiledUpdateSet;
         }
