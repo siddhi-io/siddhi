@@ -1,6 +1,6 @@
 # Download Siddhi
 
-Select the appropriate Siddhi distribution for user use case. 
+Select the appropriate Siddhi distribution for your use case. 
 
 ##Siddhi Distribution 
 
