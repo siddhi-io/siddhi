@@ -581,7 +581,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
-        //todo: override delete funcs from abstractrecordtable and delete from cache table and record table
 
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
 
