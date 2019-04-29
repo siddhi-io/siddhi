@@ -556,13 +556,8 @@ minikube addons enable ingress
 To install the siddhi kubernetes operator use the following commands.
 
 ```
-git clone https://github.com/siddhi-io/siddhi-operator.git
-cd siddhi-operator
-kubectl create -f ./deploy/crds/siddhi_v1alpha1_siddhiprocess_crd.yaml
-kubectl create -f ./deploy/service_account.yaml
-kubectl create -f ./deploy/role.yaml
-kubectl create -f ./deploy/role_binding.yaml
-kubectl create -f ./deploy/operator.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/prerequisites.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/siddhi-operator.yaml
 ```
 
 After the execution of these commands, you will see the following deployments in your kubernetes cluster if the siddhi operator deployed successfully.
