@@ -533,7 +533,7 @@ Thank you</pre>
 ### **Using Siddhi as Kubernetes Micro Service**
 
 #### Prerequisites 
-1. First, you need a kubernetes cluster to deploy and run siddhi applications.
+Configure a kubernetes cluster to run Siddhi applications.
    1. [minikube](https://github.com/kubernetes/minikube#installation)
    2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
 
@@ -581,6 +581,8 @@ Copy this YAML file to a file name `monitor-app.yaml` and execute the following 
 kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 ```
 
+!!! Note "Within the sample app, a tls secret named `siddhi-tls`" is configured. If the secret is not found, it will use a self generated certificate by default."
+
 If the monitor siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
 
 ```
@@ -611,21 +613,23 @@ Now you can use following CURL command to send events to your deployed siddhi ap
 
 ```
 curl -X POST \
-  http://siddhi/monitor-app/8280/example \
+  https://siddhi/monitor-app/8280/example \
   -H 'Content-Type: application/json' \
   -d '{
 	"type": "monitored",
 	"deviceID": "001",
 	"power": 341
-}'
+}' -k
 
 ```
+!!! Note "The `-k` option is used to turn off curl's verification of the certificate." 
+
 
 #### Monitoring the status
 
 ##### Listing the siddhi processes
 
-You can use `sps or SiddhiProcesses` names to list the `SiddhiProcess` custom objects.
+Use `sps or SiddhiProcesses` as the resource type name to list all `SiddhiProcess` resources.
 
 ```
 $ kubectl get sps
@@ -639,7 +643,7 @@ monitor-app   2m
 
 ##### View siddhi process configs
 
-You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` as follow using `sp or SiddhiProcess` names.
+You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` commands as follows.
 
 ```
 $ kubectl describe sp monitor-app
@@ -739,7 +743,7 @@ status:
 
 ##### View siddhi process logs
 
-You can list the deployed pods.
+Following command list down all the deployed pods in the current namespace.
 
 ```
 $ kubectl get pods
@@ -750,7 +754,7 @@ siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
 siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
 ```
 
-Then you can view the logs of that deployed pod. This log shows you the event that you sent using the previous POST request
+Then you can use the deployed pod name to view the logs. This log shows the event received from Siddhi which was sent using the previous POST request.
 
 ```
 $ kubectl logs monitor-app-7f8584875f-krz6t
@@ -791,17 +795,17 @@ osgi> [2019-04-20 03:59:00,208]  INFO {org.wso2.carbon.config.reader.ConfigFileR
 
 ##### Deploy siddhi apps using kubernetes config maps
 
-First, you need a sample siddhi app as follow. Here we save this siddhi file as `MonitorApp.siddhi`.
+First, you need a sample siddhi app as follows. Save this siddhi file as `MonitorApp.siddhi`.
 
 <script src="https://gist.github.com/BuddhiWathsala/8687a2b73bb003a8ae7bcf3d3f63b78e.js"></script>
 
-Use the following command to create the kubernetes config map. Here the `monitor-app-cm` is the name of the config map.
+Use the following command to create a kubernetes config map. Here the `monitor-app-cm` is the name of the created config map.
 
 ```
 kubectl create configmap monitor-app-cm --from-file=<absolute-file-path>/MonitorApp.siddhi
 ```
 
-Hereafter, use the following YAML file to deploy the siddhi app. In this YAML file under the `apps` entry, you have to specify the config map names that contain siddhi apps you want to deploy. Save this YAML file as `monitor-app.yaml`.
+Thereafter, use the following YAML file to deploy the siddhi app. In this YAML file under the `apps` entry, you have to specify the config map names that contain siddhi apps you want to deploy. Save this YAML file as `monitor-app.yaml`.
 
 <script src="https://gist.github.com/BuddhiWathsala/45019cf093226e4858c931e62e04233f.js"></script>
 
@@ -812,7 +816,7 @@ kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 
 ```
 
-!!! Note "You can deploy multiple siddhi apps by specifying multiple config maps under `apps` entry like below."
+!!! Note "You can deploy multiple Siddhi apps by adding multiple config maps under `apps` entry like below."
 
 ```
 apps:
@@ -820,12 +824,12 @@ apps:
   - config-map-name2
 ```
 
-!!! Note "You can create a config map using a directory which contains multiple siddhi files instead of specifying a single siddhi file"
-    Use `kubectl create configmap siddhi-apps --from-file=<DIRECTORY_PATH>` command to create config map using a directory.
+!!! Note "You can also create a config map using a directory which contains multiple siddhi files instead of specifying a single siddhi file per a config map."
+    Use `kubectl create configmap siddhi-apps --from-file=<DIRECTORY_PATH>` command to create a config map from a directory.
 
 ##### Disable ingress creation
 
-By default, siddhi operator creates an NGINX ingress and expose your HTTP/HTTPS through that ingress. If you need to disable ingress creation you have to change the `AUTO_INGRESS_CREATION` value in the `operator.yaml` file to `false` or `null` as below.
+By default, Siddhi operator creates an NGINX ingress and exposes your HTTP/HTTPS through that ingress. If you need to disable automatic ingress creation, you have to change the `AUTO_INGRESS_CREATION` value in the `operator.yaml` file to `false` or `null` as below.
 
 <script src="https://gist.github.com/BuddhiWathsala/c1cadcf9828cfaf46bb909f30497e4ab.js"></script>
 
