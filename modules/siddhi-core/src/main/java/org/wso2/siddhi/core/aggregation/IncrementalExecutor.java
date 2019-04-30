@@ -235,7 +235,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.submit(() -> table.addEvents(tableEventChunk, 1));
+                executorService.execute(() -> table.addEvents(tableEventChunk, 1));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
@@ -257,7 +257,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.submit(() -> table.addEvents(tableEventChunk, noOfEvents));
+                executorService.execute(() -> table.addEvents(tableEventChunk, noOfEvents));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
