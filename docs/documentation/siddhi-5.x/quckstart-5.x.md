@@ -84,7 +84,7 @@ extracted folder) <br>
 
 ```
 For Windows: tooling.bat
-For Linux: ./tooling.bat
+For Linux: ./tooling.sh
 ```
 
 After successfully starting the Siddhi Editor, the terminal should look like as shown below:
