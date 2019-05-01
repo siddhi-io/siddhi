@@ -814,7 +814,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         LocalDate currentDate = LocalDate.now();
         String year = String.valueOf(currentDate.getYear());
@@ -829,7 +829,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "per \"seconds\"; ");
 
         EventPrinter.print(events);
-
+        AssertJUnit.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
