@@ -1801,7 +1801,7 @@ The possible values are as follows:
 
 ## Partition
 
-Partitions divide streams and queries into isolated groups in  order to process them in parallel and in isolation.
+Partitions divide streams and queries into isolated groups in order to process them in parallel and in isolation.
 A partition can contain one or more queries and there can be multiple instances where the same queries and streams are replicated for each partition.
 Each partition is tagged with a partition key. Those partitions only process the events that match the corresponding partition key.
 
@@ -1897,6 +1897,51 @@ begin
     insert into DeviceTempIncreasingStream
 end;
 </pre>
+
+### Purge Partition
+
+Based on the partition key used for the partition, multiple instances of streams and queries will be generated. When an extremely large number of unique partition keys are used there is a possibility of very high instances of streams and queries getting generated and eventually system going out of memory. In order to overcome this, users can define a purge interval to clean partitions that will not be used anymore.
+
+**Purpose**
+
+`@purge` allows you to clean the partition instances that will not be used anymore.
+
+**Syntax**
+
+The syntax of partition purge configuration is as follows:
+
+```sql
+@purge(enable='true', interval='<purge interval>', idle.period='<idle period of partition instance>')
+partition with ( <partition key> of <input stream> )
+begin
+    from <input stream> ...
+    select <attribute name>, <attribute name>, ...
+    insert into <output stream>
+end;
+```
+
+Partition purge configuration| Description
+---------|--------
+Purge interval | The periodic time interval to purge the purgeable partition instances.
+Idle period of partition instance| The period, a particular partition instance (for a given partition key) needs to be idle before it becomes purgeable.
+
+**Examples**
+
+Mark partition instances eligible for purging, if there are no events from a particular deviceID for 15 seconds, and periodically purge those partition instances every 1 second.
+
+```sql
+@purge(enable='true', interval='1 sec', idle.period='15 sec')
+partition with ( deviceID of TempStream )
+begin
+    from TempStream#window.lengthBatch(10)
+    select roomNo, deviceID, avg(temp) as avgTemp
+    insert into #AvgTempStream
+
+    from every (e1=#AvgTempStream),e2=#AvgTempStream[e1.avgTemp + 5 < avgTemp]
+    select e1.deviceID, e1.avgTemp as initialAvgTemp, e2.avgTemp as finalAvgTemp
+    insert into DeviceTempIncreasingStream
+end;
+```
 
 ## Table
 
