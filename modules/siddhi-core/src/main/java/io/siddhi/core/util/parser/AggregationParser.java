@@ -289,19 +289,6 @@ public class AggregationParser {
                     siddhiAppRuntimeBuilder, aggregationDefinition.getAnnotations(), groupByVariableList,
                     isProcessingOnExternalTime, enablePartioning);
 
-            Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_BUFFER_SIZE, null,
-                    aggregationDefinition.getAnnotations());
-            if (element != null) {
-                LOG.info("@BufferSize annotation is depreciated. Out of order events are handled without buffers.");
-            }
-
-            element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_IGNORE_EVENTS_OLDER_THAN_BUFFER,
-                    null, aggregationDefinition.getAnnotations());
-            if (element != null) {
-                LOG.info("@IgnoreEventsOlderThanBuffer annotation is depreciated. Out of order events are handled " +
-                        "without buffers.");
-            }
-
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
                     processedMetaStreamEvent, processExpressionExecutorsList, groupByKeyGeneratorList,
                     incrementalDurations, aggregationTables, siddhiQueryContext, aggregatorName,

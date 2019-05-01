@@ -196,7 +196,7 @@ public class IncrementalExecutor implements Executor {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.submit(() -> table.addEvents(tableEventChunk, streamEventMap.size()));
+                executorService.execute(() -> table.addEvents(tableEventChunk, streamEventMap.size()));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
