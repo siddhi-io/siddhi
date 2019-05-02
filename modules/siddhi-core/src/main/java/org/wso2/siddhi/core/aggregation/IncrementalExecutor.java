@@ -235,7 +235,16 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.execute(() -> table.addEvents(tableEventChunk, 1));
+                executorService.execute(() -> {
+                    try {
+                        table.addEvents(tableEventChunk, 1);
+                    } catch (Throwable t) {
+                        LOG.error("Exception occurred at siddhi app '" + siddhiAppContext.getName() +
+                                "' when performing table writes of aggregation '" + this.aggregatorName +
+                                "' for duration '" + this.duration + "'. This should be investigated as this can " +
+                                "cause accuracy loss.", t);
+                    }
+                });
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
@@ -257,7 +266,16 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.execute(() -> table.addEvents(tableEventChunk, noOfEvents));
+                executorService.execute(() -> {
+                    try {
+                        table.addEvents(tableEventChunk, noOfEvents);
+                    } catch (Throwable t){
+                        LOG.error("Exception occurred at siddhi app '" + siddhiAppContext.getName() +
+                                "' when performing table writes of aggregation '" + this.aggregatorName +
+                                "' for duration '" + this.duration + "'. This should be investigated as this can " +
+                                "cause accuracy loss.", t);
+                    }
+                });
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
