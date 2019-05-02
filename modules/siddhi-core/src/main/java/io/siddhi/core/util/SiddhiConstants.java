@@ -124,4 +124,8 @@ public final class SiddhiConstants {
     public static final String NAMESPACE_RETENTION_PERIOD = "retentionPeriod";
 
     public static final String PARTITION_ID_DEFAULT = "null";
+
+    public static final String ANNOTATION_CACHE = "Cache";
+    public static final String CACHE_TABLE_SIZE = "Size";
+    public static final String CACHE_QUERY_NAME = "table_cache_";
 }

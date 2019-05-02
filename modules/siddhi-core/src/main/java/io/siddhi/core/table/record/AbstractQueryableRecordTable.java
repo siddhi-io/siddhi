@@ -31,7 +31,6 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -51,6 +50,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.SelectorParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.StoreQuery;
@@ -63,7 +63,6 @@ import io.siddhi.query.api.execution.query.selection.OutputAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
-import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -73,151 +72,120 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
+import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
+import static io.siddhi.query.api.util.AnnotationHelper.getNestedAnnotation;
 
 /**
  * An abstract implementation of table. Abstract implementation will handle {@link ComplexEventChunk} so that
  * developer can directly work with event data.
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
-
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
     private int cacheSize;
     private InMemoryTable cachedTable;
-    private Boolean isCacheEnabled = Boolean.FALSE;
+    private boolean isCacheEnabled = false;
     private CompiledCondition compiledConditionForCaching;
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
+    private TableDefinition cacheTableDefinition;
+    private SiddhiAppContext siddhiAppContext;
 
     @Override
     public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
                      StreamEventCloner storeEventCloner, ConfigReader configReader) {
-        this.tableDefinition = tableDefinition;
-
-        if (!tableDefinition.getAnnotations().get(0).getAnnotations("Cache").isEmpty()) {
-            isCacheEnabled = Boolean.TRUE;
-            cacheSize = Integer.parseInt(tableDefinition.getAnnotations().get(0).getAnnotations("Cache").
-                    get(0).getElement("Size"));
-
+        this.siddhiAppContext = siddhiAppContext;
+        String[] annotationNames = {ANNOTATION_STORE, ANNOTATION_CACHE};
+        Annotation cacheTableAnnotation = getNestedAnnotation(tableDefinition.getAnnotations(), annotationNames);
+        if (cacheTableAnnotation != null) {
+            isCacheEnabled = true;
+            cacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
             cachedTable = new InMemoryTable(); //todo: add another column for expiry - timestamp
-            cachedTable.initTable(generateCacheTableDefinition(tableDefinition), storeEventPool,
+            cacheTableDefinition = new TableDefinition(tableDefinition.getId());
+            for (Attribute attribute: tableDefinition.getAttributeList()) {
+                cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
+            }
+            cachedTable.initTable(cacheTableDefinition, storeEventPool,
                     storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
-            //todo: ask suho how to get subpart of store table defn
 
-            String queryName = "table_cache" + tableDefinition.getId();
-            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
-
-            Expression onCondition = Expression.value(true);
-
+            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
+                    CACHE_QUERY_NAME + cacheTableDefinition.getId());
             MatchingMetaInfoHolder matchingMetaInfoHolder =
-                    generateMatchingMetaInfoHolderForCacheTable(tableDefinition);
-
+                    generateMatchingMetaInfoHolderForCacheTable(cacheTableDefinition);
             StoreQuery storeQuery = StoreQuery.query().
                     from(
-                            InputStore.store(tableDefinition.getId())).
+                            InputStore.store(cacheTableDefinition.getId())).
                     select(
                             Selector.selector().
                                     limit(Expression.value((cacheSize + 1)))
                     );
-
             List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
 
-            compiledConditionForCaching = compileCondition(onCondition, matchingMetaInfoHolder,
+            compiledConditionForCaching = compileCondition(Expression.value(true), matchingMetaInfoHolder,
                     variableExpressionExecutors, tableMap, siddhiQueryContext);
-
             List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery,
                     tableMap, SiddhiConstants.UNKNOWN_STATE, matchingMetaInfoHolder, siddhiQueryContext);
-
             compiledSelectionForCaching = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
-
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
         }
-    }
-
-    private TableDefinition generateCacheTableDefinition(TableDefinition tableDefinition) {
-        StringBuilder defineCache = new StringBuilder("define table ");
-        defineCache.append(tableDefinition.getId()).append(" (");
-
-        for (Attribute attribute: tableDefinition.getAttributeList()) {
-            defineCache.append(attribute.getName()).append(" ").append(attribute.getType().name().toLowerCase()).
-                    append(", ");
-        }
-        defineCache = new StringBuilder(defineCache.substring(0, defineCache.length() - 2));
-        defineCache.append("); ");
-
-        return SiddhiCompiler.parseTableDefinition(defineCache.toString());
     }
 
     @Override
     protected void connectAndLoadCache() throws ConnectionUnavailableException {
         connect();
-
         if (isCacheEnabled) {
-            try {
-                StateEvent stateEvent = new StateEvent(1, 0);
-                StreamEvent preLoadedData = query(stateEvent, compiledConditionForCaching, compiledSelectionForCaching,
-                        outputAttributesForCaching);
+            StateEvent stateEventForCaching = new StateEvent(1, 0);
+            StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                    compiledSelectionForCaching, outputAttributesForCaching);
 
-                int preLoadedDataSize;
-                if (preLoadedData != null) {
-                    preLoadedDataSize = 1;
-                    StreamEvent preLoadedDataCopy = preLoadedData;
-
-                    while (preLoadedDataCopy.getNext() != null) {
-                        preLoadedDataSize = preLoadedDataSize + 1;
-                        preLoadedDataCopy = preLoadedDataCopy.getNext();
-                    }
-
-                    if (preLoadedDataSize <= cacheSize) {
-                        ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
-                        loadedCache.add(preLoadedData);
-
-                        cachedTable.addEvents(loadedCache, preLoadedDataSize);
-                    } else {
-                        log.warn("Table size bigger than cache table size. So cache is left empty");
-                    }
+            if (preLoadedData != null) {
+                int preLoadedDataSize = findEventChunkSize(preLoadedData);
+                if (preLoadedDataSize <= cacheSize) {
+                    ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+                    loadedCache.add(preLoadedData);
+                    cachedTable.addEvents(loadedCache, preLoadedDataSize);
+                } else {
+                    isCacheEnabled = false;
+                    log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is bigger " +
+                            "than cache table size defined as " + cacheSize + ". So cache is disabled");
                 }
-            } catch (SiddhiAppRuntimeException ignore) {
-
             }
         }
     }
 
-    protected CompiledCondition generateCacheCompileCondition(Expression condition,
-                                                              MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
-                                                              SiddhiQueryContext siddhiQueryContext,
-                                                              List<VariableExpressionExecutor>
-                                                                      storeVariableExpressionExecutors,
-                                                              Map<String, Table> storeTableMap) {
-        if (isCacheEnabled) {
-            MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
-                    getMetaStreamEvents().length);
-            for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
-                    getMetaStreamEvents()) {
-                metaStateEvent.addEvent(referenceMetaStreamEvent);
-            }
-            MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
-                    metaStateEvent,
-                    storeMatchingMetaInfoHolder.getMatchingStreamEventIndex(),
-                    storeMatchingMetaInfoHolder.getStoreEventIndex(),
-                    storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
-                    tableDefinition,
-                    storeMatchingMetaInfoHolder.getCurrentState());
-            if (siddhiQueryContext.getName().startsWith("store_select_query_")) {
-                metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
-            }
-
-            Map<String, Table> tableMap = new ConcurrentHashMap<>();
-            tableMap.put(tableDefinition.getId(), cachedTable);
-
-            return cachedTable.compileCondition(condition, matchingMetaInfoHolder,
-                    storeVariableExpressionExecutors, tableMap, siddhiQueryContext);
-        } else {
-            return null;
+    private CompiledCondition generateCacheCompileCondition(Expression condition,
+                                                            MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
+                                                            SiddhiQueryContext siddhiQueryContext,
+                                                            List<VariableExpressionExecutor>
+                                                                    storeVariableExpressionExecutors) {
+        MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
+                getMetaStreamEvents().length);
+        for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
+                getMetaStreamEvents()) {
+            metaStateEvent.addEvent(referenceMetaStreamEvent);
         }
+        MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
+                metaStateEvent,
+                storeMatchingMetaInfoHolder.getMatchingStreamEventIndex(),
+                storeMatchingMetaInfoHolder.getStoreEventIndex(),
+                storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
+                cacheTableDefinition,
+                storeMatchingMetaInfoHolder.getCurrentState());
+        if (siddhiQueryContext.getName().startsWith("store_select_query_")) {
+            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
+        }
+
+        Map<String, Table> tableMap = new ConcurrentHashMap<>();
+        tableMap.put(cacheTableDefinition.getId(), cachedTable);
+
+        return cachedTable.compileCondition(condition, matchingMetaInfoHolder,
+                storeVariableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     protected abstract void connect() throws ConnectionUnavailableException;
@@ -234,7 +202,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         } else {
             return null;
         }
-
     }
 
     @Override
@@ -255,6 +222,16 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         } else {
             add(records);
         }
+    }
+
+    private int findEventChunkSize(StreamEvent streamEvent) {
+        int chunkSize = 1;
+        StreamEvent streamEventCopy = streamEvent;
+        while (streamEvent.hasNext()) {
+            chunkSize = chunkSize + 1;
+            streamEventCopy = streamEventCopy.getNext();
+        }
+        return chunkSize;
     }
 
     @Override
@@ -491,41 +468,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
 
         if (isCacheEnabled) {
-
-            CompiledCondition cacheCompileCondition = generateCacheCompileCondition(condition, matchingMetaInfoHolder,
-                    siddhiQueryContext, variableExpressionExecutors, tableMap);
-
-            CompiledCondition compiledConditionAggregation = new CompiledConditionWithCache(compileCondition,
-                    cacheCompileCondition);
-
-            return new RecordStoreCompiledCondition(expressionExecutorMap, compiledConditionAggregation);
+            CompiledCondition compiledConditionWithCache = new CompiledConditionWithCache(compileCondition,
+                    generateCacheCompileCondition(condition, matchingMetaInfoHolder, siddhiQueryContext,
+                            variableExpressionExecutors));
+            return new RecordStoreCompiledCondition(expressionExecutorMap, compiledConditionWithCache);
         } else {
             return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
-        }
-    }
-
-    /**
-     * Class to hold store compile condition and cache compile condition wrapped
-     */
-    public class CompiledConditionWithCache implements CompiledCondition {
-
-        CompiledCondition storeCompileCondition;
-        CompiledCondition cacheCompileCondition;
-
-
-
-        public CompiledConditionWithCache(CompiledCondition storeCompileCondition,
-                                          CompiledCondition cacheCompileCondition) {
-            this.storeCompileCondition = storeCompileCondition;
-            this.cacheCompileCondition = cacheCompileCondition;
-        }
-
-        public CompiledCondition getStoreCompileCondition() {
-            return storeCompileCondition;
-        }
-
-        public CompiledCondition getCacheCompileCondition() {
-            return cacheCompileCondition;
         }
     }
 
@@ -583,7 +531,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             throws ConnectionUnavailableException {
 
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
 
@@ -616,7 +563,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 return streamEventComplexEventChunk.getFirst();
             }
-
         } else {
             recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
@@ -669,33 +615,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                       CompiledSelection compiledSelection,
                                                       Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
-
-    /**
-     * class to hold both store compile selection and cache compile selection wrapped
-     */
-    public class CompiledSelectionWithCache implements CompiledSelection {
-
-        RecordStoreCompiledSelection recordStoreCompiledSelection;
-
-        public QuerySelector getQuerySelector() {
-            return querySelector;
-        }
-
-        QuerySelector querySelector;
-        MatchingMetaInfoHolder metaStreamInfoHolder;
-
-
-
-        CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
-                                   QuerySelector querySelector,
-                                   MatchingMetaInfoHolder metaStreamInfoHolder) {
-            this.recordStoreCompiledSelection = recordStoreCompiledSelection;
-            this.querySelector = querySelector;
-            this.metaStreamInfoHolder = metaStreamInfoHolder;
-        }
-    }
-
-
 
     public CompiledSelection compileSelection(Selector selector,
                                               List<Attribute> expectedOutputAttributes,
@@ -805,15 +724,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
             int metaPosition = SiddhiConstants.UNKNOWN_STATE;
             List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
-
             QuerySelector querySelector = SelectorParser.parse(selector,
                     returnStream,
                     matchingMetaInfoHolder.getMetaStateEvent(), tableMap, variableExpressionExecutorsForQuerySelector,
                     metaPosition, ProcessingMode.BATCH, false, siddhiQueryContext);
-
             QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
                     variableExpressionExecutorsForQuerySelector);
-
             querySelector.setEventPopulator(
                     StateEventPopulatorFactory.constructEventPopulator(matchingMetaInfoHolder.getMetaStateEvent()));
 
@@ -845,6 +761,48 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                           List<OrderByAttributeBuilder> orderByAttributeBuilders,
                                                           Long limit, Long offset);
 
+    /**
+     * Class to hold store compile condition and cache compile condition wrapped
+     */
+    private class CompiledConditionWithCache implements CompiledCondition {
+        CompiledCondition cacheCompileCondition;
+        CompiledCondition storeCompileCondition;
+
+        public CompiledConditionWithCache(CompiledCondition storeCompileCondition,
+                                          CompiledCondition cacheCompileCondition) {
+            this.storeCompileCondition = storeCompileCondition;
+            this.cacheCompileCondition = cacheCompileCondition;
+        }
+
+        public CompiledCondition getStoreCompileCondition() {
+            return storeCompileCondition;
+        }
+
+        public CompiledCondition getCacheCompileCondition() {
+            return cacheCompileCondition;
+        }
+    }
+
+    /**
+     * class to hold both store compile selection and cache compile selection wrapped
+     */
+    public class CompiledSelectionWithCache implements CompiledSelection {
+        QuerySelector querySelector;
+        MatchingMetaInfoHolder metaStreamInfoHolder;
+        RecordStoreCompiledSelection recordStoreCompiledSelection;
+
+        public QuerySelector getQuerySelector() {
+            return querySelector;
+        }
+
+        CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
+                                   QuerySelector querySelector,
+                                   MatchingMetaInfoHolder metaStreamInfoHolder) {
+            this.recordStoreCompiledSelection = recordStoreCompiledSelection;
+            this.querySelector = querySelector;
+            this.metaStreamInfoHolder = metaStreamInfoHolder;
+        }
+    }
 
     private class RecordStoreCompiledSelection implements CompiledSelection {
 
