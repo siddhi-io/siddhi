@@ -269,7 +269,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 executorService.execute(() -> {
                     try {
                         table.addEvents(tableEventChunk, noOfEvents);
-                    } catch (Throwable t){
+                    } catch (Throwable t) {
                         LOG.error("Exception occurred at siddhi app '" + siddhiAppContext.getName() +
                                 "' when performing table writes of aggregation '" + this.aggregatorName +
                                 "' for duration '" + this.duration + "'. This should be investigated as this can " +
