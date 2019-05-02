@@ -133,8 +133,7 @@ public class Aggregation1TestCase {
         siddhiManager.createSiddhiAppRuntime(stockStream + query);
     }
 
-    @Test
-            //(dependsOnMethods = {"incrementalStreamProcessorTest4"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest4"})
     public void incrementalStreamProcessorTest5() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest5");
         SiddhiManager siddhiManager = new SiddhiManager();
