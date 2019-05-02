@@ -308,9 +308,6 @@ public class StoreQueryParser {
                     log.debug("Store Query optimization failed for table: "
                             + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
                             "Reason for failure: " + e.getMessage());
-                } else {
-                    log.info("Creating Store Query Runtime in the normal mode, for table: "
-                            + table.getTableDefinition().getId());
                 }
                 return constructRegularStoreQueryRuntime(table, storeQuery, tableMap, windowMap,
                         metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,

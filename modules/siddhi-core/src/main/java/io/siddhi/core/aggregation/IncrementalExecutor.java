@@ -51,6 +51,8 @@ public class IncrementalExecutor implements Executor {
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
     private final StateHolder<ExecutorState> stateHolder;
+    private final String aggregatorName;
+    private final String siddhiAppName;
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
@@ -84,6 +86,8 @@ public class IncrementalExecutor implements Executor {
         this.stateHolder = siddhiQueryContext.generateStateHolder(
                 aggregatorName + "-" + this.getClass().getName(), false, () -> new ExecutorState());
         this.executorService = Executors.newSingleThreadExecutor();
+        this.aggregatorName = aggregatorName;
+        this.siddhiAppName = siddhiQueryContext.getSiddhiAppContext().getName();
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -196,7 +200,17 @@ public class IncrementalExecutor implements Executor {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.execute(() -> table.addEvents(tableEventChunk, streamEventMap.size()));
+                executorService.execute(() -> {
+                            try {
+                                table.addEvents(tableEventChunk, streamEventMap.size());
+                            } catch (Throwable t) {
+                                LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
+                                        "' when performing table writes of aggregation '" + this.aggregatorName +
+                                        "' for duration '" + this.duration + "'. This should be investigated as this " +
+                                        "can cause accuracy loss.", t);
+                            }
+                        }
+                    );
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
