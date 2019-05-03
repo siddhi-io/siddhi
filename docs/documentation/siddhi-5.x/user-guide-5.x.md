@@ -533,10 +533,11 @@ Siddhi can natively run on Kubernetes using the Siddhi Kubernetes operator.
 
 #### Prerequisites 
 
-* A Kubernetes cluster to run Siddhi applications.
+* A Kubernetes cluster v1.11.8 or higher.
 
     1. [Minikube](https://github.com/kubernetes/minikube#installation)
     2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
+    3. Or any other Kubernetes cluster
    
 * Admin privileges to install Siddhi operator 
 
