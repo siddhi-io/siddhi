@@ -28,7 +28,7 @@ import io.siddhi.core.util.snapshot.state.SnapshotStateList;
  * to the EventHolder. There are multiple event holders to fulfill different requirements.
  */
 public interface EventHolder {
-    void add(ComplexEventChunk<StreamEvent> addingEventChunk);
+    int add(ComplexEventChunk<StreamEvent> addingEventChunk);
 
     Snapshot getSnapshot();
 

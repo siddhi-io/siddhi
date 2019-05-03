@@ -35,7 +35,7 @@ public interface Operator extends CompiledCondition {
 
     boolean contains(StateEvent matchingEvent, Object storeEvents);
 
-    void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents);
+    int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents);
 
     void update(ComplexEventChunk<StateEvent> updatingEventChunk, Object storeEvents,
                 InMemoryCompiledUpdateSet compiledUpdateSet);

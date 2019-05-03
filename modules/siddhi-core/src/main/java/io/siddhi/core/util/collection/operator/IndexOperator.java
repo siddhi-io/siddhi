@@ -59,12 +59,14 @@ public class IndexOperator implements Operator {
     }
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+    public int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+        int numberOfEventsBeforeDelete = ((IndexedEventHolder) storeEvents).getAllEvents().size();
         deletingEventChunk.reset();
         while (deletingEventChunk.hasNext()) {
             StateEvent deletingEvent = deletingEventChunk.next();
             collectionExecutor.delete(deletingEvent, (IndexedEventHolder) storeEvents);
         }
+        return numberOfEventsBeforeDelete - ((IndexedEventHolder) storeEvents).getAllEvents().size();
     }
 
     @Override

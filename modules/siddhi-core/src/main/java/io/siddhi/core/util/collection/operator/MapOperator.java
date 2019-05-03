@@ -48,8 +48,8 @@ public class MapOperator extends CollectionOperator {
     }
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
-        super.delete(deletingEventChunk, ((Map<Object, StreamEvent>) storeEvents).values());
+    public int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+        return super.delete(deletingEventChunk, ((Map<Object, StreamEvent>) storeEvents).values());
     }
 
     @Override

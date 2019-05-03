@@ -26,6 +26,8 @@ import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 
+import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
+
 /**
  * Holder object to contain a list of {@link StreamEvent}. Users can add {@link ComplexEventChunk}s to the
  * {@link ListEventHolder} where events in chunk will be added to the {@link StreamEvent} list.
@@ -44,7 +46,7 @@ public class ListEventHolder extends SnapshotableStreamEventQueue implements Eve
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
+    public int add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
@@ -52,5 +54,6 @@ public class ListEventHolder extends SnapshotableStreamEventQueue implements Eve
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
             this.add(streamEvent);
         }
+        return findEventChunkSize(addingEventChunk.getFirst());
     }
 }

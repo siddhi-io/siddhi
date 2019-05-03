@@ -153,7 +153,8 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
+    public int add(ComplexEventChunk<StreamEvent> addingEventChunk) {
+        int numberOfEventsBeforeAdding = this.getAllEvents().size();
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
@@ -172,6 +173,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             }
             add(streamEvent);
         }
+        return this.getAllEvents().size() - numberOfEventsBeforeAdding;
     }
 
     private void add(StreamEvent streamEvent) {

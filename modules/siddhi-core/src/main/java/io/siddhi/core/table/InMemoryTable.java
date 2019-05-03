@@ -52,6 +52,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
+
 /**
  * In-memory event table implementation of SiddhiQL.
  */
@@ -92,6 +94,19 @@ public class InMemoryTable extends Table {
 
     }
 
+    public int addWithNumberAddedReturn(ComplexEventChunk<StreamEvent> addingEventChunk) {
+        int numberOfEventsAdded;
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            numberOfEventsAdded = state.eventHolder.add(addingEventChunk);
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
+        return numberOfEventsAdded;
+    }
+
     @Override
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
         readWriteLock.writeLock().lock();
@@ -102,6 +117,20 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
+    }
+
+    public int deleteWithNumberDeletedReturn(ComplexEventChunk<StateEvent> deletingEventChunk,
+                                              CompiledCondition compiledCondition) {
+        int numberOfDeletedEvents;
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            numberOfDeletedEvents = ((Operator) compiledCondition).delete(deletingEventChunk, state.eventHolder);
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
+        return numberOfDeletedEvents;
     }
 
     @Override
@@ -132,13 +161,38 @@ public class InMemoryTable extends Table {
                     state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
-            if (failedEvents != null) {
+            if (failedEvents.getFirst() != null) {
                 state.eventHolder.add(failedEvents);
             }
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
+
+    }
+    
+    public int updateOrAddWithNumberAddedReturn(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                            CompiledCondition compiledCondition,
+                            CompiledUpdateSet compiledUpdateSet,
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
+        int numberOfAddedEvents = 0;
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
+                    updateOrAddingEventChunk,
+                    state.eventHolder,
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
+                    addingStreamEventExtractor);
+            if (failedEvents.getFirst() != null) {
+                state.eventHolder.add(failedEvents);
+                numberOfAddedEvents = findEventChunkSize(failedEvents.getFirst());
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
+        return numberOfAddedEvents;
 
     }
 

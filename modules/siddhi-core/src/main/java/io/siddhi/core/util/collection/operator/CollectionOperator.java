@@ -73,7 +73,8 @@ public class CollectionOperator implements Operator {
     }
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+    public int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+        int numberOfDeletedEvents = 0;
         if (((Collection<StreamEvent>) storeEvents).size() > 0) {
             deletingEventChunk.reset();
             while (deletingEventChunk.hasNext()) {
@@ -85,6 +86,7 @@ public class CollectionOperator implements Operator {
                         deletingEvent.setEvent(storeEventPosition, storeEvent);
                         if ((Boolean) expressionExecutor.execute(deletingEvent)) {
                             iterator.remove();
+                            numberOfDeletedEvents += 1;
                         }
                     }
                 } finally {
@@ -92,6 +94,7 @@ public class CollectionOperator implements Operator {
                 }
             }
         }
+        return numberOfDeletedEvents;
     }
 
 

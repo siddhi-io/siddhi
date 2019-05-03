@@ -65,13 +65,16 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import org.apache.log4j.Logger;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
@@ -86,8 +89,10 @@ import static io.siddhi.query.api.util.AnnotationHelper.getNestedAnnotation;
  * developer can directly work with event data.
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
+    //todo: in memory table may grow beyond the initial user specified size - soln?
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
-    private int cacheSize;
+    private int maxCacheSize;
+    private int currentCacheSize = 0;
     private InMemoryTable cachedTable;
     private boolean isCacheEnabled = false;
     private CompiledCondition compiledConditionForCaching;
@@ -104,13 +109,21 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         Annotation cacheTableAnnotation = getNestedAnnotation(tableDefinition.getAnnotations(), annotationNames);
         if (cacheTableAnnotation != null) {
             isCacheEnabled = true;
-            cacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
-            cachedTable = new InMemoryTable(); //todo: add another column for expiry - timestamp
+            maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
+            cachedTable = new InMemoryTable();
             cacheTableDefinition = new TableDefinition(tableDefinition.getId());
             for (Attribute attribute: tableDefinition.getAttributeList()) {
                 cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
             }
+//            cacheTableDefinition.attribute("timestamp", Attribute.Type.LONG);
+            for (Annotation annotation: tableDefinition.getAnnotations()) {
+                if (!annotation.getName().equalsIgnoreCase("Store")) {
+                    cacheTableDefinition.annotation(annotation);
+                }
+            }
+//            cacheTableDefinition.annotation(getAnnotation("PrimarKey", tableDefinition.))
             cachedTable.initTable(cacheTableDefinition, storeEventPool,
+                    //todo: should change storeeventpool and storeeventcloner if adding a column for timestamp
                     storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
 
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
@@ -122,7 +135,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             InputStore.store(cacheTableDefinition.getId())).
                     select(
                             Selector.selector().
-                                    limit(Expression.value((cacheSize + 1)))
+                                    limit(Expression.value((maxCacheSize + 1)))
                     );
             List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
 
@@ -146,14 +159,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             if (preLoadedData != null) {
                 int preLoadedDataSize = findEventChunkSize(preLoadedData);
-                if (preLoadedDataSize <= cacheSize) {
+                if (preLoadedDataSize <= maxCacheSize) {
                     ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
                     loadedCache.add(preLoadedData);
                     cachedTable.addEvents(loadedCache, preLoadedDataSize);
+                    currentCacheSize = preLoadedDataSize;
                 } else {
                     isCacheEnabled = false;
                     log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is bigger " +
-                            "than cache table size defined as " + cacheSize + ". So cache is disabled");
+                            "than cache table size defined as " + maxCacheSize + ". So cache is disabled");
                 }
             }
         }
@@ -204,10 +218,34 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
+    private Object[] appendValue(Object[] obj, Object newObj) {
+
+        ArrayList<Object> temp = new ArrayList<Object>(Arrays.asList(obj));
+        temp.add(newObj);
+        return temp.toArray();
+
+    }
+
     @Override
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         if (isCacheEnabled) {
-            cachedTable.add(addingEventChunk);
+            ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
+            while (addingEventChunk.hasNext()) {
+                StreamEvent event = addingEventChunk.next();
+                Object[] outputData = event.getOutputData();
+                Object[] outputDataWithTimeStamp = appendValue(outputData,
+                        new Timestamp(System.currentTimeMillis()).getTime());
+                StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+                eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+                addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+            }
+            currentCacheSize += cachedTable.addWithNumberAddedReturn(addingEventChunk);
+            if (currentCacheSize > maxCacheSize) {
+                isCacheEnabled = false;
+                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
+                        currentCacheSize + " which is bigger than cache table size defined as " + maxCacheSize +
+                        ". So cache is now disabled");
+            }
         }
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
@@ -224,16 +262,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    private int findEventChunkSize(StreamEvent streamEvent) {
-        int chunkSize = 1;
-        StreamEvent streamEventCopy = streamEvent;
-        while (streamEvent.hasNext()) {
-            chunkSize = chunkSize + 1;
-            streamEventCopy = streamEventCopy.getNext();
-        }
-        return chunkSize;
-    }
-
     @Override
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
@@ -244,7 +272,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            cachedTable.delete(deletingEventChunk, compiledConditionWithCache.getCacheCompileCondition());
+            currentCacheSize -= cachedTable.deleteWithNumberDeletedReturn(deletingEventChunk,
+                    compiledConditionWithCache.getCacheCompileCondition());
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
         }
@@ -368,8 +397,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-            cachedTable.updateOrAdd(updateOrAddingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
+            currentCacheSize += cachedTable.updateOrAddWithNumberAddedReturn(updateOrAddingEventChunk,
+                    compiledConditionWithCache.getCacheCompileCondition(),
                     compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
+            if (currentCacheSize > maxCacheSize) {
+                isCacheEnabled = false;
+                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
+                        currentCacheSize + " which is bigger than cache table size defined as " + maxCacheSize +
+                        ". So cache is now disabled");
+            }
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
