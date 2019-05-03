@@ -527,89 +527,111 @@ Thank you</pre>
     </li>
 </ul>
 
-
-
-
 ### **Using Siddhi as Kubernetes Micro Service**
 
+Siddhi can natively run on Kubernetes using the Siddhi Kubernetes operator.
+
 #### Prerequisites 
-Configure a kubernetes cluster to run Siddhi applications.
-   1. [minikube](https://github.com/kubernetes/minikube#installation)
-   2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
 
-##### Google Kubernetes Engine(GKE) Cluster
-If you are running on a GKE, before installing the siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command (replace "your-address@gmail.com" with your account email address). 
+* A Kubernetes cluster v1.11.8 or higher.
 
-```    
-kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=cluster-admin --user=your-address@gmail.com
-```  
+    1. [Minikube](https://github.com/kubernetes/minikube#installation)
+    2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
+    3. Or any other Kubernetes cluster
+   
+* Admin privileges to install Siddhi operator 
+
+!!! Note "Minikube"
+    For Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
+    <pre>
+    minikube addons enable ingress
+    </pre>
+    or disable Siddhi operator's [automatically ingress creation](#deploy-siddhi-apps-without-ingress-creation).
+
+!!! Note "Google Kubernetes Engine (GKE) Cluster"
+    To install Siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command (by replacing "your-address@email.com" with your account email address). 
+    <pre>kubectl create clusterrolebinding user-cluster-admin-binding \ 
+            --clusterrole=cluster-admin --user=your-address@email.com
+    </pre>  
     
-##### Minikube
-If you are running on minikube you have to enable ingress using the following command.
 
-```
-minikube addons enable ingress
-```
-    
+#### Install Siddhi Operator
 
-#### Install the siddhi operator
-To install the siddhi kubernetes operator use the following commands.
+To install the Siddhi Kubernetes operator run the following commands.
 
 ```
 kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/prerequisites.yaml
 kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/siddhi-operator.yaml
 ```
-
-After the execution of these commands, you will see the following deployments in your kubernetes cluster if the siddhi operator deployed successfully.
+You can verify the installation by making sure the following deployments are running in your Kubernetes cluster. 
 
 ```
-$ kubectl get deploy
+$ kubectl get deployment
+
 NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 siddhi-operator   1         1         1            1           1m
 siddhi-parser     1         1         1            1           1m
 
 ```
 
-#### Deploy and run a siddhi application
-Now you can deploy and run siddhi applications using the deployed siddhi operator. In order to deploy siddhi files, you need custom object YAML file like below.
+#### Deploy and Run Siddhi App
+
+Siddhi applications can be deployed on Kubernetes using the Siddhi operator. 
+
+Here we will creating a very simple Siddhi stream processing application that consumes events via HTTP, filers the input events on the type 'monitored' and logs the output on the console.
+This can be created using a SiddhiProcess YAML file as given below.
 
 <script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
 
-Copy this YAML file to a file name `monitor-app.yaml` and execute the following command to install the siddhi app in your cluster.
+To deploy the above Siddhi app in your Kubernetes cluster, copy to a YAML file with name `monitor-app.yaml` and execute the following command.
 
 ```
 kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
 ```
 
-!!! Note "Within the sample app, a tls secret named `siddhi-tls`" is configured. If the secret is not found, it will use a self generated certificate by default."
+!!! Note "tls secret" 
+    Within the SiddhiProcess, a tls secret named `siddhi-tls` is configured. If a Kubernetes secret with the same name does not exist in the Kubernetes cluster, the NGINX will ignore it and use a self-generated certificate. Configuring a secret will be necessary for calling HTTPS endpoints, refer [deploy and run Siddhi apps with HTTPS](#deploy-and-run-siddhi-app-with-https) section for more details. 
 
-If the monitor siddhi app deployed successfully you can see the created deployment, service, and ingress in your cluster as follow.
+If the `monitor-app` is deployed successfully, the created SiddhiProcess, deployment, service, and ingress can be viewed as follows.
 
 ```
-$ kubectl get deploy
+$ kubectl get SiddhiProcesses
+NAME          AGE
+monitor-app   2m
+
+$ kubectl get deployment
 NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 monitor-app       1         1         1            1           1m
 siddhi-operator   1         1         1            1           1m
 siddhi-parser     1         1         1            1           1m
 
-$ kubectl get svc
+$ kubectl get service
 NAME              TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
 kubernetes        ClusterIP      10.96.0.1        <none>        443/TCP          10d
 monitor-app       ClusterIP      10.101.242.132   <none>        8280/TCP         1m
 siddhi-operator   ClusterIP      10.111.138.250   <none>        8383/TCP         1m
 siddhi-parser     LoadBalancer   10.102.172.142   <pending>     9090:31830/TCP   1m
 
-$ kubectl get ing
+$ kubectl get ingress
 NAME      HOSTS     ADDRESS     PORTS     AGE
 siddhi    siddhi    10.0.2.15   80, 443   1m
 
 ```
-Obtain the external IP of the ingress load balancer using `kubectl get ing` and add the host `siddhi` along with that external IP as an entry to the `/etc/hosts` file.
 
-!!! Note "If you are using `minikube`, use minikube IP as the external IP."
-    Use `minikube ip` command to get the IP of the minikube cluster.
+*Invoke Siddhi Applications*
 
-Now you can use following CURL command to send events to your deployed siddhi application.
+To invoke the Siddhi App, first obtain the external IP of the ingress load balancer using `kubectl get ingress` command as follows.
+```
+$ kubectl get ingress
+NAME      HOSTS     ADDRESS     PORTS     AGE
+siddhi    siddhi    10.0.2.15   80, 443   1m
+``` 
+Then, add the host `siddhi` and related external IP (`ADDRESS`) to the `/etc/hosts` file in your machine.
+
+!!! Note "Minikube"
+    For Minikube, you have to use Minikube IP as the external IP. Hence, run `minikube ip` command to get the IP of the Minikube cluster.
+
+Use the following CURL command to send events to `monitor-app` deployed in Kubernetes.
 
 ```
 curl -X POST \
@@ -619,17 +641,44 @@ curl -X POST \
 	"type": "monitored",
 	"deviceID": "001",
 	"power": 341
-}' -k
+  }' -k
 
 ```
-!!! Note "The `-k` option is used to turn off curl's verification of the certificate." 
 
+_Note: Here `-k` option is used to turn off curl's verification of the certificate._ 
 
-#### Monitoring the status
+*View Siddhi Process Logs*
 
-##### Listing the siddhi processes
+Since the output of `monitor-app` is logged, you can see the output by monitoring the associated pod's logs. 
+ 
+To find the `monitor-app` pod use the `kubectl get pods` command. This will list down all the deployed pods. 
 
-Use `sps or SiddhiProcesses` as the resource type name to list all `SiddhiProcess` resources.
+```
+$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
+```
+
+Here, the pod starting with the SiddhiProcess name (in this case `monitor-app-`) is the pod we need to monitor.
+
+To view the logs, run the `kubectl logs <pod name>` command. 
+This will show all the Siddhi process logs, along with the filtered output events as given below.
+
+```
+$ kubectl logs monitor-app-7f8584875f-krz6t
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
+```
+
+#### Get Siddhi process status
+
+##### List Siddhi processes
+
+List the Siddhi process using the `kubectl get sps` or `kubectl get SiddhiProcesses` commands as follows.
 
 ```
 $ kubectl get sps
@@ -641,9 +690,9 @@ NAME          AGE
 monitor-app   2m
 ```
 
-##### View siddhi process configs
+##### View Siddhi process configs
 
-You can view the configuration details of the deployed siddhi processes using `kubectl describe` and `kubectl get` commands as follows.
+Get the Siddhi process configuration details using `kubectl describe sp` command as follows.
 
 ```
 $ kubectl describe sp monitor-app
@@ -699,6 +748,8 @@ Events:    <none>
 
 ```
 
+Get the Siddhi process YAML using `kubectl get sp` command as follows.
+
 ```
 $ kubectl get sp monitor-app -o yaml
 
@@ -741,9 +792,9 @@ status:
 
 ```
 
-##### View siddhi process logs
+##### View Siddhi process logs
 
-Following command list down all the deployed pods in the current namespace.
+To view the Siddhi process logs, first get the Siddhi process pods using the `kubectl get pods` command as follows.  
 
 ```
 $ kubectl get pods
@@ -754,7 +805,8 @@ siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
 siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
 ```
 
-Then you can use the deployed pod name to view the logs. This log shows the event received from Siddhi which was sent using the previous POST request.
+Then to retrieve the Siddhi process logs, run `kubectl logs <pod name>` command. Here `<pod name>` should be replaced with the name of the pod that starts with the relevant SiddhiProcess's name. 
+A sample output logs is of this command is as follows.
 
 ```
 $ kubectl logs monitor-app-7f8584875f-krz6t
@@ -791,51 +843,119 @@ osgi> [2019-04-20 03:59:00,208]  INFO {org.wso2.carbon.config.reader.ConfigFileR
 [2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
 ```
 
-#### Samples
+#### Deploy and Run Siddhi App using config maps
 
-##### Deploy siddhi apps using kubernetes config maps
+Siddhi operator allows you to deploy Siddhi app configurations via config maps instead of just adding them inline. Through this you can also run multiple Siddhi Apps in a single SiddhiProcess. 
 
-First, you need a sample siddhi app as follows. Save this siddhi file as `MonitorApp.siddhi`.
-
-<script src="https://gist.github.com/BuddhiWathsala/8687a2b73bb003a8ae7bcf3d3f63b78e.js"></script>
-
-Use the following command to create a kubernetes config map. Here the `monitor-app-cm` is the name of the created config map.
-
-```
-kubectl create configmap monitor-app-cm --from-file=<absolute-file-path>/MonitorApp.siddhi
-```
-
-Thereafter, use the following YAML file to deploy the siddhi app. In this YAML file under the `apps` entry, you have to specify the config map names that contain siddhi apps you want to deploy. Save this YAML file as `monitor-app.yaml`.
-
-<script src="https://gist.github.com/BuddhiWathsala/45019cf093226e4858c931e62e04233f.js"></script>
-
-Now use the following command to deploy the siddhi app.
-
-```
-kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
-
-```
-
-!!! Note "You can deploy multiple Siddhi apps by adding multiple config maps under `apps` entry like below."
+This can be done by passing the config maps containing Siddhi app files to the SiddhiProcess's apps configuration as follows. 
 
 ```
 apps:
   - config-map-name1
   - config-map-name2
 ```
+***Sample on deploying and running Siddhi Apps via config maps***
 
-!!! Note "You can also create a config map using a directory which contains multiple siddhi files instead of specifying a single siddhi file per a config map."
+Here we will creating a very simple Siddhi application as follows, that consumes events via HTTP, filers the input events on type 'monitored' and logs the output on the console.
+
+<script src="https://gist.github.com/BuddhiWathsala/8687a2b73bb003a8ae7bcf3d3f63b78e.js"></script>
+
+Save the above Siddhi App file as `MonitorApp.siddhi`, and use this file to create a Kubernetes config map with the name `monitor-app-cm`.
+This can be achieved by running the following command. 
+
+```
+kubectl create configmap monitor-app-cm --from-file=<absolute-file-path>/MonitorApp.siddhi
+```
+
+The created config map can be added to SiddhiProcess YAML under the `apps` entry as follows. 
+
+<script src="https://gist.github.com/BuddhiWathsala/45019cf093226e4858c931e62e04233f.js"></script>
+
+Save the YAML file as `monitor-app.yaml`, and use the following command to deploy the SiddhiProcess.
+
+```
+kubectl create -f <absolute-yaml-file-path>/monitor-app.yaml
+```
+
+!!! Note "Using a config, created from a directory containing multiple Siddhi files"
+    SiddhiProcess's `apps` configuration also supports a config map that is created from a directory containing multiple Siddhi files.
     Use `kubectl create configmap siddhi-apps --from-file=<DIRECTORY_PATH>` command to create a config map from a directory.
 
-##### Disable ingress creation
 
-By default, Siddhi operator creates an NGINX ingress and exposes your HTTP/HTTPS through that ingress. If you need to disable automatic ingress creation, you have to change the `AUTO_INGRESS_CREATION` value in the `operator.yaml` file to `false` or `null` as below.
+*Invoke Siddhi Applications*
+
+To invoke the Siddhi Apps, first obtain the external IP of the ingress load balancer using `kubectl get ingress` command as follows.
+```
+$ kubectl get ingress
+NAME      HOSTS     ADDRESS     PORTS     AGE
+siddhi    siddhi    10.0.2.15   80, 443   1m
+``` 
+Then, add the host `siddhi` and related external IP (`ADDRESS`) to the `/etc/hosts` file in your machine.
+
+!!! Note "Minikube"
+    For Minikube, you have to use Minikube IP as the external IP. Hence, run `minikube ip` command to get the IP of the Minikube cluster.
+
+Use the following CURL command to send events to `monitor-app` deployed in Kubernetes.
+
+```
+curl -X POST \
+  https://siddhi/monitor-app/8280/example \
+  -H 'Content-Type: application/json' \
+  -d '{
+	"type": "monitored",
+	"deviceID": "001",
+	"power": 341
+    }' -k
+```
+
+_Note: Here `-k` option is used to turn off curl's verification of the certificate._ 
+
+
+*View Siddhi Process Logs*
+
+Since the output of `monitor-app` is logged, you can see the output by monitoring the associated pod's logs. 
+ 
+To find the `monitor-app` pod use the `kubectl get pods` command. This will list down all the deployed pods. 
+
+```
+$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
+```
+
+Here, the pod starting with the SiddhiProcess name (in this case `monitor-app-`) is the pod we need to monitor.
+
+To view the logs, run the `kubectl logs <pod name>` command. 
+This will show all the Siddhi process logs, along with the filtered output events as given below.
+
+```
+$ kubectl logs monitor-app-7f8584875f-krz6t
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
+```
+
+#### Deploy Siddhi Apps without ingress creation
+
+By default, Siddhi operator creates an NGINX ingress and exposes your HTTP/HTTPS through that ingress. If you need to disable automatic ingress creation, you have to change the `AUTO_INGRESS_CREATION` value in the Siddhi `operator.yaml` file to `false` or `null` as below.
 
 <script src="https://gist.github.com/BuddhiWathsala/c1cadcf9828cfaf46bb909f30497e4ab.js"></script>
 
-##### HTTPS support 
+#### Deploy and Run Siddhi App with HTTPS 
 
-First, you need to create a certificate using the following commands. For more details about the certificate, creation refers to [this](https://superuser.com/questions/73979/how-to-easily-create-a-ssl-certificate-and-configure-it-in-apache2-in-mac-os-x).
+Configuring tls will allow Siddhi ingress NGINX to expose HTTPS endpoints of your Siddhi Apps. To do so, created a Kubernetes secret and add that to the SiddhiProcess's `tls` configuration as following. 
+
+```
+tls:
+  ingressSecret: siddhi-tls
+```
+
+***Sample on deploying and running Siddhi App with HTTPS***
+
+First, you need to create a certificate using the following commands. For more details about the certificate creation refers [this](https://superuser.com/questions/73979/how-to-easily-create-a-ssl-certificate-and-configure-it-in-apache2-in-mac-os-x).
 
 ```
 # Generating Private Key
@@ -849,37 +969,34 @@ openssl x509 -req -days 365 -in siddhi.csr -signkey siddhi.key -out siddhi.crt
 
 ```
 
-Obtain the Base64 encoded values of the key (`siddhi.key`) and certificate (`siddhi.crt`) using the following commands.
+Then, obtain the Base64 encoded values of the key (`siddhi.key`) and certificate (`siddhi.crt`) using the following commands.
 
 ```
 $ cat siddhi.key | base64
 $ cat siddhi.crt | base64
 ```
 
-After that, add those Base64 encoded values to the following YAML file like below. Save this YAML file as `siddhi-tls.yaml`.
+Then, add these Base64 encoded values to the tls YAML file as given below, and save the file with the name `siddhi-tls.yaml`.
 
 <script src="https://gist.github.com/BuddhiWathsala/73e08ec4870e6b75e4bb3cda81f2de03.js"></script>
 
-For more details about the Ingress TLS, refer [this K8s doc](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+For more details about the Ingress TLS, refer [Kubernetes doc](https://kubernetes.io/docs/concepts/services-networking/ingress/).
 
-Use the following command to create a secret.
+Finally, Use the following command to create a Kubernetes secret.
 
 ```
 kubectl create -f <absolute-yaml-file-path>/siddhi-tls.yaml
 ```
 
-You have to add the following YAML block to the `SiddhiProcess` custom object YAML file. Siddhi operator will enable TLS support in ingress. Now, you can access your endpoints via HTTPS.
-
-```
-tls:
-  ingressSecret: siddhi-tls
-```
-
-Sample custom object YAML file.
+The created secret then need to be added to the created SiddhiProcess's `tls` configuration as following. 
 
 <script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
 
-Now you can use HTTPS URL to send events.
+When this is done Siddhi operator will now enable TLS support via the NGINX ingress, and you will be able to access all the HTTPS endpoints.
+
+*Invoke Siddhi Applications*
+
+You can use now send the events to following HTTPS endpoint.
 
 ```
 https://siddhi/monitor-app/8280/example 
