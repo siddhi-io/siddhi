@@ -539,7 +539,7 @@ Siddhi can natively run on Kubernetes using the Siddhi Kubernetes operator.
     2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
     3. Or any other Kubernetes cluster
    
-* Admin privileges to install Siddhi operator 
+* Admin privileges to install Siddhi operator  
 
 !!! Note "Minikube"
     For Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
