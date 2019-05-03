@@ -814,7 +814,7 @@
 
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
-        <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <maven.compiler.plugin.version>3.8.0-jboss-2</maven.compiler.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
