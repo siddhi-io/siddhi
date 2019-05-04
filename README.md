@@ -17,20 +17,22 @@ Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/
 ## Distributions
 
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service" rel="nofollow">
- <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/kubernetes.png?raw=true" alt="Kubernetes" width="19%">
+ <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/kubernetes.png?raw=true" alt="Kubernetes" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service" rel="nofollow">
- <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/docker.png?raw=true" alt="Docker" width="19%">
+ <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/docker.png?raw=true" alt="Docker" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service" rel="nofollow">
- <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/binary.png?raw=true" alt="Binary" width="19%">
+ <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/binary.png?raw=true" alt="Binary" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library" rel="nofollow">
- <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/java.png?raw=true" alt="Java" width="19%">
+ <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/java.png?raw=true" alt="Java" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/contribution/#obtaining-the-source-code-and-building-the-project" rel="nofollow">
- <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/source.png?raw=true" alt="Source" width="19%">
+ <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/source.png?raw=true" alt="Source" width="19%">
 </a>
+
+And more [installation options](https://siddhi-io.github.io/siddhi/download/) 
 
 ## Overview 
 
