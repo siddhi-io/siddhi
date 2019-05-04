@@ -16,7 +16,9 @@ Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/
 
 ## Distributions
 
- [![Kubernetes](https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/kubernetes.png?raw=true)](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service)
+<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service">
+ <img src="https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/kubernetes.png?raw=true" alt="Kubernetes" style="width:24%;"/>
+</a>
  [![Docker](https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/docker.png?raw=true)](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service)
  [![Binary](https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/binary.png?raw=true)](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service)
  [![Java](https://raw.githubusercontent.com/suhothayan/siddhi/master/docs/images/distributions/java.png?raw=true)](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library)
