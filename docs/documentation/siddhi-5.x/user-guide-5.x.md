@@ -965,7 +965,7 @@ tls:
 
 ***Sample on deploying and running Siddhi App with HTTPS***
 
-First, you need to create a certificate using the following commands. For more details about the certificate creation refers [this](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/tls.md#ssl-passthrough).
+First, you need to create a certificate using the following commands. For more details about the certificate creation refers [this](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/tls.md#tls-secrets).
 
 ```
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout siddhi.key -out siddhi.crt -subj "/CN=siddhi/O=siddhi"
