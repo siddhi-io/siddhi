@@ -965,37 +965,16 @@ tls:
 
 ***Sample on deploying and running Siddhi App with HTTPS***
 
-First, you need to create a certificate using the following commands. For more details about the certificate creation refers [this](https://superuser.com/questions/73979/how-to-easily-create-a-ssl-certificate-and-configure-it-in-apache2-in-mac-os-x).
+First, you need to create a certificate using the following commands. For more details about the certificate creation refers [this](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/tls.md#ssl-passthrough).
 
 ```
-# Generating Private Key
-openssl genrsa -des3 -out siddhi.key 1024
-
-# Generating the CSR
-openssl req -new -key siddhi.key -out siddhi.csr
-
-# Generate Self Signed Certificate
-openssl x509 -req -days 365 -in siddhi.csr -signkey siddhi.key -out siddhi.crt
-
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout siddhi.key -out siddhi.crt -subj "/CN=siddhi/O=siddhi"
 ```
 
-Then, obtain the Base64 encoded values of the key (`siddhi.key`) and certificate (`siddhi.crt`) using the following commands.
+After that, create a kubernetes secret called `siddhi-tls`, which we intended to add to the TLS configurations using the following command.
 
 ```
-$ cat siddhi.key | base64
-$ cat siddhi.crt | base64
-```
-
-Then, add these Base64 encoded values to the tls YAML file as given below, and save the file with the name `siddhi-tls.yaml`.
-
-<script src="https://gist.github.com/BuddhiWathsala/73e08ec4870e6b75e4bb3cda81f2de03.js"></script>
-
-For more details about the Ingress TLS, refer [Kubernetes doc](https://kubernetes.io/docs/concepts/services-networking/ingress/).
-
-Finally, Use the following command to create a Kubernetes secret.
-
-```
-kubectl create -f <absolute-yaml-file-path>/siddhi-tls.yaml
+kubectl create secret tls siddhi-tls --key siddhi.key --cert siddhi.crt
 ```
 
 The created secret then need to be added to the created SiddhiProcess's `tls` configuration as following. 
@@ -1010,6 +989,57 @@ You can use now send the events to following HTTPS endpoint.
 
 ```
 https://siddhi/monitor-app/8280/example 
+```
+Further, you can use the following CURL command to send a request to the deployed siddhi applications via HTTPS.
+
+```
+curl --cacert siddhi.crt -X POST \
+  https://siddhi/monitor-app/8280/example \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "type": "monitored",
+    "deviceID": "001",
+    "power": 341
+    }'
+```
+The output logs show the event that you sent using the previous CURL command.
+
+```
+$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-667c97c898-rrtfs       1/1       Running   0          2m
+siddhi-operator-79dcc45959-fkk4d   1/1       Running   0          3m
+siddhi-parser-64d4cd86ff-k8b87     1/1       Running   0          3m
+
+$ kubectl logs monitor-app-667c97c898-rrtfs
+
+JAVA_HOME environment variable is set to /opt/java/openjdk
+CARBON_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0
+RUNTIME_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0/wso2/runner
+Picked up JAVA_TOOL_OPTIONS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+[2019-05-06 5:36:54,894]  INFO {org.wso2.carbon.launcher.extensions.OSGiLibBundleDeployerUtils updateOSGiLib} - Successfully updated the OSGi bundle information of Carbon Runtime: runner  
+osgi> [2019-05-06 05:36:57,692]  INFO {org.wso2.msf4j.internal.websocket.WebSocketServerSC} - All required capabilities are available of WebSocket service component is available.
+[2019-05-06 05:36:57,749]  INFO {org.wso2.carbon.metrics.core.config.model.JmxReporterConfig} - Creating JMX reporter for Metrics with domain 'org.wso2.carbon.metrics'
+[2019-05-06 05:36:57,779]  INFO {org.wso2.msf4j.analytics.metrics.MetricsComponent} - Metrics Component is activated
+[2019-05-06 05:36:57,784]  INFO {org.wso2.carbon.databridge.agent.internal.DataAgentDS} - Successfully deployed Agent Server 
+[2019-05-06 05:36:58,292]  INFO {io.siddhi.distribution.event.simulator.core.service.CSVFileDeployer} - CSV file deployer initiated.
+[2019-05-06 05:36:58,295]  INFO {io.siddhi.distribution.event.simulator.core.service.SimulationConfigDeployer} - Simulation config deployer initiated.
+[2019-05-06 05:36:58,331]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiverServiceComponent} - org.wso2.carbon.databridge.receiver.binary.internal.Service Component is activated
+[2019-05-06 05:36:58,342]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary SSL Transport on port : 9712
+[2019-05-06 05:36:58,343]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary TCP Transport on port : 9612
+[2019-05-06 05:36:58,343]  INFO {org.wso2.carbon.databridge.receiver.thrift.internal.ThriftDataReceiverDS} - Service Component is activated
+[2019-05-06 05:36:58,360]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift Server started at 0.0.0.0
+[2019-05-06 05:36:58,369]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift SSL port : 7711
+[2019-05-06 05:36:58,371]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift port : 7611
+[2019-05-06 05:36:58,466]  INFO {org.wso2.msf4j.internal.MicroservicesServerSC} - All microservices are available
+[2019-05-06 05:36:58,567]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9090
+[2019-05-06 05:36:58,574]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9443
+[2019-05-06 05:36:59,091]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 8280
+[2019-05-06 05:36:59,092]  INFO {org.wso2.extension.siddhi.io.http.source.HttpConnectorPortBindingListener} - HTTP source 0.0.0.0:8280 has been started
+[2019-05-06 05:36:59,093]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Siddhi App MonitorApp deployed successfully
+[2019-05-06 05:36:59,100]  INFO {org.wso2.carbon.kernel.internal.CarbonStartupHandler} - Siddhi Runner Distribution started in 4.710 sec
+[2019-05-06 05:39:33,804]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1557121173802, data=[monitored, 001, 341], isExpired=false}
 ```
 
 ### **Using Siddhi as a Python Library**
