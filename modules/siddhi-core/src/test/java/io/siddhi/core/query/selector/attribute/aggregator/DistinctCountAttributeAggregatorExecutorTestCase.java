@@ -21,6 +21,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import org.apache.log4j.Logger;
@@ -29,16 +30,19 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DistinctCountAttributeAggregatorExecutorTestCase {
+
     private static final Logger log = Logger.getLogger(DistinctCountAttributeAggregatorExecutorTestCase.class);
     private volatile int count;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
     }
 
     @Test
     public void distinctCountTest() throws InterruptedException {
+
         log.info("Distinct Count TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -58,6 +62,7 @@ public class DistinctCountAttributeAggregatorExecutorTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 for (Event event : events) {
                     AssertJUnit.assertEquals("User ID", "USER_1", event.getData(0));
                     AssertJUnit.assertEquals("Page ID", "WEB_PAGE_4", event.getData(1));
@@ -94,4 +99,65 @@ public class DistinctCountAttributeAggregatorExecutorTestCase {
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertEquals("Event count", 1, count);
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void distinctCountTest2() throws InterruptedException {
+
+        log.info("Distinct Count TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (eventId string, userID string, pageID string); ";
+
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from inputStream#window.time(5 sec) " +
+                "select userID, pageID, distinctCount() as distinctPages " +
+                "group by userID " +
+                "having distinctPages > 3 " +
+                "insert into outputStream; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+
+                for (Event event : events) {
+                    AssertJUnit.assertEquals("User ID", "USER_1", event.getData(0));
+                    AssertJUnit.assertEquals("Page ID", "WEB_PAGE_4", event.getData(1));
+                    AssertJUnit.assertEquals("Distinct Pages", 4L, event.getData(2));
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("inputStream");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{"E001", "USER_1", "WEB_PAGE_1"});
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E002", "USER_2", "WEB_PAGE_1"});
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E003", "USER_1", "WEB_PAGE_2"}); // 1st Event in window
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E004", "USER_2", "WEB_PAGE_2"});
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E005", "USER_1", "WEB_PAGE_3"}); // 2nd Event in window
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E006", "USER_1", "WEB_PAGE_1"}); // 3rd Event in window
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E007", "USER_1", "WEB_PAGE_4"}); // 4th Event in window
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E008", "USER_2", "WEB_PAGE_2"});
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E009", "USER_1", "WEB_PAGE_1"});
+        Thread.sleep(1000);
+        inputHandler.send(new Object[]{"E010", "USER_2", "WEB_PAGE_1"});
+
+        Thread.sleep(2000);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals("Event count", 1, count);
+    }
+
 }

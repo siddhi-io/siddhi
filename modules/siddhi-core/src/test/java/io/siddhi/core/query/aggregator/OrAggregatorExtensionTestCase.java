@@ -20,6 +20,8 @@ package io.siddhi.core.query.aggregator;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
@@ -29,19 +31,23 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OrAggregatorExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(OrAggregatorExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
+    private int inEventCount;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
+        inEventCount = 0;
     }
-
 
     @Test
     public void testOrAggregatorTrueOnlyScenario() throws InterruptedException {
+
         log.info("OrAggregator TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -57,6 +63,7 @@ public class OrAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -88,6 +95,7 @@ public class OrAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testOrAggregatorTrueOnlyScenario")
     public void testOrAggregatorFalseOnlyScenario() throws InterruptedException {
+
         log.info("OrAggregator TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -103,6 +111,7 @@ public class OrAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -134,6 +143,7 @@ public class OrAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testOrAggregatorFalseOnlyScenario")
     public void testOrAggregatorTrueFalseScenario() throws InterruptedException {
+
         log.info("OrAggregator TestCase 3");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -149,6 +159,7 @@ public class OrAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -182,6 +193,7 @@ public class OrAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testOrAggregatorTrueFalseScenario")
     public void testORAggregatorMoreEventsBatchScenario() throws InterruptedException {
+
         log.info("AndAggregator TestCase 4");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -197,6 +209,7 @@ public class OrAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -227,5 +240,91 @@ public class OrAggregatorExtensionTestCase {
         AssertJUnit.assertEquals(2, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void orAggregatorTest1() throws InterruptedException {
+
+        log.info("orAggregator Test #1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (name string, isFraud bool);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(1) " +
+                "select or(isFraud, name) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
+    @Test
+    public void orAggregatorTest2() throws InterruptedException {
+
+        log.info("orAggregator Test #2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('orAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (name string, isFraud bool);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select or(isFraud) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+
+        log.info("Running: " + execPlanRunTime.getName());
+
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                inEventCount++;
+            }
+        });
+
+        execPlanRunTime.start();
+        execPlanRunTime.shutdown();
+        AssertJUnit.assertEquals(0, inEventCount);
+    }
+
+    @Test
+    public void orAggregatorTest3() throws InterruptedException {
+
+        log.info("orAggregator Test #3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('orAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (name string, isFraud bool);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select or(isFraud) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(true, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"Ms1", true});
+        inputHandler.send(new Object[]{"Ms2", false});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
     }
 }

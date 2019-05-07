@@ -21,6 +21,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
@@ -30,17 +31,20 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class StdDevAttributeAggregatorExecutorTestCase {
+
     private static final Logger log = Logger.getLogger(StdDevAttributeAggregatorExecutorTestCase.class);
     private final double epsilon = 0.00001; // difference threshold for two doubles to be treated distinct
     private int inEventCount; // Only used in the Test #1 and #6
 
     @BeforeMethod
     public void init() {
+
         inEventCount = 0;
     }
 
     @Test
     public void stdDevAggregatorTest1() throws InterruptedException {
+
         log.info("stdDevAggregator Test #1: No events in the stream");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -63,6 +67,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 inEventCount++;
             }
@@ -75,6 +80,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
 
     @Test
     public void stdDevAggregatorTest2() throws InterruptedException {
+
         log.info("stdDevAggregator Test #2: Single event in the stream");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -94,6 +100,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 0) < epsilon);
             }
@@ -109,6 +116,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
 
     @Test
     public void stdDevAggregatorTest3() throws InterruptedException {
+
         log.info("stdDevAggregator Test #3: All the events in the stream are equal");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -128,6 +136,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 0) < epsilon);
             }
@@ -145,6 +154,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
 
     @Test
     public void stdDevAggregatorTest4() throws InterruptedException {
+
         log.info("stdDevAggregator Test #4: Two symbols in the stream with same stdDev");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -164,6 +174,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 0.40825) < epsilon);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[1].getData(0) - 0.40825) < epsilon);
@@ -185,6 +196,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
 
     @Test
     public void stdDevAggregatorTest5() throws InterruptedException {
+
         log.info("stdDevAggregator Test #5: stdDev of large and small numbers");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -204,6 +216,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 400.13025) < epsilon);
                 AssertJUnit.assertTrue(Math.abs((Double) inEvents[1].getData(0) - 0.00103) < epsilon);
@@ -225,6 +238,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
 
     @Test
     public void stdDevAggregatorTest6() throws InterruptedException {
+
         log.info("stdDevAggregator Test #6");
 
         final double[] results = new double[]{0.0, 489.95, 400.09052, 405.11802, 199.96026};
@@ -246,6 +260,7 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
                     AssertJUnit.assertTrue(Math.abs(results[inEventCount] - (Double) event.getData(0)) < epsilon);
@@ -269,4 +284,57 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         Thread.sleep(100);
         execPlanRunTime.shutdown();
     }
+
+    @Test
+    public void stdDevAggregatorTest7() throws InterruptedException {
+
+        log.info("stdDevAggregator Test #7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('stdDevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(1) " +
+                "select stdDev(price) as deviation " +
+                "group by symbol " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 0) < epsilon);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"WSO2", "1345"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void stdDevAggregatorTest8() throws InterruptedException {
+
+        log.info("stdDevAggregator Test #8");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(1) " +
+                "select stdDev(price, discount) as deviation " +
+                "group by symbol " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
 }

@@ -31,18 +31,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MinimumFunctionExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(MinimumFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
     }
 
     @Test
     public void testMinFunctionExtension1() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -56,6 +59,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -105,6 +109,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMinFunctionExtension2() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -120,6 +125,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test
     public void testMinFunctionExtension3() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 3");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -133,6 +139,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -170,6 +177,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test
     public void testMinFunctionExtension4() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 4");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -183,6 +191,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -232,6 +241,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test
     public void testMinFunctionExtension5() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 5");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -245,6 +255,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -282,6 +293,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMinFunctionExtensionException6() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 6");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -294,6 +306,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMinFunctionExtensionException7() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 7");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -306,6 +319,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test
     public void testMinFunctionExtension8() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 8");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -318,6 +332,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -367,6 +382,7 @@ public class MinimumFunctionExtensionTestCase {
 
     @Test
     public void testMinFunctionExtension9() throws InterruptedException {
+
         log.info("MinimumFunctionExecutor TestCase 9");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -379,6 +395,7 @@ public class MinimumFunctionExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
