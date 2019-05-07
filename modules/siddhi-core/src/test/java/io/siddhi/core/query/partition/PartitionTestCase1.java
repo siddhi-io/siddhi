@@ -2448,10 +2448,8 @@ public class PartitionTestCase1 {
         StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
         siddhiApp.defineStream(streamDefinition);
-
         Partition partition = Partition.partition().
                 with("cseEventStream", Expression.variable("symbol"));
-
         Query query = Query.query();
         query.from(InputStream.stream("cseEventStream"));
         query.select(
@@ -2459,7 +2457,6 @@ public class PartitionTestCase1 {
                         select("symbol", Expression.variable("symbol")).
                         select("price", Expression.variable("price")).
                         select("volume", Expression.variable("volume"))
-
         );
         query.insertIntoInner("StockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
         Query query1 = Query.query();
@@ -2469,15 +2466,11 @@ public class PartitionTestCase1 {
                         select("symbol", Expression.variable("symbol")).
                         select("price", Expression.variable("price")).
                         select("volume", Expression.variable("volume"))
-
         );
         query1.insertInto("OutStockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
-
         partition.addQuery(query);
         partition.addQuery(query1);
-
         siddhiApp.addPartition(partition);
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
@@ -2506,10 +2499,8 @@ public class PartitionTestCase1 {
         StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
         siddhiApp.defineStream(streamDefinition);
-
         Partition partition = Partition.partition().
                 with("cseEventStream", Expression.variable("symbol"));
-
         Query query = Query.query();
         query.from(InputStream.stream("e1", "cseEventStream"));
         query.select(
@@ -2517,7 +2508,6 @@ public class PartitionTestCase1 {
                         select("symbol", Expression.variable("symbol")).
                         select("price", Expression.variable("price")).
                         select("volume", Expression.variable("volume"))
-
         );
         query.insertIntoInner("StockStream");
         Query query1 = Query.query();
@@ -2527,15 +2517,11 @@ public class PartitionTestCase1 {
                         select("symbol", Expression.variable("symbol")).
                         select("price", Expression.variable("price")).
                         select("volume", Expression.variable("volume"))
-
         );
         query1.insertInto("OutStockStream");
-
         partition.addQuery(query);
         partition.addQuery(query1);
-
         siddhiApp.addPartition(partition);
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
