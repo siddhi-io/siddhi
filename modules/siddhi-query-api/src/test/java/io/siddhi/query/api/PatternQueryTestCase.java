@@ -18,6 +18,7 @@
 package io.siddhi.query.api;
 
 
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.state.State;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -545,4 +546,236 @@ public class PatternQueryTestCase {
 
     }
 
+    @Test
+    public void testPatternQuery12() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare(Expression
+                                                .variable("price"),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.value(30)))),
+                                State.next(
+                                        State.stream(InputStream.stream("e2", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price").ofFunction("e1", 1),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(20)))),
+                                        State.stream(InputStream.stream("e3", "Stream2").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("price").ofInnerStream("e1"))))
+                                )
+                        )
+                )
+
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofInnerStream("e1")).
+                        select("avgPrice", Expression.function("avg",
+                                Expression.variable("price").ofInnerStream("e2"))).
+                        groupBy(Expression.variable("symbol").ofInnerStream("e1")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.value(50)))
+
+
+        );
+        query.insertInto("OutputStream");
+    }
+
+    @Test
+    public void testPatternQuery13() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(30))))),
+                                State.next(
+                                        State.count(
+                                                State.stream(InputStream.stream("e2", "Stream1").filter(Expression
+                                                        .compare(Expression.variable("price").
+                                                                        ofFunction("f1").ofInnerStream("e2", Variable
+                                                                        .LAST),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.value(20)))),
+                                                3, 5),
+                                        State.next(
+                                                State.stream(InputStream.stream("e3", "Stream2").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.variable("price").ofInnerStream("e1")))),
+                                                State.stream(InputStream.stream("e4", "Stream3").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN,
+                                                                Expression.value(74)))))
+                                )
+                        )
+                )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofInnerStream("e1")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price").ofInnerStream("e2")))
+
+        );
+        String streamStateEleString = State.stream(InputStream.stream("e3", "Stream2").filter(Expression
+                .compare(Expression.variable("price"),
+                        Compare.Operator.GREATER_THAN_EQUAL,
+                        Expression.variable("price").ofStream("e1")))).toString();
+        query.insertInto("OutputStream");
+
+    }
+
+    @Test
+    public void testPatternQuery14() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(30))))),
+                                State.next(
+                                        State.zeroOrMany(
+                                                State.stream(InputStream.stream("e2", "Stream1").filter(Expression
+                                                        .compare(Expression.variable("price").ofStream("e2", Variable
+                                                                        .LAST),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.value(20))))
+                                        ),
+                                        State.next(
+                                                State.stream(InputStream.stream("e3", "Stream2").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.variable("price").ofStream("e1")))),
+                                                State.stream(InputStream.stream("e4", "Stream3").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN,
+                                                                Expression.value(74)))))
+                                )
+                        )
+                )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
+
+        );
+        query.insertInto("OutputStream");
+    }
+
+    @Test
+    public void testPatternQuery15() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(30))))),
+                                State.next(
+                                        State.zeroOrOne(
+                                                State.stream(InputStream.stream("e2", "Stream1").filter(Expression
+                                                        .compare(Expression.variable("price").ofStream("e2", Variable
+                                                                        .LAST),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.value(20))))
+                                        ),
+                                        State.next(
+                                                State.stream(InputStream.stream("e3", "Stream2").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.variable("price").ofStream("e1")))),
+                                                State.stream(InputStream.stream("e4", "Stream3").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN,
+                                                                Expression.value(74)))))
+                                )
+                        )
+                )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
+
+        );
+        query.insertInto("OutputStream");
+    }
+
+    @Test
+    public void testPatternQuery16() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(30))))),
+                                State.next(
+                                        State.oneOrMany(
+                                                State.stream(InputStream.stream("e2", "Stream1").filter(Expression
+                                                        .compare(Expression.variable("price").ofStream("e2", Variable
+                                                                        .LAST),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.value(20))))
+                                        ),
+                                        State.next(
+                                                State.stream(InputStream.stream("e3", "Stream2").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.variable("price").ofStream("e1")))),
+                                                State.stream(InputStream.stream("e4", "Stream3").filter(Expression
+                                                        .compare(Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN,
+                                                                Expression.value(74)))))
+                                )
+                        )
+                )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
+
+        );
+        query.insertInto("OutputStream");
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPatternQuery17() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.stream(InputStream.stream("e1", "Stream1")
+                                        .filter(Expression.compare(Expression.variable("price"),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.value(30)))),
+                                State.next(State.logicalNot(State.stream(InputStream.stream("e1", "Stream1")
+                                                .filter(Expression.compare(Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(20)))), new TimeConstant(1000)),
+                                        State.stream(InputStream.stream("e3", "Stream2").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("price").ofStream("e1")))))
+                        )
+                )
+
+        );
+    }
 }

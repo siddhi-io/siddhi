@@ -19,6 +19,7 @@
 package io.siddhi.query.test;
 
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.UnsupportedAttributeTypeException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -626,6 +627,234 @@ public class SimpleQueryTestCase {
 
     }
 
+    @Test
+    public void test14() {
+        Query queryString = SiddhiCompiler.parseQuery("" +
+                "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
+                " " +
+                "select symbol as symbol, price as price, volume as volume  " +
+                "update StockQuote \n " +
+                "   set StockQuote.price = price, \n " +
+                "    StockQuote.volume = volume " +
+                " on symbol==StockQuote.symbol ;"
+        );
+        AssertJUnit.assertNotNull(queryString);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.updateBy("StockQuote",
+                UpdateStream.updateSet().
+                        set(
+                                Expression.variable("price").ofStream("StockQuote"),
+                                Expression.variable("price")).
+                        set(
+                                Expression.variable("volume").ofStream("StockQuote"),
+                                Expression.variable("volume")),
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+
+        AssertJUnit.assertEquals(query, queryString);
+    }
+
+    @Test
+    public void test15() {
+        Query queryString = SiddhiCompiler.parseQuery("" +
+                "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
+                " " +
+                "select symbol as symbol, price as price, volume as volume  " +
+                "update StockQuote \n " +
+                " on symbol==StockQuote.symbol ;"
+        );
+        AssertJUnit.assertNotNull(queryString);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.updateBy("StockQuote", OutputStream.OutputEventType.CURRENT_EVENTS,
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+
+        AssertJUnit.assertEquals(query, queryString);
+    }
+
+    @Test
+    public void test16() {
+        Query queryString = SiddhiCompiler.parseQuery("" +
+                "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
+                " " +
+                "select symbol as symbol, price as price, volume as volume  " +
+                "update or insert into StockQuote \n " +
+                "   set StockQuote.price = price, \n " +
+                "    StockQuote.volume = volume " +
+                " on symbol==StockQuote.symbol ;"
+        );
+        AssertJUnit.assertNotNull(queryString);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.updateOrInsertBy("StockQuote", OutputStream.OutputEventType.CURRENT_EVENTS,
+                UpdateStream.updateSet().
+                        set(
+                                Expression.variable("price").ofStream("StockQuote"),
+                                Expression.variable("price")).
+                        set(
+                                Expression.variable("volume").ofStream("StockQuote"),
+                                Expression.variable("volume")),
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+
+        AssertJUnit.assertEquals(query, queryString);
+    }
+
+    @Test
+    public void test17() {
+        Query queryString = SiddhiCompiler.parseQuery("" +
+                "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
+                " " +
+                "select symbol as symbol, price as price, volume as volume  " +
+                "update or insert into StockQuote \n " +
+                "   set StockQuote.price = price, \n " +
+                "    StockQuote.volume = volume " +
+                " on symbol==StockQuote.symbol ;"
+        );
+        AssertJUnit.assertNotNull(queryString);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.updateOrInsertBy("StockQuote",
+                UpdateStream.updateSet().
+                        set(
+                                Expression.variable("price").ofStream("StockQuote"),
+                                Expression.variable("price")).
+                        set(
+                                Expression.variable("volume").ofStream("StockQuote"),
+                                Expression.variable("volume")),
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+
+        AssertJUnit.assertEquals(query.toString(), queryString.toString());
+        AssertJUnit.assertTrue(query.equals(query));
+        AssertJUnit.assertFalse(query.equals("query"));
+    }
+
+    @Test
+    public void test18() throws SiddhiParserException {
+        String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
+                "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
+                "attributeName='symbol'} }], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
+                "offset=null}";
+        String selector  = Selector.selector().select(Expression.variable("symbol")).toString();
+        AssertJUnit.assertEquals(selector, selectorString);
+    }
+
+    @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
+    public void test19() throws SiddhiParserException {
+        Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
+                "select symbol, avg(price) as avgPrice " +
+                "group by symbol " +
+                "having (price >= 20)" +
+                "order by avgPrice desc " +
+                "limit 5 " +
+                "offset 3 " +
+                "insert all events into StockQuote; "
+        );
+        AssertJUnit.assertNotNull(query);
+
+        Query api = Query.query().from(InputStream.stream("StockStream").
+                filter(Expression.compare(Expression.variable("price"), Compare.Operator.GREATER_THAN, Expression
+                        .value(3))).
+                window("length", Expression.value(50))).
+                select(Selector.selector().select(Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(
+                                Expression.variable("price"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(20))).
+                        orderBy(Expression.variable("avgPrice"), OrderByAttribute.Order.DESC).
+                        limit(Expression.value(5)).
+                        offset(Expression.value(3.8))).
+                insertInto("StockQuote", OutputStream.OutputEventType.ALL_EVENTS);
+    }
 
 }
 

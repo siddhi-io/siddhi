@@ -103,4 +103,83 @@ public class DefineAggregationTestCase {
                 insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
 
     }
+
+    @Test
+    public void testAggregationJoin1() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("s1", "cseEventStream").
+                                        filter(Expression.and(
+                                                Expression.compare(
+                                                        Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                        Compare.Operator.GREATER_THAN,
+                                                        Expression.variable("price").ofStream("cseEventStream")),
+                                                Expression.compare(Expression.value(100),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("volume").ofStream("cseEventStream")
+                                                )
+                                                )
+                                        ).window("lengthBatch", Expression.value(50)),
+                                JoinInputStream.Type.JOIN,
+                                InputStore.store("s2", "StockAggregation"),
+                                Within.within(Expression.value("2014-02-15T00:00:00Z"),
+                                        Expression.value("2014-03-16T00:00:00Z")),
+                                Expression.value("day")
+                        )
+                ).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol").ofStream("cseEventStream")).
+                                select(null, Expression.variable("symbol").ofStream("cseEventStream")).
+                                groupBy(Expression.variable("symbol").ofStream("cseEventStream")).
+                                having(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price"))
+                                )
+                ).
+                insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
+    }
+
+    @Test
+    public void testAggregationJoin2() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("s1", "cseEventStream").
+                                        filter(Expression.and(
+                                                Expression.compare(
+                                                        Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                        Compare.Operator.GREATER_THAN,
+                                                        Expression.variable("price").ofStream("cseEventStream")),
+                                                Expression.compare(Expression.value(100),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("volume").ofStream("cseEventStream")
+                                                )
+                                                )
+                                        ).window("lengthBatch", Expression.value(50)),
+                                JoinInputStream.Type.JOIN,
+                                InputStore.store("s2", "StockAggregation"),
+                                JoinInputStream.EventTrigger.LEFT,
+                                Within.within(Expression.value("2014-02-15T00:00:00Z"),
+                                        Expression.value("2014-03-16T00:00:00Z")),
+                                Expression.value("day")
+                        )
+                ).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol").ofStream("cseEventStream")).
+                                select(null, Expression.variable("symbol").ofStream("cseEventStream")).
+                                groupBy(Expression.variable("symbol").ofStream("cseEventStream")).
+                                having(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price"))
+                                )
+                ).
+                insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
+    }
 }

@@ -21,6 +21,7 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -66,4 +67,16 @@ public class DefineStreamTestCase {
         AssertJUnit.assertEquals(Attribute.Type.FLOAT, streamDefinition.getAttributeType("volume"));
     }
 
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testStreamdefintionNull() {
+        StreamDefinition streamDefinition = null;
+        SiddhiApp.siddhiApp("Test").defineStream(streamDefinition);
+    }
+
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testStreamIdNull() {
+        StreamDefinition streamDefinition = StreamDefinition.id(null);
+        SiddhiApp.siddhiApp("Test").defineStream(streamDefinition);
+    }
 }
