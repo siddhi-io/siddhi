@@ -2899,17 +2899,14 @@ public class FilterTestCase1 {
     @Test
     public void testFilterQuery83() throws InterruptedException {
         log.info("Filter test83");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.LONG);
-
         Query query = new Query();
-        Filter f = new Filter(Expression.compare(Expression.variable("volume"),
+        Filter filter = new Filter(Expression.compare(Expression.variable("volume"),
                 Compare.Operator.GREATER_THAN, Expression.value(45)));
-        String funcString = f.toString();
-        AssertJUnit.assertFalse(f.equals(funcString));
-
+        String funcString = filter.toString();
+        AssertJUnit.assertFalse(filter.equals(funcString));
         query.from(InputStream.stream("cseEventStream").filter(new
                 Filter(Expression.compare(Expression.variable("volume"),
                 Compare.Operator.GREATER_THAN, Expression.value(45)))));
@@ -2917,12 +2914,10 @@ public class FilterTestCase1 {
         query.select(Selector.selector().select("symbol", Expression.variable("symbol")).select("price", Expression
                 .variable("price")).select("volume", Expression.variable("volume")));
         query.insertInto("outputStream");
-
         SiddhiApp siddhiApp = new SiddhiApp("ep1");
         siddhiApp.defineStream(cseEventStream);
         siddhiApp.addQuery(query);
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -2930,10 +2925,8 @@ public class FilterTestCase1 {
                 count.addAndGet(inEvents.length);
             }
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
-
         inputHandler.send(new Object[]{"WSO2", 50f, 60L});
         inputHandler.send(new Object[]{"WSO2", 70f, 40L});
         inputHandler.send(new Object[]{"WSO2", 44f, 200L});

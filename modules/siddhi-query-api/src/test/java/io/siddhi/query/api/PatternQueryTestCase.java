@@ -629,7 +629,6 @@ public class PatternQueryTestCase {
                         Compare.Operator.GREATER_THAN_EQUAL,
                         Expression.variable("price").ofStream("e1")))).toString();
         query.insertInto("OutputStream");
-
     }
 
     @Test

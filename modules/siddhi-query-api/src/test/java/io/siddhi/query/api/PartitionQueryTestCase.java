@@ -93,6 +93,5 @@ public class PartitionQueryTestCase {
         Partition partition = Partition.partition();
         Query query = null;
         partition.addQuery(query);
-
     }
 }

@@ -502,7 +502,6 @@ public class SimpleQueryTestCase {
                         ))
         );
         query.insertIntoFault("OutStockStream");
-
         SiddhiApp.siddhiApp("test").addQuery(query);
     }
 
@@ -536,9 +535,7 @@ public class SimpleQueryTestCase {
                         ))
         );
         query.insertIntoFault("OutStockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
-
         SiddhiApp.siddhiApp("test").addQuery(query);
-
     }
 
     @Test
