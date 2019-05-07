@@ -26,7 +26,7 @@ import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 
-import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
+import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
  * Holder object to contain a list of {@link StreamEvent}. Users can add {@link ComplexEventChunk}s to the

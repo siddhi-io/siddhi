@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
+import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
  * In-memory event table implementation of SiddhiQL.
