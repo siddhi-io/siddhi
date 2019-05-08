@@ -19,13 +19,17 @@ package io.siddhi.query.api;
 
 
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.exception.UnsupportedAttributeTypeException;
 import io.siddhi.query.api.execution.query.Query;
+import io.siddhi.query.api.execution.query.input.handler.Window;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
+import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class SimpleQueryTestCase {
@@ -468,5 +472,152 @@ public class SimpleQueryTestCase {
 
     }
 
+    @Test
+    public void testCreatingFilterQueryWithFaultStream2() {
+        Query query = Query.query();
+        query.from(
+                InputStream.faultStream("e1", "StockStream").
+                        filter(
+                                Expression.and(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price").ofStream("e1")),
+                                        Expression.compare(
+                                                Expression.value(100),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.variable("volume").ofStream("e1")
+                                        )
+                                )
+                        )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.insertIntoFault("OutStockStream");
+        SiddhiApp.siddhiApp("test").addQuery(query);
+    }
 
+    @Test
+    public void testCreatingFilterQueryWithFaultStream3() {
+        Query query = Query.query();
+        query.from(
+                InputStream.faultStream("StockStream").
+                        filter(
+                                Expression.and(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price")),
+                                        Expression.compare(
+                                                Expression.value(100),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.variable("volume")
+                                        )
+                                )
+                        )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.insertIntoFault("OutStockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
+        SiddhiApp.siddhiApp("test").addQuery(query);
+    }
+
+    @Test
+    public void testCreatingNestedFilterQuery2() {
+        Query query = Query.query();
+        query.from(InputStream.stream(
+                Query.query().
+                        from(InputStream.stream("StockStream").
+                                filter(
+                                        Expression.compare(
+                                                Expression.variable("price").ofStream("StockStream"),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.value(20))
+                                ).filter(Expression.isNull(Expression.variable("price").ofStream("StockStream")))).
+                        select(
+                                Selector.selector().
+                                        select("symbol", Expression.variable("symbol")).
+                                        select("avgPrice", Expression.function("avg", Expression.variable("price")))
+                        ).
+                        returns(OutputStream.OutputEventType.CURRENT_EVENTS))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.variable("avgPrice"))
+        );
+        query.insertInto("IBMOutStockStream");
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testSiddhiAppQueryNull() {
+        Query query = null;
+        SiddhiApp.siddhiApp("test").addQuery(query);
+    }
+
+    @Test
+    public void testCreatingReturnFilterQueryWithExtension2() {
+        Query query = Query.query();
+        Window window1 = new Window("ext", "Foo");
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.function("ext", "FooBarCond", Expression
+                                        .value(7), Expression.value(9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.function("ext", "BarCond", Expression.value(100),
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).function("ext", "Foo", Expression.value(67), Expression.value(89)).
+                        window(window1)
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("ext", "avg", Expression.variable("price")))
+        );
+    }
+
+
+    @Test
+    public void testCreatingReturnFilterQueryWithExtension3() {
+        Query query = Query.query();
+        Window window1 = new Window("Foo");
+        AssertJUnit.assertFalse(window1.equals("falsewindow"));
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.function("ext", "FooBarCond", Expression
+                                        .value(7), Expression.value(9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.function("ext", "BarCond", Expression.value(100),
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).function("ext", "Foo", Expression.value(67), Expression.value(89)).
+                        window(window1)
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("ext", "avg", Expression.variable("price")))
+        );
+    }
 }

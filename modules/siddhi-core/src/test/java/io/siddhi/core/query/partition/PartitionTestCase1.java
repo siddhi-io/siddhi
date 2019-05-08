@@ -29,10 +29,13 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.FunctionDefinition;
 import io.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.partition.Partition;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
+import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -2180,9 +2183,7 @@ public class PartitionTestCase1 {
                 " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
                 "into OutStockStream ; end ";
 
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
 
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
@@ -2234,9 +2235,7 @@ public class PartitionTestCase1 {
                 " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
                 "into OutStockStream ; end ";
 
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
 
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
@@ -2435,5 +2434,205 @@ public class PartitionTestCase1 {
         SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
         AssertJUnit.assertEquals(4, count.get());
         siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery43() throws InterruptedException {
+        log.info("Partition test43");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiApp siddhiApp = new SiddhiApp("plan43");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+        Query query = Query.query();
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.insertIntoInner("StockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
+
+        Query query1 = Query.query();
+        query1.from(InputStream.innerStream("StockStream"));
+        query1.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query1.insertInto("OutStockStream", OutputStream.OutputEventType.CURRENT_EVENTS);
+
+        partition.addQuery(query);
+        partition.addQuery(query1);
+
+        siddhiApp.addPartition(partition);
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals(4, count.get());
+    }
+
+    @Test
+    public void testPartitionQuery44() throws InterruptedException {
+        log.info("Partition test44");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiApp siddhiApp = new SiddhiApp("plan44");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+        Query query = Query.query();
+        query.from(InputStream.stream("e1", "cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.insertIntoInner("StockStream");
+
+        Query query1 = Query.query();
+        query1.from(InputStream.innerStream("e2", "StockStream"));
+        query1.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query1.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+        partition.addQuery(query1);
+
+        siddhiApp.addPartition(partition);
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals(4, count.get());
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQuery45() throws InterruptedException {
+        log.info("Partition test45");
+
+        SiddhiApp siddhiApp = new SiddhiApp("plan45");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        Partition partition = null;
+
+        siddhiApp.addPartition(partition);
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQuery46() {
+        log.info("Partition test46");
+
+        SiddhiApp siddhiApp = new SiddhiApp("plan46");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        FunctionDefinition functionDefinition = null;
+
+        siddhiApp.defineFunction(functionDefinition);
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQuery47() {
+        log.info("Partition test47");
+
+        SiddhiApp siddhiApp = new SiddhiApp("plan47");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        FunctionDefinition functionDefinition = new FunctionDefinition();
+
+        siddhiApp.defineFunction(functionDefinition.id(null));
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQuery48() {
+        log.info("Partition test48");
+
+        SiddhiApp siddhiApp = new SiddhiApp("plan48");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        FunctionDefinition functionDefinition = new FunctionDefinition();
+
+        siddhiApp.defineFunction(functionDefinition.id("e1").type(null));
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQuery49() {
+        log.info("Partition test49");
+
+        SiddhiApp siddhiApp = new SiddhiApp("plan49");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT);
+
+        siddhiApp.defineStream(streamDefinition);
+
+        FunctionDefinition functionDefinition = new FunctionDefinition();
+
+        siddhiApp.defineFunction(functionDefinition.id("e1").type(Attribute.Type.STRING).body(null));
     }
 }
