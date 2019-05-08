@@ -360,9 +360,9 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
-        isFirstEventArrived = isEventArrived;
-        recreateInMemoryData.recreateInMemoryData(isEventArrived, refreshReadingExecutors);
+    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
+        this.isFirstEventArrived = isFirstEventArrived;
+        recreateInMemoryData.recreateInMemoryData(isFirstEventArrived, refreshReadingExecutors);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

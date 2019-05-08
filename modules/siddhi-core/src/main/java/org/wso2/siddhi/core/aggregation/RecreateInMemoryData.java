@@ -74,7 +74,7 @@ public class RecreateInMemoryData {
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
     }
 
-    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
+    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
         IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
         if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1 && !refreshReadingExecutors) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
@@ -83,7 +83,7 @@ public class RecreateInMemoryData {
             return;
         }
 
-        if (isEventArrived) {
+        if (isFirstEventArrived) {
             for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
                     this.incrementalExecutorMap.entrySet()) {
                 IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
