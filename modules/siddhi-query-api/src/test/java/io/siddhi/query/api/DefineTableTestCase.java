@@ -52,13 +52,11 @@ public class DefineTableTestCase {
     public void testTableDefinitionNull() {
         TableDefinition tableDefinition = null;
         SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
-
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testTableIdNull() {
         TableDefinition tableDefinition = TableDefinition.id(null);
         SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
-
     }
 }
