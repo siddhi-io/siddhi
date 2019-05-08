@@ -37,7 +37,6 @@ import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
