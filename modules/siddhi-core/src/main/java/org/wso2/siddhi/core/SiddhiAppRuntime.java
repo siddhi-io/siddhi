@@ -497,7 +497,7 @@ public class SiddhiAppRuntime {
         for (List<Sink> sinks : sinkMap.values()) {
             for (Sink sink : sinks) {
                 try {
-                    if (sinkHandlerManager != null) {
+                    if (sinkHandlerManager != null && sink.getHandler() != null) {
                         sinkHandlerManager.unregisterSinkHandler(sink.getHandler().getElementId());
                     }
                     sink.shutdown();
