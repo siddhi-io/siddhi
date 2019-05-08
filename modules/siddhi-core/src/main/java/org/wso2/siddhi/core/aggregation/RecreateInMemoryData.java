@@ -189,22 +189,6 @@ public class RecreateInMemoryData {
 
             if (events != null) {
                 long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
-                if (endOFLatestEventTimestamp != null) {
-                    List<Event> eventsNewerThanLatestEventOfRecreateForDuration = new ArrayList<>();
-                    for (Event event : events) {
-                        // After getting the events from recreateFromTable, get the time bucket it belongs to,
-                        // if each of these events were in the recreateForDuration. This helps to identify the events,
-                        // which must be processed in-memory for recreateForDuration.
-                        long timeBucketForNextDuration = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                                (Long) event.getData(0), recreateForDuration);
-                        if (timeBucketForNextDuration > endOFLatestEventTimestamp) {
-                            eventsNewerThanLatestEventOfRecreateForDuration.add(event);
-                        }
-                    }
-                    events = eventsNewerThanLatestEventOfRecreateForDuration.toArray(
-                            new Event[eventsNewerThanLatestEventOfRecreateForDuration.size()]);
-                }
-
                 endOFLatestEventTimestamp = IncrementalTimeConverterUtil
                         .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), null);
 
