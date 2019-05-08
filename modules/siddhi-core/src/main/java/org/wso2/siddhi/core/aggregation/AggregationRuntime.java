@@ -362,13 +362,7 @@ public class AggregationRuntime implements MemoryCalculable {
 
     public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
         isFirstEventArrived = isEventArrived;
-        if (isEventArrived) {
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
-            }
-        }
-        recreateInMemoryData.recreateInMemoryData(refreshReadingExecutors);
+        recreateInMemoryData.recreateInMemoryData(isEventArrived, refreshReadingExecutors);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

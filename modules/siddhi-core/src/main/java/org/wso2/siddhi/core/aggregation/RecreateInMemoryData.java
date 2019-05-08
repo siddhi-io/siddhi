@@ -75,7 +75,7 @@ public class RecreateInMemoryData {
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
     }
 
-    public void recreateInMemoryData(boolean refreshReadingExecutors) {
+    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
         IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
         if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1 && !refreshReadingExecutors) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
@@ -83,6 +83,16 @@ public class RecreateInMemoryData {
             //This is only true in a processing aggregation runtime
             return;
         }
+
+        if (isEventArrived) {
+            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                    this.incrementalExecutorMap.entrySet()) {
+                IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
+                incrementalExecutor.setProcessingExecutor(true);
+                incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
+            }
+        }
+
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
