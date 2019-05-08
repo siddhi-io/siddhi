@@ -30,6 +30,7 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.execution.query.Query;
+import io.siddhi.query.api.execution.query.input.handler.Filter;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
@@ -2895,4 +2896,47 @@ public class FilterTestCase1 {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test
+    public void testFilterQuery83() throws InterruptedException {
+        log.info("Filter test83");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.LONG);
+
+        Query query = new Query();
+        Filter filter = new Filter(Expression.compare(Expression.variable("volume"),
+                Compare.Operator.GREATER_THAN, Expression.value(45)));
+        String funcString = filter.toString();
+        AssertJUnit.assertFalse(filter.equals(funcString));
+        query.from(InputStream.stream("cseEventStream").filter(new
+                Filter(Expression.compare(Expression.variable("volume"),
+                Compare.Operator.GREATER_THAN, Expression.value(45)))));
+        query.annotation(Annotation.annotation("info").element("name", "query1"));
+        query.select(Selector.selector().select("symbol", Expression.variable("symbol")).select("price", Expression
+                .variable("price")).select("volume", Expression.variable("volume")));
+        query.insertInto("outputStream");
+
+        SiddhiApp siddhiApp = new SiddhiApp("ep1");
+        siddhiApp.defineStream(cseEventStream);
+        siddhiApp.addQuery(query);
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                count.addAndGet(inEvents.length);
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60L});
+        inputHandler.send(new Object[]{"WSO2", 70f, 40L});
+        inputHandler.send(new Object[]{"WSO2", 44f, 200L});
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        siddhiAppRuntime.shutdown();
+    }
 }

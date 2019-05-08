@@ -18,6 +18,7 @@
 package io.siddhi.query.api;
 
 
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.partition.Partition;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -85,5 +86,12 @@ public class PartitionQueryTestCase {
 
         partition.addQuery(query);
 
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQueryNull() {
+        Partition partition = Partition.partition();
+        Query query = null;
+        partition.addQuery(query);
     }
 }
