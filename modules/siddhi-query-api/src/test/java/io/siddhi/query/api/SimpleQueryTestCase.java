@@ -595,7 +595,6 @@ public class SimpleQueryTestCase {
         );
     }
 
-
     @Test
     public void testCreatingReturnFilterQueryWithExtension3() {
         Query query = Query.query();

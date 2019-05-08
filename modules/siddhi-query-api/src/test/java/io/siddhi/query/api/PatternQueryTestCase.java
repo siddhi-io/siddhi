@@ -568,7 +568,6 @@ public class PatternQueryTestCase {
                                 )
                         )
                 )
-
         );
         query.select(
                 Selector.selector().
@@ -579,8 +578,6 @@ public class PatternQueryTestCase {
                         having(Expression.compare(Expression.variable("avgPrice"),
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
-
-
         );
         query.insertInto("OutputStream");
     }
@@ -667,7 +664,6 @@ public class PatternQueryTestCase {
                 Selector.selector().
                         select("symbol", Expression.variable("symbol").ofStream("e1")).
                         select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
-
         );
         query.insertInto("OutputStream");
     }
@@ -708,7 +704,6 @@ public class PatternQueryTestCase {
                 Selector.selector().
                         select("symbol", Expression.variable("symbol").ofStream("e1")).
                         select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
-
         );
         query.insertInto("OutputStream");
     }
@@ -749,7 +744,6 @@ public class PatternQueryTestCase {
                 Selector.selector().
                         select("symbol", Expression.variable("symbol").ofStream("e1")).
                         select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2")))
-
         );
         query.insertInto("OutputStream");
     }
@@ -774,7 +768,6 @@ public class PatternQueryTestCase {
                                                         Expression.variable("price").ofStream("e1")))))
                         )
                 )
-
         );
     }
 }
