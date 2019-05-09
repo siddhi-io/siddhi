@@ -194,30 +194,33 @@ follow the sections below broken down based on various environments. </p>
    </dependency>   
 ```
 
-<p>Refer [Using Siddhi as a library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library) documentaton for further details on using Siddhi as a Java library.</p>
- 
+You can find a quick start guide in [Using Siddhi as a library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library) documentation.
  
 ### Adding to Siddhi Local Micro Service
 <p>You can install the Siddhi extensions and third-party dependencies in your Siddhi Runner local pack by placing the JARs you downloaded in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory.
 
-<p>Since Siddhi Runner is a OSGi-based product, when you integrate third party products such as Oracle with Siddhi Runner, you need to check whether the libraries you need to add to Siddhi Runner are OSGi based. If they are not, you need to convert them to OSGi bundles before adding them to the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory. Please refer [Adding Third Party Non OSGi Libraries](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#adding-third-party-non-osgi-libraries) documentation.</p>
+<p>Since Siddhi Runner is a OSGi-based product, when you integrate third party products such as Oracle with Siddhi Runner, you need to check whether the libraries you need to add to Siddhi Runner are OSGi based. If they are not, you need to convert them to OSGi bundles before adding them to the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory.</p>
+Please refer [Converting Third Party Non OSGi Libraries](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#converting-third-party-non-osgi-libraries) documentation.
  
 ### Adding to Siddhi Docker Micro Service
 
 <p>You have to manually build a docker image using the below docker file bundling the needed extensions and third-party libraries.</p>
 <script src="https://gist.github.com/pcnfernando/09d3af8f958c464425a892efabac2d98.js"></script>
 
-<p>Here, we use the siddhi-runner-base-alpine as the base image while creating the image. The parent/base image bundles the Alpine Linux OS, JDK and the Siddhi distribution.</p>
+Here, we use the siddhi-runner-base-alpine as the base image while creating the image. The parent/base image bundles the Alpine Linux OS, JDK and the Siddhi distribution.
+You can find the Siddhi Runner docker build artifacts in [docker-siddhi repository](https://github.com/siddhi-io/docker-siddhi/tree/master/docker-files/siddhi-runner).
 
-<p>Copy the needed OSGIfied JARs and extensions to the ${BUNDLE_JAR_DIR} as defined in the above docker file, so that it would be bundled during the building phase to the docker image. Please refer [Adding Third Party Non OSGi Libraries](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#adding-third-party-non-osgi-libraries) documentation. </p>
+Copy the needed OSGIfied JARs and extensions to the ${BUNDLE_JAR_DIR} as defined in the above docker file, so that it would be bundled during the building phase to the docker image.
+Please refer [Converting Third Party Non OSGi Libraries](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#converting-third-party-non-osgi-libraries) documentation to convert non OSGI bundles before bundling it to the image.
 
-<p>You can find a quick start guide in [Using Siddhi as a Docker microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-docker-micro-service) documentaton.</p>
+You can find a quick start guide in [Using Siddhi as a Docker microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-docker-micro-service) documentation.
 
 ### Adding to Siddhi Kubernetes Micro Service
 
-<p>Inorder to use a Siddhi Runner distribution by manually adding extensions and third party libraries, you have to first create a docker image following the steps in [Adding to Docker Micro Service](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/config-guide-5.x/#adding-to-docker-micro-service) documentaion.</p>
+To use a Siddhi Runner distribution bundled with extensions and third party libraries, you have to first create a docker image following the steps described in [Adding to Docker Micro Service](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/config-guide-5.x/#adding-to-docker-micro-service) documentation.
+This created image can be referenced from the Siddhi Kubernetes artifacts thereafter.
 
-<p>You can find a quick start guide in [Using Siddhi as Kubernetes microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service) documentaton.</p>
+You can find a quick start guide in [Using Siddhi as Kubernetes microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service) documentation.
 
 ### Converting Third Party Non OSGi Libraries
 
@@ -239,6 +242,3 @@ This generates the converted file in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</c
 Restart the Siddhi Runner.
 </li>
 </ol>
-
- 
- 
