@@ -62,6 +62,11 @@ public class InMemoryTable extends Table {
     private TableDefinition tableDefinition;
     private StreamEventCloner tableStreamEventCloner;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+    public StateHolder<TableState> getStateHolder() {
+        return stateHolder;
+    }
+
     private StateHolder<TableState> stateHolder;
 
     @Override
@@ -267,9 +272,9 @@ public class InMemoryTable extends Table {
 
     }
 
-    class TableState extends State {
+    public class TableState extends State {
 
-        private final EventHolder eventHolder;
+        public final EventHolder eventHolder;
 
         public TableState(EventHolder eventHolder) {
             this.eventHolder = eventHolder;

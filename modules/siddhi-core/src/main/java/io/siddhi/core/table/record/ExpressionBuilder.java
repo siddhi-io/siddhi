@@ -73,6 +73,26 @@ public class ExpressionBuilder {
     private final Map<String, Table> tableMap;
     private Expression expression;
 
+    public MatchingMetaInfoHolder getMatchingMetaInfoHolder() {
+        return matchingMetaInfoHolder;
+    }
+
+    public SiddhiQueryContext getSiddhiQueryContext() {
+        return siddhiQueryContext;
+    }
+
+    public List<VariableExpressionExecutor> getVariableExpressionExecutors() {
+        return variableExpressionExecutors;
+    }
+
+    public Map<String, Table> getTableMap() {
+        return tableMap;
+    }
+
+    public Expression getExpression() {
+        return expression;
+    }
+
     ExpressionBuilder(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                       List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap,
                       SiddhiQueryContext siddhiQueryContext) {

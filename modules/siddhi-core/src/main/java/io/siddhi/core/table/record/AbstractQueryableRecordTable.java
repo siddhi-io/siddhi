@@ -42,7 +42,7 @@ import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.cache.CacheExpiryHandler;
+import io.siddhi.core.util.cache.CacheExpiryHandlerRunnable;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
@@ -74,11 +74,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_TIME;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_MODE_BASIC_PRELOAD;
@@ -97,17 +98,18 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
     private int maxCacheSize;
     private int currentCacheSize = 0;
-    private long cacheExpirationTimeInMillis;
-    private InMemoryTable cacheTable;
     private int cacheMode = CACHE_MODE_BASIC_PRELOAD;
+    private long cacheExpiryCheckIntervalInMillis;
     private boolean cacheEnabled = false;
     private boolean cacheExpiryEnabled = false;
+    private InMemoryTable cacheTable;
     private CompiledCondition compiledConditionForCaching;
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
     private TableDefinition cacheTableDefinition;
-    private SiddhiAppContext siddhiAppContext;
-    private CacheExpiryHandler cacheExpiryHandler;
+    protected SiddhiAppContext siddhiAppContext;
+    private CacheExpiryHandlerRunnable cacheExpiryHandlerRunnable;
+    private ScheduledExecutorService scheduledExecutorServiceForCacheExpiry;
 
     @Override
     public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -119,20 +121,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             cacheEnabled = true;
             maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
             cacheTable = new InMemoryTable();
-            cacheTableDefinition = new TableDefinition(tableDefinition.getId());
-            for (Attribute attribute: tableDefinition.getAttributeList()) {
-                cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
-            }
-            for (Annotation annotation: tableDefinition.getAnnotations()) {
-                if (!annotation.getName().equalsIgnoreCase(ANNOTATION_STORE)) {
-                    cacheTableDefinition.annotation(annotation);
-                }
-            }
+            cacheTableDefinition = generateCacheTableDefinition(tableDefinition);
             if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_EXPIRY_TIME) != null) {
                 cacheExpiryEnabled = true;
                 cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP, Attribute.Type.LONG);
-                cacheExpirationTimeInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
+                long cacheExpirationTimeInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
                         getElement(ANNOTATION_CACHE_EXPIRY_TIME));
+                cacheExpiryCheckIntervalInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
+                        getElement(ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL));
                 MetaStreamEvent cacheTableMetaStreamEvent = new MetaStreamEvent();
                 cacheTableMetaStreamEvent.addInputDefinition(cacheTableDefinition);
                 for (Attribute attribute : cacheTableDefinition.getAttributeList()) {
@@ -144,6 +140,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         cacheTableStreamEventFactory);
                 cacheTable.initTable(cacheTableDefinition, cacheTableStreamEventFactory,
                         cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
+                scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
+                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(cacheExpirationTimeInMillis, cacheTable,
+                        tableMap);
             } else {
                 cacheTable.initTable(cacheTableDefinition, storeEventPool,
                         storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
@@ -169,9 +168,20 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledSelectionForCaching = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
-
-            cacheExpiryHandler = new CacheExpiryHandler(cacheExpirationTimeInMillis, cacheTable);
         }
+    }
+
+    public TableDefinition generateCacheTableDefinition(TableDefinition storeTableDefinition) {
+        TableDefinition cacheTableDefinition = new TableDefinition(storeTableDefinition.getId());
+        for (Attribute attribute: storeTableDefinition.getAttributeList()) {
+            cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        for (Annotation annotation: storeTableDefinition.getAnnotations()) {
+            if (!annotation.getName().equalsIgnoreCase(ANNOTATION_STORE)) {
+                cacheTableDefinition.annotation(annotation);
+            }
+        }
+        return cacheTableDefinition;
     }
 
     @Override
@@ -195,7 +205,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             "than cache table size defined as " + maxCacheSize + ". So cache is disabled");
                 }
             }
-            cacheExpiryHandler.start();
+            if (cacheExpiryEnabled) {
+                ScheduledFuture<?> scheduledFuture = scheduledExecutorServiceForCacheExpiry.
+                        scheduleAtFixedRate(cacheExpiryHandlerRunnable.checkAndExpireCache, 0,
+                                cacheExpiryCheckIntervalInMillis, TimeUnit.MILLISECONDS);
+            }
         }
     }
 
@@ -300,8 +314,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
-//        cacheExpiryHandler = new CacheExpiryHandler(new Timestamp(System.currentTimeMillis()).getTime(), cacheExpirationTimeInMillis, cacheTable);
-//        cacheExpiryHandler.start();
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)

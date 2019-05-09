@@ -101,7 +101,6 @@ public class SnapshotableEventQueueOperator implements Operator {
         return numberOfDeletedEvents;
     }
 
-
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, Object storeEvents,
                        InMemoryCompiledUpdateSet compiledUpdateSet) {
