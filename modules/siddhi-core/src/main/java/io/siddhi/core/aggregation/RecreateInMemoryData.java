@@ -27,7 +27,6 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.StoreQueryRuntime;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
-import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.StoreQueryParser;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.TimePeriod;
@@ -40,6 +39,9 @@ import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.List;
 import java.util.Map;
+
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.SHARD_ID_COL;
 
 /**
  * This class is used to recreate in-memory data from the tables (Such as RDBMS) in incremental aggregation.
@@ -172,10 +174,10 @@ public class RecreateInMemoryData {
         if (isLargestGranularity) {
             selector = selector
                     .orderBy(
-                            Expression.variable(SiddhiConstants.AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
+                            Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
                     .limit(Expression.value(1));
         } else {
-            selector = selector.orderBy(Expression.variable(SiddhiConstants.AGG_START_TIMESTAMP_COL));
+            selector = selector.orderBy(Expression.variable(AGG_START_TIMESTAMP_COL));
         }
 
         InputStore inputStore;
@@ -185,7 +187,7 @@ public class RecreateInMemoryData {
             } else {
                 inputStore = InputStore.store(table.getTableDefinition().getId())
                         .on(Expression.compare(
-                                Expression.variable(SiddhiConstants.AGG_START_TIMESTAMP_COL),
+                                Expression.variable(AGG_START_TIMESTAMP_COL),
                                 Compare.Operator.GREATER_THAN_EQUAL,
                                 Expression.value(endOFLatestEventTimestamp)
                         ));
@@ -193,17 +195,17 @@ public class RecreateInMemoryData {
         } else {
             if (endOFLatestEventTimestamp == null) {
                 inputStore = InputStore.store(table.getTableDefinition().getId()).on(
-                        Expression.compare(Expression.variable(SiddhiConstants.SHARD_ID_COL), Compare.Operator.EQUAL,
+                        Expression.compare(Expression.variable(SHARD_ID_COL), Compare.Operator.EQUAL,
                                 Expression.value(shardId)));
             } else {
                 inputStore = InputStore.store(table.getTableDefinition().getId()).on(
                         Expression.and(
                                 Expression.compare(
-                                        Expression.variable(SiddhiConstants.SHARD_ID_COL),
+                                        Expression.variable(SHARD_ID_COL),
                                         Compare.Operator.EQUAL,
                                         Expression.value(shardId)),
                                 Expression.compare(
-                                        Expression.variable(SiddhiConstants.AGG_START_TIMESTAMP_COL),
+                                        Expression.variable(AGG_START_TIMESTAMP_COL),
                                         Compare.Operator.GREATER_THAN_EQUAL,
                                         Expression.value(endOFLatestEventTimestamp))));
             }

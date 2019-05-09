@@ -58,6 +58,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
@@ -298,9 +300,9 @@ public class AggregationRuntime implements MemoryCalculable {
         // Create within expression
         Expression timeFilterExpression;
         if (processingOnExternalTime) {
-            timeFilterExpression = Expression.variable("AGG_EVENT_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_EXTERNAL_TIMESTAMP_COL);
         } else {
-            timeFilterExpression = Expression.variable("AGG_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_START_TIMESTAMP_COL);
         }
         Expression withinExpression;
         Expression start = Expression.variable(additionalAttributes.get(0).getName());

@@ -59,8 +59,6 @@ import static io.siddhi.query.api.expression.Expression.Time.timeToLong;
  **/
 public class IncrementalDataPurging implements Runnable {
     private static final Logger LOG = Logger.getLogger(IncrementalDataPurging.class);
-    private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
-    private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
     private static final Long RETAIN_ALL = -1L;
     private static final String RETAIN_ALL_VALUES = "all";
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
@@ -89,9 +87,9 @@ public class IncrementalDataPurging implements Runnable {
         this.streamEventFactory = streamEventFactory;
         this.aggregationTables = aggregationTables;
         if (isProcessingOnExternalTime) {
-            purgingTimestampField = EXTERNAL_AGG_TIMESTAMP_FIELD;
+            purgingTimestampField = SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
         } else {
-            purgingTimestampField = INTERNAL_AGG_TIMESTAMP_FIELD;
+            purgingTimestampField = SiddhiConstants.AGG_START_TIMESTAMP_COL;
         }
         aggregatedTimestampAttribute = new Attribute(purgingTimestampField, Attribute.Type.LONG);
 
