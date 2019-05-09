@@ -196,26 +196,6 @@ follow the sections below broken down based on various environments. </p>
 
 <p>Refer [Using Siddhi as a library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library) documentaton for further details on using Siddhi as a Java library.</p>
  
-### Converting Third Party Non OSGi Libraries
-
-<p>To convert jar files to OSGi bundles, follow the procedure given below:</p>
-<ol>
-<li>
-Download the non-OSGi jar for the required third party product, and save it in a preferred directory in your machine.
-</li>
-<li>
-In your CLI, navigate to the <code>&lt;SIDDHI_RUNNER_HOME&gt;/bin</code> directory. Then issue the following command.
-
-```
-./jartobundle.sh <PATH_TO_NON-OSGi_JAR> ../lib
-```
-
-This generates the converted file in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory.
-</li>
-<li>
-Restart the Siddhi Runner.
-</li>
-</ol>
  
 ### Adding to Siddhi Local Micro Service
 <p>You can install the Siddhi extensions and third-party dependencies in your Siddhi Runner local pack by placing the JARs you downloaded in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory.
@@ -239,7 +219,26 @@ Restart the Siddhi Runner.
 
 <p>You can find a quick start guide in [Using Siddhi as Kubernetes microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service) documentaton.</p>
 
- 
+### Converting Third Party Non OSGi Libraries
+
+<p>To convert jar files to OSGi bundles, follow the procedure given below:</p>
+<ol>
+<li>
+Download the non-OSGi jar for the required third party product, and save it in a preferred directory in your machine.
+</li>
+<li>
+In your CLI, navigate to the <code>&lt;SIDDHI_RUNNER_HOME&gt;/bin</code> directory. Then issue the following command.
+
+```
+./jartobundle.sh <PATH_TO_NON-OSGi_JAR> ../lib
+```
+
+This generates the converted file in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</code> directory.
+</li>
+<li>
+Restart the Siddhi Runner.
+</li>
+</ol>
 
  
  
