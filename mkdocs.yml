@@ -41,9 +41,9 @@ pages:
   - Siddhi 5.x:
     - Quick Start Guide: documentation/siddhi-5.x/quckstart-5.x.md
     - User Guide: documentation/siddhi-5.x/user-guide-5.x.md
+    - Config Guide: documentation/siddhi-5.x/config-guide-5.x.md
     - Siddhi Query Guide: documentation/siddhi-5.x/query-guide-5.x.md
     - Siddhi Architecture: documentation/siddhi-5.x/architecture-5.x.md
-    - Siddhi Config Guide: documentation/siddhi-5.x/config-guide-5.x.md
   - Siddhi 4.x:
     - Quick Start Guide: documentation/siddhi-4.x/quckstart-4.x.md
     - User Guide: documentation/siddhi-4.x/user-guide-4.x.md
