@@ -99,7 +99,7 @@ public class RecreateInMemoryData {
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
-        // Get all events from table corresponding to max duration
+        // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
         StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, refreshReadingExecutors,
                 endOFLatestEventTimestamp);
@@ -107,7 +107,7 @@ public class RecreateInMemoryData {
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
 
-        // Get latest event timestamp in tableForMaxDuration
+        // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
         events = storeQueryRuntime.execute();
         if (events != null) {
             Long lastData = (Long) events[events.length - 1].getData(0);
@@ -129,6 +129,7 @@ public class RecreateInMemoryData {
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
+            // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
             storeQuery = getStoreQuery(recreateFromTable, false, refreshReadingExecutors, endOFLatestEventTimestamp);
