@@ -32,13 +32,16 @@ import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
+import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.SHARD_ID_COL;
 
 /**
  * This class is used to recreate in-memory data from the tables (Such as RDBMS) in incremental aggregation.
@@ -60,7 +63,7 @@ public class RecreateInMemoryData {
                                 Map<TimePeriod.Duration, Table> aggregationTables,
                                 Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                                 SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent, Map<String,
-                                Table> tableMap, Map<String, Window> windowMap,
+            Table> tableMap, Map<String, Window> windowMap,
                                 Map<String, AggregationRuntime> aggregationMap, String shardId,
                                 Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.incrementalDurations = incrementalDurations;
@@ -94,29 +97,22 @@ public class RecreateInMemoryData {
         }
 
         Event[] events;
-        Long latestEventTimestamp = null;
+        Long endOFLatestEventTimestamp = null;
 
-        // Get all events from table corresponding to max duration
+        // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery;
-        if (shardId == null || refreshReadingExecutors) {
-            storeQuery = StoreQuery.query().from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
-                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
-        } else {
-            storeQuery = StoreQuery.query().from(
-                    InputStore.store(tableForMaxDuration.getTableDefinition().getId())
-                            .on(Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
-                                    Expression.value(shardId))))
-                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
-        }
+        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, refreshReadingExecutors,
+                endOFLatestEventTimestamp);
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
 
-        // Get latest event timestamp in tableForMaxDuration
+        // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
         events = storeQueryRuntime.execute();
         if (events != null) {
-            latestEventTimestamp = (Long) events[events.length - 1].getData(0);
+            Long lastData = (Long) events[events.length - 1].getData(0);
+            endOFLatestEventTimestamp = IncrementalTimeConverterUtil
+                    .getNextEmitTime(lastData, incrementalDurations.get(incrementalDurations.size() - 1), null);
         }
 
         for (int i = incrementalDurations.size() - 1; i > 0; i--) {
@@ -133,19 +129,10 @@ public class RecreateInMemoryData {
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
+            // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            if (shardId == null || refreshReadingExecutors) {
-                storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
-            } else {
-                storeQuery = StoreQuery.query().from(
-                        InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
-                                Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
-                                        Expression.value(shardId))))
-                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
-            }
-
+            storeQuery = getStoreQuery(recreateFromTable, false, refreshReadingExecutors, endOFLatestEventTimestamp);
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -153,23 +140,8 @@ public class RecreateInMemoryData {
 
             if (events != null) {
                 long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
-                if (latestEventTimestamp != null) {
-                    List<Event> eventsNewerThanLatestEventOfRecreateForDuration = new ArrayList<>();
-                    for (Event event : events) {
-                        // After getting the events from recreateFromTable, get the time bucket it belongs to,
-                        // if each of these events were in the recreateForDuration. This helps to identify the events,
-                        // which must be processed in-memory for recreateForDuration.
-                        long timeBucketForNextDuration = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                                (Long) event.getData(0), recreateForDuration);
-                        if (timeBucketForNextDuration > latestEventTimestamp) {
-                            eventsNewerThanLatestEventOfRecreateForDuration.add(event);
-                        }
-                    }
-                    events = eventsNewerThanLatestEventOfRecreateForDuration.toArray(
-                            new Event[eventsNewerThanLatestEventOfRecreateForDuration.size()]);
-                }
-
-                latestEventTimestamp = referenceToNextLatestEvent;
+                endOFLatestEventTimestamp = IncrementalTimeConverterUtil
+                        .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), null);
 
                 ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
                 for (Event event : events) {
@@ -188,12 +160,58 @@ public class RecreateInMemoryData {
                         rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
                     }
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
-                            latestEventTimestamp, rootDuration, null);
+                            referenceToNextLatestEvent, rootDuration, null);
 
                     rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
 
                 }
             }
         }
+    }
+
+    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, boolean refreshReadingExecutors,
+                                     Long endOFLatestEventTimestamp) {
+        Selector selector = Selector.selector();
+        if (isLargestGranularity) {
+            selector = selector
+                    .orderBy(
+                            Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
+                    .limit(Expression.value(1));
+        } else {
+            selector = selector.orderBy(Expression.variable(AGG_START_TIMESTAMP_COL));
+        }
+
+        InputStore inputStore;
+        if (shardId == null || refreshReadingExecutors) {
+            if (endOFLatestEventTimestamp == null) {
+                inputStore = InputStore.store(table.getTableDefinition().getId());
+            } else {
+                inputStore = InputStore.store(table.getTableDefinition().getId())
+                        .on(Expression.compare(
+                                Expression.variable(AGG_START_TIMESTAMP_COL),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(endOFLatestEventTimestamp)
+                        ));
+            }
+        } else {
+            if (endOFLatestEventTimestamp == null) {
+                inputStore = InputStore.store(table.getTableDefinition().getId()).on(
+                        Expression.compare(Expression.variable(SHARD_ID_COL), Compare.Operator.EQUAL,
+                                Expression.value(shardId)));
+            } else {
+                inputStore = InputStore.store(table.getTableDefinition().getId()).on(
+                        Expression.and(
+                                Expression.compare(
+                                        Expression.variable(SHARD_ID_COL),
+                                        Compare.Operator.EQUAL,
+                                        Expression.value(shardId)),
+                                Expression.compare(
+                                        Expression.variable(AGG_START_TIMESTAMP_COL),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.value(endOFLatestEventTimestamp))));
+            }
+        }
+
+        return StoreQuery.query().from(inputStore).select(selector);
     }
 }
