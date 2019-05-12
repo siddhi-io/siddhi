@@ -294,7 +294,7 @@ Thank you</pre>
 
 Siddhi can also run on Docker by passing the SiddhiApps and required configurations to it.
 
-* Pull the the latest Siddhi Runner image from [Docker Hub](https://hub.docker.com/).
+* Pull the the latest Siddhi Runner image from [Siddhiio Docker Hub](https://hub.docker.com/u/siddhiio).
 ```
 docker pull siddhiio/siddhi-runner-alpine:latest
 ```
