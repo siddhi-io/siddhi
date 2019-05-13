@@ -85,7 +85,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (recordTableHandler != null) {
             records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
                     recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection);
+                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
         } else {
             records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
                     recordStoreCompiledSelection.compiledSelection, outputAttributes);
