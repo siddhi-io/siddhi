@@ -24,48 +24,42 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.query.processor.ProcessingMode;
-import io.siddhi.core.table.InMemoryCompiledUpdateSet;
+import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.InMemoryTable;
-import io.siddhi.core.table.holder.EventHolder;
 import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.parser.EventHolderPasser;
-import io.siddhi.core.util.parser.ExpressionParser;
-import io.siddhi.core.util.parser.OperatorParser;
-import io.siddhi.core.util.snapshot.state.StateHolder;
+import io.siddhi.core.util.parser.MatcherParser;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
+import io.siddhi.query.api.expression.Variable;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Custom store for testing of in memory cache for store tables.
  */
 @Extension(
-        name = "testWithCache",
+        name = "testStoreContainingInMemoryTable",
         namespace = "store",
         description = "Using this implementation a testing for store extension can be done.",
         examples = {
                 @Example(
-                        syntax = "@store(type='test')" +
+                        syntax = "@store(type='testStoreContainingInMemoryTable')" +
                                 "define table testTable (symbol string, price int, volume float); ",
                         description = "The above syntax initializes a test type store."
                 )
         }
 )
-public class TestStoreWithCache extends AbstractQueryableRecordTable {
+public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTable {
     private InMemoryTable inMemoryTable;
 
     @Override
@@ -77,8 +71,6 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
         for (Attribute attribute : tableDefinition.getAttributeList()) {
             cacheTableMetaStreamEvent.addOutputData(attribute);
         }
-
-//        StreamEventFactory testTableStreamEventFactory = new StreamEventFactory(cacheTableMetaStreamEvent);
         StreamEventCloner testTableStreamEventCloner = new StreamEventCloner(cacheTableMetaStreamEvent,
                 storeEventPool);
 
@@ -110,7 +102,6 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
     private ComplexEventChunk<StreamEvent> objectListToComplexEventChunk(List<Object[]> records) {
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         for (Object[] record: records) {
-//            StreamEvent event = new StreamEvent(0, 0, record.length);
             StreamEvent event = storeEventPool.newInstance();
             event.setOutputData(record);
             complexEventChunk.add(event);
@@ -152,9 +143,19 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
 
     private StateEvent parameterMapToStateEvent(Map<String, Object> parameterMap) {
         StateEvent stateEvent = new StateEvent(2, parameterMap.size());
-        Object[] outputData = parameterMap.values().toArray();
+        List<Object> outputData = new ArrayList<>();
+        List<Attribute> attributeList = inMemoryTable.getTableDefinition().getAttributeList();
+
+        for (int i = 0; i < attributeList.size(); i++) {
+            if (parameterMap.get(attributeList.get(i).getName()) != null) {
+                outputData.add(parameterMap.get(attributeList.get(i).getName()));
+            } else {
+                outputData.add(null);
+            }
+        }
+
         StreamEvent event = storeEventPool.newInstance();
-        event.setOutputData(outputData);
+        event.setOutputData(outputData.toArray());
         stateEvent.addEvent(0, event);
         return stateEvent;
     }
@@ -165,7 +166,6 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
 
         StreamEvent outEvent = inMemoryTable.find(compiledCondition,
                 parameterMapToStateEvent(findConditionParameterMap));
-
         List<Object[]> objects = new LinkedList<>();
 
         if (outEvent != null) {
@@ -175,28 +175,102 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
             }
             objects.add(outEvent.getOutputData());
         }
-
         return new TestStoreWithCacheIterator(objects.iterator());
     }
 
     @Override
     protected boolean contains(Map<String, Object> containsConditionParameterMap,
                                CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        return inMemoryTable.contains(parameterMapToStateEvent(containsConditionParameterMap), compiledCondition);
+        return inMemoryTable.contains(convForContains(containsConditionParameterMap), compiledCondition);
+    }
+
+    private StateEvent convForContains(Map<String, Object> parameterMap) {
+        StateEvent stateEvent = new StateEvent(2, parameterMap.size());
+        List<Object> outputData = new ArrayList<>();
+        List<Attribute> attributeList = inMemoryTable.getTableDefinition().getAttributeList();
+
+        for (int i = 0; i < attributeList.size(); i++) {
+            if (parameterMap.get(attributeList.get(i).getName()) != null) {
+                outputData.add(parameterMap.get(attributeList.get(i).getName()));
+//            } else {
+//                outputData.add(null);
+            }
+        }
+
+        StreamEvent event = storeEventPool.newInstance();
+        event.setOutputData(outputData.toArray());
+        stateEvent.addEvent(0, event);
+        return stateEvent;
+    }
+
+    private ComplexEventChunk<StateEvent> convForDelete (List<Map<String, Object>> deleteConditionParameterMaps) {
+        List<Object[]> objectList = new LinkedList<>();
+        for (Map<String, Object> parameterMap: deleteConditionParameterMaps) {
+            List<Object> outputData = new ArrayList<>();
+            List<Attribute> attributeList = inMemoryTable.getTableDefinition().getAttributeList();
+
+            for (int i = 0; i < attributeList.size(); i++) {
+                if (parameterMap.get(attributeList.get(i).getName()) != null) {
+                    outputData.add(parameterMap.get(attributeList.get(i).getName()));
+                } else {
+                    outputData.add(null);
+                }
+            }
+            objectList.add(outputData.toArray());
+        }
+
+        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        for (Object[] record: objectList) {
+            StreamEvent event = new StreamEvent(0, 0, record.length);
+            StateEvent stateEvent = new StateEvent(2, record.length);
+            event.setOutputData(record);
+            stateEvent.addEvent(0, event);
+            complexEventChunk.add(stateEvent);
+        }
+        return complexEventChunk;
     }
 
     @Override
     protected void delete(List<Map<String, Object>> deleteConditionParameterMaps,
                           CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        ComplexEventChunk<StateEvent> deletingChunk = parameterMapListToComplexEventChunk(deleteConditionParameterMaps);
-        inMemoryTable.delete(deletingChunk, compiledCondition);
+        inMemoryTable.delete(convForDelete(deleteConditionParameterMaps), compiledCondition);
+    }
+
+    private ComplexEventChunk<StateEvent> convForUpdate(List<Map<String, Object>> parameterMapList) {
+        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        for (Map<String, Object> parameterMap: parameterMapList) {
+            complexEventChunk.add(parameterMapToStateEvent(parameterMap));
+        }
+        return complexEventChunk;
     }
 
     @Override
     protected void update(CompiledCondition updateCondition, List<Map<String, Object>> updateConditionParameterMaps,
                           Map<String, CompiledExpression> updateSetExpressions,
                           List<Map<String, Object>> updateSetParameterMaps) throws ConnectionUnavailableException {
+        MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
+        tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+        TableDefinition matchingTableDefinition = TableDefinition.id("");
+        for (Attribute attribute : inMemoryTable.getTableDefinition().getAttributeList()) {
+            tableMetaStreamEvent.addOutputData(attribute);
+            matchingTableDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
+        MatchingMetaInfoHolder matchingMetaInfoHolder =
+                MatcherParser.constructMatchingMetaStateHolder(tableMetaStreamEvent, 0,
+                        inMemoryTable.getTableDefinition(), 0);
 
+        UpdateSet updateSet = new UpdateSet();
+        for (Attribute attribute : matchingMetaInfoHolder.getMatchingStreamDefinition().
+                getAttributeList()) {
+            updateSet.set(new Variable(attribute.getName()), new Variable(attribute.getName()));
+        }
+
+        CompiledUpdateSet compiledUpdateSet = inMemoryTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
+                null, tableMap, null);
+
+        inMemoryTable.update(convForUpdate(updateSetParameterMaps), updateCondition,
+                compiledUpdateSet);
     }
 
     @Override
@@ -206,6 +280,28 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
                                List<Map<String, Object>> updateSetParameterMaps,
                                List<Object[]> addingRecords) throws ConnectionUnavailableException {
 
+        MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
+        tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+        TableDefinition matchingTableDefinition = TableDefinition.id("");
+        for (Attribute attribute : inMemoryTable.getTableDefinition().getAttributeList()) {
+            tableMetaStreamEvent.addOutputData(attribute);
+            matchingTableDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
+        MatchingMetaInfoHolder matchingMetaInfoHolder =
+                MatcherParser.constructMatchingMetaStateHolder(tableMetaStreamEvent, 0,
+                        inMemoryTable.getTableDefinition(), 0);
+
+        UpdateSet updateSet = new UpdateSet();
+        for (Attribute attribute : matchingMetaInfoHolder.getMatchingStreamDefinition().
+                getAttributeList()) {
+            updateSet.set(new Variable(attribute.getName()), new Variable(attribute.getName()));
+        }
+
+        CompiledUpdateSet compiledUpdateSet = inMemoryTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
+                null, tableMap, null);
+        inMemoryTable.updateOrAdd(convForUpdate(updateSetParameterMaps), updateCondition, compiledUpdateSet,
+                new AddingStreamEventExtractor(matchingMetaInfoHolder.getMatchingStreamEventIndex()));
     }
 
     @Override
@@ -219,19 +315,8 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
 
     @Override
     protected CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder) {
-//        Map<Integer, ExpressionExecutor> expressionExecutorMap = new HashMap<>();
-//        for (UpdateSet.SetAttribute setAttribute : updateSet.getSetAttributeList()) {
-//            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(
-//                    setAttribute.getAssignmentExpression(), matchingMetaInfoHolder.getMetaStateEvent(),
-//                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
-//                    false, 0, ProcessingMode.BATCH, false,
-//                    siddhiQueryContext);
-//            int attributePosition = tableDefinition.
-//                    getAttributePosition(setAttribute.getTableVariable().getAttributeName());
-//            expressionExecutorMap.put(attributePosition, expressionExecutor);
-//        }
-//        return new InMemoryCompiledUpdateSet(expressionExecutorMap);
-        return null;
+        System.out.println("h");
+        return compileCondition(expressionBuilder);
     }
 
     @Override
