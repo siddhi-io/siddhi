@@ -810,7 +810,7 @@
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
         <apache.rat.plugin.version>0.13</apache.rat.plugin.version>
-        <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
+        <maven.scr.plugin.version>1.26.2</maven.scr.plugin.version>
 
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
