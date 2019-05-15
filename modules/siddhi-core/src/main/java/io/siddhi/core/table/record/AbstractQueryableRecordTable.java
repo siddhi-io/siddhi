@@ -74,18 +74,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_TIME;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_TIME;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
-import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_MODE_BASIC_PRELOAD;
+import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
 import static io.siddhi.query.api.util.AnnotationHelper.getNestedAnnotation;
@@ -114,6 +116,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     protected Selector selectorForTestStoreQuery;
     protected SiddhiQueryContext siddhiQueryContextForTestStoreQuery;
     protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestStoreQuery;
+    protected StateEvent containsMatchingEvent;
 
     @Override
     public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -210,7 +213,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
             }
             if (cacheExpiryEnabled) {
-                ScheduledFuture<?> scheduledFuture = scheduledExecutorServiceForCacheExpiry.
+                scheduledExecutorServiceForCacheExpiry.
                         scheduleAtFixedRate(cacheExpiryHandlerRunnable.checkAndExpireCache, 0,
                                 cacheExpiryCheckIntervalInMillis, TimeUnit.MILLISECONDS);
             }
@@ -407,6 +410,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
+        containsMatchingEvent = matchingEvent;
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;

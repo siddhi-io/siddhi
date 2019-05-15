@@ -23,13 +23,11 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 public class CacheExpireTestCase {
     private static final Logger log = Logger.getLogger(CacheExpireTestCase.class);
@@ -51,7 +49,7 @@ public class CacheExpireTestCase {
 //        SiddhiManager siddhiManager = new SiddhiManager();
 //        String streams = "" +
 //                "define stream StockStream (symbol string, price float, volume long); " +
-//                "@Store(type=\"testWithCache\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
+//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
 //                //"@Index(\"volume\")" +
 //                "define table StockTable (symbol string, price float, volume long); ";
 //
@@ -83,7 +81,7 @@ public class CacheExpireTestCase {
 //        SiddhiManager siddhiManager = new SiddhiManager();
 //        String streams = "" +
 //                "define stream StockStream (symbol string, price float, volume long); " +
-//                "@Store(type=\"testWithCache\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
+//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
 //                //"@Index(\"volume\")" +
 //                "define table StockTable (symbol string, price float, volume long); ";
 //
@@ -119,7 +117,7 @@ public class CacheExpireTestCase {
 //        String streams = "" +
 //                "define stream StockStream (symbol string, price float, volume long); " +
 //                "define stream DeleteStream (symbol string); " +
-//                "@Store(type=\"testWithCache\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
+//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
 //                //"@Index(\"volume\")" +
 //                "define table StockTable (symbol string, price float, volume long); ";
 //
@@ -166,7 +164,7 @@ public class CacheExpireTestCase {
 //        String streams = "" +
 //                "define stream StockStream (symbol string, price float, volume long, timestamp long); " +
 //                "define stream DeleteStream (currentTime long); " +
-//                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
 //                //"@Index(\"volume\")" +
 //                "define table StockTable (symbol string, price float, volume long, timestamp long); ";
 //
@@ -207,7 +205,8 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
+                "expiry.check.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -267,7 +266,7 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
                 "expiry.check.interval=\"1 sec\", policy=\"FIFO\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";

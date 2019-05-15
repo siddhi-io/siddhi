@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.siddhi.core.query.table.testStoreContainingInMemoryTable;
+package io.siddhi.core.query.table.teststorecontaininginmemorytable;
 
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
@@ -97,12 +97,12 @@ public class InTestStoreTestCase {
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        InputHandler CheckInStockStream = siddhiAppRuntime.getInputHandler("CheckInStockStream");
+        InputHandler checkInStockStream = siddhiAppRuntime.getInputHandler("CheckInStockStream");
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-        CheckInStockStream.send(new Object[]{"WSO2"});
+        checkInStockStream.send(new Object[]{"WSO2"});
         Assert.assertEquals(true, eventArrived, "Event arrived");
 
         siddhiAppRuntime.shutdown();

@@ -40,6 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * this class is a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
+ * expiry
+ */
 public class CacheExpiryHandlerRunnable {
     private InMemoryTable cacheTable;
     private StreamEventFactory streamEventFactory;

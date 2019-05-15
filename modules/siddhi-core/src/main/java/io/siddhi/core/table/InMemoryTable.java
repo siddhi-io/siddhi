@@ -272,6 +272,9 @@ public class InMemoryTable extends Table {
 
     }
 
+    /**
+     * class to store the state of table
+     */
     public class TableState extends State {
 
         public final EventHolder eventHolder;

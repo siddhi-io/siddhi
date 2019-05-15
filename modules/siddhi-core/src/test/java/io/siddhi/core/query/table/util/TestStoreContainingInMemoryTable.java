@@ -54,7 +54,10 @@ import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Variable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 
@@ -200,7 +203,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
     @Override
     protected boolean contains(Map<String, Object> containsConditionParameterMap,
                                CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        return inMemoryTable.contains(convForContains(containsConditionParameterMap), compiledCondition);
+        return inMemoryTable.contains(containsMatchingEvent, compiledCondition);
     }
 
     @Override
@@ -284,7 +287,6 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
 
     @Override
     protected CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder) {
-        System.out.println("h");
         return compileCondition(expressionBuilder);
     }
 
@@ -365,6 +367,31 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         stateEvent.addEvent(0, event);
         return stateEvent;
     }
+
+//    private StateEvent convForContains2(Map<String, Object> parameterMap, CompiledCondition compiledCondition) {
+//        StateEvent stateEvent = new StateEvent(2, parameterMap.size());
+//        List<Object> outputData = new ArrayList<>();
+//        List<Attribute> attributeList = inMemoryTable.getTableDefinition().getAttributeList();
+//
+//        for (int i = 0; i < attributeList.size(); i++) {
+//            if (parameterMap.get(attributeList.get(i).getName()) != null) {
+//                outputData.add(parameterMap.get(attributeList.get(i).getName()));
+////            } else {
+////                outputData.add(null);
+//            }
+//        }
+//
+//        StreamEvent event = storeEventPool.newInstance();
+//        event.setOutputData(outputData.toArray());
+//        stateEvent.addEvent(0, event);
+//        return stateEvent;
+//    }
+
+//    private String[] getParameterOrderFromCompileCondition(CompiledCondition compiledCondition) {
+//        SnapshotableEventQueueOperator operator = (SnapshotableEventQueueOperator) compiledCondition;
+//        int streamEventPosition = 0;
+//        if (operator.)
+//    }
 
     private ComplexEventChunk<StateEvent> convForDelete (List<Map<String, Object>> deleteConditionParameterMaps) {
         List<Object[]> objectList = new LinkedList<>();
