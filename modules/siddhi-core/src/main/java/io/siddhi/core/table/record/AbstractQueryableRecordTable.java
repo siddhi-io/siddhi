@@ -110,6 +110,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     protected SiddhiAppContext siddhiAppContext;
     private CacheExpiryHandlerRunnable cacheExpiryHandlerRunnable;
     private ScheduledExecutorService scheduledExecutorServiceForCacheExpiry;
+    protected StateEvent findMatchingEvent;
+    protected Selector selectorForTestStoreQuery;
+    protected SiddhiQueryContext siddhiQueryContextForTestStoreQuery;
+    protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestStoreQuery;
 
     @Override
     public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -565,6 +569,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
+        findMatchingEvent = matchingEvent;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             CompiledConditionWithCache compiledConditionAggregation = (CompiledConditionWithCache)
@@ -612,6 +617,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
+        findMatchingEvent = matchingEvent;
 
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         RecordStoreCompiledCondition recordStoreCompiledCondition;
@@ -704,6 +710,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
+        selectorForTestStoreQuery = selector;
+        siddhiQueryContextForTestStoreQuery = siddhiQueryContext;
+        matchingMetaInfoHolderForTestStoreQuery = matchingMetaInfoHolder;
         List<OutputAttribute> outputAttributes = selector.getSelectionList();
         if (outputAttributes.size() == 0) {
             MetaStreamEvent metaStreamEvent = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
@@ -874,11 +883,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         MatchingMetaInfoHolder metaStreamInfoHolder;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
 
+        public MatchingMetaInfoHolder getMetaStreamInfoHolder() {
+            return metaStreamInfoHolder;
+        }
+
         public QuerySelector getQuerySelector() {
             return querySelector;
         }
 
-        CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
+        public CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
                                    QuerySelector querySelector,
                                    MatchingMetaInfoHolder metaStreamInfoHolder) {
             this.recordStoreCompiledSelection = recordStoreCompiledSelection;
