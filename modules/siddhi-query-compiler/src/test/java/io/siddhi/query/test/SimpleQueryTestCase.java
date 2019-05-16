@@ -18,6 +18,8 @@
 
 package io.siddhi.query.test;
 
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.FunctionDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
 import io.siddhi.query.api.exception.UnsupportedAttributeTypeException;
 import io.siddhi.query.api.execution.query.Query;
@@ -855,6 +857,27 @@ public class SimpleQueryTestCase {
                         offset(Expression.value(3.8))).
                 insertInto("StockQuote", OutputStream.OutputEventType.ALL_EVENTS);
     }
+
+    @Test
+    public void testCompilerParse() {
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long, available " +
+                "bool);";
+
+        SiddhiCompiler.parse(cseEventStream);
+    }
+
+    @Test
+    public void testFunctionDefinition() throws SiddhiParserException {
+        FunctionDefinition functionDefinition = SiddhiCompiler.
+                parseFunctionDefinition("define function concatFn[javascript] return string " +
+                        "{var str1 = data[0];};");
+
+        AssertJUnit.assertEquals(functionDefinition.getId(), "concatFn");
+        AssertJUnit.assertEquals(functionDefinition.getBody(), "var str1 = data[0]");
+        AssertJUnit.assertEquals(functionDefinition.getLanguage(), "javascript");
+        AssertJUnit.assertEquals(functionDefinition.getReturnType(), Attribute.Type.STRING);
+    }
+
 
 }
 
