@@ -77,8 +77,7 @@ public class EventChunkOperator implements Operator {
     }
 
     @Override
-    public int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
-        int numberOfDeletedEvents = 0;
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
         ComplexEventChunk<StreamEvent> storeEventChunk = (ComplexEventChunk<StreamEvent>) storeEvents;
         deletingEventChunk.reset();
         while (deletingEventChunk.hasNext()) {
@@ -90,14 +89,12 @@ public class EventChunkOperator implements Operator {
                     deletingEvent.setEvent(storeEventPosition, storeEvent);
                     if ((Boolean) expressionExecutor.execute(deletingEvent)) {
                         storeEventChunk.remove();
-                        numberOfDeletedEvents += 1;
                     }
                 }
             } finally {
                 deletingEvent.setEvent(storeEventPosition, null);
             }
         }
-        return numberOfDeletedEvents;
     }
 
 

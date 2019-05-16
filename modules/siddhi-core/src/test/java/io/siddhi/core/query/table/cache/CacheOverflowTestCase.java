@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.siddhi.core.query.table.cache;
 
 import io.siddhi.core.SiddhiAppRuntime;
@@ -33,7 +50,6 @@ public class CacheOverflowTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
         String query1 = "" +
@@ -110,7 +126,6 @@ public class CacheOverflowTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
-//                "@PrimaryKey(\"symbol\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -168,8 +183,6 @@ public class CacheOverflowTestCase {
                 "define stream StockStream (symbol string, price double, volume long); " +
                 "define stream UpdateStockStream (symbol string, price double, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price double, volume long); ";
 
         String query = "" +
@@ -214,8 +227,6 @@ public class CacheOverflowTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

@@ -299,6 +299,7 @@ public class StoreQueryParser {
                                                                         variableExpressionExecutors,
                                                                 LockWrapper lockWrapper,
                                                                 SiddhiQueryContext siddhiQueryContext) {
+        metaStreamEvent.setEventType(EventType.TABLE);
         if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
             try {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, tableMap,
@@ -347,8 +348,6 @@ public class StoreQueryParser {
         CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
                 storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
-
-
         StoreQueryRuntime storeQueryRuntime =
                 new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
                         compiledSelection, expectedOutputAttributes, siddhiQueryContext.getName());
@@ -359,7 +358,6 @@ public class StoreQueryParser {
             storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
             storeQueryRuntime.setStateEventFactory(new StateEventFactory(
                     matchingMetaInfoHolderForSelection.getMetaStateEvent()));
-
         } catch (ClassCastException ignored) {
 
         }
@@ -382,7 +380,6 @@ public class StoreQueryParser {
         MatchingMetaInfoHolder matchingMetaInfoHolder;
         AbstractDefinition inputDefinition;
         QuerySelector querySelector;
-        metaStreamEvent.setEventType(EventType.TABLE);
 
         switch (storeQuery.getType()) {
             case FIND:

@@ -47,6 +47,11 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
     private boolean forceFullSnapshot = true;
     private boolean isOperationLogEnabled = true;
     private int eventIndex = -1;
+    protected int size;
+
+    public void reduceSizeByOne() {
+        size--;
+    }
 
     public SnapshotableStreamEventQueue(StreamEventClonerHolder eventClonerHolder) {
         this(eventClonerHolder, Integer.MAX_VALUE);

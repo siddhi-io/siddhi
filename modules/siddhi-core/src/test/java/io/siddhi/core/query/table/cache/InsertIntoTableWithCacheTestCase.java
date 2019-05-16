@@ -51,7 +51,6 @@ public class InsertIntoTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
         String query1 = "" +
@@ -83,8 +82,7 @@ public class InsertIntoTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
-                //"@Index(\"volume\")" +
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         String query = "" +
@@ -120,12 +118,10 @@ public class InsertIntoTableWithCacheTestCase {
 
         String table = "" +
                 "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
-                //"@Index(\"volume\")" +
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 "define table StockTable (symbol string, price float, volume long);\n" +
                 "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
-                //"@Index(\"volume\")" +
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 "define table MyTable (symbol string, price float);\n";
 
         String query = "" +

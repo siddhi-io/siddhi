@@ -89,10 +89,8 @@ import static io.siddhi.query.api.util.AnnotationHelper.getNestedAnnotation;
  * developer can directly work with event data.
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
-    //todo: in memory table may grow beyond the initial user specified size - soln?
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
     private int maxCacheSize;
-    private int currentCacheSize = 0;
     private InMemoryTable cachedTable;
     private boolean isCacheEnabled = false;
     private CompiledCondition compiledConditionForCaching;
@@ -115,15 +113,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             for (Attribute attribute: tableDefinition.getAttributeList()) {
                 cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
             }
-//            cacheTableDefinition.attribute("timestamp", Attribute.Type.LONG);
             for (Annotation annotation: tableDefinition.getAnnotations()) {
                 if (!annotation.getName().equalsIgnoreCase("Store")) {
                     cacheTableDefinition.annotation(annotation);
                 }
             }
-//            cacheTableDefinition.annotation(getAnnotation("PrimarKey", tableDefinition.))
             cachedTable.initTable(cacheTableDefinition, storeEventPool,
-                    //todo: should change storeeventpool and storeeventcloner if adding a column for timestamp
                     storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
 
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
@@ -146,6 +141,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledSelectionForCaching = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
+            QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
+            QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
+                    variableExpressionExecutors);
         }
     }
 
@@ -163,7 +161,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
                     loadedCache.add(preLoadedData);
                     cachedTable.addEvents(loadedCache, preLoadedDataSize);
-                    currentCacheSize = preLoadedDataSize;
                 } else {
                     isCacheEnabled = false;
                     log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is bigger " +
@@ -191,9 +188,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
                 cacheTableDefinition,
                 storeMatchingMetaInfoHolder.getCurrentState());
-        if (siddhiQueryContext.getName().startsWith("store_select_query_")) {
-            metaStateEvent.getMetaStreamEvent(0).setEventType(MetaStreamEvent.EventType.TABLE);
-        }
 
         Map<String, Table> tableMap = new ConcurrentHashMap<>();
         tableMap.put(cacheTableDefinition.getId(), cachedTable);
@@ -239,11 +233,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
                 addingEventChunkWithTimestamp.add(eventWithTimeStamp);
             }
-            currentCacheSize += cachedTable.addWithNumberAddedReturn(addingEventChunk);
-            if (currentCacheSize > maxCacheSize) {
+            cachedTable.add(addingEventChunk);
+            if (cachedTable.size() > maxCacheSize) {
                 isCacheEnabled = false;
                 log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
-                        currentCacheSize + " which is bigger than cache table size defined as " + maxCacheSize +
+                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
                         ". So cache is now disabled");
             }
         }
@@ -272,7 +266,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            currentCacheSize -= cachedTable.deleteWithNumberDeletedReturn(deletingEventChunk,
+            cachedTable.delete(deletingEventChunk,
                     compiledConditionWithCache.getCacheCompileCondition());
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
@@ -397,13 +391,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-            currentCacheSize += cachedTable.updateOrAddWithNumberAddedReturn(updateOrAddingEventChunk,
+            cachedTable.updateOrAdd(updateOrAddingEventChunk,
                     compiledConditionWithCache.getCacheCompileCondition(),
                     compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
-            if (currentCacheSize > maxCacheSize) {
+            if (cachedTable.size() > maxCacheSize) {
                 isCacheEnabled = false;
                 log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
-                        currentCacheSize + " which is bigger than cache table size defined as " + maxCacheSize +
+                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
                         ". So cache is now disabled");
             }
         } else {
