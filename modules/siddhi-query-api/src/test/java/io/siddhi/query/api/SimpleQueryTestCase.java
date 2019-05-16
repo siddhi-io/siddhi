@@ -894,7 +894,7 @@ public class SimpleQueryTestCase {
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void testQuery23() {
+    public void testQuery11() {
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream"));
         query.annotation(Annotation.annotation("info").element("name", "query1"));
@@ -911,7 +911,7 @@ public class SimpleQueryTestCase {
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void test1() throws InterruptedException {
 
         String modString = "Mod{leftValue=IntConstant{value=1}, rightValue=IntConstant{value=2}}";
         String addString = "Add{leftValue=IntConstant{value=1}, rightValue=IntConstant{value=2}}";
@@ -1012,7 +1012,7 @@ public class SimpleQueryTestCase {
     }
 
     @Test
-    public void selectorUnsuppoNlWX() {
+    public void test5() {
         String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
                 "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
                 "attributeName='symbol'} }], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
