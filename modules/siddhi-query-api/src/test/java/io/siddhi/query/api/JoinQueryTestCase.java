@@ -92,4 +92,33 @@ public class JoinQueryTestCase {
                 ).
                 insertInto("JoinInputStream");
     }
+
+    @Test
+    public void testCreatingUnidirectionalJoinQuery2() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("t", "TickEvent"),
+                                JoinInputStream.Type.JOIN,
+                                InputStream.stream("n", "NewsEvent").
+                                        window("unique", Expression.variable("symbol"))
+                        )
+                ).
+                insertInto("JoinInputStream");
+    }
+
+    @Test
+    public void testCreatingUnidirectionalJoinQuery3() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("t", "TickEvent"),
+                                JoinInputStream.Type.JOIN,
+                                InputStream.stream("n", "NewsEvent").
+                                        window("unique", Expression.variable("symbol")),
+                                JoinInputStream.EventTrigger.LEFT
+                        )
+                ).
+                insertInto("JoinInputStream");
+    }
 }

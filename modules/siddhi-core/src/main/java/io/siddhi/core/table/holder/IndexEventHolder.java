@@ -588,9 +588,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                     TreeMap<Object, Set<StreamEvent>> indexMap = indexData.get(indexEntry.getKey());
                     Object key = deletedEvent.getOutputData()[indexEntry.getValue()];
                     Set<StreamEvent> values = indexMap.get(key);
-                    values.remove(deletedEvent);
-                    if (values.size() == 0) {
-                        indexMap.remove(key);
+                    if (values != null) {
+                        values.remove(deletedEvent);
+                        if (values.size() == 0) {
+                            indexMap.remove(key);
+                        }
                     }
                 }
             }
@@ -603,9 +605,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 TreeMap<Object, Set<StreamEvent>> indexMap = indexData.get(indexEntry.getKey());
                 Object key = toDeleteEvent.getOutputData()[indexEntry.getValue()];
                 Set<StreamEvent> values = indexMap.get(key);
-                values.remove(toDeleteEvent);
-                if (values.size() == 0) {
-                    indexMap.remove(key);
+                if (values != null) {
+                    values.remove(toDeleteEvent);
+                    if (values.size() == 0) {
+                        indexMap.remove(key);
+                    }
                 }
             }
         }
