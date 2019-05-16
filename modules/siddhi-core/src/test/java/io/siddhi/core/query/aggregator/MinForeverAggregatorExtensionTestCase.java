@@ -31,19 +31,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MinForeverAggregatorExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(MinForeverAggregatorExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
     }
 
-
     @Test
     public void testMinForeverAggregatorExtension1() throws InterruptedException {
+
         log.info("minForeverAggregator TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -57,6 +59,7 @@ public class MinForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -106,6 +109,7 @@ public class MinForeverAggregatorExtensionTestCase {
 
     @Test
     public void testMinForeverAggregatorExtension2() throws InterruptedException {
+
         log.info("minForeverAggregator TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -119,6 +123,7 @@ public class MinForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -154,9 +159,9 @@ public class MinForeverAggregatorExtensionTestCase {
 
     }
 
-
     @Test
     public void testMinForeverAggregatorExtension3() throws InterruptedException {
+
         log.info("minForeverAggregator TestCase 3");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -170,6 +175,7 @@ public class MinForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -219,6 +225,7 @@ public class MinForeverAggregatorExtensionTestCase {
 
     @Test
     public void testMinForeverAggregatorExtension4() throws InterruptedException {
+
         log.info("minForeverAggregator TestCase 4");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -232,6 +239,7 @@ public class MinForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -267,9 +275,9 @@ public class MinForeverAggregatorExtensionTestCase {
 
     }
 
-
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMinForeverAggregatorExtension5() throws InterruptedException {
+
         log.info("minForeverAggregator TestCase 5");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -279,6 +287,80 @@ public class MinForeverAggregatorExtensionTestCase {
                 "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
+    }
+
+    @Test
+    public void minForeverAttributeAggregatorTest6() throws InterruptedException {
+
+        log.info("minForeverAttributeAggregator Test 6");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('MinForeverAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (price1 string, price2 string, price3 string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select minForever(price1) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(20, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "20.0", "20.0"});
+        inputHandler.send(new Object[]{"30", "35.0", "25.0"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test
+    public void minForeverAttributeAggregatorTest7() throws InterruptedException {
+
+        log.info("minForeverAttributeAggregator Test 7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('minForeverAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (price1 double, price2 double, price3 double);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select minForever(price1) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(10.0, inEvents[1].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{null, 20.0, null});
+        inputHandler.send(new Object[]{10.0, 20.0, 25.0});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
     }
 
 }

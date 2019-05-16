@@ -58,6 +58,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
@@ -298,9 +300,9 @@ public class AggregationRuntime implements MemoryCalculable {
         // Create within expression
         Expression timeFilterExpression;
         if (processingOnExternalTime) {
-            timeFilterExpression = Expression.variable("AGG_EVENT_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_EXTERNAL_TIMESTAMP_COL);
         } else {
-            timeFilterExpression = Expression.variable("AGG_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_START_TIMESTAMP_COL);
         }
         Expression withinExpression;
         Expression start = Expression.variable(additionalAttributes.get(0).getName());
@@ -363,15 +365,9 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
-        isFirstEventArrived = isEventArrived;
-        if (isEventArrived) {
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
-            }
-        }
-        recreateInMemoryData.recreateInMemoryData(refreshReadingExecutors);
+    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
+        this.isFirstEventArrived = isFirstEventArrived;
+        recreateInMemoryData.recreateInMemoryData(isFirstEventArrived, refreshReadingExecutors);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

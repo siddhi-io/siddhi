@@ -21,6 +21,8 @@ package io.siddhi.core.query.aggregator;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
@@ -30,19 +32,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MaxAggregatorExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(MaxAggregatorExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
     }
 
-
     @Test
     public void testMaxAggregatorExtension1() throws InterruptedException {
+
         log.info("MaxAggregator TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -57,6 +61,7 @@ public class MaxAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -94,6 +99,164 @@ public class MaxAggregatorExtensionTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
 
+    }
+
+    @Test
+    public void maxAttributeAggregatorTest1() throws InterruptedException {
+
+        log.info("maxAttributeAggregator Test #1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('minAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight string, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(5) " +
+                "select max(weight) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(50, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "Box1"});
+        inputHandler.send(new Object[]{"30", "Box2"});
+        inputHandler.send(new Object[]{"10", "Box3"});
+        inputHandler.send(new Object[]{"40", "Box4"});
+        inputHandler.send(new Object[]{"50", "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void maxAttributeAggregatorTest2() throws InterruptedException {
+
+        log.info("maxAttributeAggregator Test #2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('minAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(5) " +
+                "select max(weight, deviceId) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(50, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{20.0, "Box1"});
+        inputHandler.send(new Object[]{30.0, "Box2"});
+        inputHandler.send(new Object[]{10.0, "Box3"});
+        inputHandler.send(new Object[]{40.0, "Box4"});
+        inputHandler.send(new Object[]{50.0, "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test
+    public void minAttributeAggregatorTest1() throws InterruptedException {
+
+        log.info("minAttributeAggregator Test #1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('minAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight string, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(5) " +
+                "select min(weight) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(10, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "Box1"});
+        inputHandler.send(new Object[]{"30", "Box2"});
+        inputHandler.send(new Object[]{"10", "Box3"});
+        inputHandler.send(new Object[]{"40", "Box4"});
+        inputHandler.send(new Object[]{"50", "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void minAttributeAggregatorTest2() throws InterruptedException {
+
+        log.info("minAttributeAggregator Test #2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('minAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(5) " +
+                "select min(weight, deviceId) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(10, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{20.0, "Box1"});
+        inputHandler.send(new Object[]{30.0, "Box2"});
+        inputHandler.send(new Object[]{10.0, "Box3"});
+        inputHandler.send(new Object[]{40.0, "Box4"});
+        inputHandler.send(new Object[]{50.0, "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
     }
 
 }

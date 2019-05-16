@@ -31,19 +31,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MaxForeverAggregatorExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(MaxForeverAggregatorExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
     }
 
-
     @Test
     public void testMaxForeverAggregatorExtension1() throws InterruptedException {
+
         log.info("MaxForeverAggregator TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -58,6 +60,7 @@ public class MaxForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -107,6 +110,7 @@ public class MaxForeverAggregatorExtensionTestCase {
 
     @Test
     public void testMaxForeverAggregatorExtension2() throws InterruptedException {
+
         log.info("MaxForeverAggregator TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -120,6 +124,7 @@ public class MaxForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -155,9 +160,9 @@ public class MaxForeverAggregatorExtensionTestCase {
 
     }
 
-
     @Test
     public void testMaxForeverAggregatorExtension3() throws InterruptedException {
+
         log.info("MaxForeverAggregator TestCase 3");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -171,6 +176,7 @@ public class MaxForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -220,6 +226,7 @@ public class MaxForeverAggregatorExtensionTestCase {
 
     @Test
     public void testMaxForeverAggregatorExtension4() throws InterruptedException {
+
         log.info("MaxForeverAggregator TestCase 4");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -233,6 +240,7 @@ public class MaxForeverAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
@@ -268,9 +276,9 @@ public class MaxForeverAggregatorExtensionTestCase {
 
     }
 
-
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMaxForeverAggregatorExtension5() throws InterruptedException {
+
         log.info("MaxForeverAggregator TestCase 5");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -280,6 +288,81 @@ public class MaxForeverAggregatorExtensionTestCase {
                 "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
+    }
+
+    @Test
+    public void maxForeverAttributeAggregatorTest6() throws InterruptedException {
+
+        log.info("maxForeverAttributeAggregator Test 6");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('MaxForeverAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (price1 string, price2 string, price3 string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select maxForever(price1) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(20, inEvents[0].getData()[0]);
+                AssertJUnit.assertEquals(30.00, inEvents[1].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "20", "20"});
+        inputHandler.send(new Object[]{"30.00", "30.88", "20"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test
+    public void maxForeverAttributeAggregatorTest7() throws InterruptedException {
+
+        log.info("maxForeverAttributeAggregator Test 7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('maxForeverAttributeAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (price1 double, price2 double, price3 double);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select maxForever(price1) as max " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(30, inEvents[1].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{null, 20.0, 20.0});
+        inputHandler.send(new Object[]{30.0, 30.88, 20.0});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
     }
 
 }
