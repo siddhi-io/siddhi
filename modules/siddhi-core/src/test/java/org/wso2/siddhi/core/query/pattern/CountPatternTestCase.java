@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class CountPatternTestCase {
@@ -922,6 +923,76 @@ public class CountPatternTestCase {
         AssertJUnit.assertEquals("Number of remove events", 0, removeEventCount);
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
 
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testQuery16() throws InterruptedException {
+        log.info("testQuery16");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "@app:playback\n " +
+                "define stream Stream1 (id string, symbol string, price float, volume int); ";
+        String query = "" +
+                " @info(name = 'query1') " +
+                " from every e1=Stream1[symbol=='WSO2'] " +
+                "  -> e2=Stream1[symbol=='WSO2']<2:> -> e3=Stream1[symbol=='GOOG'] " +
+                " within 10 milliseconds " +
+                " select e1.price as price1, e2.price as price2, e3.price as price3 " +
+                " insert into OutputStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] inEvents) {
+                EventPrinter.print(inEvents);
+                eventArrived = true;
+                inEventCount += inEvents.length;
+            }
+
+        });
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+        siddhiAppRuntime.start();
+
+        long startTime = System.currentTimeMillis();
+        long now = 1;
+        for (int i = 1; i < 401; i++) {
+            stream1.send(++now, new Object[]{
+                    ++now, "WSO2", 25.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "WSO2", 23.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "WSO2", 23.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "WSO2", 23.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "WSO2", 23.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "GOOG", 27.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "GOOG", 28.6f, 100
+            });
+            stream1.send(++now, new Object[]{
+                    ++now, "GOOG", 28.6f, 100
+            });
+            now += 100;
+        }
+
+        long endTime = System.currentTimeMillis();
+        long timeElapsed = endTime - startTime;
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Event count", 400 * 3, inEventCount);
+        AssertJUnit.assertTrue("Event processing time", timeElapsed < 400);
         siddhiAppRuntime.shutdown();
     }
 
