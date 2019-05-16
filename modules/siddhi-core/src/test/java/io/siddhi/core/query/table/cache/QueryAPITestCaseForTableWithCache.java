@@ -29,20 +29,14 @@ import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class QueryAPITestCaseForTableWithCache {
     private static final Logger log = Logger.getLogger(QueryAPITestCaseForTableWithCache.class);
 
-    @BeforeClass
-    public static void startTest() {
-        log.info("== Query Tests for Cache started ==");
-    }
-
     @Test
     public void test0() throws InterruptedException {
-        log.info("Test1 table with cache");
+        log.info("Test0 table with cache");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
