@@ -20,6 +20,7 @@ package io.siddhi.core.query.streamfunction;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
@@ -29,6 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class StreamFunctionTestCase {
+
     private static final Logger log = Logger.getLogger(StreamFunctionTestCase.class);
     private int inEventCount;
     private int removeEventCount;
@@ -36,6 +38,7 @@ public class StreamFunctionTestCase {
 
     @BeforeMethod
     public void init() {
+
         inEventCount = 0;
         removeEventCount = 0;
         eventArrived = false;
@@ -57,6 +60,7 @@ public class StreamFunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -95,6 +99,7 @@ public class StreamFunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -133,6 +138,7 @@ public class StreamFunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -173,6 +179,7 @@ public class StreamFunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -195,4 +202,61 @@ public class StreamFunctionTestCase {
         siddhiAppRuntime.shutdown();
 
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void logStreamProcessorTest1() throws InterruptedException {
+        log.info("logStreamProcessorTest #1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#log(12) " +
+                "select* " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void logStreamProcessorTest2() throws InterruptedException {
+        log.info("logStreamProcessorTest #2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#log(12, 'message') " +
+                "select* " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void logStreamProcessorTest3() throws InterruptedException {
+        log.info("logStreamProcessorTest #3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#log('message', true, 1, 'hai') " +
+                "select* " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void logStreamProcessorTest4() throws InterruptedException {
+        log.info("logStreamProcessorTest #4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#log(12, 'event', true) " +
+                "select* " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
 }

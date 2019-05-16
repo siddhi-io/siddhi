@@ -2436,4 +2436,436 @@ public class PartitionTestCase1 {
         AssertJUnit.assertEquals(4, count.get());
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void testDivideExpressionExecutorIntCase1() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorIntCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorIntCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr3/atr11 as dividedVal, atr5 as threshold,  atr1 " +
+                "as symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert" +
+                " into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "kk", 100, 101.0, 500L, 20L, 11.43, 75.7f, false, true, null});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0, 501L, 206L, 15.21, 76.7f, false, true, null});
+        inputHandler.send(new Object[]{"IBM", "ll", 100, 102.0, 502L, 202L, 45.23, 77.7f, false, true, null});
+        inputHandler.send(new Object[]{"ORACLE", "hh", 100, 101.0, 502L, 209L, 87.34, 77.7f, false, false, null});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorIntCase2() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorIntCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorIntCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr3/atr11 as dividedVal, atr5 as threshold,  atr1 " +
+                "as symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert" +
+                " into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "kk", 100, 101.0, 500L, 20L, 11.43, 75.7f, false, true, 0});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0, 501L, 206L, 15.21, 76.7f, false, true, 0});
+        inputHandler.send(new Object[]{"IBM", "ll", 100, 102.0, 502L, 202L, 45.23, 77.7f, false, true, 0});
+        inputHandler.send(new Object[]{"ORACLE", "hh", 100, 101.0, 502L, 209L, 87.34, 77.7f, false, false, 0});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorLongCase1() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorLongCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorLongCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr5/atr6 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "mm", 100, 101.0, 20L, null, 11.43, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0, 206L, null, 15.21, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", "mm", 100, 102.0, 202L, null, 45.23, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", "ff", 100, 101.0, 20L, null, 87.34, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorLongCase2() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorLongCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorLongCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr5/atr6 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", null, 100, 101.0, 500L, 0L, 11.43, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0, 501L, 0L, 15.21, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", null, 100, 102.0, 502L, 0L, 45.23, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", null, 100, 101.0, 502L, 0L, 87.34, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorDoubleCase1() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorDoubleCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorDoubleCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr4/atr7 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "ll", 100, null, 500L, 200L, 11.43, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, null, 501L, 201L, 15.21, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", "mm", 100, null, 502L, 202L, 45.23, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", "kk", 100, null, 502L, 202L, 87.34, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+    @Test
+    public void testDivideExpressionExecutorDoubleCase2() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorDoubleCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorDoubleCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 double, " +
+                "atr5 long,  atr6 long,  atr7 double,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr4/atr7 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "ff", 100, 101.0, 500L, 200L, 0.0, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0, 501L, 201L, 0.0, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", "ll", 100, 102.0, 502L, 202L, 0.0, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", "hh", 100, 101.0, 502L, 202L, 0.0, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorFloatCase1() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorFloatCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorFloatCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 float, " +
+                "atr5 long,  atr6 long,  atr7 float,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr4/atr7 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "mm", 100, null, 500L, 200L, 11.43f, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, null, 501L, 201L, 15.21f, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", "gg", 100, null, 502L, 202L, 45.23f, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", "ff", 100, null, 502L, 202L, 87.34f, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testDivideExpressionExecutorFloatCase2() throws InterruptedException {
+        log.info("Partition testDivideExpressionExecutorFloatCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('testDivideExpressionExecutorFloatCase') " +
+                "define stream cseEventStream (atr1 string,  atr2 string, atr3 int, atr4 float, " +
+                "atr5 long,  atr6 long,  atr7 float,  atr8 float , atr9 bool, atr10 bool,  atr11 int);" +
+                "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                "cseEventStream[atr5 < 700 ] select atr4/atr7 as dividedVal, atr5 as threshold,  atr1 as" +
+                " symbol, " + "cast(atr2,  'double') as priceInDouble,  sum(atr7) as summedValue insert " +
+                "into OutStockStream ; end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 4) {
+                        AssertJUnit.assertEquals(null, event.getData(0));
+                        eventArrived = true;
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "mm", 100, 101.0f, 500L, 200L, 0.0f, 75.7f, false, true, 105});
+        inputHandler.send(new Object[]{"WSO2", "aa", 100, 101.0f, 501L, 201L, 0.0f, 76.7f, false, true, 106});
+        inputHandler.send(new Object[]{"IBM", "gg", 100, 102.0f, 502L, 202L, 0.0f, 77.7f, false, true, 107});
+        inputHandler.send(new Object[]{"ORACLE", "dd", 100, 101.0f, 502L, 202L, 0.0f, 77.7f, false, false, 108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        AssertJUnit.assertEquals(4, count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
 }

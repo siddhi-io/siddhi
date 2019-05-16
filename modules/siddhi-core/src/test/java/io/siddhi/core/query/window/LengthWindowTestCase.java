@@ -20,6 +20,7 @@ package io.siddhi.core.query.window;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
@@ -251,6 +252,39 @@ public class LengthWindowTestCase {
 
     }
 
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void lengthWindowTest5() throws InterruptedException {
+        log.info("Testing length window grater than one parameter");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "@info(name = 'query1') from cseEventStream#window.length(2, price) select symbol,price," +
+                "volume insert" +
+                " all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals("Message order inEventCount", inEventCount, inEvents[0].getData(2));
+                AssertJUnit.assertEquals("Events cannot be expired", false, inEvents[0].isExpired());
+                inEventCount = inEventCount + inEvents.length;
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        AssertJUnit.assertEquals(2, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
 }
-
-
