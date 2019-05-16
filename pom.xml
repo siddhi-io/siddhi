@@ -39,12 +39,12 @@
         <module>modules/siddhi-service</module>
         <module>modules/siddhi-query-compiler</module>
         <module>modules/siddhi-core</module>
-        <!--<module>modules/siddhi-samples</module>-->
+        <module>modules/siddhi-samples</module>
         <module>modules/siddhi-annotations</module>
-        <!--<module>modules/siddhi-doc-gen</module>-->
-        <!--<module>modules/siddhi-core/siddhi-core-doc-gen</module>-->
+        <module>modules/siddhi-doc-gen</module>
+        <module>modules/siddhi-core/siddhi-core-doc-gen</module>
         <module>modules/siddhi-feature</module>
-        <!--<module>coverage-reports</module>-->
+        <module>coverage-reports</module>
     </modules>
 
     <dependencyManagement>
