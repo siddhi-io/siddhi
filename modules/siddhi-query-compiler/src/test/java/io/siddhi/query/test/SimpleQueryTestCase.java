@@ -877,8 +877,6 @@ public class SimpleQueryTestCase {
         AssertJUnit.assertEquals(functionDefinition.getLanguage(), "javascript");
         AssertJUnit.assertEquals(functionDefinition.getReturnType(), Attribute.Type.STRING);
     }
-
-
 }
 
 

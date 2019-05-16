@@ -186,6 +186,4 @@ public class DefineStreamTestCase {
         AssertJUnit.assertEquals(elementString, element.toString());
 
     }
-
-
 }

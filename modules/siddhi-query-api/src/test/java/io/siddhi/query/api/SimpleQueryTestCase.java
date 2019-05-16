@@ -1022,8 +1022,4 @@ public class SimpleQueryTestCase {
 
         AssertJUnit.assertEquals(selector, selectorString);
     }
-
-
-
-
 }

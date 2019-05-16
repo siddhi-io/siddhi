@@ -113,5 +113,4 @@ public class DefineTriggerTestCase {
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").
                 atEvery(new TimeConstant(1000)).at("start"));
     }
-
 }

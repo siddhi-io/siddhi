@@ -250,6 +250,4 @@ public class DefineAggregationTestCase {
 
         AssertJUnit.assertEquals(basicSingleInputStream, aggregationDefinition.getBasicSingleInputStream().toString());
     }
-
-
 }
