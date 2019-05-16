@@ -21,9 +21,11 @@ package io.siddhi.query.api;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
+import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class StoreQueryTestCase {
@@ -77,6 +79,108 @@ public class StoreQueryTestCase {
                                 on(Expression.compare(Expression.variable("price"),
                                         Compare.Operator.GREATER_THAN, Expression.value(40)),
                                         Within.within(Expression.value("2017/01/*")), Expression.value("day"))).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol")).
+                                select(Expression.variable("price")).
+                                groupBy(Expression.variable("symbol")).
+                                having(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price"))
+                                )
+                );
+    }
+
+    @Test
+    public void test4() {
+        StoreQuery storeQuery = StoreQuery.query();
+        storeQuery.
+                from(
+                        InputStore.store("StockTable")).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol")).
+                                select("price", Expression.variable("price"))
+                ).
+                updateBy("StockTable", Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol")));
+
+        AssertJUnit.assertNotNull(storeQuery.toString());
+    }
+
+    @Test
+    public void test5() {
+        StoreQuery storeQuery = StoreQuery.query();
+        storeQuery.
+                from(
+                        InputStore.store("StockTable")).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol")).
+                                select("price", Expression.variable("price"))
+                ).
+                deleteBy("StockTable", Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol")));
+    }
+
+    @Test
+    public void test6() {
+        StoreQuery storeQuery = StoreQuery.query();
+        storeQuery.
+                from(
+                        InputStore.store("StockTable")).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol")).
+                                select("price", Expression.variable("price"))
+                ).
+                updateBy("StockTable", UpdateStream.updateSet().
+                        set(
+                                Expression.variable("symbol").ofStream("StockStream"),
+                                Expression.variable("symbol")).
+                        set(
+                                Expression.variable("price").ofStream("StockStream"),
+                                Expression.variable("price")), Expression.compare(
+                                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol")));
+    }
+
+    @Test
+    public void test7() {
+        StoreQuery storeQuery = StoreQuery.query();
+        storeQuery.
+                from(
+                        InputStore.store("StockTable")).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol")).
+                                select("price", Expression.variable("price"))
+                ).
+                updateOrInsertBy("StockTable", UpdateStream.updateSet().
+                        set(
+                                Expression.variable("symbol").ofStream("StockStream"),
+                                Expression.variable("symbol")).
+                        set(
+                                Expression.variable("pricd").ofStream("StockStream"),
+                                Expression.variable("price")), Expression.compare(
+                                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol")));
+    }
+
+    @Test
+    public void test8() {
+        StoreQuery.query().
+                from(
+                        InputStore.store("cseEventTable").
+                                on(Within.within(Expression.value("2017/01/*")), Expression.value("day"))).
                 select(
                         Selector.selector().
                                 select("symbol", Expression.variable("symbol")).

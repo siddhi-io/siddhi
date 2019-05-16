@@ -26,6 +26,7 @@
             <class name="io.siddhi.query.api.DefineStreamTestCase"/>
             <class name="io.siddhi.query.api.DefineTableTestCase"/>
             <class name="io.siddhi.query.api.DefineTriggerTestCase"/>
+            <class name="io.siddhi.query.api.DefineWindowTestCase"/>
             <class name="io.siddhi.query.api.JoinQueryTestCase"/>
             <class name="io.siddhi.query.api.OutputRateTestCase"/>
             <class name="io.siddhi.query.api.PartitionQueryTestCase"/>
