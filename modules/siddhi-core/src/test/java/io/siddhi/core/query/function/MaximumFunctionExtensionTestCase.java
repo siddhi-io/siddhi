@@ -485,4 +485,6 @@ public class MaximumFunctionExtensionTestCase {
         siddhiAppRuntime.shutdown();
 
     }
+
+
 }

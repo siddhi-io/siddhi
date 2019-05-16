@@ -60,7 +60,7 @@ Name | Description
 ### Extensions released under GPL License
 Name | Description
 :-- | :--
-<a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution-geo</a> | The siddhi-gpl-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc. Following are the functions of the Geo extension.
+<a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution-geo</a> | The siddhi-gpl-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution-nlp</a> | The siddhi-gpl-execution-nlp extension is an extension to Siddhi that can be used to process natural language.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-pmml">execution-pmml</a> | The siddhi-gpl-execution-pmml extension is an extension to Siddhi that can be used to process texts based on a PMML processing model.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-r">execution-r</a> | The siddhi-gpl-execution-r extension is an extension to Siddhi that can be used to process events with R scripts.

@@ -23,6 +23,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.definition.TriggerDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
 import org.testng.annotations.Test;
 
@@ -47,5 +48,28 @@ public class DefineTriggerTestCase {
                 ("datasource.id", "cepDataSource"));
     }
 
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTriggerEventNull() {
+        TriggerDefinition trigger = null;
+        SiddhiApp.siddhiApp("test").defineTrigger(trigger);
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTriggerEventIdNull() {
+        TriggerDefinition trigger = TriggerDefinition.id(null);
+        SiddhiApp.siddhiApp("test").defineTrigger(trigger);
+    }
+
+    @Test
+    public void testCreatingTableDefinition2() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.week(10L).value()));
+    }
+
+    @Test
+    public void testCreatingTableDefinition3() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.week(1).value()));
+    }
 
 }

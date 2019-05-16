@@ -58,6 +58,14 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         try {
             for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
+                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
+                    iterator.remove();
+                    if (withinEveryPreStateProcessor != null) {
+                        withinEveryPreStateProcessor.addEveryState(stateEvent);
+                        withinEveryPreStateProcessor.updateState();
+                    }
+                    continue;
+                }
                 if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
                     continue;
                 }

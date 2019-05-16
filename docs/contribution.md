@@ -1,14 +1,13 @@
 # How to Contribute
 
-Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
- SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.
+Siddhi is a cloud native Streaming and Complex Event Processing engine that understands Streaming SQL queries in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
-We are an open-source project under Apache license and the work of hundreds of contributors.
+It's an open-source project under Apache license and the work of hundreds of contributors.
 
-We always appreciate and welcome your help. You can contribute to siddhi in various ways; please find them below.
+We always appreciate and welcome your help. You can contribute to Siddhi in various ways; please find them below.
 
 
-## Communicating with the team
+## Asking Questions
 
 [Siddhi-Dev Google Group](https://groups.google.com/forum/#!forum/siddhi-dev) Group is the main Siddhi project discussion forum for developers.
 
@@ -44,10 +43,19 @@ If for some (unlikely) reason at any time CLA changes, you will get presented wi
 
 ### Obtaining the Source Code and Building the Project
 
-- Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
-- Prerequisites: JDK 1.8.x or JDK 11.x.x and Maven 3.5.x version (Install [Maven](https://maven.apache.org/install.html))
-- Run the Maven command `mvn clean install` from the Siddhi root directory:
+#### Prerequisites
+* [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), [OpenJDK 8](http://openjdk.java.net/install/), or JDK 11 (Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime)
+* [Maven 3.5.x or later version](https://maven.apache.org/install.html)
 
+#### Steps to Build
+1. Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
+
+    ```bash
+    git clone https://github.com/siddhi-io/siddhi.git
+    ```
+    
+1. Run the Maven command ``mvn clean install`` from the root directory
+ 
   Command | Description
   --- | ---
   `mvn clean install` | Build and install the artifacts into the local repository.
@@ -55,7 +63,7 @@ If for some (unlikely) reason at any time CLA changes, you will get presented wi
 
 ### Setting up the Developer Environment
 
-You can use any of your preferred IDEs (eg: IntelliJ IDEA, Eclipse.. ). Make sure, that your IDE is configured with proper JDK and Maven settings. Import the source code in your IDE and do necessary code changes.
+Use any of your preferred IDEs (eg: IntelliJ IDEA, Eclipse.. ). Make sure, that your IDE is configured with proper JDK and Maven settings. Import the source code in your IDE and do necessary code changes.
 Then add necessary unit tests with respect to your changes. Finally, build the complete Siddhi project with tests and commit the changes to your Github folk once build is successful.
 
 ### Commit the Changes
@@ -71,8 +79,7 @@ We follow these commit message requirements:
 
 Please find details at: [https://chris.beams.io/posts/git-commit/](https://chris.beams.io/posts/git-commit/)
 
-
-## Proposing changes/improvements to Siddhi
+## Proposing Changes/Improvements
 
 Start with the discussion in the [Siddhi-Dev Google Group](https://groups.google.com/forum/#!forum/siddhi-dev).
 

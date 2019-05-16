@@ -53,6 +53,7 @@ public class Aggregation2TestCase {
 
     @BeforeMethod
     public void init() {
+
         inEventCount = new AtomicInteger(0);
         removeEventCount = new AtomicInteger(0);
         eventArrived = false;
@@ -62,6 +63,7 @@ public class Aggregation2TestCase {
 
     @Test
     public void incrementalStreamProcessorTest47() throws InterruptedException {
+
         LOG.info("incrementalStreamProcessorTest47 - Aggregation external timestamp minute granularity");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -118,7 +120,6 @@ public class Aggregation2TestCase {
                     eventsList.add(event.getData());
                 }
 
-
                 List<Object[]> expected = Arrays.asList(
                         new Object[]{1496289900000L, "WSO2", 650.0, 216.66666666666666},
                         new Object[]{1496289900000L, "IBM", 1500.0, 375.0}
@@ -133,6 +134,7 @@ public class Aggregation2TestCase {
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest47"})
     public void incrementalStreamProcessorTest48() throws InterruptedException {
+
         LOG.info("incrementalStreamProcessorTest48 - Aggregation external timestamp second granularity");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -199,6 +201,7 @@ public class Aggregation2TestCase {
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest48"})
     public void incrementalStreamProcessorTest49() throws InterruptedException {
+
         LOG.info("incrementalStreamProcessorTest49 - Aggregate on system timestamp and retrieval on non root duration");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -228,6 +231,7 @@ public class Aggregation2TestCase {
             siddhiAppRuntime.addCallback("query1", new QueryCallback() {
                 @Override
                 public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                     if (inEvents != null) {
                         EventPrinter.print(timestamp, inEvents, removeEvents);
                         for (Event event : inEvents) {
@@ -309,6 +313,7 @@ public class Aggregation2TestCase {
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest49"},
             expectedExceptions = StoreQueryCreationException.class)
     public void incrementalStreamProcessorTest50() throws InterruptedException {
+
         LOG.info("incrementalStreamProcessorTest50 - Retrieval query syntax validating ");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -333,6 +338,7 @@ public class Aggregation2TestCase {
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest50"})
     public void incrementalStreamProcessorTest51() throws InterruptedException {
+
         LOG.info("incrementalStreamProcessorTest51 - Checking aggregation values when queried twice (non external " +
                 "timestamp)");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -363,6 +369,7 @@ public class Aggregation2TestCase {
             siddhiAppRuntime.addCallback("query1", new QueryCallback() {
                 @Override
                 public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                     if (inEvents != null) {
                         EventPrinter.print(timestamp, inEvents, removeEvents);
                         for (Event event : inEvents) {
@@ -454,6 +461,7 @@ public class Aggregation2TestCase {
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest51"}, expectedExceptions =
             SiddhiAppCreationException.class)
     public void incrementalStreamProcessorTest52() {
+
         LOG.info("incrementalStreamProcessorTest52 - Checking partitionbyid parsing");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream =
@@ -473,6 +481,7 @@ public class Aggregation2TestCase {
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest52"}, expectedExceptions =
             SiddhiAppCreationException.class)
     public void incrementalStreamProcessorTest53() {
+
         LOG.info("incrementalStreamProcessorTest53 - Checking partitionbyid enable=true");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream =
@@ -491,6 +500,7 @@ public class Aggregation2TestCase {
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest53"})
     public void incrementalStreamProcessorTest54() {
+
         LOG.info("incrementalStreamProcessorTest54 - Checking partitionbyid enable= false");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream =
@@ -533,7 +543,6 @@ public class Aggregation2TestCase {
         siddhiAppRuntime.start();
     }
 
-
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest55"}, expectedExceptions =
             SiddhiAppCreationException.class)
     public void incrementalStreamProcessorTest56() {
@@ -559,6 +568,159 @@ public class Aggregation2TestCase {
         siddhiAppRuntime.start();
     }
 
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sumAggregatorTest57() throws InterruptedException {
+
+        LOG.info("sumAggregator Test 57");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('sumAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(3) " +
+                "select sum(weight,deviceId) as total " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(55, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{10.0, "Box1"});
+        inputHandler.send(new Object[]{20.0, "Box2"});
+        inputHandler.send(new Object[]{25.0, "Box3"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sumAggregatorTest58() throws InterruptedException {
+
+        LOG.info("sumAggregator Test 58");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('sumAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(3) " +
+                "select sum(deviceId) as total " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(3, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{10.0, "Box1"});
+        inputHandler.send(new Object[]{20.0, "Box2"});
+        inputHandler.send(new Object[]{25.0, "Box3"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void avgAggregatorTest59() throws InterruptedException {
+
+        LOG.info("avgAggregator Test 59");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('avgAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(5) " +
+                "select avg(weight,deviceId) as avgWeight " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{20.0, "Box1"});
+        inputHandler.send(new Object[]{30.0, "Box2"});
+        inputHandler.send(new Object[]{20.0, "Box3"});
+        inputHandler.send(new Object[]{40.0, "Box4"});
+        inputHandler.send(new Object[]{20.0, "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test
+    public void avgAggregatorTest60() throws InterruptedException {
+
+        LOG.info("avgAggregator Test 60");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('avgAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight string, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(5) " +
+                "select avg(weight) as avgWeight " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "Box1"});
+        inputHandler.send(new Object[]{"30", "Box2"});
+        inputHandler.send(new Object[]{"20", "Box3"});
+        inputHandler.send(new Object[]{"40", "Box4"});
+        inputHandler.send(new Object[]{"20", "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
 
 }
 

@@ -77,16 +77,17 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_LAST_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.SHARD_ID_COL;
+
 /**
  * This is the parser class of incremental aggregation definition.
  */
 public class AggregationParser {
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(AggregationParser.class);
-    private static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
-    private static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
-    private static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
-    private static final String SHARD_ID_COL = "SHARD_ID";
 
     public static AggregationRuntime parse(AggregationDefinition aggregationDefinition,
                                            SiddhiAppContext siddhiAppContext,
@@ -288,19 +289,6 @@ public class AggregationParser {
                     incrementalDurations, processedMetaStreamEvent.getOutputStreamDefinition(),
                     siddhiAppRuntimeBuilder, aggregationDefinition.getAnnotations(), groupByVariableList,
                     isProcessingOnExternalTime, enablePartioning);
-
-            Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_BUFFER_SIZE, null,
-                    aggregationDefinition.getAnnotations());
-            if (element != null) {
-                LOG.info("@BufferSize annotation is depreciated. Out of order events are handled without buffers.");
-            }
-
-            element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_IGNORE_EVENTS_OLDER_THAN_BUFFER,
-                    null, aggregationDefinition.getAnnotations());
-            if (element != null) {
-                LOG.info("@IgnoreEventsOlderThanBuffer annotation is depreciated. Out of order events are handled " +
-                        "without buffers.");
-            }
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
                     processedMetaStreamEvent, processExpressionExecutorsList, groupByKeyGeneratorList,
