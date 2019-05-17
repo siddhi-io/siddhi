@@ -79,15 +79,8 @@ public class RecreateInMemoryData {
     }
 
     public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
-        IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
-        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1 && !refreshReadingExecutors) {
-            // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
-            // created. Hence this method does not have to be executed.
-            //This is only true in a processing aggregation runtime
-            return;
-        }
-
-        if (isFirstEventArrived) {
+        if (!refreshReadingExecutors && isFirstEventArrived) {
+            // Only cleared when executors change from reading to processing state in one node deployment
             for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
                     this.incrementalExecutorMap.entrySet()) {
                 IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
