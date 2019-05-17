@@ -258,17 +258,9 @@ wso2.metrics:
 ```
 </li>
 <li>
-To enable JDBC reporting, set the Enable JDBC parameter to true in the <code>wso2.metrics.jdbc: => reporting:</code> subsection as shown below. If JDBC reporting is not enabled, only real-time metrics are displayed in the first page of the Status dashboard, and information relating to metrics history is not displayed in the other pages of the dashboard. To render the first entry of the graph, you need to wait for the time duration specified as the pollingPeriod.
-
-```
-# Enable JDBC Reporter
- name: JDBC
- enabled: true
- pollingPeriod: 60
-```
-</li>
-<li>
-Under  wso2.metrics.jdbc , configure the following properties to clean up the database entries. For detailed instructions of how to configure a datasource, see [Configuring Datasources](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#configuring-datasources)
+To enable JDBC reporting and configure properties to clean up the database entries, add the below configuration in <code>&lt;SIDDHI_RUNNER_HOME&gt;/conf/runner/deployment.yaml</code> file.  
+If JDBC reporting is not enabled in <code>wso2.metrics.jdbc: => reporting:</code>, information relating to metrics history will not be persisted for future references. You need to wait for the time duration specified as the pollingPeriod for the initial reporting to be persisted in the datasource configured.
+For detailed instructions of how to configure a datasource, see [Configuring Datasources](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#configuring-datasources)
 
 ```
 wso2.metrics.jdbc:
@@ -291,6 +283,26 @@ wso2.metrics.jdbc:
  
         # This is the period for each cleanup operation in seconds.
         scheduledCleanupPeriod: 86400
+        
+  reporting:
+      # The JDBC Reporter configurations will be ignored if the Metrics JDBC Core feature is not available in runtime
+      jdbc:
+        - # The name for the JDBC Reporter
+          name: JDBC
+  
+          # Enable JDBC Reporter
+          enabled: true
+  
+          # Source of Metrics, which will be used to identify each metric in database -->
+          # Commented to use the hostname by default
+          # source: Carbon
+  
+          # Alias referring to the Data Source configuration
+          dataSource: *JDBC01
+  
+          # Polling Period in seconds.
+          # This is the period for polling metrics from the metric registry and updating the database with the values
+          pollingPeriod: 60      
 ```
 | Parameter | Default Value | Description |
 | ------------- |-------------|-------------|
