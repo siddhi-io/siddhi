@@ -458,16 +458,12 @@ public class TimeLengthWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeLengthWindowTest11() throws InterruptedException {
         log.info("Testing timeLength window less than two parameters");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream#window.timeLength(4 sec) select symbol," +
                 "price," +
                 "volume insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -483,7 +479,6 @@ public class TimeLengthWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -494,7 +489,6 @@ public class TimeLengthWindowTestCase {
         Thread.sleep(500);
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         Thread.sleep(5000);
-
         AssertJUnit.assertEquals(4, inEventCount);
         AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -504,9 +498,7 @@ public class TimeLengthWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeLengthWindowTest12() throws InterruptedException {
         log.info("Testing timeLength window is a dinamic value");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -514,9 +506,7 @@ public class TimeLengthWindowTestCase {
                 "from cseEventStream#window.timeLength(1/2 sec,4) " +
                 "select symbol,price,volume " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -532,7 +522,6 @@ public class TimeLengthWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
@@ -547,15 +536,12 @@ public class TimeLengthWindowTestCase {
         AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeLengthWindowTest13() throws InterruptedException {
         log.info("Testing timeLength window constant but not a int or long value");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -563,9 +549,7 @@ public class TimeLengthWindowTestCase {
                 "from cseEventStream#window.timeLength('4 sec',4) " +
                 "select symbol,price,volume " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -581,7 +565,6 @@ public class TimeLengthWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
@@ -596,7 +579,5 @@ public class TimeLengthWindowTestCase {
         AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
-
 }

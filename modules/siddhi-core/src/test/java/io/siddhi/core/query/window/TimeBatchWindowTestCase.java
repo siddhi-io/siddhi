@@ -525,7 +525,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest11() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -535,7 +534,6 @@ public class TimeBatchWindowTestCase {
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -550,7 +548,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -571,7 +568,6 @@ public class TimeBatchWindowTestCase {
     @Test
     public void timeWindowBatchTest12() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -579,9 +575,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(2 sec , 123L) " +
                 "select symbol, sum(price) as sumPrice, volume " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -599,7 +593,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         // Start sending events in the beginning of a cycle
@@ -624,7 +617,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest13() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -634,7 +626,6 @@ public class TimeBatchWindowTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -652,7 +643,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         // Start sending events in the beginning of a cycle
@@ -671,13 +661,11 @@ public class TimeBatchWindowTestCase {
         AssertJUnit.assertEquals(0, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest14() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -685,9 +673,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch('2 sec', 0) " +
                 "select symbol, sum(price) as sumPrice, volume " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -705,7 +691,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         // Start sending events in the beginning of a cycle
@@ -730,7 +715,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest15() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -783,7 +767,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest16() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -791,9 +774,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(1 sec, true, 100) " +
                 "select symbol, sum(price) as total " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -808,7 +789,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -829,7 +809,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest17() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -837,9 +816,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(1 sec, 1/2, 100) " +
                 "select symbol, sum(price) as total " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -854,7 +831,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -875,7 +851,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest18() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -885,7 +860,6 @@ public class TimeBatchWindowTestCase {
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -900,7 +874,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -928,9 +901,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(1 sec, 123L, true) " +
                 "select symbol, sum(price) as total " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -945,7 +916,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -966,7 +936,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest20() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -974,9 +943,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(1 sec, 123L, 'true') " +
                 "select symbol, sum(price) as total " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -991,7 +958,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -1012,7 +978,6 @@ public class TimeBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void timeWindowBatchTest21() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -1020,9 +985,7 @@ public class TimeBatchWindowTestCase {
                 "from cseEventStream#window.timeBatch(1 sec, 123L, true, 100) " +
                 "select symbol, sum(price) as total " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -1037,7 +1000,6 @@ public class TimeBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -1054,5 +1016,4 @@ public class TimeBatchWindowTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
-
 }

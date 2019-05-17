@@ -30,7 +30,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class StreamFunctionTestCase {
-
     private static final Logger log = Logger.getLogger(StreamFunctionTestCase.class);
     private int inEventCount;
     private int removeEventCount;
@@ -46,17 +45,13 @@ public class StreamFunctionTestCase {
 
     @Test
     public void pol2CartFunctionTest() throws InterruptedException {
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String polarStream = "define stream PolarStream (theta double, rho double);";
         String query = "@info(name = 'query1') " +
                 "from PolarStream#pol2Cart(theta, rho) " +
                 "select x, y " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(polarStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -72,7 +67,6 @@ public class StreamFunctionTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("PolarStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{22.6, 13.0});
@@ -80,38 +74,30 @@ public class StreamFunctionTestCase {
         AssertJUnit.assertEquals(1, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test
     public void pol2CartFunctionTest2() throws InterruptedException {
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String polarStream = "define stream PolarStream (theta double, rho double, elevation double);";
         String query = "@info(name = 'query1') " +
                 "from PolarStream#pol2Cart(theta, rho, elevation) " +
                 "select x, z " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(polarStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
                     AssertJUnit.assertEquals(12, Math.round((Double) inEvents[0].getData(0)));
                     AssertJUnit.assertEquals(7, Math.round((Double) inEvents[0].getData(1)));
-
                 }
                 eventArrived = true;
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("PolarStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{22.6, 13.0, 7.0});
@@ -119,38 +105,30 @@ public class StreamFunctionTestCase {
         AssertJUnit.assertEquals(1, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test
     public void pol2CartFunctionTest3() throws InterruptedException {
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String polarStream = "define stream PolarStream (theta double, rho double);";
         String query = "@info(name = 'query1') " +
                 "from PolarStream#pol2Cart(*) " +
                 "select x, y " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(polarStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
                     AssertJUnit.assertEquals(12, Math.round((Double) inEvents[0].getData(0)));
                     AssertJUnit.assertEquals(5, Math.round((Double) inEvents[0].getData(1)));
-
                 }
                 eventArrived = true;
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("PolarStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{22.6, 13.0});
@@ -158,41 +136,33 @@ public class StreamFunctionTestCase {
         AssertJUnit.assertEquals(1, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test
     public void nonStandardAttribute() throws InterruptedException {
-
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:get", AttributeStreamFunction.class);
-
         String siddhiApp = "" +
                 "define stream `$InputStream` (`56$2theta` double, rho double); " +
                 "@info(name = 'query1') " +
                 "from `$InputStream`#custom:get('test(0)') " +
                 "select `56$2theta`, rho, `test(0)` as foo " +
                 "insert into OutputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
                     AssertJUnit.assertEquals(22.6, inEvents[0].getData(0));
                     AssertJUnit.assertEquals(13.0, inEvents[0].getData(1));
                     AssertJUnit.assertEquals("test", inEvents[0].getData(2));
-
                 }
                 eventArrived = true;
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("$InputStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{22.6, 13.0});
@@ -200,63 +170,53 @@ public class StreamFunctionTestCase {
         AssertJUnit.assertEquals(1, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void logStreamProcessorTest1() throws InterruptedException {
         log.info("logStreamProcessorTest #1");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
         String execPlan = "@info(name = 'query1') " +
                 "from cseEventStream#log(12) " +
                 "select* " +
                 "insert into outputStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void logStreamProcessorTest2() throws InterruptedException {
         log.info("logStreamProcessorTest #2");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
         String execPlan = "@info(name = 'query1') " +
                 "from cseEventStream#log(12, 'message') " +
                 "select* " +
                 "insert into outputStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void logStreamProcessorTest3() throws InterruptedException {
         log.info("logStreamProcessorTest #3");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
         String execPlan = "@info(name = 'query1') " +
                 "from cseEventStream#log('message', true, 1, 'hai') " +
                 "select* " +
                 "insert into outputStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void logStreamProcessorTest4() throws InterruptedException {
         log.info("logStreamProcessorTest #4");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "define stream cseEventStream (symbol string, price double, discount int);";
         String execPlan = "@info(name = 'query1') " +
                 "from cseEventStream#log(12, 'event', true) " +
                 "select* " +
                 "insert into outputStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
     }
-
 }

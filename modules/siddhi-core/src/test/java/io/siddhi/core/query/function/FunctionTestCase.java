@@ -320,32 +320,26 @@ public class FunctionTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testFunctionQuery9() throws InterruptedException {
         log.info("CreateSet Test1");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol string, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol, deviceId) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test
     public void testFunctionQuery10() throws InterruptedException {
         log.info("CreateSet Test2");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol int, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
@@ -368,113 +362,91 @@ public class FunctionTestCase {
     @Test
     public void testFunctionQuery12() throws InterruptedException {
         log.info("CreateSet Test4");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol bool, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test
     public void testFunctionQuery13() throws InterruptedException {
         log.info("CreateSet Test5");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol long, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test
     public void testFunctionQuery14() throws InterruptedException {
         log.info("CreateSet Test6");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol float, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test
     public void testFunctionQuery15() throws InterruptedException {
         log.info("CreateSet Test7");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('createSet') ";
         String cseEventStream = "define stream fooStream (symbol string, deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from fooStream " +
                 "select createSet(symbol) as initialSet  " +
                 "insert into barStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testFunctionQuery16() throws InterruptedException {
         log.info("CreateSet8");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('DefaultFunction') ";
         String cseEventStream = "define stream cseEventStream (temp double, roomNo int,deviceId long);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream " +
                 "select default(temp,1/2) as temp, roomNo " +
                 "insert into StandardTempStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testFunctionQuery17() throws InterruptedException {
         log.info("SizeOfSet");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('SizeOfSetFunction') ";
         String cseEventStream = "define stream cseEventStream (distinctSymbols string, roomNo int);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream " +
                 "select sizeOfSet(distinctSymbols) as sizeOfSymbolSet " +
                 "insert into StandardTempStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testFunctionQuery18() throws InterruptedException {
         log.info("SizeOfSet");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String planName = "@app:name('SizeOfSetFunction') ";
         String cseEventStream = "define stream cseEventStream (distinctSymbols string, roomNo int);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream " +
                 "select sizeOfSet(distinctSymbols, roomNo) as sizeOfSymbolSet " +
                 "insert into StandardTempStream;";
-
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
-
 }

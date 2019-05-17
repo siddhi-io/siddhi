@@ -413,9 +413,7 @@ public class DelayWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void delayWindowTest8() {
         log.info("DelayWindow Test8 : Testing delay window for dinamic value");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String eventStream = "" +
                 "define stream CargoStream (weight int); " +
                 "define stream OutputStream(weight int, totalWeight long, averageWeight double); ";
@@ -424,9 +422,7 @@ public class DelayWindowTestCase {
                 "from CargoStream#window.delay(1/2) " +
                 "select weight, sum(weight) as totalWeight, avg(weight) as averageWeight " +
                 "insert into OutputStream;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(eventStream + query);
-
         siddhiAppRuntime.addCallback("CargoWeightQuery", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -441,7 +437,6 @@ public class DelayWindowTestCase {
             }
 
         });
-
         StreamCallback callBack = new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -451,9 +446,7 @@ public class DelayWindowTestCase {
                 }
             }
         };
-
         siddhiAppRuntime.addCallback("OutputStream", callBack);
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
         siddhiAppRuntime.start();
         try {
@@ -472,5 +465,4 @@ public class DelayWindowTestCase {
             siddhiAppRuntime.shutdown();
         }
     }
-
 }

@@ -967,22 +967,17 @@ public class LengthBatchWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void lengthBatchWindowTest19() throws InterruptedException {
         log.info("Dynamic value");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(1/2) " +
                 "select symbol,price,volume " +
                 "insert into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.fail("No events should arrive");
                 inEventCount = inEventCount + inEvents.length;
@@ -990,7 +985,6 @@ public class LengthBatchWindowTestCase {
             }
 
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
@@ -998,16 +992,13 @@ public class LengthBatchWindowTestCase {
         AssertJUnit.assertEquals(0, inEventCount);
         AssertJUnit.assertFalse(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void lengthBatchWindowTest20() throws InterruptedException {
         log.info("LengthBatchWindow Test20");
-
         final int length = 1;
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String siddhiApp = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);" +
                 "" +
@@ -1015,14 +1006,11 @@ public class LengthBatchWindowTestCase {
                 "from cseEventStream#window.lengthBatch(" + length + ", 1/2) " +
                 "select symbol, price, count(volume) as volumes " +
                 "insert all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(Event[] events) {
-
                 EventPrinter.print(events);
                 eventArrived = true;
                 if (events.length == 1) {
@@ -1037,7 +1025,6 @@ public class LengthBatchWindowTestCase {
                 }
             }
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
@@ -1053,7 +1040,6 @@ public class LengthBatchWindowTestCase {
         AssertJUnit.assertEquals("1 event batch", 9, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
 
 }

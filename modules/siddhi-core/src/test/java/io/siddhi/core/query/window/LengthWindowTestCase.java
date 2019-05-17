@@ -255,16 +255,12 @@ public class LengthWindowTestCase {
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void lengthWindowTest5() throws InterruptedException {
         log.info("Testing length window grater than one parameter");
-
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream#window.length(2, price) select symbol,price," +
                 "volume insert" +
                 " all events into outputStream ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -274,9 +270,7 @@ public class LengthWindowTestCase {
                 inEventCount = inEventCount + inEvents.length;
                 eventArrived = true;
             }
-
         });
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
@@ -284,7 +278,5 @@ public class LengthWindowTestCase {
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
-
 }
