@@ -242,3 +242,93 @@ This generates the converted file in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/lib</c
 Restart the Siddhi Runner.
 </li>
 </ol>
+
+## Configuring metrics
+
+Siddhi Runner uses WSO2 Carbon Metrics which provides an API for using the [Metrics library](https://metrics.dropwizard.io/4.0.0/). Siddhi Runner is shipped with JVM Metrics to monitor statistics of your Siddhi Runner using Java Metrics. 
+
+To enable metrics and to configure metric-related properties, do the following configurations in the <code>&lt;SIDDHI_RUNNER_HOME&gt;/conf/runner/deployment.yaml</code> file.
+<ol>
+<li>
+To enable wso2 metrics, set the enabled property to true under wso2.metrics as shown below.
+
+```
+wso2.metrics:
+  enabled: true
+```
+</li>
+<li>
+To enable JDBC reporting, set the Enable JDBC parameter to true in the <code>wso2.metrics.jdbc: => reporting:</code> subsection as shown below. If JDBC reporting is not enabled, only real-time metrics are displayed in the first page of the Status dashboard, and information relating to metrics history is not displayed in the other pages of the dashboard. To render the first entry of the graph, you need to wait for the time duration specified as the pollingPeriod.
+
+```
+# Enable JDBC Reporter
+ name: JDBC
+ enabled: true
+ pollingPeriod: 60
+```
+</li>
+<li>
+Under  wso2.metrics.jdbc , configure the following properties to clean up the database entries. For detailed instructions of how to configure a datasource, see [Configuring Datasources](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#configuring-datasources)
+
+```
+wso2.metrics.jdbc:
+  # Data Source Configurations for JDBC Reporters
+  dataSource:
+    # Default Data Source Configuration
+    - &JDBC01
+      # JNDI name of the data source to be used by the JDBC Reporter.
+      # This data source should be defined under wso2.datasources.
+      dataSourceName: java:comp/env/jdbc/SiddhiMetricsDB
+      # Schedule regular deletion of metrics data older than a set number of days.
+      # It is recommended that you enable this job to ensure your metrics tables do not get extremely large.
+      # Deleting data older than seven days should be sufficient.
+      scheduledCleanup:
+        # Enable scheduled cleanup to delete Metrics data in the database.
+        enabled: false
+ 
+        # The scheduled job will cleanup all data older than the specified days
+        daysToKeep: 7
+ 
+        # This is the period for each cleanup operation in seconds.
+        scheduledCleanupPeriod: 86400
+```
+| Parameter | Default Value | Description |
+| ------------- |-------------|-------------|
+|dataSource	| &JDBC01	|            |
+|dataSource > dataSourceName |	java:comp/env/jdbc/SiddhiMetricsDB |	The name of the datasource used to store metric data.|
+|dataSource > scheduledCleanup > enabled |	false |	If this is set to true, metrics data stored in the database is cleared at a specific time interval as scheduled. |
+|dataSource > scheduledCleanup > daysToKeep |	3 |	If scheduled clean-up of metric data is enabled, all metric data in the database that are older than the number of days specified in this parameter are deleted.|
+|dataSource > scheduledCleanup > scheduledCleanupPeriod |	86400 |	This parameter specifies the time interval in seconds at which all metric data stored in the database must be cleared.|
+</li>
+
+<li>
+JVM metrics of which the log level is set to OFF are not measured by default. If you need to monitor one or more of them, add the relevant metric name(s) under the <code>wso2.metrics: => levels</code> subsection as shown in the extract below. As shown below, you also need to mention log4j mode in which the metrics need to be monitored (i.e., OFF, INFO, DEBUG, TRACE, or ALL). 
+
+```
+wso2.metrics:
+ # Enable Metrics
+   enabled: true
+    jmx:
+      # Register MBean when initializing Metrics
+    registerMBean: true
+      # MBean Name
+    name: org.wso2.carbon:type=Metrics
+    # Metrics Levels are organized from most specific to least:
+    # OFF (most specific, no metrics)
+    # INFO
+    # DEBUG
+    # TRACE (least specific, a lot of data)
+    # ALL (least specific, all data)
+ levels:
+      # The root level configured for Metrics
+    rootLevel: INFO
+      # Metric Levels
+    levels:
+         jvm.buffers: 'OFF'
+         jvm.class-loading: INFO
+         jvm.gc: DEBUG
+         jvm.memory: INFO
+```
+</li>
+
+Please refer [Siddhi Applicaiton Statistics documentation](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/query-guide-5.x/#statistics) for enabling Siddhi application level metrics for a Siddhi application.
