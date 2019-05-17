@@ -74,7 +74,7 @@ public class IncrementalAggregationProcessor implements Processor {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();
                 if (!isFirstEventArrived) {
-                    aggregationRuntime.recreateInMemoryData(true, false);
+                    aggregationRuntime.recreateInMemoryDataFirstEventArrived();
                     isFirstEventArrived = true;
                 }
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
