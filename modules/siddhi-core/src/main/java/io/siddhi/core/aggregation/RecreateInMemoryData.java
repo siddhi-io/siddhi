@@ -89,6 +89,15 @@ public class RecreateInMemoryData {
             }
         }
 
+        // Clear all executors before recreating
+        Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+        if (refreshReadingExecutors) {
+            incrementalExecutorMap = this.incrementalExecutorMapForPartitions;
+        } else {
+            incrementalExecutorMap = this.incrementalExecutorMap;
+        }
+        incrementalExecutorMap.forEach(((duration, incrementalExecutor) -> incrementalExecutor.clearExecutor()));
+
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
@@ -110,15 +119,8 @@ public class RecreateInMemoryData {
 
         for (int i = incrementalDurations.size() - 1; i > 0; i--) {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
-            IncrementalExecutor incrementalExecutor;
+            IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
-            if (refreshReadingExecutors) {
-                incrementalExecutor = incrementalExecutorMapForPartitions.get(recreateForDuration);
-            } else {
-                incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
-            }
-            // Reset all executors when recreating again
-            incrementalExecutor.clearExecutor();
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
@@ -146,12 +148,7 @@ public class RecreateInMemoryData {
 
                 if (i == 1) {
                     TimePeriod.Duration rootDuration = incrementalDurations.get(0);
-                    IncrementalExecutor rootIncrementalExecutor;
-                    if (refreshReadingExecutors) {
-                        rootIncrementalExecutor = incrementalExecutorMapForPartitions.get(rootDuration);
-                    } else {
-                        rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
-                    }
+                    IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             referenceToNextLatestEvent, rootDuration, null);
 
