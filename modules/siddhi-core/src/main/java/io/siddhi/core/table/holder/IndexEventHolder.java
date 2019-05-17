@@ -681,6 +681,6 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     @Override
     public int size() {
-        return this.size();
+        return primaryKeyData.size();
     }
 }
