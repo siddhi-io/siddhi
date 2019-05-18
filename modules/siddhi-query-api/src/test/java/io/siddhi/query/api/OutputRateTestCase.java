@@ -17,6 +17,7 @@
  */
 package io.siddhi.query.api;
 
+import io.siddhi.query.api.exception.UnsupportedAttributeTypeException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.output.ratelimit.OutputRate;
@@ -156,5 +157,95 @@ public class OutputRateTestCase {
         query.output(OutputRate.perSnapshot(Expression.Time.minute(1)));
         query.insertInto("StockQuote");
 
+    }
+
+    @Test
+    public void testCreatingQuery4() {
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("cseEventStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7),
+                                Expression.value(9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("lengthBatch", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.output(OutputRate.perSnapshot(Expression.value(1000L)));
+        query.insertInto("StockQuote");
+    }
+
+    @Test
+    public void testCreatingQuery5() {
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("cseEventStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("lengthBatch", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.output(OutputRate.perEvents(Expression.value(1000L)).output(OutputRate.Type.ALL));
+        query.insertInto("StockQuote");
+    }
+
+    @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
+    public void testCreatingQuery6() {
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("cseEventStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("lengthBatch", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.output(OutputRate.perEvents(Expression.value(21.3)).output(OutputRate.Type.ALL));
+        query.insertInto("StockQuote");
     }
 }

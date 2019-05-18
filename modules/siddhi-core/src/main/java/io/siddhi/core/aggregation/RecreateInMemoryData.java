@@ -79,15 +79,8 @@ public class RecreateInMemoryData {
     }
 
     public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
-        IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
-        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1 && !refreshReadingExecutors) {
-            // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
-            // created. Hence this method does not have to be executed.
-            //This is only true in a processing aggregation runtime
-            return;
-        }
-
-        if (isFirstEventArrived) {
+        if (!refreshReadingExecutors && isFirstEventArrived) {
+            // Only cleared when executors change from reading to processing state in one node deployment
             for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
                     this.incrementalExecutorMap.entrySet()) {
                 IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
@@ -95,6 +88,15 @@ public class RecreateInMemoryData {
                 incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
             }
         }
+
+        // Clear all executors before recreating
+        Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+        if (refreshReadingExecutors) {
+            incrementalExecutorMap = this.incrementalExecutorMapForPartitions;
+        } else {
+            incrementalExecutorMap = this.incrementalExecutorMap;
+        }
+        incrementalExecutorMap.forEach(((duration, incrementalExecutor) -> incrementalExecutor.clearExecutor()));
 
         Event[] events;
         Long endOFLatestEventTimestamp = null;
@@ -117,15 +119,8 @@ public class RecreateInMemoryData {
 
         for (int i = incrementalDurations.size() - 1; i > 0; i--) {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
-            IncrementalExecutor incrementalExecutor;
+            IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
-            if (refreshReadingExecutors) {
-                incrementalExecutor = incrementalExecutorMapForPartitions.get(recreateForDuration);
-            } else {
-                incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
-            }
-            // Reset all executors when recreating again
-            incrementalExecutor.clearExecutor();
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
@@ -153,12 +148,7 @@ public class RecreateInMemoryData {
 
                 if (i == 1) {
                     TimePeriod.Duration rootDuration = incrementalDurations.get(0);
-                    IncrementalExecutor rootIncrementalExecutor;
-                    if (refreshReadingExecutors) {
-                        rootIncrementalExecutor = incrementalExecutorMapForPartitions.get(rootDuration);
-                    } else {
-                        rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
-                    }
+                    IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             referenceToNextLatestEvent, rootDuration, null);
 
