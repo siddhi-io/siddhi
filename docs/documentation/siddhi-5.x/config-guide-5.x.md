@@ -265,7 +265,7 @@ Since Local Microservice is OSGi-based, when adding libraries/drivers they need 
 !!! Tip "Converting Jars to OSGi Bundles.."
     If the database driver is not an OSGi bundle, then it should be converted to OSGi. Please refer [Converting Jars to OSGi Bundles](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#converting-jars-to-osgi-bundles) documentation for details.
 
-Refer [guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service) for more details on using Siddhi as Local Microservice.
+Refer [guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-microservice) for more details on using Siddhi as Local Microservice.
 
 ### Adding to Siddhi Docker Microservice
 
@@ -283,13 +283,13 @@ The necessary OSGi jars and extensions that need to be added to the Siddhi Docke
 !!! Tip "Converting Jars to OSGi Bundles"
     If the database driver is not an OSGi bundle, then it should be converted to OSGi. Please refer [Converting Jars to OSGi Bundles](http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/#converting-jars-to-osgi-bundles) documentation for details.
 
-Refer [guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service) for more details on using Siddhi as Docker Microservice.
+Refer [guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-microservice) for more details on using Siddhi as Docker Microservice.
 
 ### Adding to Siddhi Kubernetes Microservice
 
-To add or update Siddhi extensions and/or third-party dependencies, a custom docker image has to be created using the steps described in [Adding to Siddhi Docker Microservice](#adding-to-siddhi-docker-micro-service) documentation including the necessary extensions and dependencies. The created image can be then referenced in the `sepc.pod` subsection in the `SiddhiProcess` Kubernetes artifact created to deploy Siddhi in Kubernetes.
+To add or update Siddhi extensions and/or third-party dependencies, a custom docker image has to be created using the steps described in [Adding to Siddhi Docker Microservice](#adding-to-siddhi-docker-microservice) documentation including the necessary extensions and dependencies. The created image can be then referenced in the `sepc.pod` subsection in the `SiddhiProcess` Kubernetes artifact created to deploy Siddhi in Kubernetes.
 
-For details on creating the Kubernetes artifacts refer [Using Siddhi as Kubernetes Microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service) documentation.
+For details on creating the Kubernetes artifacts refer [Using Siddhi as Kubernetes Microservice](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-microservice) documentation.
 
 ## Configuring Statistics
 

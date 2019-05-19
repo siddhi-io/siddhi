@@ -243,9 +243,9 @@ It is also notable that the defined `length window` only keeps 3 events in-memor
 first event in the window is removed from memory. This ensures that the memory usage does not grow beyond a specific limit. There are also other
 implementations done in Siddhi  to reduce the memory consumption. For more information, see [Siddhi Architecture](http://siddhi.io/documentation/siddhi-5.x/architecture-5.x/).
 
-## 7. Running streaming application as a micro service
+## 7. Running streaming application as a microservice
 
-This step we will run above developed Siddhi application as a micro service utilizing docker. For othere available options please refer [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-in-various-environments). Here we will use siddhi-runner docker distribution. Follow below steps.
+This step we will run above developed Siddhi application as a microservice utilizing docker. For othere available options please refer [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-in-various-environments). Here we will use siddhi-runner docker distribution. Follow below steps.
 
 * Install docker in your machine and start the daemon.([https://docs.docker.com/install/](https://docs.docker
 .com/install/))
@@ -255,7 +255,7 @@ docker pull siddhiio/siddhi-runner-alpine:latest
 ```
 * Navigate to Siddhi Editor and choose **File -> Export File** for download above Siddhi application as a file.
 * Move downloaded Siddhi file(_HelloWorldModifiedApp.siddhi_) to a desired location(/home/me/siddhi-apps)
-* Execute below command to start a streaming micro service which runs above developed siddhi application. **(Please 
+* Execute below command to start a streaming microservice which runs above developed siddhi application. **(Please 
 pay attention to the siddhi app name as in the Quick Start Guide we have changed the modified Siddhi app name from 
 that of the original app.)**
 ```
