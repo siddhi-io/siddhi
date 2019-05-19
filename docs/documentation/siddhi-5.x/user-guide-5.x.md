@@ -43,7 +43,7 @@ Siddhi can be used as a library in any Java program (including OSGi runtimes) ju
 
 <script src="https://gist.github.com/suhothayan/0c81a843101601e82a7175b7add2aa4d.js"></script>
 
-### **Using Siddhi as Local Micro Service**
+### **Using Siddhi as Local Microservice**
 
 Siddhi can also run a standalone program by passing the SiddhiApps and required configurations to it.
 
@@ -62,6 +62,9 @@ Siddhi can also run a standalone program by passing the SiddhiApps and required 
 
 !!! Tip "Siddhi Tooling"
     You can also use the powerful [Siddhi Editor](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/#3-using-siddhi-for-the-first-time) to implement and test steam processing applications. 
+
+!!! Info "Configuring Siddhi"
+    To configure databases, extensions, authentication, periodic state persistence, and statistics for Siddhi as Local Microservice refer [Siddhi Config Guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/config-guide-5.x/). 
 
 **Samples**
 
@@ -290,7 +293,7 @@ Thank you</pre>
     </li>
 </ul>
 
-### **Using Siddhi as Docker Micro Service**
+### **Using Siddhi as Docker Microservice**
 
 Siddhi can also run on Docker by passing the SiddhiApps and required configurations to it.
 
@@ -316,6 +319,9 @@ docker run -it -v /home/me/siddhi-apps:/apps -v /home/me/siddhi-configs:/configs
 
 !!! Tip "Siddhi Tooling"
     You can also use the powerful [Siddhi Editor](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/#3-using-siddhi-for-the-first-time) to implement and test steam processing applications. 
+
+!!! Info "Configuring Siddhi"
+    To configure databases, extensions, authentication, periodic state persistence, and statistics for Siddhi as Docker Microservice refer [Siddhi Config Guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/config-guide-5.x/). 
 
 **Samples**
 
@@ -531,7 +537,7 @@ Thank you</pre>
     </li>
 </ul>
 
-### **Using Siddhi as Kubernetes Micro Service**
+### **Using Siddhi as Kubernetes Microservice**
 
 Siddhi can natively run on Kubernetes using the Siddhi Kubernetes operator.
 
@@ -589,6 +595,9 @@ This can be created using a SiddhiProcess YAML file as given below.
 
 !!! Tip "Siddhi Tooling"
     You can also use the powerful [Siddhi Editor](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/#3-using-siddhi-for-the-first-time) to implement and test steam processing applications. 
+
+!!! Info "Configuring Siddhi"
+    To configure databases, extensions, authentication, periodic state persistence, and statistics for Siddhi as Kubernetes Microservice refer [Siddhi Config Guide](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/config-guide-5.x/). 
 
 To deploy the above Siddhi app in your Kubernetes cluster, copy to a YAML file with name `monitor-app.yaml` and execute the following command.
 
