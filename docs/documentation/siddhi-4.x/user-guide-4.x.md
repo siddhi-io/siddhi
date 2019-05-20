@@ -1,7 +1,7 @@
 # Siddhi 4.x User Guide
 
-!!! info
-    Please find the latest Siddhi User Guide [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/)
+!!! info "Latest Siddhi 5.x User Guide"
+    Please find the latest Siddhi User Guide [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-introduction-5.x/)
 
 
 ## **Using Siddhi in <a target="_blank" href="https://wso2.com/analytics-and-stream-processing/">WSO2 Stream Processor</a>**

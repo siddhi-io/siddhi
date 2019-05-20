@@ -12,7 +12,7 @@
 
 Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
-Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library), and as a micro service on [bare metal, VM](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service), [Docker](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service) and natively in [Kubernetes](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service). It also has a [graphical and text editor](#siddhi-development-environment) for building Streaming Data Integration and Streaming Analytics applications.
+Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/), and as a micro service on [bare metal, VM](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service), [Docker](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service) and natively in [Kubernetes](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service). It also has a [graphical and text editor](#siddhi-development-environment) for building Streaming Data Integration and Streaming Analytics applications.
 
 ## Distributions
 
@@ -25,7 +25,7 @@ Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service" rel="nofollow">
  <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/binary.png?raw=true" alt="Binary" width="19%">
 </a>
-<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-a-java-library" rel="nofollow">
+<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/" rel="nofollow">
  <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/java.png?raw=true" alt="Java" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/contribution/#obtaining-the-source-code-and-building-the-project" rel="nofollow">
@@ -140,7 +140,7 @@ Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0">5.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.0.0/">5.0.0</a>.
 
 ## Contact us 
 * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
