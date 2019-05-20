@@ -80,6 +80,7 @@ public class RecreateInMemoryData {
             for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
                     this.incrementalExecutorMap.entrySet()) {
                 IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
+                incrementalExecutor.clearExecutor();
                 incrementalExecutor.setProcessingExecutor(true);
                 incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
             }
