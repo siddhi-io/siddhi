@@ -91,7 +91,7 @@ The following parameters are configured in a stream definition.
 To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
  
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
-[Threading and Asynchronous](http://siddhi.io/documentation/siddhi-4.0/siddhi-4.x.md#threading-and-asynchronous) configuration section.
+[Threading and Asynchronous](#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql
@@ -1882,7 +1882,7 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
     When the attribute to the right is a table attribute, the operations supported differ based on the database type.
  
 To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. To understand more see [output event type](#output-event-types).
 
 !!! note 
     Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
@@ -2341,7 +2341,7 @@ The following types of triggeres are currently supported:
 |-------------|-----------|
 |`'start'`| An event is triggered when Siddhi is started.|
 |`every <time interval>`| An event is triggered periodically at the given time interval.
-|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.
+|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.1.7/tutorials/tutorial-lesson-06.html">quartz-scheduler</a>.
  
 
 **Examples**

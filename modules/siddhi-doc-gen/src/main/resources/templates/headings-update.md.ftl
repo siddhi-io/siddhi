@@ -18,7 +18,7 @@
 <#import "utils.ftl" as utils>
 <#assign skipMaxHeadingLevel = -1>
 <#if extensionRepositoryName == CONSTANTS.FREEMARKER_SIDDHI_REPOSITORY_ARTIFACT_ID>
-    <#assign repositoryOwner = "wso2">
+    <#assign repositoryOwner = "siddhi-io">
 <#else>
     <#assign repositoryOwner = "wso2-extensions">
     <#assign extensionRepositoryName = extensionRepositoryName?replace(CONSTANTS.FREEMARKER_EXTENSION_REPOSITORY_PARENT_POSTFIX, "", "r")>
