@@ -111,7 +111,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     }
 
     @Override
-    public void execute(ComplexEventChunk streamEventChunk) {
+    public synchronized void execute(ComplexEventChunk streamEventChunk) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Event Chunk received by " + this.duration + " incremental executor: " +
                     streamEventChunk.toString());
