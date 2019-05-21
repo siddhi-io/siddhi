@@ -27,9 +27,24 @@ import java.util.Map;
 public class ServiceDeploymentInfo {
 
     private ServiceProtocol serviceProtocol = ServiceProtocol.TCP;
+    private SourceStrategy sourceStrategy = SourceStrategy.PULL;
     private boolean secured = false;
     private int port;
     private Map<String, String> deploymentProperties = new HashMap<>();
+
+    /**
+     * @param serviceProtocol the protocol used by the service
+     * @param port            the port of the service
+     * @param secured         is the service protocol secured
+     * @param sourceStrategy  the source strategy
+     */
+    public ServiceDeploymentInfo(ServiceProtocol serviceProtocol, int port, boolean secured,
+                                 SourceStrategy sourceStrategy) {
+        this.serviceProtocol = serviceProtocol;
+        this.port = port;
+        this.secured = secured;
+        this.sourceStrategy = sourceStrategy;
+    }
 
     /**
      * Service related information to the deployment
@@ -47,12 +62,37 @@ public class ServiceDeploymentInfo {
     /**
      * Service related information to the deployment
      *
+     * @param port           the port of the service
+     * @param secured        is the service protocol secured
+     * @param sourceStrategy the source strategy
+     */
+    public ServiceDeploymentInfo(int port, boolean secured, SourceStrategy sourceStrategy) {
+        this.port = port;
+        this.secured = secured;
+        this.sourceStrategy = sourceStrategy;
+    }
+
+    /**
+     * Service related information to the deployment
+     *
      * @param secured is the service protocol secured
      * @param port    the port of the service
      */
     public ServiceDeploymentInfo(int port, boolean secured) {
         this.port = port;
         this.secured = secured;
+    }
+
+    /**
+     * Service related information to the deployment
+     *
+     * @param sourceStrategy the source strategy
+     */
+    public ServiceDeploymentInfo(SourceStrategy sourceStrategy) {
+        this.sourceStrategy = sourceStrategy;
+    }
+
+    public ServiceDeploymentInfo() {
     }
 
     public ServiceProtocol getServiceProtocol() {
@@ -79,6 +119,14 @@ public class ServiceDeploymentInfo {
         this.secured = secured;
     }
 
+    public SourceStrategy getSourceStrategy() {
+        return sourceStrategy;
+    }
+
+    public void setSourceStrategy(SourceStrategy sourceStrategy) {
+        this.sourceStrategy = sourceStrategy;
+    }
+
     public Map<String, String> getDeploymentProperties() {
         return deploymentProperties;
     }
@@ -94,5 +142,12 @@ public class ServiceDeploymentInfo {
      */
     public enum ServiceProtocol {
         TCP, UDP, SCTP,
+    }
+
+    /**
+     * Source strategy
+     */
+    public enum SourceStrategy {
+        PUSH, PULL
     }
 }
