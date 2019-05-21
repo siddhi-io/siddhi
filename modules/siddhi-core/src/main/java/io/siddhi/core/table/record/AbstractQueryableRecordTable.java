@@ -205,14 +205,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return query(matchingEvent, compiledCondition, compiledSelection, null);
     }
 
-    public StreamEvent findInCache(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        if (isCacheEnabled) {
-            return cachedTable.find(matchingEvent, compiledCondition);
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         if (isCacheEnabled) {
@@ -583,7 +575,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());
 
-            StreamEvent cacheResults = findInCache(compiledConditionAggregation.getCacheCompileCondition(),
+            StreamEvent cacheResults = cachedTable.find(compiledConditionAggregation.getCacheCompileCondition(),
                     matchingEvent);
             if (cacheResults != null) {
                 return cacheResults;
@@ -638,7 +630,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             CompiledSelectionWithCache compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             recordStoreCompiledSelection = compiledSelectionWithCache.recordStoreCompiledSelection;
-            StreamEvent cacheResults = findInCache(compiledConditionWithCache.getCacheCompileCondition(),
+            StreamEvent cacheResults = cachedTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                     matchingEvent);
             if (cacheResults != null) {
                 StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
