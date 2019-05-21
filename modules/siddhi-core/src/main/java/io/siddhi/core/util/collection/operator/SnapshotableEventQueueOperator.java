@@ -98,7 +98,6 @@ public class SnapshotableEventQueueOperator implements Operator {
         }
     }
 
-
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, Object storeEvents,
                        InMemoryCompiledUpdateSet compiledUpdateSet) {

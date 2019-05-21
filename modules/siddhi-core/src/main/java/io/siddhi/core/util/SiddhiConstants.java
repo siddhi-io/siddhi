@@ -125,9 +125,12 @@ public final class SiddhiConstants {
 
     public static final String PARTITION_ID_DEFAULT = "null";
 
+    public static final String ANNOTATION_CACHE = "Cache";
+    public static final String CACHE_TABLE_SIZE = "Size";
+    public static final String CACHE_QUERY_NAME = "table_cache_";
+
     public static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
     public static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
     public static final String SHARD_ID_COL = "SHARD_ID";
-
 }

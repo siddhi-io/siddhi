@@ -33,4 +33,6 @@ public interface EventHolder {
     Snapshot getSnapshot();
 
     void restore(SnapshotStateList snapshotStatelist);
+
+    int size();
 }

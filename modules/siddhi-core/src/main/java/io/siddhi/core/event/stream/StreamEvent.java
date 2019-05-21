@@ -100,6 +100,10 @@ public class StreamEvent implements ComplexEvent {
 //        this.isExpired = isExpired;
 //    }
 
+    public boolean hasNext() {
+        return (this.getNext() != null);
+    }
+
     public Type getType() {
         return type;
     }
