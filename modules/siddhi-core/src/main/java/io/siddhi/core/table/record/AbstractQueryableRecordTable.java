@@ -221,7 +221,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
                 outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
                         siddhiAppContext.getTimestampGenerator().currentTime();
-                        StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+                StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
                 eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
                 addingEventChunkWithTimestamp.add(eventWithTimeStamp);
             }
