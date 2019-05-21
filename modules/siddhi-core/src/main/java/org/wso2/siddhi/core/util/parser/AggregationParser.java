@@ -347,13 +347,17 @@ public class AggregationParser {
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));
             //Remove timestamp executor
             baseExecutors.remove(0);
+
+            List<String> groupByAttributesList = aggregationDefinition.getSelector().getGroupByList()
+                    .stream().map(Variable::getAttributeName).collect(Collectors.toList());
+
             AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
                     incrementalExecutorMap, aggregationTables, ((SingleStreamRuntime) streamRuntime),
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
                     incrementalDataPurging, shouldUpdateExpressionExecutor, shardId,
-                    incrementalExecutorMapForPartitions);
+                    incrementalExecutorMapForPartitions, groupByAttributesList);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
