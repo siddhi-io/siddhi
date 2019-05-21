@@ -19,6 +19,7 @@ package io.siddhi.annotation.processor;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.AnnotationValidationException;
@@ -112,6 +113,32 @@ public class AbstractAnnotationProcessor {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                             "name:{0} -> defaultValue annotated in class {1} cannot be null or empty for the " +
                             "optional parameter.", parameterName, extensionClassFullName));
+                }
+            }
+        }
+    }
+
+    /**
+     * This method uses for validate @Extension / @ParameterOverload element.
+     *
+     * @param parameterOverloads parameter array which needs to be validate.
+     * @throws AnnotationValidationException whenever if the validate rule violate, throws the annotation validate
+     *                                       exception with proper message.
+     */
+    public void parameterOverloadValidation(ParameterOverload[] parameterOverloads)
+            throws AnnotationValidationException {
+        for (ParameterOverload parameterOverload : parameterOverloads) {
+            String[] parameterNames = parameterOverload.parameterNames();
+            for (String parameterName : parameterNames) {
+                //Check if the @Parameter name is empty.
+                if (parameterName.isEmpty()) {
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension-> @Parameter" +
+                            "-> name annotated in class {0} is null or empty.", extensionClassFullName));
+                } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+                    //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension-> @Parameter" +
+                                    "-> name {0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
+                            parameterName, extensionClassFullName));
                 }
             }
         }
