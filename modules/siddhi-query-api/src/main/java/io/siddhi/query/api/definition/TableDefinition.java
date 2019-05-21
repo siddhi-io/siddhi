@@ -25,7 +25,7 @@ import io.siddhi.query.api.annotation.Annotation;
 public class TableDefinition extends AbstractDefinition {
     private static final long serialVersionUID = 1L;
 
-    public TableDefinition(String id) {
+    protected TableDefinition(String id) {
         super(id);
     }
 

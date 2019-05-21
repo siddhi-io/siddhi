@@ -71,6 +71,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
@@ -96,9 +98,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private Attribute[] outputAttributesForCaching;
     private TableDefinition cacheTableDefinition;
     private SiddhiAppContext siddhiAppContext;
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     @Override
-    public void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
+    public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
                      StreamEventCloner storeEventCloner, ConfigReader configReader) {
         this.siddhiAppContext = siddhiAppContext;
         String[] annotationNames = {ANNOTATION_STORE, ANNOTATION_CACHE};
@@ -107,7 +110,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             isCacheEnabled = true;
             maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
             cachedTable = new InMemoryTable();
-            cacheTableDefinition = new TableDefinition(tableDefinition.getId());
+            cacheTableDefinition = TableDefinition.id(tableDefinition.getId());
             for (Attribute attribute: tableDefinition.getAttributeList()) {
                 cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
             }
@@ -225,13 +228,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
                 addingEventChunkWithTimestamp.add(eventWithTimeStamp);
             }
-            cachedTable.add(addingEventChunk);
-            if (cachedTable.size() > maxCacheSize) {
-                isCacheEnabled = false;
-                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
-                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
-                        ". So cache is now disabled");
-            }
         }
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
@@ -241,10 +237,27 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             records.add(event.getOutputData());
             timestamp = event.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.add(timestamp, records);
+        if (isCacheEnabled) {
+            readWriteLock.writeLock().lock();
+            cachedTable.add(addingEventChunk);
+            if (recordTableHandler != null) {
+                recordTableHandler.add(timestamp, records);
+            } else {
+                add(records);
+            }
+            readWriteLock.writeLock().unlock();
+            if (cachedTable.size() > maxCacheSize) {
+                isCacheEnabled = false;
+                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
+                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
+                        ". So cache is now disabled");
+            }
         } else {
-            add(records);
+            if (recordTableHandler != null) {
+                recordTableHandler.add(timestamp, records);
+            } else {
+                add(records);
+            }
         }
     }
 
@@ -252,14 +265,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
+        CompiledConditionWithCache compiledConditionWithCache = null;
         if (isCacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            cachedTable.delete(deletingEventChunk,
-                    compiledConditionWithCache.getCacheCompileCondition());
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
         }
@@ -278,11 +290,25 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             deleteConditionParameterMaps.add(variableMap);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                    compiledCondition);
+        if (isCacheEnabled) {
+            assert compiledConditionWithCache != null;
+            readWriteLock.writeLock().lock();
+            cachedTable.delete(deletingEventChunk,
+                    compiledConditionWithCache.getCacheCompileCondition());
+            if (recordTableHandler != null) {
+                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                        compiledCondition);
+            } else {
+                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+            }
+            readWriteLock.writeLock().unlock();
         } else {
-            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+            if (recordTableHandler != null) {
+                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                        compiledCondition);
+            } else {
+                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+            }
         }
     }
 
@@ -291,17 +317,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                        CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
+        CompiledConditionWithCache compiledConditionWithCache = null;
+        CompiledUpdateSetWithCache compiledUpdateSetWithCache = null;
         if (isCacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
+            compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-            cachedTable.update(updatingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
-                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet());
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -328,13 +354,29 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             updateSetParameterMaps.add(variableMapForUpdateSet);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps);
+        if (isCacheEnabled) {
+            assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
+            readWriteLock.writeLock().lock();
+            cachedTable.update(updatingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
+                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet());
+            if (recordTableHandler != null) {
+                recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps);
+            } else {
+                update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+            }
+            readWriteLock.writeLock().unlock();
         } else {
-            update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+            if (recordTableHandler != null) {
+                recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps);
+            } else {
+                update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+            }
         }
     }
 
@@ -342,15 +384,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
+        CompiledConditionWithCache compiledConditionWithCache = null;
         if (isCacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            if (cachedTable.contains(matchingEvent, compiledConditionWithCache.getCacheCompileCondition())) {
-                return true;
-            }
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
         }
@@ -359,11 +399,29 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
             containsConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
         }
-        if (recordTableHandler != null) {
-            return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+        if (isCacheEnabled) {
+            assert compiledConditionWithCache != null;
+            readWriteLock.readLock().lock();
+            try {
+                if (cachedTable.contains(matchingEvent, compiledConditionWithCache.getCacheCompileCondition())) {
+                    return true;
+                }
+                if (recordTableHandler != null) {
+                    return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
+                            recordStoreCompiledCondition.compiledCondition);
+                } else {
+                    return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+                }
+            } finally {
+                readWriteLock.readLock().unlock();
+            }
         } else {
-            return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            if (recordTableHandler != null) {
+                return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
+                        recordStoreCompiledCondition.compiledCondition);
+            } else {
+                return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            }
         }
     }
 
@@ -374,24 +432,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
+        CompiledConditionWithCache compiledConditionWithCache = null;
+        CompiledUpdateSetWithCache compiledUpdateSetWithCache = null;
         if (isCacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
+            compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-            cachedTable.updateOrAdd(updateOrAddingEventChunk,
-                    compiledConditionWithCache.getCacheCompileCondition(),
-                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
-            if (cachedTable.size() > maxCacheSize) {
-                isCacheEnabled = false;
-                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
-                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
-                        ". So cache is now disabled");
-            }
         } else {
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -420,13 +471,36 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             addingRecords.add(stateEvent.getStreamEvent(0).getOutputData());
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps, addingRecords);
+        if (isCacheEnabled) {
+            assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
+            readWriteLock.writeLock().lock();
+            cachedTable.updateOrAdd(updateOrAddingEventChunk,
+                    compiledConditionWithCache.getCacheCompileCondition(),
+                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
+            if (cachedTable.size() > maxCacheSize) {
+                isCacheEnabled = false;
+                log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
+                        cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
+                        ". So cache is now disabled");
+            }
+            if (recordTableHandler != null) {
+                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps, addingRecords);
+            } else {
+                updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+            }
+            readWriteLock.writeLock().unlock();
         } else {
-            updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+            if (recordTableHandler != null) {
+                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps, addingRecords);
+            } else {
+                updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+            }
         }
 
     }
@@ -451,9 +525,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (isCacheEnabled) {
             CompiledUpdateSet cacheCompileUpdateSet =  cachedTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
                     variableExpressionExecutors, tableMap, siddhiQueryContext);
-            CompiledUpdateSetWithCache compiledUpdateSetWithCache = new CompiledUpdateSetWithCache(
-                    recordTableCompiledUpdateSet, cacheCompileUpdateSet);
-            return compiledUpdateSetWithCache;
+            return new CompiledUpdateSetWithCache(recordTableCompiledUpdateSet, cacheCompileUpdateSet);
         }
         return recordTableCompiledUpdateSet;
     }
@@ -461,7 +533,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     /**
      * Class to wrap store compile update set and cache compile update set
      */
-    public class CompiledUpdateSetWithCache implements CompiledUpdateSet {
+    private class CompiledUpdateSetWithCache implements CompiledUpdateSet {
         CompiledUpdateSet storeCompiledUpdateSet;
         CompiledUpdateSet cacheCompiledUpdateSet;
 

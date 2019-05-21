@@ -90,7 +90,6 @@ public class SnapshotableEventQueueOperator implements Operator {
                     deletingEvent.setEvent(storeEventPosition, storeEvent);
                     if ((Boolean) expressionExecutor.execute(deletingEvent)) {
                         storeEventQueue.remove();
-                        storeEventQueue.reduceSizeByOne();
                     }
                 }
             } finally {
