@@ -36,6 +36,7 @@ import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompile
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryCalculable;
@@ -125,8 +126,10 @@ public class AggregationRuntime implements MemoryCalculable {
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
     }
 
-    private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {
+    private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                            String inputReferenceId) {
         metaStreamEvent.addInputDefinition(inputDefinition);
+        metaStreamEvent.setInputReferenceId(inputReferenceId);
         metaStreamEvent.initializeAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
@@ -151,12 +154,12 @@ public class AggregationRuntime implements MemoryCalculable {
             cloneStreamDefinition((StreamDefinition) metaStreamEventWithStartEnd.getLastInputDefinition(),
                     streamDefinitionWithStartEnd);
         }
-
         streamDefinitionWithStartEnd.attribute(additionalAttributes.get(0).getName(),
                 additionalAttributes.get(0).getType());
         streamDefinitionWithStartEnd.attribute(additionalAttributes.get(1).getName(),
                 additionalAttributes.get(1).getType());
-        initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd);
+        initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd,
+                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0).getInputReferenceId());
         return metaStreamEventWithStartEnd;
     }
 
@@ -173,12 +176,12 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     private static MatchingMetaInfoHolder createNewStreamTableMetaInfoHolder(
-            MetaStreamEvent metaStreamEventWithStartEnd, AbstractDefinition tableDefinition) {
+            MetaStreamEvent metaStreamEventWithStartEnd, AbstractDefinition tableDefinition, String referenceId) {
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
         MetaStreamEvent metaStreamEventForTable = new MetaStreamEvent();
 
         metaStreamEventForTable.setEventType(MetaStreamEvent.EventType.TABLE);
-        initMetaStreamEvent(metaStreamEventForTable, tableDefinition);
+        initMetaStreamEvent(metaStreamEventForTable, tableDefinition, referenceId);
 
         metaStateEvent.addEvent(metaStreamEventWithStartEnd);
         metaStateEvent.addEvent(metaStreamEventForTable);
@@ -258,7 +261,8 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
         MatchingMetaInfoHolder streamTableMetaInfoHolderWithStartEnd = createNewStreamTableMetaInfoHolder(
-                newMetaStreamEventWithStartEnd, tableDefinition);
+                newMetaStreamEventWithStartEnd, tableDefinition,
+                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId());
 
         // Create per expression executor
         ExpressionExecutor perExpressionExecutor;
@@ -306,6 +310,9 @@ public class AggregationRuntime implements MemoryCalculable {
         Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
         withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
+        // Combine with and on condition for table query
+        Expression withinExpressionTable = Expression.and(expression, withinExpression);
+
         // Create start and end time expression
         Expression startEndTimeExpression;
         ExpressionExecutor startTimeEndTimeExpressionExecutor;
@@ -328,9 +335,10 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create compile condition per each table used to persist aggregates.
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
+        List<VariableExpressionExecutor> startEndExpressionExecutorList = new ArrayList<>();
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
-            CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpression,
-                    streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, variableExpressionExecutors, tableMap,
+            CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
+                    streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, startEndExpressionExecutorList, tableMap,
                     queryName);
             withinTableCompiledConditions.put(entry.getKey(), withinTableCompileCondition);
         }
@@ -339,8 +347,12 @@ public class AggregationRuntime implements MemoryCalculable {
         // This compile condition is used to check whether the running aggregates (in-memory data)
         // are within given duration
         withinInMemoryCompileCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true),
-                withinExpression, streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, variableExpressionExecutors,
-                tableMap, queryName);
+                withinExpression, streamTableMetaInfoHolderWithStartEnd, siddhiAppContext,
+                startEndExpressionExecutorList, tableMap, queryName);
+
+        QueryParserHelper.reduceMetaComplexEvent(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent());
+        QueryParserHelper.updateVariablePosition(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent(),
+                startEndExpressionExecutorList);
 
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as
