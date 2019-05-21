@@ -231,13 +231,16 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         if (isCacheEnabled) {
             readWriteLock.writeLock().lock();
-            cachedTable.add(addingEventChunk);
-            if (recordTableHandler != null) {
-                recordTableHandler.add(timestamp, records);
-            } else {
-                add(records);
+            try {
+                cachedTable.add(addingEventChunk);
+                if (recordTableHandler != null) {
+                    recordTableHandler.add(timestamp, records);
+                } else {
+                    add(records);
+                }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
-            readWriteLock.writeLock().unlock();
             if (cachedTable.size() > maxCacheSize) {
                 isCacheEnabled = false;
                 log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
@@ -285,15 +288,18 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (isCacheEnabled) {
             assert compiledConditionWithCache != null;
             readWriteLock.writeLock().lock();
-            cachedTable.delete(deletingEventChunk,
-                    compiledConditionWithCache.getCacheCompileCondition());
-            if (recordTableHandler != null) {
-                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                        compiledCondition);
-            } else {
-                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+            try {
+                cachedTable.delete(deletingEventChunk,
+                        compiledConditionWithCache.getCacheCompileCondition());
+                if (recordTableHandler != null) {
+                    recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                            compiledCondition);
+                } else {
+                    delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+                }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
-            readWriteLock.writeLock().unlock();
         } else {
             if (recordTableHandler != null) {
                 recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
@@ -349,6 +355,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (isCacheEnabled) {
             assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
             readWriteLock.writeLock().lock();
+            try {
             cachedTable.update(updatingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
                     compiledUpdateSetWithCache.getCacheCompiledUpdateSet());
             if (recordTableHandler != null) {
@@ -359,7 +366,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
             }
-            readWriteLock.writeLock().unlock();
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
         } else {
             if (recordTableHandler != null) {
                 recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
@@ -466,24 +475,27 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (isCacheEnabled) {
             assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
             readWriteLock.writeLock().lock();
-            cachedTable.updateOrAdd(updateOrAddingEventChunk,
-                    compiledConditionWithCache.getCacheCompileCondition(),
-                    compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
+            try {
+                cachedTable.updateOrAdd(updateOrAddingEventChunk,
+                        compiledConditionWithCache.getCacheCompileCondition(),
+                        compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor);
+                if (recordTableHandler != null) {
+                    recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
+                            updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                            updateSetParameterMaps, addingRecords);
+                } else {
+                    updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+                            recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+                }
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
             if (cachedTable.size() > maxCacheSize) {
                 isCacheEnabled = false;
                 log.warn(siddhiAppContext.getName() + ": " + cacheTableDefinition.getId() + " size is now " +
                         cachedTable.size() + " which is bigger than cache table size defined as " + maxCacheSize +
                         ". So cache is now disabled");
             }
-            if (recordTableHandler != null) {
-                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
-                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                        updateSetParameterMaps, addingRecords);
-            } else {
-                updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
-            }
-            readWriteLock.writeLock().unlock();
         } else {
             if (recordTableHandler != null) {
                 recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
