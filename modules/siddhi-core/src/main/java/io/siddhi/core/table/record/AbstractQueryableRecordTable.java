@@ -579,19 +579,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
+        CompiledConditionWithCache compiledConditionAggregation = null;
         if (isCacheEnabled) {
-
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionAggregation = (CompiledConditionWithCache)
+            compiledConditionAggregation = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());
-
-            StreamEvent cacheResults = cachedTable.find(compiledConditionAggregation.getCacheCompileCondition(),
-                    matchingEvent);
-            if (cacheResults != null) {
-                return cacheResults;
-            }
         } else {
             recordStoreCompiledCondition =
                     ((RecordStoreCompiledCondition) compiledCondition);
@@ -604,11 +598,31 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+        if (isCacheEnabled) {
+            assert compiledConditionAggregation != null;
+            readWriteLock.readLock().lock();
+            try {
+                StreamEvent cacheResults = cachedTable.find(compiledConditionAggregation.getCacheCompileCondition(),
+                        matchingEvent);
+                if (cacheResults != null) {
+                    return cacheResults;
+                }
+                if (recordTableHandler != null) {
+                    records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                            recordStoreCompiledCondition.compiledCondition);
+                } else {
+                    records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+                }
+            } finally {
+                readWriteLock.readLock().unlock();
+            }
         } else {
-            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            if (recordTableHandler != null) {
+                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                        recordStoreCompiledCondition.compiledCondition);
+            } else {
+                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            }
         }
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         if (records != null) {
@@ -631,36 +645,20 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
+        CompiledConditionWithCache compiledConditionWithCache = null;
+        CompiledSelectionWithCache compiledSelectionWithCache = null;
+        StreamEvent cacheResults = null;
 
         if (isCacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(
                     compiledConditionTemp.variableExpressionExecutorMap,
                     compiledConditionWithCache.getStoreCompileCondition());
 
-            CompiledSelectionWithCache compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
+            compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             recordStoreCompiledSelection = compiledSelectionWithCache.recordStoreCompiledSelection;
-            StreamEvent cacheResults = cachedTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                    matchingEvent);
-            if (cacheResults != null) {
-                StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                        metaStreamInfoHolder.getMetaStateEvent());
-                Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
-                        compiledSelectionWithCache.querySelector,
-                        stateEventFactory, MetaStreamEvent.EventType.TABLE);
-                assert cacheResultsAfterSelection != null;
-                for (Event event : cacheResultsAfterSelection) {
-
-                    Object[] record = event.getData();
-                    StreamEvent streamEvent = storeEventPool.newInstance();
-                    streamEvent.setOutputData(new Object[outputAttributes.length]);
-                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                    streamEventComplexEventChunk.add(streamEvent);
-                }
-                return streamEventComplexEventChunk.getFirst();
-            }
         } else {
             recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
@@ -677,13 +675,49 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                    recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
+        if (isCacheEnabled) {
+            assert compiledConditionWithCache != null;
+            readWriteLock.readLock().lock();
+            try {
+                cacheResults = cachedTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                        matchingEvent);
+                if (recordTableHandler != null) {
+                    records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
+                            recordStoreCompiledCondition.compiledCondition,
+                            recordStoreCompiledSelection.compiledSelection, outputAttributes);
+                } else {
+                    records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
+                            recordStoreCompiledSelection.compiledSelection, outputAttributes);
+                }
+            } finally {
+                readWriteLock.readLock().unlock();
+            }
         } else {
-            records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
+            if (recordTableHandler != null) {
+                records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
+                        recordStoreCompiledCondition.compiledCondition,
+                        recordStoreCompiledSelection.compiledSelection, outputAttributes);
+            } else {
+                records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
+                        recordStoreCompiledSelection.compiledSelection, outputAttributes);
+            }
+        }
+        if (cacheResults != null) {
+            StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
+                    metaStreamInfoHolder.getMetaStateEvent());
+            Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
+                    compiledSelectionWithCache.querySelector,
+                    stateEventFactory, MetaStreamEvent.EventType.TABLE);
+            assert cacheResultsAfterSelection != null;
+            for (Event event : cacheResultsAfterSelection) {
+
+                Object[] record = event.getData();
+                StreamEvent streamEvent = storeEventPool.newInstance();
+                streamEvent.setOutputData(new Object[outputAttributes.length]);
+                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                streamEventComplexEventChunk.add(streamEvent);
+            }
+            return streamEventComplexEventChunk.getFirst();
         }
         if (records != null) {
             while (records.hasNext()) {
