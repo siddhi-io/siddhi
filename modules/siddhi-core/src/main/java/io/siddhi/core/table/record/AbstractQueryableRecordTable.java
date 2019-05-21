@@ -65,9 +65,7 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import org.apache.log4j.Logger;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -82,7 +80,7 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
-import static io.siddhi.query.api.util.AnnotationHelper.getNestedAnnotation;
+import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 
 /**
  * An abstract implementation of table. Abstract implementation will handle {@link ComplexEventChunk} so that
@@ -104,7 +102,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                      StreamEventCloner storeEventCloner, ConfigReader configReader) {
         this.siddhiAppContext = siddhiAppContext;
         String[] annotationNames = {ANNOTATION_STORE, ANNOTATION_CACHE};
-        Annotation cacheTableAnnotation = getNestedAnnotation(tableDefinition.getAnnotations(), annotationNames);
+        Annotation cacheTableAnnotation = getAnnotation(annotationNames, tableDefinition.getAnnotations());
         if (cacheTableAnnotation != null) {
             isCacheEnabled = true;
             maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
@@ -212,14 +210,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    private Object[] appendValue(Object[] obj, Object newObj) {
-
-        ArrayList<Object> temp = new ArrayList<Object>(Arrays.asList(obj));
-        temp.add(newObj);
-        return temp.toArray();
-
-    }
-
     @Override
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         if (isCacheEnabled) {
@@ -227,9 +217,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             while (addingEventChunk.hasNext()) {
                 StreamEvent event = addingEventChunk.next();
                 Object[] outputData = event.getOutputData();
-                Object[] outputDataWithTimeStamp = appendValue(outputData,
-                        new Timestamp(System.currentTimeMillis()).getTime());
-                StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+                Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+                System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+                outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                        siddhiAppContext.getTimestampGenerator().currentTime();
+                        StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
                 eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
                 addingEventChunkWithTimestamp.add(eventWithTimeStamp);
             }
