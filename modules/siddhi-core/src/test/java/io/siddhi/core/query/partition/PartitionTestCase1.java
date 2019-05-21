@@ -2435,7 +2435,6 @@ public class PartitionTestCase1 {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
     public void testPartitionQuery43() throws InterruptedException {
         log.info("Partition test43");
 
@@ -2537,15 +2536,16 @@ public class PartitionTestCase1 {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
+           @Override
+           public void receive(Event[] events) {
+               EventPrinter.print(events);
                 count.addAndGet(events.length);
                 eventArrived = true;
             }
         });
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
+
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
         inputHandler.send(new Object[]{"WSO2", 75.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
@@ -2634,4 +2634,5 @@ public class PartitionTestCase1 {
 
         siddhiApp.defineFunction(functionDefinition.id("e1").type(Attribute.Type.STRING).body(null));
     }
+
 }
