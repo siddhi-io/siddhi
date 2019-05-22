@@ -47,10 +47,16 @@ public class ListEventHolder extends SnapshotableStreamEventQueue implements Eve
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
+            size++;
             ComplexEvent complexEvent = addingEventChunk.next();
             StreamEvent streamEvent = tableStreamEventFactory.newInstance();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
             this.add(streamEvent);
         }
+    }
+
+    @Override
+    public int size() {
+        return size;
     }
 }

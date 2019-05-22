@@ -45,6 +45,7 @@ import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
@@ -298,6 +299,7 @@ public class StoreQueryParser {
                                                                         variableExpressionExecutors,
                                                                 LockWrapper lockWrapper,
                                                                 SiddhiQueryContext siddhiQueryContext) {
+        metaStreamEvent.setEventType(EventType.TABLE);
         if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
             try {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, tableMap,
@@ -343,10 +345,20 @@ public class StoreQueryParser {
         CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
                 storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
-
         StoreQueryRuntime storeQueryRuntime =
                 new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
                         compiledSelection, expectedOutputAttributes, siddhiQueryContext.getName());
+        try {
+            AbstractQueryableRecordTable.CompiledSelectionWithCache compiledSelectionWithCache =
+                    (AbstractQueryableRecordTable.CompiledSelectionWithCache) compiledSelection;
+            storeQueryRuntime.setSelector(compiledSelectionWithCache.getQuerySelector());
+            storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
+            storeQueryRuntime.setStateEventFactory(new StateEventFactory(
+                    matchingMetaInfoHolderForSelection.getMetaStateEvent()));
+        } catch (ClassCastException ignored) {
+
+        }
+
         QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
         QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
                 variableExpressionExecutors);
@@ -365,7 +377,6 @@ public class StoreQueryParser {
         MatchingMetaInfoHolder matchingMetaInfoHolder;
         AbstractDefinition inputDefinition;
         QuerySelector querySelector;
-        metaStreamEvent.setEventType(EventType.TABLE);
 
         switch (storeQuery.getType()) {
             case FIND:
@@ -450,7 +461,7 @@ public class StoreQueryParser {
         }
     }
 
-    private static List<Attribute> buildExpectedOutputAttributes(
+    public static List<Attribute> buildExpectedOutputAttributes(
             StoreQuery storeQuery, Map<String, Table> tableMap,
             int metaPosition, MatchingMetaInfoHolder metaStreamInfoHolder, SiddhiQueryContext siddhiQueryContext) {
         MetaStateEvent selectMetaStateEvent =
@@ -540,6 +551,16 @@ public class StoreQueryParser {
         metaStateEvent.addEvent(metaStreamEvent);
         return new MatchingMetaInfoHolder(metaStateEvent, -1, 0, streamDefinition,
                 storeDefinition, 0);
+    }
+
+    public static MatchingMetaInfoHolder generateMatchingMetaInfoHolderForCacheTable(TableDefinition tableDefinition) {
+        MetaStateEvent metaStateEvent = new MetaStateEvent(1);
+        MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+        initMetaStreamEvent(metaStreamEvent, tableDefinition);
+        metaStateEvent.addEvent(metaStreamEvent);
+        MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent,
+                -1, 0, tableDefinition, tableDefinition, 0);
+        return matchingMetaInfoHolder;
     }
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {

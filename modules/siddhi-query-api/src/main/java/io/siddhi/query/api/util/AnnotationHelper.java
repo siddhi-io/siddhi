@@ -22,6 +22,7 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.exception.DuplicateAnnotationException;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,7 +30,16 @@ import java.util.List;
  */
 public class AnnotationHelper {
 
-    // TODO: 1/28/17 update helper methods to work with nested annotations.
+    public static Annotation getAnnotation(String[] annotationNames, List<Annotation> annotationList) {
+        if (annotationNames.length == 1) {
+            return getAnnotation(annotationNames[0], annotationList);
+        } else {
+            return getAnnotation(Arrays.copyOfRange(annotationNames, 1, annotationNames.length),
+                    getAnnotation(annotationNames[0], annotationList).getAnnotations()
+            );
+        }
+    }
+
     public static Annotation getAnnotation(String annotationName, List<Annotation> annotationList) {
         Annotation annotation = null;
         for (Annotation aAnnotation : annotationList) {

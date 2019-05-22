@@ -37,9 +37,11 @@
             <class name="io.siddhi.core.managment.LogTestCase"/>
             <class name="io.siddhi.core.managment.StatisticsTestCase"/>
 
+            <class name="io.siddhi.core.query.aggregator.AndAggregatorExtensionTestCase"/>
             <class name="io.siddhi.core.query.aggregator.MaxAggregatorExtensionTestCase"/>
             <class name="io.siddhi.core.query.aggregator.MaxForeverAggregatorExtensionTestCase"/>
             <class name="io.siddhi.core.query.aggregator.MinForeverAggregatorExtensionTestCase"/>
+            <class name="io.siddhi.core.query.aggregator.OrAggregatorExtensionTestCase"/>
 
             <class name="io.siddhi.core.query.extension.ExtensionTestCase"/>
 
@@ -130,6 +132,7 @@
             <class name="io.siddhi.core.query.FilterTestCase1"/>
             <class name="io.siddhi.core.query.FilterTestCase2"/>
             <class name="io.siddhi.core.query.IsNullTestCase"/>
+            <class name="io.siddhi.core.query.OrderByLimitTestCase"/>
             <class name="io.siddhi.core.query.PassThroughTestCase"/>
             <class name="io.siddhi.core.query.SimpleQueryValidatorTestCase"/>
             <class name="io.siddhi.core.query.StringCompareTestCase"/>

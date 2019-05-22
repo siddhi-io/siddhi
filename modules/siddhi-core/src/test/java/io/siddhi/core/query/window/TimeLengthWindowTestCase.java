@@ -21,6 +21,7 @@ package io.siddhi.core.query.window;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
@@ -450,6 +451,132 @@ public class TimeLengthWindowTestCase {
         Thread.sleep(5000);
         AssertJUnit.assertEquals("In event count", 8, inEventCount);
         AssertJUnit.assertEquals("Remove event count", 3, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void timeLengthWindowTest11() throws InterruptedException {
+        log.info("Testing timeLength window less than two parameters");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "@info(name = 'query1') from cseEventStream#window.timeLength(4 sec) select symbol," +
+                "price," +
+                "volume insert all events into outputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        Thread.sleep(500);
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        Thread.sleep(500);
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        Thread.sleep(500);
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        Thread.sleep(5000);
+        AssertJUnit.assertEquals(4, inEventCount);
+        AssertJUnit.assertEquals(4, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void timeLengthWindowTest12() throws InterruptedException {
+        log.info("Testing timeLength window is a dinamic value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeLength(1/2 sec,4) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"Google", 80.5f, 2});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"Yahoo", 90.5f, 3});
+        Thread.sleep(4000);
+        AssertJUnit.assertEquals(4, inEventCount);
+        AssertJUnit.assertEquals(4, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void timeLengthWindowTest13() throws InterruptedException {
+        log.info("Testing timeLength window constant but not a int or long value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeLength('4 sec',4) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"Google", 80.5f, 2});
+        Thread.sleep(1200);
+        inputHandler.send(new Object[]{"Yahoo", 90.5f, 3});
+        Thread.sleep(4000);
+        AssertJUnit.assertEquals(4, inEventCount);
+        AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }

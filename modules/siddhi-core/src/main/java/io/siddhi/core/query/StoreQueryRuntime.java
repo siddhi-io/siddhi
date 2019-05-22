@@ -116,6 +116,10 @@ public abstract class StoreQueryRuntime {
      */
     public abstract TYPE getType();
 
+    public void setMetaStreamEvent(MetaStreamEvent metaStreamEvent) {
+        this.metaStreamEvent = metaStreamEvent;
+    }
+
     /**
      * This enum contains the possible types of the store query runtimes
      */
