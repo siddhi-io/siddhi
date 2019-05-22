@@ -95,7 +95,7 @@ public class IncrementalExecutor implements Executor {
     }
 
     @Override
-    public void execute(ComplexEventChunk streamEventChunk) {
+    public synchronized void execute(ComplexEventChunk streamEventChunk) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Event Chunk received by " + this.duration + " incremental executor: " +
                     streamEventChunk.toString());
