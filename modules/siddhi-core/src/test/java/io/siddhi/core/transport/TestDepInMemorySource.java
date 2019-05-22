@@ -99,7 +99,6 @@ public class TestDepInMemorySource extends InMemorySource {
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
-        return new ServiceDeploymentInfo(ServiceDeploymentInfo.ServiceProtocol.UDP, 9000, true,
-                true);
+        return new ServiceDeploymentInfo(ServiceDeploymentInfo.ServiceProtocol.UDP, 9000, true);
     }
 }
