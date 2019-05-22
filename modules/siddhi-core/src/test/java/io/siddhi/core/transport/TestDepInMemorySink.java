@@ -47,6 +47,6 @@ public class TestDepInMemorySink extends InMemorySink {
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
-        return new ServiceDeploymentInfo(8080, true, true);
+        return new ServiceDeploymentInfo(8080, true);
     }
 }
