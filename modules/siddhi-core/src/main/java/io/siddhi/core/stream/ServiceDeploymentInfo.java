@@ -36,14 +36,12 @@ public class ServiceDeploymentInfo {
      * @param serviceProtocol the protocol used by the service
      * @param port            the port of the service
      * @param secured         is the service protocol secured
-     * @param isPulling       is the source pulling
      */
-    public ServiceDeploymentInfo(ServiceProtocol serviceProtocol, int port, boolean secured,
-                                 boolean isPulling) {
+    public ServiceDeploymentInfo(ServiceProtocol serviceProtocol, int port, boolean secured) {
         this.serviceProtocol = serviceProtocol;
         this.port = port;
         this.secured = secured;
-        this.isPulling = isPulling;
+        this.isPulling = false;
     }
 
     /**
@@ -51,12 +49,11 @@ public class ServiceDeploymentInfo {
      *
      * @param port           the port of the service
      * @param secured        is the service protocol secured
-     * @param isPulling      is the source pulling
      */
-    public ServiceDeploymentInfo(int port, boolean secured, boolean isPulling) {
+    public ServiceDeploymentInfo(int port, boolean secured) {
         this.port = port;
         this.secured = secured;
-        this.isPulling = isPulling;
+        this.isPulling = false;
     }
 
     public ServiceDeploymentInfo() {
