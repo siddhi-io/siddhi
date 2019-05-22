@@ -752,7 +752,7 @@
         <google.guava.version.range>[23.0.0, 24.0.0)</google.guava.version.range>
         <org.quartz.version.range>[2.0.0, 3.0.0)</org.quartz.version.range>
 
-        <awaitility.version>3.0.0</awaitility.version>
+        <awaitility.version>3.1.6</awaitility.version>
         <testng.version>6.14.3</testng.version>
         <log4j.version>1.2.17</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
