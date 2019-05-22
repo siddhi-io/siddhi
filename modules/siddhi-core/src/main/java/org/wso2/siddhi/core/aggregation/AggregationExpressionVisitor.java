@@ -35,19 +35,19 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
 
     private Stack<Object> conditionOperands;
     private String inputStreamRefId;
-    private List<String> groupByAttributesList;
+    private List<String> tableAttributesNameList;
     private List<String> allAttributesList;
 
 
     AggregationExpressionVisitor(String inputStreamRefId, List<Attribute> inputStreamAttributesList,
-                                 List<String> groupByAttributes) {
+                                 List<String> tableAttributesNameList) {
         this.conditionOperands = new Stack<>();
         this.inputStreamRefId = inputStreamRefId;
-        this.groupByAttributesList = groupByAttributes;
+        this.tableAttributesNameList = tableAttributesNameList;
         this.allAttributesList = inputStreamAttributesList.stream()
                 .map(Attribute::getName)
                 .collect(Collectors.toList());
-        this.allAttributesList.addAll(groupByAttributes);
+        this.allAttributesList.addAll(tableAttributesNameList);
     }
 
     public Expression getReducedExpression() {
@@ -211,7 +211,7 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
         } else {
             if (streamId.equals(inputStreamRefId)) {
                 this.conditionOperands.push(expression);
-            } else if (this.groupByAttributesList.contains(variable.getAttributeName())) {
+            } else if (this.tableAttributesNameList.contains(variable.getAttributeName())) {
                 this.conditionOperands.push(expression);
             } else {
                 this.conditionOperands.push("true");
