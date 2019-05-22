@@ -68,7 +68,6 @@ import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDura
 public class AggregationRuntime implements MemoryCalculable {
     private final AggregationDefinition aggregationDefinition;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final SiddhiAppContext siddhiAppContext;
     private final MetaStreamEvent tableMetaStreamEvent;
@@ -84,11 +83,10 @@ public class AggregationRuntime implements MemoryCalculable {
     private RecreateInMemoryData recreateInMemoryData;
     private boolean processingOnExternalTime;
     private boolean isFirstEventArrived;
-    private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
     private ExpressionExecutor shouldUpdateExpressionExecutor;
-    private String shardId;
     private List<String> tableAttributesNameList;
+    private boolean isDistributed;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -103,8 +101,7 @@ public class AggregationRuntime implements MemoryCalculable {
                               List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
                               IncrementalDataPurging incrementalDataPurging,
-                              ExpressionExecutor shouldUpdateExpressionExecutor, String shardId,
-                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+                              ExpressionExecutor shouldUpdateExpressionExecutor, boolean isDistributed) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -122,12 +119,11 @@ public class AggregationRuntime implements MemoryCalculable {
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
         this.incrementalDataPurging = incrementalDataPurging;
         this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
-        this.shardId = shardId;
-        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
-        aggregateMetaSteamEvent = new MetaStreamEvent();
-        aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
+        this.aggregateMetaSteamEvent = new MetaStreamEvent();
+        aggregationDefinition.getAttributeList().forEach(this.aggregateMetaSteamEvent::addOutputData);
         this.tableAttributesNameList = tableMetaStreamEvent.getInputDefinitions().get(0).getAttributeList()
                 .stream().map(Attribute::getName).collect(Collectors.toList());
+        this.isDistributed = isDistributed;
     }
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
@@ -210,19 +206,14 @@ public class AggregationRuntime implements MemoryCalculable {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
-            if (lastExecutorsRefreshedTime == -1 || System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000) {
-                if (shardId != null) {
-                    this.recreateInMemoryData.recreateInMemoryData(isFirstEventArrived, true);
-                } else if (!isFirstEventArrived) {
-                    this.recreateInMemoryData.recreateInMemoryData(false, false);
-                }
-                lastExecutorsRefreshedTime = System.currentTimeMillis();
+            if (!isFirstEventArrived) {
+                this.recreateInMemoryData.recreateInMemoryData();
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
                     baseExecutors, outputExpressionExecutors, siddhiAppContext,
                     aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor,
-                    incrementalExecutorMapForPartitions);
+                    isDistributed);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
@@ -383,10 +374,14 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryDataFirstEventArrived() {
+    public void recreateInMemoryData() {
         // State only updated when first event arrives to IncrementalAggregationProcessor
         this.isFirstEventArrived = true;
-        this.recreateInMemoryData.recreateInMemoryData(true, false);
+        for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                this.incrementalExecutorMap.entrySet()) {
+            durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
+        }
+        this.recreateInMemoryData.recreateInMemoryData();
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

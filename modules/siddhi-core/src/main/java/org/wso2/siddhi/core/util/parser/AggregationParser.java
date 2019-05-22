@@ -169,7 +169,7 @@ public class AggregationParser {
             }
 
             ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-            Boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
+            boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
 
             if (enablePartioning || shouldPartitionById) {
                 shardId = configManager.extractProperty("shardId");
@@ -297,15 +297,6 @@ public class AggregationParser {
                     groupByKeyGeneratorList, incrementalDurations,
                     aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
 
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
-            if (shardId != null) {
-                incrementalExecutorMapForPartitions =
-                        buildIncrementalExecutors(
-                                processedMetaStreamEvent, processExpressionExecutorsList,
-                                groupByKeyGeneratorList, incrementalDurations,
-                                aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
-            }
-
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
             incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
                     , aggregationTables, isProcessingOnExternalTime, siddhiAppContext);
@@ -313,7 +304,7 @@ public class AggregationParser {
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
                     aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                    windowMap, aggregationMap, shardId, incrementalExecutorMapForPartitions);
+                    windowMap, aggregationMap, shardId, enablePartioning);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -353,8 +344,7 @@ public class AggregationParser {
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
-                    incrementalDataPurging, shouldUpdateExpressionExecutor, shardId,
-                    incrementalExecutorMapForPartitions);
+                    incrementalDataPurging, shouldUpdateExpressionExecutor, enablePartioning);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -496,6 +486,13 @@ public class AggregationParser {
         ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiAppContext, tableMap,
                 incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent);
 
+        if (shardId != null) {
+            ExpressionExecutor nodeIdExpressionExecutor =
+                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
+            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
+            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
+        }
+
         Attribute timestampAttribute = new Attribute(AGG_START_TIMESTAMP_COL, Attribute.Type.LONG);
         incomingMetaStreamEvent.addOutputData(timestampAttribute);
         incomingExpressionExecutors.add(timestampExecutor);
@@ -626,13 +623,6 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(outputAttribute.getRename()));
                 }
             }
-        }
-
-        if (shardId != null) {
-            ExpressionExecutor nodeIdExpressionExecutor =
-                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
-            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
-            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
         }
         return addAggLastEvent;
     }

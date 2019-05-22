@@ -114,8 +114,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             SiddhiAppContext siddhiAppContext,
                             List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                             List<GroupByKeyGenerator> groupbyKeyGeneratorList,
-                            ExpressionExecutor shouldUpdateExpressionExecutor,
-                            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+                            ExpressionExecutor shouldUpdateExpressionExecutor, boolean isDistributed) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
 
@@ -160,7 +159,9 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(null);
 
         //If processing on external time, the in-memory data also needs to be queried
-        if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
+        if (isDistributed) {
+            // TODO: 22/05/19 Distributed ongoing aggregations lookup
+        } else if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             List<ExpressionExecutor> clonedBaseExecutors = baseExecutors.stream().map(expressionExecutor ->
                     expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
@@ -169,13 +170,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                     siddhiAppContext, shouldUpdateExpressionExecutorClone);
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
             // Aggregate in-memory data and create an event chunk out of it
-            if (incrementalExecutorMapForPartitions != null) {
-                aggregatedInMemoryEventChunk = incrementalDataAggregator
-                        .aggregateInMemoryData(incrementalExecutorMapForPartitions);
-            } else {
-                aggregatedInMemoryEventChunk = incrementalDataAggregator
-                        .aggregateInMemoryData(incrementalExecutorMap);
-            }
+            aggregatedInMemoryEventChunk = incrementalDataAggregator.aggregateInMemoryData(incrementalExecutorMap);
 
             // Get the in-memory aggregate data, which is within given duration
             StreamEvent withinMatchFromInMemory = ((Operator) inMemoryStoreCompileCondition).find(matchingEvent,
