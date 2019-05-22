@@ -44,6 +44,48 @@ public class DeleteFromTableTestCase {
     }
 
     @Test
+    public void deleteFromTableTest0() throws InterruptedException {
+        log.info("deleteFromTableTest1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on symbol=='IBM' ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+
+        Event[] events = new Event[2];
+        events[0] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L});
+        events[1] = new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L});
+
+        deleteStockStream.send(events);
+
+        Thread.sleep(500);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
     public void deleteFromTableTest1() throws InterruptedException {
         log.info("deleteFromTableTest1");
 

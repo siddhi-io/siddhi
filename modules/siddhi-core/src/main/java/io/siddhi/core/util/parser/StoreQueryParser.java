@@ -341,11 +341,11 @@ public class StoreQueryParser {
         List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery,
                 tableMap, metaPosition, matchingMetaInfoHolder, siddhiQueryContext);
 
-        MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
-                metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
-                table.getTableDefinition());
+//        MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
+//                metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
+//                table.getTableDefinition());
         CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
-                storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
+                storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
 
 
@@ -358,7 +358,7 @@ public class StoreQueryParser {
             storeQueryRuntime.setSelector(compiledSelectionWithCache.getQuerySelector());
             storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
             storeQueryRuntime.setStateEventFactory(new StateEventFactory(
-                    matchingMetaInfoHolderForSelection.getMetaStateEvent()));
+                    matchingMetaInfoHolder.getMetaStateEvent()));
 
         } catch (ClassCastException ignored) {
 

@@ -61,7 +61,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -127,7 +127,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -192,7 +192,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol1 string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -256,7 +256,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -319,7 +319,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -382,7 +382,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -445,7 +445,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -510,7 +510,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float); ";
@@ -573,7 +573,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +
@@ -640,7 +640,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +
@@ -710,7 +710,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +
@@ -777,7 +777,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +
@@ -848,7 +848,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, price float); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +
@@ -918,7 +918,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, price float); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@PrimaryKey(\"symbol\")" +
                 //"@Index(\"volume\")" +
                 "@connection(maxWait = '4000')" +

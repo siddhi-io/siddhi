@@ -40,7 +40,9 @@ import io.siddhi.query.api.util.AnnotationHelper;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Class to parse {@link EventHolder}

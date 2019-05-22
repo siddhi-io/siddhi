@@ -34,8 +34,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class QueryAPITestCaseForTableWithCache {
-
-
     private static final Logger log = Logger.getLogger(QueryAPITestCaseForTableWithCache.class);
 
     @BeforeClass
@@ -56,7 +54,9 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+//                "@PrimaryKey(\"symbol\")" +
+//                "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -71,7 +71,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-        stockStream.send(new Object[]{"WSO3", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 200L});
         Thread.sleep(500);
 
         Event[] events = siddhiAppRuntime.query("" +
@@ -103,7 +103,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -150,7 +150,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -205,7 +205,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -260,7 +260,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -298,7 +298,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
@@ -326,7 +326,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
@@ -355,7 +355,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -390,7 +390,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -428,7 +428,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -471,7 +471,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -515,7 +515,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String storeQuery = "" +
                 "from StockTable " +
@@ -552,7 +552,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (id int, symbol string, volume int); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable3 (id int, symbol string, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +

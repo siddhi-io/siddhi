@@ -50,7 +50,7 @@ public class InsertIntoTableWithCacheTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
@@ -82,8 +82,8 @@ public class InsertIntoTableWithCacheTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -119,12 +119,12 @@ public class InsertIntoTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long);\n";
 
         String table = "" +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
+                "@Store(type=\"testStoreContainingInMemoryTable\")\n" + // , @Cache(size="10")
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long);\n" +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
-                "@PrimaryKey(\"symbol, price\")" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@PrimaryKey(\"symbol\", \"price\")" +
                 //"@Index(\"volume\")" +
                 "define table MyTable (symbol string, price float);\n";
 

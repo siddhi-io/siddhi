@@ -71,7 +71,7 @@ public class IndexTableTestCase {
                 "" +
                 "@info(name = 'query2') " +
                 "from CheckStockStream join StockTable " +
-                " on CheckStockStream.symbol==StockTable.symbol " +
+                " on CheckStockStream.volume==StockTable.volume AND CheckStockStream.symbol==StockTable.symbol " +
                 "select CheckStockStream.symbol, StockTable.volume " +
                 "insert into OutStream;";
 
@@ -102,7 +102,7 @@ public class IndexTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 55.6f, 100L});
             checkStockStream.send(new Object[]{"IBM", 100L});
-            checkStockStream.send(new Object[]{"WSO2", 100L});
+//            checkStockStream.send(new Object[]{"WSO2", 100L});
 
             List<Object[]> expected = Arrays.asList(
                     new Object[]{"IBM", 100L},

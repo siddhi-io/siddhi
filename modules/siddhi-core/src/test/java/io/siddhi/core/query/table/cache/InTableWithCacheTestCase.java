@@ -24,14 +24,24 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.sql.SQLException;
 
 public class InTableWithCacheTestCase {
+    private int inEventCount;
+    private int removeEventCount;
+    private boolean eventArrived;
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
+    }
     private static final Logger log = Logger.getLogger(InTableWithCacheTestCase.class);
 
     @BeforeClass
@@ -52,7 +62,7 @@ public class InTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckInStockStream (symbol string); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
@@ -71,23 +81,29 @@ public class InTableWithCacheTestCase {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2"});
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
             }
 
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        InputHandler CheckInStockStream = siddhiAppRuntime.getInputHandler("CheckInStockStream");
+        InputHandler checkInStockStream = siddhiAppRuntime.getInputHandler("CheckInStockStream");
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-        CheckInStockStream.send(new Object[]{"WSO2"});
-        Thread.sleep(1000);
-
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable ");
-//        EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
+        checkInStockStream.send(new Object[]{"WSO2"});
+        Assert.assertEquals(true, eventArrived, "Event arrived");
 
         siddhiAppRuntime.shutdown();
     }
