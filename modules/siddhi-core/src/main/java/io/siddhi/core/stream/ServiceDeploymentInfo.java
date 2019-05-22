@@ -27,7 +27,7 @@ import java.util.Map;
 public class ServiceDeploymentInfo {
 
     private ServiceProtocol serviceProtocol = ServiceProtocol.TCP;
-    private SourceStrategy sourceStrategy = SourceStrategy.PULL;
+    private boolean isPulling = true;
     private boolean secured = false;
     private int port;
     private Map<String, String> deploymentProperties = new HashMap<>();
@@ -36,14 +36,14 @@ public class ServiceDeploymentInfo {
      * @param serviceProtocol the protocol used by the service
      * @param port            the port of the service
      * @param secured         is the service protocol secured
-     * @param sourceStrategy  the source strategy
+     * @param isPulling       is the source pulling
      */
     public ServiceDeploymentInfo(ServiceProtocol serviceProtocol, int port, boolean secured,
-                                 SourceStrategy sourceStrategy) {
+                                 boolean isPulling) {
         this.serviceProtocol = serviceProtocol;
         this.port = port;
         this.secured = secured;
-        this.sourceStrategy = sourceStrategy;
+        this.isPulling = isPulling;
     }
 
     /**
@@ -51,12 +51,12 @@ public class ServiceDeploymentInfo {
      *
      * @param port           the port of the service
      * @param secured        is the service protocol secured
-     * @param sourceStrategy the source strategy
+     * @param isPulling      is the source pulling
      */
-    public ServiceDeploymentInfo(int port, boolean secured, SourceStrategy sourceStrategy) {
+    public ServiceDeploymentInfo(int port, boolean secured, boolean isPulling) {
         this.port = port;
         this.secured = secured;
-        this.sourceStrategy = sourceStrategy;
+        this.isPulling = isPulling;
     }
 
     public ServiceDeploymentInfo() {
@@ -86,12 +86,12 @@ public class ServiceDeploymentInfo {
         this.secured = secured;
     }
 
-    public SourceStrategy getSourceStrategy() {
-        return sourceStrategy;
+    public boolean isPulling() {
+        return isPulling;
     }
 
-    public void setSourceStrategy(SourceStrategy sourceStrategy) {
-        this.sourceStrategy = sourceStrategy;
+    public void setPulling(boolean pulling) {
+        isPulling = pulling;
     }
 
     public Map<String, String> getDeploymentProperties() {
@@ -109,12 +109,5 @@ public class ServiceDeploymentInfo {
      */
     public enum ServiceProtocol {
         TCP, UDP, SCTP,
-    }
-
-    /**
-     * Source strategy
-     */
-    public enum SourceStrategy {
-        PUSH, PULL
     }
 }
