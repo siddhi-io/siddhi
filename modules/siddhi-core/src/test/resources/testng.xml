@@ -27,6 +27,7 @@
             <class name="org.wso2.siddhi.core.aggregation.IncrementalPurgingTestCase"/>
             <class name="org.wso2.siddhi.core.aggregation.DistinctCountAggregationTestCase"/>
             <class name="org.wso2.siddhi.core.aggregation.AggregationFindQueryValidationTestCase"/>
+            <class name="org.wso2.siddhi.core.aggregation.AggregationFilterTestCase"/>
 
             <class name="org.wso2.siddhi.core.managment.AsyncTestCase"/>
             <class name="org.wso2.siddhi.core.managment.EventTestCase"/>
