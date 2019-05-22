@@ -37,6 +37,7 @@ import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondit
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.snapshot.SnapshotService;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
@@ -88,6 +90,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private IncrementalDataPurging incrementalDataPurging;
     private String shardId;
     private List<List<ExpressionExecutor>> aggregateProcessExpressionExecutorsListForFind;
+    private List<String> tableAttributesNameList;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -126,10 +129,15 @@ public class AggregationRuntime implements MemoryCalculable {
         this.baseExecutorsForFind = aggregateProcessExpressionExecutorsListForFind.get(0).subList(1,
                 aggregateProcessExpressionExecutorsListForFind.get(0).size());
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
+        this.tableAttributesNameList = tableMetaStreamEvent.getInputDefinitions().get(0).getAttributeList()
+                .stream().map(Attribute::getName).collect(Collectors.toList());
+
     }
 
-    private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {
+    private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                            String inputReferenceId) {
         metaStreamEvent.addInputDefinition(inputDefinition);
+        metaStreamEvent.setInputReferenceId(inputReferenceId);
         metaStreamEvent.initializeAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
@@ -159,7 +167,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 additionalAttributes.get(0).getType());
         streamDefinitionWithStartEnd.attribute(additionalAttributes.get(1).getName(),
                 additionalAttributes.get(1).getType());
-        initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd);
+        initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd,
+                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0).getInputReferenceId());
         return metaStreamEventWithStartEnd;
     }
 
@@ -176,12 +185,12 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     private static MatchingMetaInfoHolder createNewStreamTableMetaInfoHolder(
-            MetaStreamEvent metaStreamEventWithStartEnd, AbstractDefinition tableDefinition) {
+            MetaStreamEvent metaStreamEventWithStartEnd, AbstractDefinition tableDefinition, String referenceId) {
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
         MetaStreamEvent metaStreamEventForTable = new MetaStreamEvent();
 
         metaStreamEventForTable.setEventType(MetaStreamEvent.EventType.TABLE);
-        initMetaStreamEvent(metaStreamEventForTable, tableDefinition);
+        initMetaStreamEvent(metaStreamEventForTable, tableDefinition, referenceId);
 
         metaStateEvent.addEvent(metaStreamEventWithStartEnd);
         metaStateEvent.addEvent(metaStreamEventForTable);
@@ -263,7 +272,8 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
         MatchingMetaInfoHolder streamTableMetaInfoHolderWithStartEnd = createNewStreamTableMetaInfoHolder(
-                newMetaStreamEventWithStartEnd, tableDefinition);
+                newMetaStreamEventWithStartEnd, tableDefinition,
+                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId());
 
         // Create per expression executor
         ExpressionExecutor perExpressionExecutor;
@@ -311,6 +321,17 @@ public class AggregationRuntime implements MemoryCalculable {
         Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
         withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
+        // Combine with and on condition for table query
+        AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
+        AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
+                newMetaStreamEventWithStartEnd.getInputReferenceId(),
+                newMetaStreamEventWithStartEnd.getLastInputDefinition().getAttributeList(),
+                this.tableAttributesNameList
+        );
+        aggregationExpressionBuilder.build(expressionVisitor);
+
+        Expression withinExpressionTable = Expression.and(withinExpression, expressionVisitor.getReducedExpression());
+
         // Create start and end time expression
         Expression startEndTimeExpression;
         ExpressionExecutor startTimeEndTimeExpressionExecutor;
@@ -334,9 +355,11 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create compile condition per each table used to persist aggregates.
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
+        List<VariableExpressionExecutor> startEndExpressionExecutorList = new ArrayList<>();
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
-            CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpression,
-                    streamTableMetaInfoHolderWithStartEnd, variableExpressionExecutors, tableMap, siddhiQueryContext);
+            CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
+                    streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList, tableMap,
+                    siddhiQueryContext);
             withinTableCompiledConditions.put(entry.getKey(), withinTableCompileCondition);
         }
 
@@ -344,8 +367,12 @@ public class AggregationRuntime implements MemoryCalculable {
         // This compile condition is used to check whether the running aggregates (in-memory data)
         // are within given duration
         withinInMemoryCompileCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true),
-                withinExpression, streamTableMetaInfoHolderWithStartEnd, variableExpressionExecutors,
+                withinExpression, streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList,
                 tableMap, siddhiQueryContext);
+
+        QueryParserHelper.reduceMetaComplexEvent(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent());
+        QueryParserHelper.updateVariablePosition(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent(),
+                startEndExpressionExecutorList);
 
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as

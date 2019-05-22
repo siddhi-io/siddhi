@@ -27,6 +27,7 @@
             <class name="io.siddhi.core.aggregation.DistinctCountAggregationTestCase"/>
             <class name="io.siddhi.core.aggregation.AggregationFindQueryValidationTestCase"/>
             <class name="io.siddhi.core.aggregation.IncrementalPurgingTestCase"/>
+            <class name="io.siddhi.core.aggregation.AggregationFilterTestCase"/>
 
             <class name="io.siddhi.core.managment.AsyncTestCase"/>
             <class name="io.siddhi.core.managment.EventTestCase"/>
