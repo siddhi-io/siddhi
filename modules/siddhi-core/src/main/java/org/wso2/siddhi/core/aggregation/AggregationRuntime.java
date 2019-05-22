@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
@@ -87,7 +88,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private IncrementalDataPurging incrementalDataPurging;
     private ExpressionExecutor shouldUpdateExpressionExecutor;
     private String shardId;
-    private List<String> groupByAttributeNameList;
+    private List<String> tableAttributesNameList;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -103,8 +104,7 @@ public class AggregationRuntime implements MemoryCalculable {
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
                               IncrementalDataPurging incrementalDataPurging,
                               ExpressionExecutor shouldUpdateExpressionExecutor, String shardId,
-                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions,
-                              List<String> groupByAttributeNameList) {
+                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -126,7 +126,8 @@ public class AggregationRuntime implements MemoryCalculable {
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
-        this.groupByAttributeNameList = groupByAttributeNameList;
+        this.tableAttributesNameList = tableMetaStreamEvent.getInputDefinitions().get(0).getAttributeList()
+                .stream().map(Attribute::getName).collect(Collectors.toList());
     }
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
@@ -318,7 +319,7 @@ public class AggregationRuntime implements MemoryCalculable {
         AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
                 newMetaStreamEventWithStartEnd.getInputReferenceId(),
                 newMetaStreamEventWithStartEnd.getLastInputDefinition().getAttributeList(),
-                this.groupByAttributeNameList
+                this.tableAttributesNameList
         );
         aggregationExpressionBuilder.build(expressionVisitor);
 
