@@ -49,19 +49,6 @@ public class ServiceDeploymentInfo {
     /**
      * Service related information to the deployment
      *
-     * @param serviceProtocol the protocol used by the service
-     * @param port            the port of the service
-     * @param secured         is the service protocol secured
-     */
-    public ServiceDeploymentInfo(ServiceProtocol serviceProtocol, int port, boolean secured) {
-        this.serviceProtocol = serviceProtocol;
-        this.port = port;
-        this.secured = secured;
-    }
-
-    /**
-     * Service related information to the deployment
-     *
      * @param port           the port of the service
      * @param secured        is the service protocol secured
      * @param sourceStrategy the source strategy
@@ -69,26 +56,6 @@ public class ServiceDeploymentInfo {
     public ServiceDeploymentInfo(int port, boolean secured, SourceStrategy sourceStrategy) {
         this.port = port;
         this.secured = secured;
-        this.sourceStrategy = sourceStrategy;
-    }
-
-    /**
-     * Service related information to the deployment
-     *
-     * @param secured is the service protocol secured
-     * @param port    the port of the service
-     */
-    public ServiceDeploymentInfo(int port, boolean secured) {
-        this.port = port;
-        this.secured = secured;
-    }
-
-    /**
-     * Service related information to the deployment
-     *
-     * @param sourceStrategy the source strategy
-     */
-    public ServiceDeploymentInfo(SourceStrategy sourceStrategy) {
         this.sourceStrategy = sourceStrategy;
     }
 
