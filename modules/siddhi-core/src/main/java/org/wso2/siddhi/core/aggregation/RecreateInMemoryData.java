@@ -148,14 +148,14 @@ public class RecreateInMemoryData {
                     storeQuery = StoreQuery.query().from(
                             InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
                                     Expression.and(
-                                    Expression.compare(
-                                            Expression.variable("SHARD_ID"),
-                                            Compare.Operator.EQUAL,
-                                            Expression.value(shardId)),
-                                    Expression.compare(
-                                            Expression.variable("AGG_TIMESTAMP"),
-                                            Compare.Operator.GREATER_THAN_EQUAL,
-                                            Expression.value(endOFLatestEventTimestamp)))))
+                                            Expression.compare(
+                                                    Expression.variable("SHARD_ID"),
+                                                    Compare.Operator.EQUAL,
+                                                    Expression.value(shardId)),
+                                            Expression.compare(
+                                                    Expression.variable("AGG_TIMESTAMP"),
+                                                    Compare.Operator.GREATER_THAN_EQUAL,
+                                                    Expression.value(endOFLatestEventTimestamp)))))
                             .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
                 }
             }
@@ -189,5 +189,6 @@ public class RecreateInMemoryData {
                 }
             }
         }
+        isRefreshed = true;
     }
 }
