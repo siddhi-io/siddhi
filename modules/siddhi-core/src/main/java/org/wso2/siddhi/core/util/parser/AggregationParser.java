@@ -259,6 +259,33 @@ public class AggregationParser {
                             }
                     ).collect(Collectors.toList());
 
+            // GroupBy for reading
+            List<GroupByKeyGenerator> groupByKeyGeneratorListForReading;
+            if (enablePartioning && !isProcessingOnExternalTime) {
+                groupByKeyGeneratorListForReading = incrementalDurations.stream()
+                        .map(incrementalDuration -> {
+                                    List<Expression> groupByExpressionList = new ArrayList<>();
+                                    Expression timestampExpression =
+                                            AttributeFunction.function(
+                                                    "incrementalAggregator", "getAggregationStartTime",
+                                                    new Variable(AGG_START_TIMESTAMP_COL),
+                                                    new StringConstant(incrementalDuration.name())
+                                            );
+                                    groupByExpressionList.add(timestampExpression);
+                                    if (groupBy) {
+                                        groupByExpressionList.addAll(groupByVariableList.stream()
+                                                .map(groupByVariable -> (Expression) groupByVariable)
+                                                .collect(Collectors.toList()));
+                                    }
+                                    return new GroupByKeyGenerator(groupByExpressionList, processedMetaStreamEvent,
+                                            SiddhiConstants.UNKNOWN_STATE, tableMap, processVariableExpressionExecutors,
+                                            siddhiAppContext, aggregatorName);
+                                }
+                        ).collect(Collectors.toList());
+            } else {
+                groupByKeyGeneratorListForReading = groupByKeyGeneratorList;
+            }
+
             // Create new scheduler
             EntryValveExecutor entryValveExecutor = new EntryValveExecutor(siddhiAppContext);
             LockWrapper lockWrapper = new LockWrapper(aggregatorName);
@@ -343,7 +370,7 @@ public class AggregationParser {
                     incrementalExecutorMap, aggregationTables, ((SingleStreamRuntime) streamRuntime),
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
-                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
+                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorListForReading,
                     incrementalDataPurging, shouldUpdateExpressionExecutor, enablePartioning);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
@@ -419,7 +446,7 @@ public class AggregationParser {
             } else if (attributeList.get(i).getName().equals(AGG_LAST_TIMESTAMP_COL)) {
                 Expression lastTimestampExpression =
                         AttributeFunction.function(
-                                 "max",
+                                "max",
                                 new Variable(AGG_LAST_TIMESTAMP_COL)
                         );
                 ExpressionExecutor latestTimestampExecutor = ExpressionParser.parseExpression(
@@ -597,7 +624,7 @@ public class AggregationParser {
                 } else {
                     if (isProcessingOnExternalTime) {
                         if (!addAggLastEvent) {
-                            Attribute lastEventTimeStamp =  new Attribute(AGG_LAST_TIMESTAMP_COL,
+                            Attribute lastEventTimeStamp = new Attribute(AGG_LAST_TIMESTAMP_COL,
                                     Attribute.Type.LONG);
                             incomingMetaStreamEvent.addOutputData(lastEventTimeStamp);
                             incomingExpressionExecutors.add(externalTimestampExecutor);

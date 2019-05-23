@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
@@ -52,6 +53,7 @@ import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDura
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions;
     private CompiledCondition inMemoryStoreCompileCondition;
+    private Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition;
     private CompiledCondition onCompiledCondition;
     private MetaStreamEvent tableMetaStreamEvent;
     private MetaStreamEvent aggregateMetaStreamEvent;
@@ -60,23 +62,29 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private ExpressionExecutor perExpressionExecutor;
     private ExpressionExecutor startTimeEndTimeExpressionExecutor;
     private List<ExpressionExecutor> timestampFilterExecutors;
-    private boolean isProcessingOnExternalTime;
 
+    private final boolean isProcessingOnExternalTime;
+    private final boolean isDistributed;
     private final StreamEventPool streamEventPoolForTableMeta;
     private final StreamEventCloner tableEventCloner;
     private final StreamEventPool streamEventPoolForAggregateMeta;
     private final StreamEventCloner aggregateEventCloner;
     private final List<Attribute> additionalAttributes;
+    private final List<TimePeriod.Duration> durationList;
 
     public IncrementalAggregateCompileCondition(
             Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions,
-            CompiledCondition inMemoryStoreCompileCondition, CompiledCondition onCompiledCondition,
+            CompiledCondition inMemoryStoreCompileCondition,
+            Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition,
+            CompiledCondition onCompiledCondition,
             MetaStreamEvent tableMetaStreamEvent, MetaStreamEvent aggregateMetaSteamEvent,
             List<Attribute> additionalAttributes, MatchingMetaInfoHolder alteredMatchingMetaInfoHolder,
             ExpressionExecutor perExpressionExecutor, ExpressionExecutor startTimeEndTimeExpressionExecutor,
-            List<ExpressionExecutor> timestampFilterExecutors, boolean isProcessingOnExternalTime) {
+            List<ExpressionExecutor> timestampFilterExecutors, boolean isProcessingOnExternalTime,
+            List<TimePeriod.Duration> incrementalDurations, boolean isDistributed) {
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
+        this.withinTableLowerGranularityCompileCondition = withinTableLowerGranularityCompileCondition;
         this.onCompiledCondition = onCompiledCondition;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
         this.aggregateMetaStreamEvent = aggregateMetaSteamEvent;
@@ -92,6 +100,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.startTimeEndTimeExpressionExecutor = startTimeEndTimeExpressionExecutor;
         this.timestampFilterExecutors = timestampFilterExecutors;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
+        this.durationList = incrementalDurations;
+        this.isDistributed = isDistributed;
     }
 
     @Override
@@ -100,11 +110,18 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         for (Map.Entry<TimePeriod.Duration, CompiledCondition> entry : withinTableCompiledConditions.entrySet()) {
             copyOfWithinTableCompiledConditions.put(entry.getKey(), entry.getValue().cloneCompilation(key));
         }
+        Map<TimePeriod.Duration, CompiledCondition> copyOfWithinTableLowerGranularityCompileCondition = new HashMap<>();
+        for (Map.Entry<TimePeriod.Duration, CompiledCondition> entry :
+                withinTableLowerGranularityCompileCondition.entrySet()) {
+            copyOfWithinTableLowerGranularityCompileCondition
+                    .put(entry.getKey(), entry.getValue().cloneCompilation(key));
+        }
         return new IncrementalAggregateCompileCondition(copyOfWithinTableCompiledConditions,
-                inMemoryStoreCompileCondition.cloneCompilation(key),
+                inMemoryStoreCompileCondition.cloneCompilation(key), copyOfWithinTableLowerGranularityCompileCondition,
                 onCompiledCondition.cloneCompilation(key), tableMetaStreamEvent, aggregateMetaStreamEvent,
                 additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
-                startTimeEndTimeExpressionExecutor, timestampFilterExecutors, isProcessingOnExternalTime);
+                startTimeEndTimeExpressionExecutor, timestampFilterExecutors, isProcessingOnExternalTime, durationList,
+                isDistributed);
     }
 
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,
@@ -116,7 +133,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             SiddhiAppContext siddhiAppContext,
                             List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                             List<GroupByKeyGenerator> groupbyKeyGeneratorList,
-                            ExpressionExecutor shouldUpdateExpressionExecutor, boolean isDistributed) {
+                            ExpressionExecutor shouldUpdateExpressionExecutor) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
         //Create matching event if it is store Query
@@ -177,7 +194,22 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         //If processing on external time, the in-memory data also needs to be queried
         if (isDistributed) {
-            // TODO: 22/05/19 Distributed ongoing aggregations lookup
+            int perValueIndex = this.durationList.indexOf(perValue);
+            if (perValueIndex != 0) {
+                Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();
+                for (int i = 0; i < perValueIndex; i++) {
+                    TimePeriod.Duration key = this.durationList.get(i);
+                    lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
+                }
+                List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
+                        .map((entry) -> aggregationTables.get(entry.getKey()).find(matchingEvent, entry.getValue()))
+                        .collect(Collectors.toList());
+                eventChunks.forEach((eventChunk) -> {
+                    if (eventChunk != null) {
+                        complexEventChunkToHoldWithinMatches.add(eventChunk);
+                    }
+                });
+            }
         } else if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             List<ExpressionExecutor> clonedBaseExecutors = baseExecutors.stream().map(expressionExecutor ->
@@ -196,7 +228,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         }
 
         ComplexEventChunk<StreamEvent> processedEvents;
-        if (isProcessingOnExternalTime) {
+        if (isDistributed || isProcessingOnExternalTime) {
             int durationIndex = incrementalDurations.indexOf(perValue);
             List<ExpressionExecutor> expressionExecutors = aggregateProcessingExecutorsList.get(durationIndex);
             List<ExpressionExecutor> clonedExecutors = expressionExecutors.stream().map(expressionExecutor ->
