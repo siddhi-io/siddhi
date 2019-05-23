@@ -175,7 +175,7 @@ public class AggregationParser {
             }
 
             ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-            Boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
+            boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
 
             if (enablePartioning || shouldPartitionById) {
                 shardId = configManager.extractProperty("shardId");
@@ -295,14 +295,6 @@ public class AggregationParser {
                     incrementalDurations, aggregationTables, siddhiQueryContext, aggregatorName,
                     shouldUpdateTimestamp);
 
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
-            if (shardId != null) {
-                incrementalExecutorMapForPartitions =
-                        buildIncrementalExecutors(
-                                processedMetaStreamEvent, processExpressionExecutorsList,
-                                groupByKeyGeneratorList, incrementalDurations,
-                                aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
-            }
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
             incrementalDataPurging.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
                     , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext);
@@ -310,7 +302,7 @@ public class AggregationParser {
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
                     aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                    windowMap, aggregationMap, shardId, incrementalExecutorMapForPartitions);
+                    windowMap, aggregationMap, shardId, enablePartioning);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -346,8 +338,7 @@ public class AggregationParser {
                     incrementalDurations, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, groupByKeyGeneratorList,
-                    incrementalDataPurging, shardId,
-                    incrementalExecutorMapForPartitions, shouldUpdateTimestamp,
+                    incrementalDataPurging, shouldUpdateTimestamp, enablePartioning,
                     processExpressionExecutorsListForFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
