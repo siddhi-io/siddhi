@@ -94,8 +94,6 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -139,8 +137,6 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -183,8 +179,7 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
+
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -226,8 +221,6 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -266,10 +259,7 @@ public class DeleteFromTableWithCacheTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -313,8 +303,6 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -357,8 +345,6 @@ public class DeleteFromTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-                //"@PrimaryKey(\"symbol\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

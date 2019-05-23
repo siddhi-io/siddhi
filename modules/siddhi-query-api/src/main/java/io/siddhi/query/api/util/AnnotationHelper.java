@@ -30,12 +30,13 @@ import java.util.List;
  */
 public class AnnotationHelper {
 
-    public static Annotation getNestedAnnotation(List<Annotation> annotationList, String... annotationNames) {
+    public static Annotation getAnnotation(String[] annotationNames, List<Annotation> annotationList) {
         if (annotationNames.length == 1) {
             return getAnnotation(annotationNames[0], annotationList);
         } else {
-            return getNestedAnnotation(getAnnotation(annotationNames[0], annotationList).getAnnotations(),
-                    Arrays.copyOfRange(annotationNames, 1, annotationNames.length));
+            return getAnnotation(Arrays.copyOfRange(annotationNames, 1, annotationNames.length),
+                    getAnnotation(annotationNames[0], annotationList).getAnnotations()
+            );
         }
     }
 

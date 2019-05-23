@@ -153,8 +153,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     }
 
     @Override
-    public int add(ComplexEventChunk<StreamEvent> addingEventChunk) {
-        int numberOfEventsBeforeAdding = this.getAllEvents().size();
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
@@ -173,7 +172,6 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             }
             add(streamEvent);
         }
-        return this.getAllEvents().size() - numberOfEventsBeforeAdding;
     }
 
     private void add(StreamEvent streamEvent) {
@@ -590,9 +588,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                     TreeMap<Object, Set<StreamEvent>> indexMap = indexData.get(indexEntry.getKey());
                     Object key = deletedEvent.getOutputData()[indexEntry.getValue()];
                     Set<StreamEvent> values = indexMap.get(key);
-                    values.remove(deletedEvent);
-                    if (values.size() == 0) {
-                        indexMap.remove(key);
+                    if (values != null) {
+                        values.remove(deletedEvent);
+                        if (values.size() == 0) {
+                            indexMap.remove(key);
+                        }
                     }
                 }
             }
@@ -605,9 +605,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 TreeMap<Object, Set<StreamEvent>> indexMap = indexData.get(indexEntry.getKey());
                 Object key = toDeleteEvent.getOutputData()[indexEntry.getValue()];
                 Set<StreamEvent> values = indexMap.get(key);
-                values.remove(toDeleteEvent);
-                if (values.size() == 0) {
-                    indexMap.remove(key);
+                if (values != null) {
+                    values.remove(toDeleteEvent);
+                    if (values.size() == 0) {
+                        indexMap.remove(key);
+                    }
                 }
             }
         }
@@ -675,5 +677,10 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             }
         }
         this.isOperationLogEnabled = true;
+    }
+
+    @Override
+    public int size() {
+        return primaryKeyData.size();
     }
 }

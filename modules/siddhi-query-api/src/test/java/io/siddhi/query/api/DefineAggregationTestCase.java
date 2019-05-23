@@ -20,6 +20,10 @@ package io.siddhi.query.api;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AggregationDefinition;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.exception.DuplicateDefinitionException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -28,6 +32,7 @@ import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class DefineAggregationTestCase {
@@ -102,5 +107,147 @@ public class DefineAggregationTestCase {
                 ).
                 insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
 
+    }
+
+    @Test
+    public void testAggregationJoin1() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("s1", "cseEventStream").
+                                        filter(Expression.and(
+                                                Expression.compare(
+                                                        Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                        Compare.Operator.GREATER_THAN,
+                                                        Expression.variable("price").ofStream("cseEventStream")),
+                                                Expression.compare(Expression.value(100),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("volume").ofStream("cseEventStream")
+                                                )
+                                                )
+                                        ).window("lengthBatch", Expression.value(50)),
+                                JoinInputStream.Type.JOIN,
+                                InputStore.store("s2", "StockAggregation"),
+                                Within.within(Expression.value("2014-02-15T00:00:00Z"),
+                                        Expression.value("2014-03-16T00:00:00Z")),
+                                Expression.value("day")
+                        )
+                ).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol").ofStream("cseEventStream")).
+                                select(null, Expression.variable("symbol").ofStream("cseEventStream")).
+                                groupBy(Expression.variable("symbol").ofStream("cseEventStream")).
+                                having(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price"))
+                                )
+                ).
+                insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
+    }
+
+    @Test
+    public void testAggregationJoin2() {
+        Query.query().
+                from(
+                        InputStream.joinStream(
+                                InputStream.stream("s1", "cseEventStream").
+                                        filter(Expression.and(
+                                                Expression.compare(
+                                                        Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                        Compare.Operator.GREATER_THAN,
+                                                        Expression.variable("price").ofStream("cseEventStream")),
+                                                Expression.compare(Expression.value(100),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.variable("volume").ofStream("cseEventStream")
+                                                )
+                                                )
+                                        ).window("lengthBatch", Expression.value(50)),
+                                JoinInputStream.Type.JOIN,
+                                InputStore.store("s2", "StockAggregation"),
+                                JoinInputStream.EventTrigger.LEFT,
+                                Within.within(Expression.value("2014-02-15T00:00:00Z"),
+                                        Expression.value("2014-03-16T00:00:00Z")),
+                                Expression.value("day")
+                        )
+                ).
+                select(
+                        Selector.selector().
+                                select("symbol", Expression.variable("symbol").ofStream("cseEventStream")).
+                                select(null, Expression.variable("symbol").ofStream("cseEventStream")).
+                                groupBy(Expression.variable("symbol").ofStream("cseEventStream")).
+                                having(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price"))
+                                )
+                ).
+                insertInto("StockQuote", OutputStream.OutputEventType.EXPIRED_EVENTS);
+    }
+
+    @Test
+    public void testDefineAggregationWithExactTimeSpecifier2() {
+        AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
+                .from(InputStream.stream("StockStream"))
+                .select(Selector.basicSelector()
+                        .select("timestamp", Expression.variable("timestamp").ofStream("StockStream"))
+                        .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
+                        .select("price", Expression.variable("price").ofStream("StockStream"))
+                        .groupBy(Expression.variable("price").ofStream("StockStream")))
+                .aggregateBy(Expression.variable("timestamp"))
+                .every(TimePeriod.interval(TimePeriod.Duration.DAYS,
+                        TimePeriod.Duration.MONTHS,
+                        TimePeriod.Duration.YEARS));
+    }
+
+    @Test
+    public void testdefineAggregation() {
+        SiddhiApp.siddhiApp("test").defineAggregation(AggregationDefinition.id("stockAggregation")).defineStream(
+                StreamDefinition.id("StockStream").attribute("symbol",
+                        Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
+                        Attribute.Type.FLOAT));
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testdefineAggregation2() {
+        SiddhiApp.siddhiApp("test").defineAggregation(null).defineStream(
+                StreamDefinition.id("StockStream").attribute("symbol",
+                        Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
+                        Attribute.Type.FLOAT));
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testdifineAggregation3() {
+        SiddhiApp.siddhiApp("test").defineAggregation(AggregationDefinition.id(null)).defineStream(
+                StreamDefinition.id("StockStream").attribute("symbol",
+                        Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
+                        Attribute.Type.FLOAT));
+    }
+
+    @Test(expectedExceptions = DuplicateDefinitionException.class)
+    public void testDefineAggregation4() {
+        SiddhiApp.siddhiApp("Test").defineAggregation(AggregationDefinition.id("stockAggregation"))
+                .defineStream(StreamDefinition.id("stockAggregation").attribute("symbol",
+                                Attribute.Type.STRING).attribute("price", Attribute.Type.INT).
+                                attribute("volume", Attribute.Type.FLOAT));
+    }
+
+    @Test
+    public void testDefineAggregationWithExactTimeSpecifier3() {
+        String basicSingleInputStream = "SingleInputStream{isFaultStream=false, isInnerStream=false, " +
+                "id='StockStream', streamReferenceId='null', streamHandlers=[], windowPosition=-1}";
+
+        AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
+                .from(InputStream.stream("StockStream"))
+                .select(Selector.basicSelector()
+                        .select("timestamp", Expression.variable("timestamp").ofStream("StockStream"))
+                        .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
+                        .select("price", Expression.variable("price").ofStream("StockStream"))
+                        .groupBy(Expression.variable("price").ofStream("StockStream")));
+
+        AssertJUnit.assertEquals(basicSingleInputStream, aggregationDefinition.getBasicSingleInputStream().toString());
     }
 }

@@ -91,7 +91,7 @@ The following parameters are configured in a stream definition.
 To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
  
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
-[Threading and Asynchronous](http://siddhi.io/documentation/siddhi-4.0/siddhi-4.x.md#threading-and-asynchronous) configuration section.
+[Threading and Asynchronous](#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql
@@ -1882,7 +1882,7 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
     When the attribute to the right is a table attribute, the operations supported differ based on the database type.
  
 To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. To understand more see [output event type](#output-event-types).
 
 !!! note 
     Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
@@ -2341,7 +2341,7 @@ The following types of triggeres are currently supported:
 |-------------|-----------|
 |`'start'`| An event is triggered when Siddhi is started.|
 |`every <time interval>`| An event is triggered periodically at the given time interval.
-|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.
+|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.1.7/tutorials/tutorial-lesson-06.html">quartz-scheduler</a>.
  
 
 **Examples**
@@ -2837,7 +2837,7 @@ extension type.
 * Follow the procedure for the required archetype, based on your project:
 
 !!! Note
-    When using the generated archetype please make sure you uncomment @Extension annotation and complete the
+    When using the generated archetype please make sure you complete the @Extension
     annotation with proper values. This annotation will be used to identify and document the extension, hence your
     extension will not work without @Extension annotation.
 
@@ -2859,16 +2859,26 @@ To install and implement the siddhi-io extension archetype, follow the procedure
 
 1. Issue the following command from your CLI.
             
-                mvn archetype:generate
-                    -DarchetypeGroupId=io.siddhi.extension.archetype
-                    -DarchetypeArtifactId=siddhi-archetype-execution
-                    -DgroupId=io.extension.siddhi.execution
-                    -Dversion=1.0.0-SNAPSHOT
+        mvn archetype:generate
+            -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+            -DarchetypeArtifactId=siddhi-archetype-execution
+            -DgroupId=org.wso2.extension.siddhi.execution
+            -Dversion=1.0.0-SNAPSHOT
             
-2. Enter the required execution name in the message that pops up as shown in the example below.
+2. Enter the mandatory properties prompted, please see the description for all properties below.
            
-            Define value for property 'executionType': ML
-            
+    |Properties | Description | Mandatory | Default Value |
+    |------------- |-------------| ---- | ----- |
+    |_nameOfFunction | Name of the custom function to be created | Y | - |
+    |_nameSpaceOfFunction | Namespace of the function, used to grouped similar custom functions | Y | -
+    |groupIdPostfix| Namespace of the function is added as postfix to the groupId as a convention | N | {_nameSpaceOfFunction}
+    |artifactId | Artifact Id of the project | N | siddhi-execution-{_nameSpaceOfFunction}
+    |classNameOfAggregateFunction| Class name of the Aggregate Function | N | ${_nameOfFunction}AggregateFunction
+    |classNameOfFunction|Class name of the Function|N|${_nameOfFunction}Function
+    |classNameOfStreamFunction|Class name of the Stream Function|N|${_nameOfFunction}StreamFunction
+    |classNameOfStreamProcessor|Class name of the Stream Processor|N|${_nameOfFunction}StreamProcessor
+    |classNameOfWindow|Class name of the Window|N|${_nameOfFunction}Window
+                
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
                   
 **siddhi-io**
@@ -2887,18 +2897,23 @@ For more information about these extension types, see [Extension Types](#Extensi
 To implement the siddhi-io extension archetype, follow the procedure below:
     
 1. Issue the following command from your CLI.
-                
-          
-               mvn archetype:generate
-                   -DarchetypeGroupId=io.siddhi.extension.archetype
-                   -DarchetypeArtifactId=siddhi-archetype-io
-                   -DgroupId=io.extension.siddhi.io
-                   -Dversion=1.0.0-SNAPSHOT
-            
-2. Enter the required execution name (the transport type in this scenario) in the message that pops up as shown in the example below.
-           
-         Define value for property 'typeOf_IO': http
+        
+        mvn archetype:generate
+            -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+            -DarchetypeArtifactId=siddhi-archetype-io
+            -DgroupId=org.wso2.extension.siddhi.io
+            -Dversion=1.0.0-SNAPSHOT
 
+1. Enter the mandatory properties prompted, please see the description for all properties below.
+           
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _IOType | Type of IO for which Siddhi-io extension is written | Y | - 
+    | groupIdPostfix| Type of the IO is added as postfix to the groupId as a convention | N | {_IOType} 
+    | artifactId | Artifact Id of the project | N | siddhi-io-{_IOType}
+    | classNameOfSink | Class name of the Sink | N | {_IOType}Sink
+    | classNameOfSource | Class name of the Source | N | {_IOType}Source
+    
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
          
 **siddhi-map**
@@ -2919,16 +2934,21 @@ To implement the siddhi-map extension archetype, follow the procedure below:
         
 1. Issue the following command from your CLI.                
             
-                mvn archetype:generate
-                    -DarchetypeGroupId=io.siddhi.extension.archetype
-                    -DarchetypeArtifactId=siddhi-archetype-map
-                    -DgroupId=io.extension.siddhi.map
-                    -Dversion=1.0.0-SNAPSHOT
+        mvn archetype:generate
+            -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+            -DarchetypeArtifactId=siddhi-archetype-map
+            -DgroupId=org.wso2.extension.siddhi.map
+            -Dversion=1.0.0-SNAPSHOT    
             
-2. Enter the required execution name (the map type in this scenario) in the message that pops up as shown in the example below.
+2. Enter the mandatory properties prompted, please see the description for all properties below.
        
-            Define value for property 'mapType':CSV
-    
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _mapType | Type of Mapper for which Siddhi-map extension is written | Y | - 
+    | groupIdPostfix| Type of the Map is added as postfix to the groupId as a convention | N | {_mapType} 
+    | artifactId | Artifact Id of the project | N | siddhi-map-{_mapType}
+    | classNameOfSinkMapper | Class name of the Sink Mapper| N | {_mapType}SinkMapper
+    | classNameOfSourceMapper | Class name of the Source Mapper | N | {_mapType}SourceMapper    
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
                    
 **siddhi-script**
@@ -2943,16 +2963,21 @@ To implement the siddhi-script extension archetype, follow the procedure below:
 
 1. Issue the following command from your CLI.                   
            
-               mvn archetype:generate
-                   -DarchetypeGroupId=io.siddhi.extension.archetype
-                   -DarchetypeArtifactId=siddhi-archetype-script
-                   -DgroupId=io.extension.siddhi.script
-                   -Dversion=1.0.0-SNAPSHOT
+       mvn archetype:generate
+           -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+           -DarchetypeArtifactId=siddhi-archetype-script
+           -DgroupId=org.wso2.extension.siddhi.script
+           -Dversion=1.0.0-SNAPSHOT
            
-2. Enter the required execution name in the message that pops up as shown in the example below.
+2. Enter the mandatory properties prompted, please see the description for all properties below.
        
-         Define value for property 'typeOfScript':
-
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _nameOfScript | Name of Custom Script for which Siddhi-script extension is written | Y | - 
+    | groupIdPostfix| Name of the Script is added as postfix to the groupId as a convention | N | {_nameOfScript} 
+    | artifactId | Artifact Id of the project | N | siddhi-script-{_nameOfScript}
+    | classNameOfScript | Class name of the Script | N | Eval{_nameOfScript}
+    
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
        
 **siddhi-store**
@@ -2967,16 +2992,21 @@ To implement the siddhi-store extension archetype, follow the procedure below:
 
 1. Issue the following command from your CLI.                      
    
-               mvn archetype:generate
-                  -DarchetypeGroupId=io.siddhi.extension.archetype
-                  -DarchetypeArtifactId=siddhi-archetype-store
-                  -DgroupId=io.extension.siddhi.store
-                  -Dversion=1.0.0-SNAPSHOT
+       mvn archetype:generate
+          -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+          -DarchetypeArtifactId=siddhi-archetype-store
+          -DgroupId=org.wso2.extension.siddhi.store
+          -Dversion=1.0.0-SNAPSHOT
            
-2. Enter the required execution name in the message that pops up as shown in the example below.
+2. Enter the mandatory properties prompted, please see the description for all properties below.
                           
-          Define value for property 'storeType': RDBMS
-    
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _storeType | Type of Store for which Siddhi-store extension is written | Y | - 
+    | groupIdPostfix| Type of the Store is added as postfix to the groupId as a convention | N | {_storeType} 
+    | artifactId | Artifact Id of the project | N | siddhi-store-{_storeType}
+    | className | Class name of the Store | N | {_storeType}EventTable
+        
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
 ## Configuring and Monitoring Siddhi Applications

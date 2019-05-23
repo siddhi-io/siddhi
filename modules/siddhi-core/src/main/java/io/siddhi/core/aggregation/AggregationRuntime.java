@@ -58,6 +58,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
@@ -207,12 +209,11 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             if (lastExecutorsRefreshedTime == -1 || System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000) {
                 if (shardId != null) {
-                    recreateInMemoryData(false, true);
-                    lastExecutorsRefreshedTime = System.currentTimeMillis();
+                    this.recreateInMemoryData.recreateInMemoryData(isFirstEventArrived, true);
                 } else if (!isFirstEventArrived) {
-                    recreateInMemoryData(false, false);
-                    lastExecutorsRefreshedTime = System.currentTimeMillis();
+                    this.recreateInMemoryData.recreateInMemoryData(false, false);
                 }
+                lastExecutorsRefreshedTime = System.currentTimeMillis();
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
@@ -298,9 +299,9 @@ public class AggregationRuntime implements MemoryCalculable {
         // Create within expression
         Expression timeFilterExpression;
         if (processingOnExternalTime) {
-            timeFilterExpression = Expression.variable("AGG_EVENT_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_EXTERNAL_TIMESTAMP_COL);
         } else {
-            timeFilterExpression = Expression.variable("AGG_TIMESTAMP");
+            timeFilterExpression = Expression.variable(AGG_START_TIMESTAMP_COL);
         }
         Expression withinExpression;
         Expression start = Expression.variable(additionalAttributes.get(0).getName());
@@ -363,15 +364,10 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
-        isFirstEventArrived = isEventArrived;
-        if (isEventArrived) {
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
-            }
-        }
-        recreateInMemoryData.recreateInMemoryData(refreshReadingExecutors);
+    public void recreateInMemoryDataFirstEventArrived() {
+        // State only updated when first event arrives to IncrementalAggregationProcessor
+        this.isFirstEventArrived = true;
+        this.recreateInMemoryData.recreateInMemoryData(true, false);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

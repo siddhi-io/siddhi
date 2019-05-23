@@ -409,4 +409,60 @@ public class DelayWindowTestCase {
         AssertJUnit.assertEquals(Long.valueOf(2050), lastValue);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void delayWindowTest8() {
+        log.info("DelayWindow Test8 : Testing delay window for dinamic value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String eventStream = "" +
+                "define stream CargoStream (weight int); " +
+                "define stream OutputStream(weight int, totalWeight long, averageWeight double); ";
+        String query = "" +
+                "@info(name='CargoWeightQuery') " +
+                "from CargoStream#window.delay(1/2) " +
+                "select weight, sum(weight) as totalWeight, avg(weight) as averageWeight " +
+                "insert into OutputStream;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(eventStream + query);
+        siddhiAppRuntime.addCallback("CargoWeightQuery", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+        StreamCallback callBack = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (Event event : events) {
+                    lastValue = (Long) event.getData(1);
+                    averageValue = (Double) event.getData(2);
+                }
+            }
+        };
+        siddhiAppRuntime.addCallback("OutputStream", callBack);
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
+        siddhiAppRuntime.start();
+        try {
+            inputHandler.send(new Object[]{1000});
+            inputHandler.send(new Object[]{1500});
+
+            SiddhiTestHelper.waitForEvents(100, 2, count, 3000);
+            AssertJUnit.assertEquals(2, inEventCount);
+            AssertJUnit.assertEquals(0, removeEventCount);
+            AssertJUnit.assertEquals(Long.valueOf(2500), lastValue);
+            AssertJUnit.assertEquals(Double.valueOf(1250), averageValue);
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
 }

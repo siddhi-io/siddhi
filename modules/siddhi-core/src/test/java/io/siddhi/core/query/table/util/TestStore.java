@@ -58,7 +58,7 @@ public class TestStore extends AbstractRecordTable {
     public static Map<String, String> systemConfigs;
 
     @Override
-    protected void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext, StreamEventCloner
+    protected void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext, StreamEventCloner
             storeEventCloner, ConfigReader configReader) {
 
     }

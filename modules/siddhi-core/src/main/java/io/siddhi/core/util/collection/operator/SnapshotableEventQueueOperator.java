@@ -78,10 +78,9 @@ public class SnapshotableEventQueueOperator implements Operator {
     }
 
     @Override
-    public int delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object storeEvents) {
         SnapshotableStreamEventQueue storeEventQueue = (SnapshotableStreamEventQueue) storeEvents;
         deletingEventChunk.reset();
-        int numberOfDeletedEvents = 0;
         while (deletingEventChunk.hasNext()) {
             StateEvent deletingEvent = deletingEventChunk.next();
             try {
@@ -91,14 +90,12 @@ public class SnapshotableEventQueueOperator implements Operator {
                     deletingEvent.setEvent(storeEventPosition, storeEvent);
                     if ((Boolean) expressionExecutor.execute(deletingEvent)) {
                         storeEventQueue.remove();
-                        numberOfDeletedEvents += 1;
                     }
                 }
             } finally {
                 deletingEvent.setEvent(storeEventPosition, null);
             }
         }
-        return numberOfDeletedEvents;
     }
 
     @Override

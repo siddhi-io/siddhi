@@ -147,34 +147,4 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
     }
-
-//    private Event[] executeSelector(StreamEvent streamEvents, MetaStreamEvent.EventType eventType) {
-//        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
-//        while (streamEvents != null) {
-//
-//            StreamEvent streamEvent = streamEvents;
-//            streamEvents = streamEvents.getNext();
-//            streamEvent.setNext(null);
-//
-//            StateEvent stateEvent = stateEventFactory.newInstance();
-//            if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
-//                stateEvent.addEvent(1, streamEvent);
-//            } else {
-//                stateEvent.addEvent(0, streamEvent);
-//            }
-//            complexEventChunk.add(stateEvent);
-//        }
-//        ComplexEventChunk outputComplexEventChunk = selector.execute(complexEventChunk);
-//        if (outputComplexEventChunk != null) {
-//            List<Event> events = new ArrayList<>();
-//            outputComplexEventChunk.reset();
-//            while (outputComplexEventChunk.hasNext()) {
-//                ComplexEvent complexEvent = outputComplexEventChunk.next();
-//                events.add(new Event(complexEvent.getTimestamp(), complexEvent.getOutputData()));
-//            }
-//            return events.toArray(new Event[0]);
-//        } else {
-//            return null;
-//        }
-//    }
 }

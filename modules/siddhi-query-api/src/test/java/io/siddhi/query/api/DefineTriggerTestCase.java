@@ -20,10 +20,14 @@ package io.siddhi.query.api;
 
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.definition.TriggerDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.DuplicateDefinitionException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.constant.TimeConstant;
 import org.testng.annotations.Test;
 
 public class DefineTriggerTestCase {
@@ -47,5 +51,66 @@ public class DefineTriggerTestCase {
                 ("datasource.id", "cepDataSource"));
     }
 
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTriggerEventNull() {
+        TriggerDefinition trigger = null;
+        SiddhiApp.siddhiApp("test").defineTrigger(trigger);
+    }
 
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTriggerEventIdNull() {
+        TriggerDefinition trigger = TriggerDefinition.id(null);
+        SiddhiApp.siddhiApp("test").defineTrigger(trigger);
+    }
+
+    @Test
+    public void testCreatingTableDefinition2() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.week(10L).value()));
+    }
+
+    @Test
+    public void testCreatingTableDefinition3() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.week(1).value()));
+    }
+
+    @Test
+    public void testTriggerDefinition() {
+        TriggerDefinition triggerDefinition = new TriggerDefinition();
+        triggerDefinition.setQueryContextEndIndex(new int[1]);
+        triggerDefinition.setQueryContextStartIndex(new int[1]);
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.day(5).value()));
+    }
+
+    @Test
+    public void testTriggerDefinition2() {
+        SiddhiApp app = new SiddhiApp().defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.year(1).value()));
+    }
+
+    @Test
+    public void testTriggerDefinition3() {
+        SiddhiApp.siddhiApp().defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.month(1).value()));
+    }
+
+    @Test(expectedExceptions = DuplicateDefinitionException.class)
+    public void testTriggerDefinition4() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.day(5).value())).defineStream(StreamDefinition.id("TriggerStream"));
+    }
+
+    @Test(expectedExceptions = DuplicateDefinitionException.class)
+    public void testTriggerDefinition5() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
+                .Time.day(5).value())).defineTrigger(TriggerDefinition.id("TriggerStream"));
+    }
+
+    @Test
+    public void testTriggerDefinition6() {
+        SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").
+                atEvery(new TimeConstant(1000)).at("start"));
+    }
 }

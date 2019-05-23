@@ -299,6 +299,7 @@ public class StoreQueryParser {
                                                                         variableExpressionExecutors,
                                                                 LockWrapper lockWrapper,
                                                                 SiddhiQueryContext siddhiQueryContext) {
+        metaStreamEvent.setEventType(EventType.TABLE);
         if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
             try {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, tableMap,
@@ -309,9 +310,6 @@ public class StoreQueryParser {
                     log.debug("Store Query optimization failed for table: "
                             + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
                             "Reason for failure: " + e.getMessage());
-                } else {
-                    log.info("Creating Store Query Runtime in the normal mode, for table: "
-                            + table.getTableDefinition().getId());
                 }
                 return constructRegularStoreQueryRuntime(table, storeQuery, tableMap, windowMap,
                         metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,
@@ -347,8 +345,6 @@ public class StoreQueryParser {
         CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
                 storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
-
-
         StoreQueryRuntime storeQueryRuntime =
                 new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
                         compiledSelection, expectedOutputAttributes, siddhiQueryContext.getName());
@@ -359,7 +355,6 @@ public class StoreQueryParser {
             storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
             storeQueryRuntime.setStateEventFactory(new StateEventFactory(
                     matchingMetaInfoHolder.getMetaStateEvent()));
-
         } catch (ClassCastException ignored) {
 
         }
@@ -382,7 +377,6 @@ public class StoreQueryParser {
         MatchingMetaInfoHolder matchingMetaInfoHolder;
         AbstractDefinition inputDefinition;
         QuerySelector querySelector;
-        metaStreamEvent.setEventType(EventType.TABLE);
 
         switch (storeQuery.getType()) {
             case FIND:

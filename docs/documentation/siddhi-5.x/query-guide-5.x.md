@@ -1134,10 +1134,11 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 * [session](http://siddhi.io/api/latest/#session-window)
 * [cron](http://siddhi.io/api/latest/#cron-window)
 * [externalTime](http://siddhi.io/api/latest/#externaltime-window)
+<a class="headerlink" name="output-event-types" href="#output-event-types" title="Permanent link"></a>
 * [externalTimeBatch](http://siddhi.io/api/latest/#externaltimebatch-window)
 * [delay](http://siddhi.io/api/latest/#delay-window)
 
-**Output event types**<a id="output-event-types" class='anchor' aria-hidden='true'></a>
+**Output event types**
 
 Projection of the query depends on the output event types such as, `current` and `expired` event types.
  By default all queries produce `current` events and only queries with windows produce `expired` events
@@ -1801,7 +1802,7 @@ The possible values are as follows:
 
 ## Partition
 
-Partitions divide streams and queries into isolated groups in  order to process them in parallel and in isolation.
+Partitions divide streams and queries into isolated groups in order to process them in parallel and in isolation.
 A partition can contain one or more queries and there can be multiple instances where the same queries and streams are replicated for each partition.
 Each partition is tagged with a partition key. Those partitions only process the events that match the corresponding partition key.
 
@@ -1897,6 +1898,51 @@ begin
     insert into DeviceTempIncreasingStream
 end;
 </pre>
+
+### Purge Partition
+
+Based on the partition key used for the partition, multiple instances of streams and queries will be generated. When an extremely large number of unique partition keys are used there is a possibility of very high instances of streams and queries getting generated and eventually system going out of memory. In order to overcome this, users can define a purge interval to clean partitions that will not be used anymore.
+
+**Purpose**
+
+`@purge` allows you to clean the partition instances that will not be used anymore.
+
+**Syntax**
+
+The syntax of partition purge configuration is as follows:
+
+```sql
+@purge(enable='true', interval='<purge interval>', idle.period='<idle period of partition instance>')
+partition with ( <partition key> of <input stream> )
+begin
+    from <input stream> ...
+    select <attribute name>, <attribute name>, ...
+    insert into <output stream>
+end;
+```
+
+Partition purge configuration| Description
+---------|--------
+Purge interval | The periodic time interval to purge the purgeable partition instances.
+Idle period of partition instance| The period, a particular partition instance (for a given partition key) needs to be idle before it becomes purgeable.
+
+**Examples**
+
+Mark partition instances eligible for purging, if there are no events from a particular deviceID for 15 seconds, and periodically purge those partition instances every 1 second.
+
+```sql
+@purge(enable='true', interval='1 sec', idle.period='15 sec')
+partition with ( deviceID of TempStream )
+begin
+    from TempStream#window.lengthBatch(10)
+    select roomNo, deviceID, avg(temp) as avgTemp
+    insert into #AvgTempStream
+
+    from every (e1=#AvgTempStream),e2=#AvgTempStream[e1.avgTemp + 5 < avgTemp]
+    select e1.deviceID, e1.avgTemp as initialAvgTemp, e2.avgTemp as finalAvgTemp
+    insert into DeviceTempIncreasingStream
+end;
+```
 
 ## Table
 
@@ -2203,7 +2249,7 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
     When the attribute to the right is a table attribute, the operations supported differ based on the database type.
 
 To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. To understand more see [output event type](#output-event-types).
 
 !!! note
     Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
@@ -2258,17 +2304,6 @@ Named aggregation allows you to obtain aggregates in an incremental manner for a
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
- Named aggregation's granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the named aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
-
-|Granularity           |Default retention      |Minimum retention
----------------        |--------------         |------------------  
-|`second`              |`120` seconds          |`120` seconds
-|`minute`              |`24`  hours            |`120` minutes
-|`hour`                |`30`  days             |`25`  hours
-|`day`                 |`1`   year             |`32`  days
-|`month`               |`All`                  |`13`  month
-|`year`                |`All`                  |`none`
-
 **Purpose**
 
 Named aggregation allows you to retrieve the aggregate values for different time durations.
@@ -2293,8 +2328,6 @@ The above syntax includes the following:
 
 |Item                          |Description
 ---------------                |---------
-|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This identifies the number of expired events to retain in a buffer in order<br/>to handle out of order event processing. This is an optional<br/>parameter that is applicable only if aggregation is based on external<br/>timestamps (because events aggregated based on event arrival<br/>time cannot be out of order). Siddhi determines whether an event is expired or not<br/>based on the timestamp of the latest event and the most granular duration for<br/>which aggregation is calculated.<br/> e.g., If the aggregation is calculated for `sec…year`, the most granular duration is seconds. Therefore, if the buffer size is `3` and events arrive during 51st, 52nd, 53rd and 54th seconds, all of the older aggregations (i.e., for 51st, 52nd and 53rd seconds) are kept in the buffer because the latest event arrived during the 54th second. <br/>The default value is `0`.
-|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this parameter is set to `false` (which is default), any event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>this parameter is set to `true`, any event older than the buffer is dropped. This is an optional annotation.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
 |`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> If this annotation is not provided, the default purging mentioned above is applied.<br/> If you want to disable automatic data purging, you can use this annotation as follows:</br>'@purge(enable=false)</br>/You should disable data purging if the aggregation query in included in the Siddhi application for read-only purposes.
 |`@retentionPeriod`            |This annotation is used to specify the length of time the data needs to be retained when carrying out data purging.<br/> If this annotation is not provided, the default retention period is applied.
@@ -2304,11 +2337,22 @@ The above syntax includes the following:
 |`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
 |`<time periods>`              |Time periods can be specified as a range where the minimum and the maximum value are separated by three dots, or as comma-separated values. <br><br> e.g., A range can be specified as sec...year where aggregation is done per second, minute, hour, day, month and year. Comma-separated values can be specified as min, hour. <br><br> Skipping time durations (e.g., min, day where the hour duration is skipped) when specifying comma-separated values is supported only from v4.1.1 onwards
 
-!!! Note
-    From V4.2.0 onwards, aggregation is carried out at calendar start times for each granularity with the GMT timezone
+ Aggregation's granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the named aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied.
+
+|Granularity           |Default retention      |Minimum retention
+---------------        |--------------         |------------------  
+|`second`              |`120` seconds          |`120` seconds
+|`minute`              |`24`  hours            |`120` minutes
+|`hour`                |`30`  days             |`25`  hours
+|`day`                 |`1`   year             |`32`  days
+|`month`               |`All`                  |`13`  month
+|`year`                |`All`                  |`none`
 
 !!! Note
-    From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition).
+    Aggregation is carried out at calendar start times for each granularity with the GMT timezone
+
+!!! Note
+    The same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition).
 
 **Example**
 
@@ -2327,8 +2371,6 @@ define aggregation TradeAggregation
 
 ### Distributed Aggregation
 
-!!! Note
-    Distributed Aggregation is only supported after v4.3.0
 
 Distributed Aggregation allows you to partially process aggregations in different shards. This allows Siddhi
 app in one shard to be responsible only for processing a part of the aggregation.
@@ -2360,8 +2402,6 @@ System Property| Description| Possible Values | Optional | Default Value
 shardId| The id of the shard one of the distributed aggregation is running in. This should be unique to a single shard | Any string | No | <Empty_String>
 partitionById| This allows user to enable/disable distributed aggregation for all aggregations running in one siddhi manager .(Available from v4.3.3) | true/false | Yesio | false
 
-
-
 !!! Note
     ShardIds should not be changed after the first configuration in order to keep data consistency.
 
@@ -2391,12 +2431,9 @@ Item|Description
 ---------|---------
 `within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by a comma as `string` or `long` values, or by using the wildcard `string` specifying the data range. For details refer examples.            
 `per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
-`AGG_TIMESTAMP`|This specifies the start time of the aggregations and can be used in the select clause.
 
-`within` and `per` clauses also accept attribute values from the stream.
-
-!!! Note
-    The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
+`within` and `per` clauses also accept attribute values from the stream.<br>
+The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
 
 **Example**
 
@@ -2662,7 +2699,7 @@ The following types of triggeres are currently supported:
 |-------------|-----------|
 |`'start'`| An event is triggered when Siddhi is started.|
 |`every <time interval>`| An event is triggered periodically at the given time interval.
-|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.
+|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.1.7/tutorials/tutorial-lesson-06.html">quartz-scheduler</a>.
 
 
 **Examples**
@@ -3158,7 +3195,7 @@ extension type.
 * Follow the procedure for the required archetype, based on your project:
 
 !!! Note
-    When using the generated archetype please make sure you uncomment @Extension annotation and complete the
+    When using the generated archetype please make sure you complete the @Extension
     annotation with proper values. This annotation will be used to identify and document the extension, hence your
     extension will not work without @Extension annotation.
 
@@ -3183,12 +3220,22 @@ To install and implement the siddhi-io extension archetype, follow the procedure
                 mvn archetype:generate
                     -DarchetypeGroupId=io.siddhi.extension.archetype
                     -DarchetypeArtifactId=siddhi-archetype-execution
-                    -DgroupId=io.extension.siddhi.execution
+                    -DgroupId=io.siddhi.extension.execution
                     -Dversion=1.0.0-SNAPSHOT
 
-2. Enter the required execution name in the message that pops up as shown in the example below.
-
-            Define value for property 'executionType': ML
+2. Enter the mandatory properties prompted, please see the description for all properties below.
+           
+    |Properties | Description | Mandatory | Default Value |
+    |------------- |-------------| ---- | ----- |
+    |_nameOfFunction | Name of the custom function to be created | Y | - |
+    |_nameSpaceOfFunction | Namespace of the function, used to grouped similar custom functions | Y | -
+    |groupIdPostfix| Namespace of the function is added as postfix to the groupId as a convention | N | {_nameSpaceOfFunction}
+    |artifactId | Artifact Id of the project | N | siddhi-execution-{_nameSpaceOfFunction}
+    |classNameOfAggregateFunction| Class name of the Aggregate Function | N | ${_nameOfFunction}AggregateFunction
+    |classNameOfFunction|Class name of the Function|N|${_nameOfFunction}Function
+    |classNameOfStreamFunction|Class name of the Stream Function|N|${_nameOfFunction}StreamFunction
+    |classNameOfStreamProcessor|Class name of the Stream Processor|N|${_nameOfFunction}StreamProcessor
+    |classNameOfWindow|Class name of the Window|N|${_nameOfFunction}Window
 
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
@@ -3209,16 +3256,21 @@ To implement the siddhi-io extension archetype, follow the procedure below:
 
 1. Issue the following command from your CLI.
 
-
                mvn archetype:generate
                    -DarchetypeGroupId=io.siddhi.extension.archetype
                    -DarchetypeArtifactId=siddhi-archetype-io
-                   -DgroupId=io.extension.siddhi.io
+                   -DgroupId=io.siddhi.extension.io
                    -Dversion=1.0.0-SNAPSHOT
 
-2. Enter the required execution name (the transport type in this scenario) in the message that pops up as shown in the example below.
-
-         Define value for property 'typeOf_IO': http
+1. Enter the mandatory properties prompted, please see the description for all properties below.
+           
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _IOType | Type of IO for which Siddhi-io extension is written | Y | - 
+    | groupIdPostfix| Type of the IO is added as postfix to the groupId as a convention | N | {_IOType} 
+    | artifactId | Artifact Id of the project | N | siddhi-io-{_IOType}
+    | classNameOfSink | Class name of the Sink | N | {_IOType}Sink
+    | classNameOfSource | Class name of the Source | N | {_IOType}Source
 
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
@@ -3243,13 +3295,19 @@ To implement the siddhi-map extension archetype, follow the procedure below:
                 mvn archetype:generate
                     -DarchetypeGroupId=io.siddhi.extension.archetype
                     -DarchetypeArtifactId=siddhi-archetype-map
-                    -DgroupId=io.extension.siddhi.map
+                    -DgroupId=io.siddhi.extension.map
                     -Dversion=1.0.0-SNAPSHOT
 
-2. Enter the required execution name (the map type in this scenario) in the message that pops up as shown in the example below.
-
-            Define value for property 'mapType':CSV
-
+2. Enter the mandatory properties prompted, please see the description for all properties below.
+       
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _mapType | Type of Mapper for which Siddhi-map extension is written | Y | - 
+    | groupIdPostfix| Type of the Map is added as postfix to the groupId as a convention | N | {_mapType} 
+    | artifactId | Artifact Id of the project | N | siddhi-map-{_mapType}
+    | classNameOfSinkMapper | Class name of the Sink Mapper| N | {_mapType}SinkMapper
+    | classNameOfSourceMapper | Class name of the Source Mapper | N | {_mapType}SourceMapper   
+    
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
 **siddhi-script**
@@ -3267,12 +3325,17 @@ To implement the siddhi-script extension archetype, follow the procedure below:
                mvn archetype:generate
                    -DarchetypeGroupId=io.siddhi.extension.archetype
                    -DarchetypeArtifactId=siddhi-archetype-script
-                   -DgroupId=io.extension.siddhi.script
+                   -DgroupId=io.siddhi.extension.script
                    -Dversion=1.0.0-SNAPSHOT
 
-2. Enter the required execution name in the message that pops up as shown in the example below.
-
-         Define value for property 'typeOfScript':
+2. Enter the mandatory properties prompted, please see the description for all properties below.
+       
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _nameOfScript | Name of Custom Script for which Siddhi-script extension is written | Y | - 
+    | groupIdPostfix| Name of the Script is added as postfix to the groupId as a convention | N | {_nameOfScript} 
+    | artifactId | Artifact Id of the project | N | siddhi-script-{_nameOfScript}
+    | classNameOfScript | Class name of the Script | N | Eval{_nameOfScript}
 
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
@@ -3291,12 +3354,17 @@ To implement the siddhi-store extension archetype, follow the procedure below:
                mvn archetype:generate
                   -DarchetypeGroupId=io.siddhi.extension.archetype
                   -DarchetypeArtifactId=siddhi-archetype-store
-                  -DgroupId=io.extension.siddhi.store
+                  -DgroupId=io.siddhi.extension.store
                   -Dversion=1.0.0-SNAPSHOT
 
-2. Enter the required execution name in the message that pops up as shown in the example below.
-
-          Define value for property 'storeType': RDBMS
+2. Enter the mandatory properties prompted, please see the description for all properties below.
+                          
+    | Properties | Description | Mandatory | Default Value |
+    | ------------- |-------------| ---- | ----- |
+    | _storeType | Type of Store for which Siddhi-store extension is written | Y | - 
+    | groupIdPostfix| Type of the Store is added as postfix to the groupId as a convention | N | {_storeType} 
+    | artifactId | Artifact Id of the project | N | siddhi-store-{_storeType}
+    | className | Class name of the Store | N | {_storeType}EventTable
 
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 

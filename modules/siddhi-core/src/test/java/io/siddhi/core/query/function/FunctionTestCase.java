@@ -39,12 +39,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class FunctionTestCase {
+
     private static final Logger log = Logger.getLogger(FunctionTestCase.class);
     private int count;
     private boolean eventArrived;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
     }
@@ -53,6 +55,7 @@ public class FunctionTestCase {
 
     @Test
     public void functionTest1() throws InterruptedException {
+
         log.info("function test 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -78,6 +81,7 @@ public class FunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event inEvent : inEvents) {
@@ -98,7 +102,6 @@ public class FunctionTestCase {
 
         });
 
-
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 55.6f, 70.6f});
@@ -114,6 +117,7 @@ public class FunctionTestCase {
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void functionTest2() throws InterruptedException {
+
         log.info("function test 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -127,6 +131,7 @@ public class FunctionTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 for (Event inEvent : inEvents) {
                     count++;
@@ -157,6 +162,7 @@ public class FunctionTestCase {
 
     @Test
     public void functionTest3() throws InterruptedException {
+
         log.info("function test 3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -166,12 +172,12 @@ public class FunctionTestCase {
         String query = "@info(name = 'query1') from cseEventStream[coalesce(price1,price2) > 0f] select symbol, " +
                 "coalesce(price1,price2) as price,quantity insert into outputStream ;";
 
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 for (Event inEvent : inEvents) {
                     count++;
@@ -198,4 +204,249 @@ public class FunctionTestCase {
 
     }
 
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void functionTest4() throws InterruptedException {
+
+        log.info("function test 4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price1 float, price2 float, volume long" +
+                " , quantity int);";
+        String query = "@info(name = 'query1') from cseEventStream[coalesce(price1,price2) > 0f] select symbol, " +
+                "coalesce() as price,quantity insert into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        AssertJUnit.assertEquals(50.0f, inEvent.getData()[1]);
+                    } else if (count == 2) {
+                        AssertJUnit.assertEquals(70.0f, inEvent.getData()[1]);
+                    } else if (count == 3) {
+                        AssertJUnit.assertEquals(44.0f, inEvent.getData()[1]);
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60L, 6});
+        inputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10});
+        inputHandler.send(new Object[]{"WSO2", null, 44f, 200L, 56});
+        inputHandler.send(new Object[]{"WSO2", null, null, 200L, 56});
+        Thread.sleep(100);
+        org.testng.AssertJUnit.assertEquals(3, count);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery5() throws InterruptedException {
+
+        log.info("Default function test");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String planName = "@app:name('DefaultFunction') ";
+        String cseEventStream = "define stream cseEventStream (temp double, roomNo int,deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select default(temp,0.0,deviceId) as temp, roomNo " +
+                "insert into StandardTempStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery6() throws InterruptedException {
+
+        log.info("Default function test for different type");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String planName = "@app:name('DefaultFunction') ";
+        String cseEventStream = "define stream cseEventStream (temp double, roomNo int,deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select default(temp,123) as temp, roomNo " +
+                "insert into StandardTempStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery7() throws InterruptedException {
+
+        log.info("eventTimestamp Test1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String planName = "@app:name('eventTimestamp') ";
+        String cseEventStream = "define stream fooStream (symbol string, time string);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select symbol as name, eventTimestamp(time) as eventTimestamp " +
+                "insert into barStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery8() throws InterruptedException {
+
+        log.info("CurrentTimestamp Test1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String planName = "@app:name('eventTimestamp') ";
+        String cseEventStream = "define stream fooStream (symbol string, currentTime string);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select symbol as name, currentTimeMillis(currentTime) as eventTimestamp " +
+                "insert into barStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery9() throws InterruptedException {
+        log.info("CreateSet Test1");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol string, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol, deviceId) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery10() throws InterruptedException {
+        log.info("CreateSet Test2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol int, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery11() throws InterruptedException {
+        log.info("CreateSet Test3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol double, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery12() throws InterruptedException {
+        log.info("CreateSet Test4");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol bool, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery13() throws InterruptedException {
+        log.info("CreateSet Test5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol long, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery14() throws InterruptedException {
+        log.info("CreateSet Test6");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol float, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void testFunctionQuery15() throws InterruptedException {
+        log.info("CreateSet Test7");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('createSet') ";
+        String cseEventStream = "define stream fooStream (symbol string, deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from fooStream " +
+                "select createSet(symbol) as initialSet  " +
+                "insert into barStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery16() throws InterruptedException {
+        log.info("CreateSet8");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('DefaultFunction') ";
+        String cseEventStream = "define stream cseEventStream (temp double, roomNo int,deviceId long);";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select default(temp,1/2) as temp, roomNo " +
+                "insert into StandardTempStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery17() throws InterruptedException {
+        log.info("SizeOfSet");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('SizeOfSetFunction') ";
+        String cseEventStream = "define stream cseEventStream (distinctSymbols string, roomNo int);";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select sizeOfSet(distinctSymbols) as sizeOfSymbolSet " +
+                "insert into StandardTempStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testFunctionQuery18() throws InterruptedException {
+        log.info("SizeOfSet");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String planName = "@app:name('SizeOfSetFunction') ";
+        String cseEventStream = "define stream cseEventStream (distinctSymbols string, roomNo int);";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select sizeOfSet(distinctSymbols, roomNo) as sizeOfSymbolSet " +
+                "insert into StandardTempStream;";
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+    }
 }

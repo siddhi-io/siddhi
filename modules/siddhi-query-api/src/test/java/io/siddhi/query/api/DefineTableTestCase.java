@@ -21,6 +21,8 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import io.siddhi.query.api.exception.DuplicateDefinitionException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.testng.annotations.Test;
 
 public class DefineTableTestCase {
@@ -47,4 +49,22 @@ public class DefineTableTestCase {
                 ("datasource.id", "cepDataSource"));
     }
 
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTableDefinitionNull() {
+        TableDefinition tableDefinition = null;
+        SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testTableIdNull() {
+        TableDefinition tableDefinition = TableDefinition.id(null);
+        SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
+    }
+
+    @Test(expectedExceptions = DuplicateDefinitionException.class)
+    public void testCreatingTableDefinition2() {
+        SiddhiApp.siddhiApp("test").defineTable(TableDefinition.id("StockStream").attribute("symbol",
+                Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
+                .FLOAT)).defineTable(TableDefinition.id("StockStream"));
+    }
 }

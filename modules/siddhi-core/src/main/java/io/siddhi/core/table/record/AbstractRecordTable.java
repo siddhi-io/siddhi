@@ -68,10 +68,10 @@ public abstract class AbstractRecordTable extends Table {
         this.recordTableHandler = recordTableHandler;
         this.storeEventPool = storeEventPool;
         init(tableDefinition, configReader);
-        init(tableDefinition, siddhiAppContext, storeEventCloner, configReader);
+        initCache(tableDefinition, siddhiAppContext, storeEventCloner, configReader);
     }
 
-    protected abstract void init(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
+    protected abstract void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
                                  StreamEventCloner storeEventCloner, ConfigReader configReader);
 
     /**

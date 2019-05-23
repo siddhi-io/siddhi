@@ -29,26 +29,14 @@ import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class QueryAPITestCaseForTableWithCache {
     private static final Logger log = Logger.getLogger(QueryAPITestCaseForTableWithCache.class);
 
-    @BeforeClass
-    public static void startTest() {
-        log.info("== Query Tests for Cache started ==");
-    }
-
-    @AfterClass
-    public static void shutdown() {
-        log.info("== Query Tests for Cache completed ==");
-    }
-
     @Test
     public void test0() throws InterruptedException {
-        log.info("Test1 table with cache");
+        log.info("Test0 table with cache");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -363,9 +351,7 @@ public class QueryAPITestCaseForTableWithCache {
                 "insert into StockTable ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
@@ -398,9 +384,7 @@ public class QueryAPITestCaseForTableWithCache {
                 "insert into StockTable ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
@@ -436,9 +420,7 @@ public class QueryAPITestCaseForTableWithCache {
                 "insert into StockTable ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
@@ -479,9 +461,7 @@ public class QueryAPITestCaseForTableWithCache {
                 "insert into StockTable ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
@@ -560,9 +540,7 @@ public class QueryAPITestCaseForTableWithCache {
                 "insert into StockTable3 ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{1, "WSO2", 100});

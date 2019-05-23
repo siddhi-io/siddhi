@@ -132,4 +132,9 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_CACHE_EXPIRY_TIME = "expiry.time";
     public static final String ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL = "expiry.check.interval";
     public static final int CACHE_MODE_BASIC_PRELOAD = 1;
+
+    public static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
+    public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
+    public static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
+    public static final String SHARD_ID_COL = "SHARD_ID";
 }

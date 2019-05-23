@@ -29,7 +29,6 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.input.stream.StreamRuntime;
-import io.siddhi.core.query.input.stream.join.JoinProcessor;
 import io.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
@@ -222,7 +221,6 @@ public class QueryParser {
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
-//            if (((JoinProcessor) streamRuntime.getSingleStreamRuntimes().get(0).getProcessorChain()).getCompiledCondition())
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
@@ -253,6 +251,4 @@ public class QueryParser {
         }
         return queryRuntime;
     }
-
-
 }

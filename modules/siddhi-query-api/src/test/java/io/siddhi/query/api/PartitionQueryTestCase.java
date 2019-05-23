@@ -18,6 +18,7 @@
 package io.siddhi.query.api;
 
 
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.partition.Partition;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -85,5 +86,33 @@ public class PartitionQueryTestCase {
 
         partition.addQuery(query);
 
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testPartitionQueryNull() {
+        Partition partition = Partition.partition();
+        Query query = null;
+        partition.addQuery(query);
+    }
+
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void testDuplicatePartitionQuery() {
+        Partition partition = Partition.partition().
+                with("StockStream", Expression.variable("symbol")).
+                with("StockStream", Expression.variable("symbol")).
+                with("StockStream2",
+                        Partition.range("LessValue",
+                                Expression.compare(
+                                        Expression.value(7),
+                                        Compare.Operator.GREATER_THAN,
+                                        Expression.variable("price"))
+                        ),
+                        Partition.range("HighValue",
+                                Expression.compare(
+                                        Expression.value(9.5),
+                                        Compare.Operator.LESS_THAN,
+                                        Expression.variable("price1"))
+                        )
+                );
     }
 }

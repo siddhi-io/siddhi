@@ -20,6 +20,8 @@ package io.siddhi.core.query.aggregator;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
@@ -29,19 +31,23 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AndAggregatorExtensionTestCase {
+
     private static final Logger log = Logger.getLogger(AndAggregatorExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
+    private int inEventCount;
 
     @BeforeMethod
     public void init() {
+
         count = 0;
         eventArrived = false;
+        inEventCount = 0;
     }
-
 
     @Test
     public void testAndAggregatorTrueOnlyScenario() throws InterruptedException {
+
         log.info("AndAggregator TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -57,6 +63,7 @@ public class AndAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -88,6 +95,7 @@ public class AndAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testAndAggregatorTrueOnlyScenario")
     public void testAndAggregatorFalseOnlyScenario() throws InterruptedException {
+
         log.info("AndAggregator TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -103,6 +111,7 @@ public class AndAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -134,6 +143,7 @@ public class AndAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testAndAggregatorFalseOnlyScenario")
     public void testAndAggregatorTrueFalseScenario() throws InterruptedException {
+
         log.info("AndAggregator TestCase 3");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -149,6 +159,7 @@ public class AndAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -180,6 +191,7 @@ public class AndAggregatorExtensionTestCase {
 
     @Test(dependsOnMethods = "testAndAggregatorTrueFalseScenario")
     public void testAndAggregatorMoreEventsBatchScenario() throws InterruptedException {
+
         log.info("AndAggregator TestCase 4");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -195,6 +207,7 @@ public class AndAggregatorExtensionTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 eventArrived = true;
                 for (Event event : events) {
@@ -226,4 +239,90 @@ public class AndAggregatorExtensionTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void andAggregatorTest5() throws InterruptedException {
+
+        log.info("andAggregator Test 5");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (name string, isFraud bool);";
+        String execPlan = "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(1) " +
+                "select and(isFraud, name) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        siddhiManager.createSiddhiAppRuntime(cseEventStream + execPlan);
+    }
+
+    @Test
+    public void andAggregatorTest6() throws InterruptedException {
+
+        log.info("andAggregator Test 6");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('andAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (name string, isFraud bool);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select and(isFraud) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+
+        log.info("Running: " + execPlanRunTime.getName());
+
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                inEventCount++;
+            }
+        });
+
+        execPlanRunTime.start();
+        execPlanRunTime.shutdown();
+        AssertJUnit.assertEquals(0, inEventCount);
+    }
+
+    @Test
+    public void andAggregatorTest7() throws InterruptedException {
+
+        log.info("andAggregator Test 7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('andAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (name string, isFraud bool);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select and(isFraud) as isFraudTransaction " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(true, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"Nayana", "True"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
 }
