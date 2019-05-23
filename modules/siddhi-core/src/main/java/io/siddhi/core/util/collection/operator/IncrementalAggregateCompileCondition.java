@@ -68,7 +68,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private List<ExpressionExecutor> timestampFilterExecutors;
     private boolean isProcessingOnExternalTime;
     private final boolean isDistributed;
-    private final List<TimePeriod.Duration> durationList;
+    private final List<TimePeriod.Duration> incrementalDurations;
 
     public IncrementalAggregateCompileCondition(
             Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions,
@@ -97,14 +97,13 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.startTimeEndTimeExpressionExecutor = startTimeEndTimeExpressionExecutor;
         this.timestampFilterExecutors = timestampFilterExecutors;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
-        this.durationList = incrementalDurations;
+        this.incrementalDurations = incrementalDurations;
         this.isDistributed = isDistributed;
     }
 
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,
                             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, Table> aggregationTables,
-                            List<TimePeriod.Duration> incrementalDurations,
                             List<ExpressionExecutor> baseExecutorsForFind,
                             List<ExpressionExecutor> outputExpressionExecutors,
                             SiddhiQueryContext siddhiQueryContext,
@@ -170,11 +169,11 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         //If processing on external time, the in-memory data also needs to be queried
         if (isDistributed) {
-            int perValueIndex = this.durationList.indexOf(perValue);
+            int perValueIndex = this.incrementalDurations.indexOf(perValue);
             if (perValueIndex != 0) {
                 Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();
                 for (int i = 0; i < perValueIndex; i++) {
-                    TimePeriod.Duration key = this.durationList.get(i);
+                    TimePeriod.Duration key = this.incrementalDurations.get(i);
                     lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
                 }
                 List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()

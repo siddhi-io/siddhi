@@ -214,9 +214,9 @@ public class AggregationRuntime implements MemoryCalculable {
                 this.recreateInMemoryData.recreateInMemoryData();
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
-                    aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
-                    baseExecutorsForFind, outputExpressionExecutors, siddhiQueryContext,
-                    aggregateProcessExpressionExecutorsListForFind, groupByKeyGeneratorList, shouldUpdateTimestamp);
+                    aggregationDefinition, incrementalExecutorMap, aggregationTables, baseExecutorsForFind,
+                    outputExpressionExecutors, siddhiQueryContext, aggregateProcessExpressionExecutorsListForFind,
+                    groupByKeyGeneratorList, shouldUpdateTimestamp);
         } finally {
             SnapshotService.getSkipStateStorageThreadLocal().set(null);
             if (latencyTrackerFind != null &&
