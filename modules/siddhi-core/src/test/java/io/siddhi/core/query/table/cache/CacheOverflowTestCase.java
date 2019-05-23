@@ -49,7 +49,7 @@ public class CacheOverflowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"3\"))\n" +
                 "define table StockTable (symbol string, volume long); ";
 
         String query1 = "" +
@@ -86,7 +86,7 @@ public class CacheOverflowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"3\"))\n" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table StockTable (symbol string, volume long); ";
 
@@ -125,7 +125,7 @@ public class CacheOverflowTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"3\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -182,7 +182,7 @@ public class CacheOverflowTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price double, volume long); " +
                 "define stream UpdateStockStream (symbol string, price double, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"3\"))\n" +
                 "define table StockTable (symbol string, price double, volume long); ";
 
         String query = "" +
@@ -226,7 +226,7 @@ public class CacheOverflowTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"3\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"3\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

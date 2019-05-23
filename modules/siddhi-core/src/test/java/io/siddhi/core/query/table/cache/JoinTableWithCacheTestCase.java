@@ -61,7 +61,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -125,7 +125,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -187,7 +187,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol1 string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -247,7 +247,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -308,7 +308,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -368,7 +368,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -429,7 +429,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -491,7 +491,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -552,7 +552,7 @@ public class JoinTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "@connection(maxWait = '4000')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +

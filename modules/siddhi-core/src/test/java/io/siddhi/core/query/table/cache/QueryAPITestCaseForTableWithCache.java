@@ -42,7 +42,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
 //                "@PrimaryKey(\"symbol\")" +
 //                "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -91,7 +91,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -138,7 +138,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -193,7 +193,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -248,7 +248,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -286,7 +286,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
@@ -314,7 +314,7 @@ public class QueryAPITestCaseForTableWithCache {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
@@ -343,7 +343,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -376,7 +376,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -412,7 +412,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -453,7 +453,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -495,7 +495,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String storeQuery = "" +
                 "from StockTable " +
@@ -532,7 +532,7 @@ public class QueryAPITestCaseForTableWithCache {
 
         String streams = "" +
                 "define stream StockStream (id int, symbol string, volume int); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 "define table StockTable3 (id int, symbol string, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +

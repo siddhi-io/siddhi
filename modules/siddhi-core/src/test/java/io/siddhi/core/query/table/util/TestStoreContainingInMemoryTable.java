@@ -47,6 +47,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.MatcherParser;
 import io.siddhi.core.util.parser.SelectorParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -91,7 +92,17 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         StreamEventCloner testTableStreamEventCloner = new StreamEventCloner(cacheTableMetaStreamEvent,
                 storeEventPool);
 
-        inMemoryTable.init(generateCacheTableDefinition(tableDefinition), storeEventPool, testTableStreamEventCloner,
+        TableDefinition testStoreContainingIMTableDefinition = TableDefinition.id(tableDefinition.getId());
+        for (Attribute attribute: tableDefinition.getAttributeList()) {
+            testStoreContainingIMTableDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        for (Annotation annotation: tableDefinition.getAnnotations()) {
+            if (!annotation.getName().equalsIgnoreCase("Store")) {
+                testStoreContainingIMTableDefinition.annotation(annotation);
+            }
+        }
+
+        inMemoryTable.init(testStoreContainingIMTableDefinition, storeEventPool, testTableStreamEventCloner,
                 configReader, super.getSiddhiAppContext(), recordTableHandler);
     }
 
@@ -109,8 +120,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
 
         if (outEvent != null) {
             compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
-            StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                    getMetaStreamInfoHolder().getMetaStateEvent());
+            StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.getMetaStateEvent());
             Event[] cacheResultsAfterSelection = executeSelector(outEvent,
                     compiledSelectionWithCache.getQuerySelector(), stateEventFactory, MetaStreamEvent.EventType.TABLE);
 
@@ -154,7 +164,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                         getMetaStateEvent()));
 
         compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector,
-                matchingMetaInfoHolderForTestStoreQuery);
+                matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent());
         return compiledSelectionWithCache;
     }
 

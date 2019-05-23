@@ -205,7 +205,7 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
                 "expiry.check.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -266,7 +266,7 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
                 "expiry.check.interval=\"1 sec\", policy=\"FIFO\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";

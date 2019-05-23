@@ -62,7 +62,7 @@ public class InTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckInStockStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 

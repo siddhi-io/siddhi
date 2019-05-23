@@ -759,14 +759,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         }
         if (cacheResults != null) {
-            StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                    metaStreamInfoHolder.getMetaStateEvent());
+            StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.metaStateEvent);
             Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
                     compiledSelectionWithCache.querySelector,
                     stateEventFactory, MetaStreamEvent.EventType.TABLE);
             assert cacheResultsAfterSelection != null;
             for (Event event : cacheResultsAfterSelection) {
-
                 Object[] record = event.getData();
                 StreamEvent streamEvent = storeEventPool.newInstance();
                 streamEvent.setOutputData(new Object[outputAttributes.length]);
@@ -934,7 +932,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
 
             compiledSelectionWithCache = new CompiledSelectionWithCache(recordStoreCompiledSelection, querySelector,
-                    matchingMetaInfoHolder);
+                    metaStateEventForCacheSelection);
             return compiledSelectionWithCache;
         } else {
             return  new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
@@ -985,23 +983,23 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      */
     public class CompiledSelectionWithCache implements CompiledSelection {
         QuerySelector querySelector;
-        MatchingMetaInfoHolder metaStreamInfoHolder;
+        MetaStateEvent metaStateEvent;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
 
-        public MatchingMetaInfoHolder getMetaStreamInfoHolder() {
-            return metaStreamInfoHolder;
+        public CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
+                                          QuerySelector querySelector,
+                                          MetaStateEvent metaStateEvent) {
+            this.recordStoreCompiledSelection = recordStoreCompiledSelection;
+            this.querySelector = querySelector;
+            this.metaStateEvent = metaStateEvent;
         }
 
         public QuerySelector getQuerySelector() {
             return querySelector;
         }
 
-        public CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
-                                   QuerySelector querySelector,
-                                   MatchingMetaInfoHolder metaStreamInfoHolder) {
-            this.recordStoreCompiledSelection = recordStoreCompiledSelection;
-            this.querySelector = querySelector;
-            this.metaStreamInfoHolder = metaStreamInfoHolder;
+        public MetaStateEvent getMetaStateEvent() {
+            return metaStateEvent;
         }
     }
 
