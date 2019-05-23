@@ -216,9 +216,7 @@ public class AggregationRuntime implements MemoryCalculable {
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
                     baseExecutorsForFind, outputExpressionExecutors, siddhiQueryContext,
-                    aggregateProcessExpressionExecutorsListForFind,
-                    groupByKeyGeneratorList, shouldUpdateTimestamp,
-                    isDistributed);
+                    aggregateProcessExpressionExecutorsListForFind, groupByKeyGeneratorList, shouldUpdateTimestamp);
         } finally {
             SnapshotService.getSkipStateStorageThreadLocal().set(null);
             if (latencyTrackerFind != null &&
@@ -242,13 +240,15 @@ public class AggregationRuntime implements MemoryCalculable {
         additionalAttributes.add(new Attribute("_START", Attribute.Type.LONG));
         additionalAttributes.add(new Attribute("_END", Attribute.Type.LONG));
 
-        int durationsSize = this.incrementalDurations.size() - 1;
+        int lowerGranularitySize = this.incrementalDurations.size() - 1;
+        List<String> lowerGranularityAttributes = new ArrayList<>();
         if (isDistributed) {
             //Add additional attributes to get base aggregation timestamps based on current timestamps
             // for values calculated in inmemory in the shards
-            for (int i = 0; i < durationsSize - 1; i++) {
-                Attribute attribute = new Attribute("_AGG_TIMESTAMP_FILTER_" + i, Attribute.Type.LONG);
-                additionalAttributes.add(attribute);
+            for (int i = 0; i < lowerGranularitySize; i++) {
+                String attributeName = "_AGG_TIMESTAMP_FILTER_" + i;
+                additionalAttributes.add(new Attribute(attributeName, Attribute.Type.LONG));
+                lowerGranularityAttributes.add(attributeName);
             }
         }
 
@@ -342,10 +342,10 @@ public class AggregationRuntime implements MemoryCalculable {
 
         List<ExpressionExecutor> timestampFilterExecutors = new ArrayList<>();
         if (isDistributed) {
-            for (int i = 0; i < durationsSize - 1; i++) {
+            for (int i = 0; i < lowerGranularitySize; i++) {
                 Expression[] expressionArray = new Expression[]{
                         new AttributeFunction("", "currentTimeMillis", null),
-                        Expression.value(this.incrementalDurations.get(i).toString())};
+                        Expression.value(this.incrementalDurations.get(i + 1).toString())};
                 Expression filterExpression = new AttributeFunction("incrementalAggregator",
                         "getAggregationStartTime", expressionArray);
                 timestampFilterExecutors.add(ExpressionParser.parseExpression(filterExpression,
@@ -382,6 +382,29 @@ public class AggregationRuntime implements MemoryCalculable {
                 withinExpression, streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList,
                 tableMap, siddhiQueryContext);
 
+        // Create compile condition for in-memory data, in case of distributed
+        // Look at the lower level granularities
+        Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition = new HashMap<>();
+        String aggregationName = aggregationDefinition.getId();
+        Expression lowerGranularity;
+        if (isDistributed) {
+            for (int i = 0; i < lowerGranularitySize; i++) {
+                lowerGranularity = Expression.and(
+                        withinExpressionTable,
+                        Expression.compare(
+                                Expression.variable("AGG_TIMESTAMP"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.variable(lowerGranularityAttributes.get(i)))
+                );
+                TimePeriod.Duration duration = this.incrementalDurations.get(i);
+                String tableName = aggregationName + "_" + duration.toString();
+                CompiledCondition compiledCondition = tableMap.get(tableName).compileCondition(lowerGranularity,
+                        streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList, tableMap,
+                        siddhiQueryContext);
+                withinTableLowerGranularityCompileCondition.put(duration, compiledCondition);
+            }
+        }
+
         QueryParserHelper.reduceMetaComplexEvent(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent());
         QueryParserHelper.updateVariablePosition(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent(),
                 startEndExpressionExecutorList);
@@ -394,9 +417,10 @@ public class AggregationRuntime implements MemoryCalculable {
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
-                onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,
-                alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
-                timestampFilterExecutors, processingOnExternalTime);
+                withinTableLowerGranularityCompileCondition, onCompiledCondition, tableMetaStreamEvent,
+                aggregateMetaSteamEvent, additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
+                startTimeEndTimeExpressionExecutor, timestampFilterExecutors, processingOnExternalTime,
+                incrementalDurations, isDistributed);
     }
 
     public void startPurging() {
