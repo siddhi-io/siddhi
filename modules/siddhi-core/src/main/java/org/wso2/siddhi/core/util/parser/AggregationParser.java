@@ -486,13 +486,6 @@ public class AggregationParser {
         ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiAppContext, tableMap,
                 incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent);
 
-        if (shardId != null) {
-            ExpressionExecutor nodeIdExpressionExecutor =
-                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
-            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
-            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
-        }
-
         Attribute timestampAttribute = new Attribute(AGG_START_TIMESTAMP_COL, Attribute.Type.LONG);
         incomingMetaStreamEvent.addOutputData(timestampAttribute);
         incomingExpressionExecutors.add(timestampExecutor);
@@ -623,6 +616,12 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(outputAttribute.getRename()));
                 }
             }
+        }
+        if (shardId != null) {
+            ExpressionExecutor nodeIdExpressionExecutor =
+                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
+            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
+            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
         }
         return addAggLastEvent;
     }
