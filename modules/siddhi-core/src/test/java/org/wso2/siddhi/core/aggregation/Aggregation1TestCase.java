@@ -191,7 +191,6 @@ public class Aggregation1TestCase {
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -266,7 +265,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 4:06:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 1000f, null, 200L, 9, 1496290016000L});
 
-            Thread.sleep(100);
+            Thread.sleep(5000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 04:05:50",
                     "2017-06-01 04:06:57", "seconds"});
             Thread.sleep(100);
