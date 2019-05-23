@@ -87,8 +87,6 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                     break;
                 case AGGREGATE:
                     stateEvent = new StateEvent(2, 0);
-                    StreamEvent streamEvent = new StreamEvent(0, 2, 0);
-                    stateEvent.addEvent(0, streamEvent);
                     streamEvents = aggregation.find(stateEvent, compiledCondition);
                     break;
                 case DEFAULT:

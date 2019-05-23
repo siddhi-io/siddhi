@@ -154,10 +154,9 @@ public class AggregationRuntime implements MemoryCalculable {
             cloneStreamDefinition((StreamDefinition) metaStreamEventWithStartEnd.getLastInputDefinition(),
                     streamDefinitionWithStartEnd);
         }
-        streamDefinitionWithStartEnd.attribute(additionalAttributes.get(0).getName(),
-                additionalAttributes.get(0).getType());
-        streamDefinitionWithStartEnd.attribute(additionalAttributes.get(1).getName(),
-                additionalAttributes.get(1).getType());
+        additionalAttributes.forEach(attribute ->
+                streamDefinitionWithStartEnd.attribute(attribute.getName(), attribute.getType())
+        );
         initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd,
                 matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0).getInputReferenceId());
         return metaStreamEventWithStartEnd;
@@ -237,6 +236,16 @@ public class AggregationRuntime implements MemoryCalculable {
         additionalAttributes.add(new Attribute("_START", Attribute.Type.LONG));
         additionalAttributes.add(new Attribute("_END", Attribute.Type.LONG));
 
+        int durationsSize = this.incrementalDurations.size() - 1;
+        if (isDistributed) {
+            //Add additional attributes to get base aggregation timestamps based on current timestamps
+            // for values calculated in inmemory in the shards
+            for (int i = 0; i < durationsSize - 1; i++) {
+                Attribute attribute = new Attribute("_AGG_TIMESTAMP_FILTER_" + i, Attribute.Type.LONG);
+                additionalAttributes.add(attribute);
+            }
+        }
+
         // Get table definition. Table definitions for all the tables used to persist aggregates are similar.
         // Therefore it's enough to get the definition from one table.
         AbstractDefinition tableDefinition = ((Table) aggregationTables.values().toArray()[0]).getTableDefinition();
@@ -305,17 +314,6 @@ public class AggregationRuntime implements MemoryCalculable {
         Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
         withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
-        // Combine with and on condition for table query
-        AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
-        AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
-                newMetaStreamEventWithStartEnd.getInputReferenceId(),
-                newMetaStreamEventWithStartEnd.getLastInputDefinition().getAttributeList(),
-                this.tableAttributesNameList
-        );
-        aggregationExpressionBuilder.build(expressionVisitor);
-
-        Expression withinExpressionTable = Expression.and(withinExpression, expressionVisitor.getReducedExpression());
-
         // Create start and end time expression
         Expression startEndTimeExpression;
         ExpressionExecutor startTimeEndTimeExpressionExecutor;
@@ -335,9 +333,31 @@ public class AggregationRuntime implements MemoryCalculable {
                     "definition for filtering of aggregation data.");
         }
 
+        List<ExpressionExecutor> timestampFilterExecutors = new ArrayList<>();
+        if (isDistributed) {
+            for (int i = 0; i < durationsSize - 1; i++) {
+                Expression[] expressionArray = new Expression[]{
+                        new AttributeFunction("", "currentTimeMillis", null),
+                        Expression.value(this.incrementalDurations.get(i).toString())};
+                Expression filterExpression = new AttributeFunction("incrementalAggregator",
+                        "getAggregationStartTime", expressionArray);
+                timestampFilterExecutors.add(ExpressionParser.parseExpression(filterExpression,
+                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                        variableExpressionExecutors, siddhiAppContext, false, 0, queryName));
+            }
+        }
 
         // Create compile condition per each table used to persist aggregates.
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
+        // Combine with and on condition for table query
+        AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
+        AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
+                newMetaStreamEventWithStartEnd.getInputReferenceId(),
+                newMetaStreamEventWithStartEnd.getLastInputDefinition().getAttributeList(),
+                this.tableAttributesNameList
+        );
+        aggregationExpressionBuilder.build(expressionVisitor);
+        Expression withinExpressionTable = Expression.and(withinExpression, expressionVisitor.getReducedExpression());
         List<VariableExpressionExecutor> startEndExpressionExecutorList = new ArrayList<>();
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
@@ -367,7 +387,7 @@ public class AggregationRuntime implements MemoryCalculable {
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,
                 alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
-                processingOnExternalTime);
+                timestampFilterExecutors, processingOnExternalTime);
     }
 
     public void startPurging() {

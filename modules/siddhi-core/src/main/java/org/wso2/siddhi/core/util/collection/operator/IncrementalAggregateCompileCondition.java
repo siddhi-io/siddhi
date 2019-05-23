@@ -59,6 +59,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private MatchingMetaInfoHolder alteredMatchingMetaInfoHolder;
     private ExpressionExecutor perExpressionExecutor;
     private ExpressionExecutor startTimeEndTimeExpressionExecutor;
+    private List<ExpressionExecutor> timestampFilterExecutors;
     private boolean isProcessingOnExternalTime;
 
     private final StreamEventPool streamEventPoolForTableMeta;
@@ -73,7 +74,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             MetaStreamEvent tableMetaStreamEvent, MetaStreamEvent aggregateMetaSteamEvent,
             List<Attribute> additionalAttributes, MatchingMetaInfoHolder alteredMatchingMetaInfoHolder,
             ExpressionExecutor perExpressionExecutor, ExpressionExecutor startTimeEndTimeExpressionExecutor,
-            boolean isProcessingOnExternalTime) {
+            List<ExpressionExecutor> timestampFilterExecutors, boolean isProcessingOnExternalTime) {
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
         this.onCompiledCondition = onCompiledCondition;
@@ -89,6 +90,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.alteredMatchingMetaInfoHolder = alteredMatchingMetaInfoHolder;
         this.perExpressionExecutor = perExpressionExecutor;
         this.startTimeEndTimeExpressionExecutor = startTimeEndTimeExpressionExecutor;
+        this.timestampFilterExecutors = timestampFilterExecutors;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
     }
 
@@ -102,7 +104,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 inMemoryStoreCompileCondition.cloneCompilation(key),
                 onCompiledCondition.cloneCompilation(key), tableMetaStreamEvent, aggregateMetaStreamEvent,
                 additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
-                startTimeEndTimeExpressionExecutor, isProcessingOnExternalTime);
+                startTimeEndTimeExpressionExecutor, timestampFilterExecutors, isProcessingOnExternalTime);
     }
 
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,
@@ -117,7 +119,30 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             ExpressionExecutor shouldUpdateExpressionExecutor, boolean isDistributed) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
+        //Create matching event if it is store Query
+        int additionTimestampAttributesSize = this.timestampFilterExecutors.size() + 2;
+        Long[] timestampFilters = new Long[additionTimestampAttributesSize];
+        if (matchingEvent.getStreamEvent(0) == null) {
+            StreamEvent streamEvent = new StreamEvent(0, additionTimestampAttributesSize, 0);
+            matchingEvent.addEvent(0, streamEvent);
+        }
 
+        Long[] startTimeEndTime = (Long[]) startTimeEndTimeExpressionExecutor.execute(matchingEvent);
+        if (startTimeEndTime == null) {
+            throw new SiddhiAppRuntimeException("Start and end times for within duration cannot be retrieved");
+        }
+        timestampFilters[0] = startTimeEndTime[0];
+        timestampFilters[1] = startTimeEndTime[1];
+
+        if (isDistributed) {
+            for (int i = 0; i < additionTimestampAttributesSize - 2; i++) {
+                timestampFilters[i + 2] = ((Long) this.timestampFilterExecutors.get(i).execute(matchingEvent));
+            }
+        }
+
+        complexEventPopulater.populateComplexEvent(matchingEvent.getStreamEvent(0), timestampFilters);
+
+        // Get all the aggregates within the given duration, from table corresponding to "per" duration
         // Retrieve per value
         String perValueAsString = perExpressionExecutor.execute(matchingEvent).toString();
         TimePeriod.Duration perValue;
@@ -139,14 +164,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         Table tableForPerDuration = aggregationTables.get(perValue);
 
-        Long[] startTimeEndTime = (Long[]) startTimeEndTimeExpressionExecutor.execute(matchingEvent);
-        if (startTimeEndTime == null) {
-            throw new SiddhiAppRuntimeException("Start and end times for within duration cannot be retrieved");
-        }
-
-        complexEventPopulater.populateComplexEvent(matchingEvent.getStreamEvent(0), startTimeEndTime);
-
-        // Get all the aggregates within the given duration, from table corresponding to "per" duration
         StreamEvent withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
                 withinTableCompiledConditions.get(perValue));
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
