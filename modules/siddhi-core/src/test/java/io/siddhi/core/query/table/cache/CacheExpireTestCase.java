@@ -249,12 +249,10 @@ public class CacheExpireTestCase {
         Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
 
-
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
 //        AssertJUnit.assertEquals(2, events.length);
-
         siddhiAppRuntime.shutdown();
     }
 
@@ -310,12 +308,10 @@ public class CacheExpireTestCase {
         Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
 
-
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
 //        AssertJUnit.assertEquals(2, events.length);
-
         siddhiAppRuntime.shutdown();
     }
 }

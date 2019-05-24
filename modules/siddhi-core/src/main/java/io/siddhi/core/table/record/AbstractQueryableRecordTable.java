@@ -690,7 +690,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         }
         return streamEventComplexEventChunk.getFirst();
-
     }
 
     @Override
@@ -785,7 +784,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         return streamEventComplexEventChunk.getFirst();
     }
-
 
     /**
      * Query records matching the compiled condition and selection
@@ -910,7 +908,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         if (cacheEnabled) {
             CompiledSelectionWithCache compiledSelectionWithCache;
-//            MetaStateEvent metaStateEventForCacheSelection = matchingMetaInfoHolder.getMetaStateEvent();
             MetaStateEvent metaStateEventForCacheSelection = new MetaStateEvent(matchingMetaInfoHolder.
                     getMetaStateEvent().getStreamEventCount());
             for (MetaStreamEvent metaStreamEvent: matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
