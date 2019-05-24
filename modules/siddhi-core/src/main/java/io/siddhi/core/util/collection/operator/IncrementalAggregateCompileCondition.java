@@ -168,36 +168,38 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 incrementalDurations, perValue);
 
         //If processing on external time, the in-memory data also needs to be queried
-        if (isDistributed) {
-            int perValueIndex = this.incrementalDurations.indexOf(perValue);
-            if (perValueIndex != 0) {
-                Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();
-                for (int i = 0; i < perValueIndex; i++) {
-                    TimePeriod.Duration key = this.incrementalDurations.get(i);
-                    lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
-                }
-                List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
-                        .map((entry) -> aggregationTables.get(entry.getKey()).find(matchingEvent, entry.getValue()))
-                        .collect(Collectors.toList());
-                eventChunks.forEach((eventChunk) -> {
-                    if (eventChunk != null) {
-                        complexEventChunkToHoldWithinMatches.add(eventChunk);
-                    }
-                });
-            }
-        } else if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
+        if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
-            IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, oldestInMemoryEventTimestamp, baseExecutorsForFind, tableMetaStreamEvent,
-                    shouldUpdateTimestamp, groupbyKeyGeneratorList.get(0) != null);
-            ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
-            // Aggregate in-memory data and create an event chunk out of it
-            aggregatedInMemoryEventChunk = incrementalDataAggregator.aggregateInMemoryData(incrementalExecutorMap);
+            if (isDistributed) {
+                int perValueIndex = this.incrementalDurations.indexOf(perValue);
+                if (perValueIndex != 0) {
+                    Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();
+                    for (int i = 0; i < perValueIndex; i++) {
+                        TimePeriod.Duration key = this.incrementalDurations.get(i);
+                        lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
+                    }
+                    List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
+                            .map((entry) -> aggregationTables.get(entry.getKey()).find(matchingEvent, entry.getValue()))
+                            .collect(Collectors.toList());
+                    eventChunks.forEach((eventChunk) -> {
+                        if (eventChunk != null) {
+                            complexEventChunkToHoldWithinMatches.add(eventChunk);
+                        }
+                    });
+                }
+            } else {
+                IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(
+                        incrementalDurations, perValue, oldestInMemoryEventTimestamp, baseExecutorsForFind,
+                        tableMetaStreamEvent, shouldUpdateTimestamp, groupbyKeyGeneratorList.get(0) != null);
+                ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
+                // Aggregate in-memory data and create an event chunk out of it
+                aggregatedInMemoryEventChunk = incrementalDataAggregator.aggregateInMemoryData(incrementalExecutorMap);
 
-            // Get the in-memory aggregate data, which is within given duration
-            StreamEvent withinMatchFromInMemory = ((Operator) inMemoryStoreCompileCondition).find(matchingEvent,
-                    aggregatedInMemoryEventChunk, tableEventCloner);
-            complexEventChunkToHoldWithinMatches.add(withinMatchFromInMemory);
+                // Get the in-memory aggregate data, which is within given duration
+                StreamEvent withinMatchFromInMemory = ((Operator) inMemoryStoreCompileCondition).find(matchingEvent,
+                        aggregatedInMemoryEventChunk, tableEventCloner);
+                complexEventChunkToHoldWithinMatches.add(withinMatchFromInMemory);
+            }
         }
 
         ComplexEventChunk<StreamEvent> processedEvents;
