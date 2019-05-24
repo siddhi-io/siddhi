@@ -3,12 +3,16 @@ package io.siddhi.core.query.table.cache;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.query.table.util.TestAppender;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
 import org.testng.annotations.Test;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CacheExpiryAndReloadTestCase {
     private static final Logger log = Logger.getLogger(CacheExpiryAndReloadTestCase.class);
@@ -16,6 +20,10 @@ public class CacheExpiryAndReloadTestCase {
     public void insertIntoTableWithCacheTest5() throws InterruptedException, SQLException {
         //Configure siddhi to insert events data to table only from specific fields of the stream.
         log.info("insertIntoTableWithCacheTest1");
+
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -68,6 +76,12 @@ public class CacheExpiryAndReloadTestCase {
                 "from StockTable ");
         EventPrinter.print(events);
 //        AssertJUnit.assertEquals(2, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            logMessages.add(String.valueOf(logEvent.getMessage()));
+        }
 
         siddhiAppRuntime.shutdown();
     }

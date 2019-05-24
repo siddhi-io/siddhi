@@ -17,6 +17,7 @@
  */
 package io.siddhi.core.util.cache;
 
+import com.sun.tools.javac.comp.Check;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -24,6 +25,7 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.parser.MatcherParser;
@@ -53,10 +55,13 @@ public class CacheExpiryHandlerRunnable {
     private Compare.Operator greaterThanOperator;
     private List<VariableExpressionExecutor> variableExpressionExecutors;
     private Map<String, Table> tableMap;
+    private AbstractQueryableRecordTable storeTable;
 
-    public CacheExpiryHandlerRunnable(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap) {
+    public CacheExpiryHandlerRunnable(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap,
+                                      AbstractQueryableRecordTable storeTable) {
         this.cacheTable = cacheTable;
         this.tableMap = tableMap;
+        this.storeTable = storeTable;
 
         MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
         tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
@@ -96,6 +101,26 @@ public class CacheExpiryHandlerRunnable {
                 tableMap, null);
     }
 
-    public Runnable checkAndExpireCache = () -> cacheTable.delete(generateDeleteEventChunk(),
-            generateExpiryCompiledCondition(new Timestamp(System.currentTimeMillis()).getTime()));
+    public Runnable checkAndExpireCache(int cacheMode) {
+        class CheckAndExpireCache implements Runnable {
+            int cacheMode;
+
+            public CheckAndExpireCache(int cacheMode) {
+                this.cacheMode = cacheMode;
+            }
+
+            @Override
+            public void run() {
+                cacheTable.delete(generateDeleteEventChunk(),
+                        generateExpiryCompiledCondition(new Timestamp(System.currentTimeMillis()).getTime()));
+            }
+        }
+        return new CheckAndExpireCache(cacheMode);
+    }
+
+//    public Runnable checkAndExpireCache = () -> {
+//
+//    System.out.println("1");
+//    System.out.println("2");
+//    };
 }
