@@ -268,7 +268,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 4:06:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 1000f, null, 200L, 9, 1496290016000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 04:05:50",
                     "2017-06-01 04:06:57", "seconds"});
             Thread.sleep(100);
@@ -398,7 +398,7 @@ public class Aggregation1TestCase {
             // Monday, August 3, 2020 6:07:56 AM
             stockStreamInputHandler.send(new Object[]{"CISCO", 260f, 44f, 200L, 16, 1596434876000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
 
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
@@ -580,7 +580,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 4:06:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 1000f, null, 200L, 9, 1496290016000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
@@ -823,7 +823,7 @@ public class Aggregation1TestCase {
             // Monday, December 3, 2020 6:07:56 AM
             stockStreamInputHandler.send(new Object[]{"CISCO", 260f, 44f, 200L, 16, 1606975676000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
@@ -960,7 +960,7 @@ public class Aggregation1TestCase {
             // Monday, December 3, 2020 6:07:56 AM
             stockStreamInputHandler.send(new Object[]{"CISCO", 260f, 44f, 200L, 16, 1606975676000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
@@ -1121,7 +1121,7 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
@@ -1172,7 +1172,7 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
@@ -1281,7 +1281,7 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 140f, null, 200L, 11, 1496289953000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, 1496289951000L, 1496289952001L, "seconds"});
             Thread.sleep(100);
 
@@ -1451,7 +1451,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-**-** **:**:**\" " +
@@ -1520,7 +1520,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 **:**:**\" " +
@@ -1577,7 +1577,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 06:**:**\" " +
@@ -1634,7 +1634,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 06:21:**\" " +
@@ -1691,7 +1691,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 11:51:27 +05:30\" " +
@@ -1864,7 +1864,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 5:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20, "2017-06-01 05:07:56"});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "minutes"});
             Thread.sleep(100);
@@ -1986,7 +1986,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 5:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20, "2017-06-01 05:07:56"});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
@@ -2126,7 +2126,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 4:05:46 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9, 1496289946000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
 
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
@@ -2223,7 +2223,7 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289948000L});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289948000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
 
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
@@ -2321,7 +2321,7 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
 
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:51 +05:30",
                     "2017-06-01 09:35:52 +05:30", "seconds"});
@@ -2384,7 +2384,7 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
 
 
             siddhiAppRuntime.query("from stockAggregation within 1496289949000L, 1496289950000L per " +
@@ -2437,7 +2437,7 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1496289953000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice");
@@ -2533,7 +2533,7 @@ public class Aggregation1TestCase {
             // Thursday, June 1, 2017 5:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20, "2017-06-01 11:07:56 +05:30"});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2016-05-30 08:35:51 +05:30",
                     "2018-06-02 10:35:52 +05:30", "months"});
             Thread.sleep(100);
