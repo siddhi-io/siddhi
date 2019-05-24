@@ -23,6 +23,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.MetaStateEventAttribute;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
@@ -73,10 +74,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL;
@@ -909,7 +910,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         if (cacheEnabled) {
             CompiledSelectionWithCache compiledSelectionWithCache;
-
+//            MetaStateEvent metaStateEventForCacheSelection = matchingMetaInfoHolder.getMetaStateEvent();
             MetaStateEvent metaStateEventForCacheSelection = new MetaStateEvent(matchingMetaInfoHolder.
                     getMetaStateEvent().getStreamEventCount());
             for (MetaStreamEvent metaStreamEvent: matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
@@ -923,6 +924,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     returnStream,
                     metaStateEventForCacheSelection, tableMap, variableExpressionExecutorsForQuerySelector,
                     metaPosition, ProcessingMode.BATCH, false, siddhiQueryContext);
+            for (MetaStateEventAttribute outputDataAttribute: metaStateEventForCacheSelection.
+                    getOutputDataAttributes()) {
+                matchingMetaInfoHolder.getMetaStateEvent().addOutputDataAllowingDuplicate(outputDataAttribute);
+            }
             QueryParserHelper.updateVariablePosition(metaStateEventForCacheSelection,
                     variableExpressionExecutorsForQuerySelector);
             querySelector.setEventPopulator(

@@ -34,8 +34,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class QueryAPITestCaseForTestStore {
-
-
     private static final Logger log = Logger.getLogger(QueryAPITestCaseForTestStore.class);
 
     @BeforeClass
