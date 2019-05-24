@@ -431,7 +431,7 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData(boolean isFirstEventArrived) {
+    public synchronized void recreateInMemoryData(boolean isFirstEventArrived) {
         // State only updated when first event arrives to IncrementalAggregationProcessor
         if (isFirstEventArrived) {
             this.isFirstEventArrived = true;
@@ -440,9 +440,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
             }
         }
-        synchronized (this) {
-            this.recreateInMemoryData.recreateInMemoryData();
-        }
+        this.recreateInMemoryData.recreateInMemoryData();
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
