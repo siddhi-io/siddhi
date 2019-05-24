@@ -48,20 +48,20 @@ public class RecreateInMemoryData {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final SiddhiAppContext siddhiAppContext;
     private final StreamEventPool streamEventPool;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
     private final String shardId;
+    private final boolean isDistributed;
+    private boolean isRefreshed;
 
     public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables,
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
             MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
-            Map<String, AggregationRuntime> aggregationMap, String shardId,
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+            Map<String, AggregationRuntime> aggregationMap, String shardId, boolean isDistributed) {
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -71,37 +71,21 @@ public class RecreateInMemoryData {
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
         this.shardId = shardId;
-        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
+        this.isDistributed = isDistributed;
+        this.isRefreshed = false;
     }
 
-    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
-        if (!refreshReadingExecutors && isFirstEventArrived) {
-            // Only cleared when executors change from reading to processing state in one node deployment
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
-                incrementalExecutor.clearExecutor();
-                incrementalExecutor.setProcessingExecutor(true);
-                incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
-            }
+    public void recreateInMemoryData() {
+        if (this.isRefreshed) {
+            return;
         }
-
-        // Clear all executors before recreating
-        Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-        if (refreshReadingExecutors) {
-            incrementalExecutorMap = this.incrementalExecutorMapForPartitions;
-        } else {
-            incrementalExecutorMap = this.incrementalExecutorMap;
-        }
-        incrementalExecutorMap.forEach(((duration, incrementalExecutor) -> incrementalExecutor.clearExecutor()));
-
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
         // Get all events from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
         StoreQuery storeQuery;
-        if (shardId == null || refreshReadingExecutors) {
+        if (!isDistributed) {
             storeQuery = StoreQuery.query()
                     .from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
                     .select(Selector.selector()
@@ -138,7 +122,7 @@ public class RecreateInMemoryData {
             // for minute duration, take the second table [provided that aggregation is done for seconds])
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            if (shardId == null || refreshReadingExecutors) {
+            if (!isDistributed) {
                 if (endOFLatestEventTimestamp == null) {
                     storeQuery = StoreQuery.query()
                             .from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
@@ -164,14 +148,14 @@ public class RecreateInMemoryData {
                     storeQuery = StoreQuery.query().from(
                             InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
                                     Expression.and(
-                                    Expression.compare(
-                                            Expression.variable("SHARD_ID"),
-                                            Compare.Operator.EQUAL,
-                                            Expression.value(shardId)),
-                                    Expression.compare(
-                                            Expression.variable("AGG_TIMESTAMP"),
-                                            Compare.Operator.GREATER_THAN_EQUAL,
-                                            Expression.value(endOFLatestEventTimestamp)))))
+                                            Expression.compare(
+                                                    Expression.variable("SHARD_ID"),
+                                                    Compare.Operator.EQUAL,
+                                                    Expression.value(shardId)),
+                                            Expression.compare(
+                                                    Expression.variable("AGG_TIMESTAMP"),
+                                                    Compare.Operator.GREATER_THAN_EQUAL,
+                                                    Expression.value(endOFLatestEventTimestamp)))))
                             .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
                 }
             }
@@ -205,5 +189,6 @@ public class RecreateInMemoryData {
                 }
             }
         }
+        isRefreshed = true;
     }
 }

@@ -95,6 +95,7 @@ public class IncrementalExternalTimestampDataAggregator {
         for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstTime :
                 baseIncrementalValueGroupByStore.entrySet()) {
             processedInMemoryEventChunk.add(entryAgainstTime.getValue().createStreamEvent());
+            entryAgainstTime.getValue().clean();
         }
         return processedInMemoryEventChunk;
     }

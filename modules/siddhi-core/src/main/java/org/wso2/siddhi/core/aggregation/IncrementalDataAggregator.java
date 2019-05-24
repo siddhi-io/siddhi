@@ -131,11 +131,13 @@ public class IncrementalDataAggregator {
         if (this.baseIncrementalValueStoreGroupByMap.size() == 0) {
             if (this.baseIncrementalValueStore.isProcessed()) {
                 processedInMemoryEventChunk.add(this.baseIncrementalValueStore.createStreamEvent());
+                this.baseIncrementalValueStore.clean();
             }
         } else {
             for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstGroupBy :
                     baseIncrementalValueStoreGroupByMap.entrySet()) {
                 processedInMemoryEventChunk.add(entryAgainstGroupBy.getValue().createStreamEvent());
+                entryAgainstGroupBy.getValue().clean();
                 }
             }
         return processedInMemoryEventChunk;
