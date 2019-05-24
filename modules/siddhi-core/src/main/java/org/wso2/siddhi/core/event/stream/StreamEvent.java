@@ -24,7 +24,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.*;
+import static org.wso2.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
+import static org.wso2.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
+import static org.wso2.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
+import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_INDEX;
+import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX;
 
 /**
  * Standard processing event inside Siddhi. StreamEvent will be created
@@ -36,7 +40,6 @@ public class StreamEvent implements ComplexEvent {
     private Object[] beforeWindowData;          //Attributes before window execution
     private Object[] onAfterWindowData;         //Attributes on and after window execution
     protected Object[] outputData;              //Attributes to sent as output
-    //    protected boolean isExpired = false;
     protected Type type = Type.CURRENT;
     private StreamEvent next;
 
@@ -51,10 +54,6 @@ public class StreamEvent implements ComplexEvent {
             outputData = new Object[outputDataSize];
         }
     }
-
-//    public StreamEvent() {
-//        //Do nothing
-//    }
 
     public Object[] getBeforeWindowData() {
         return beforeWindowData;
@@ -87,14 +86,6 @@ public class StreamEvent implements ComplexEvent {
     public void setOutputData(Object[] outputData) {
         this.outputData = outputData;
     }
-
-//    public boolean isExpired() {
-//        return isExpired;
-//    }
-//
-//    public void setExpired(boolean isExpired) {
-//        this.isExpired = isExpired;
-//    }
 
     public Type getType() {
         return type;
@@ -194,15 +185,22 @@ public class StreamEvent implements ComplexEvent {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StreamEvent{");
-        sb.append("timestamp=").append(timestamp);
-        sb.append(", beforeWindowData=").append(beforeWindowData == null ? "null" : Arrays.asList(beforeWindowData).toString());
-        sb.append(", onAfterWindowData=").append(onAfterWindowData == null ? "null" : Arrays.asList(onAfterWindowData).toString());
-        sb.append(", outputData=").append(outputData == null ? "null" : Arrays.asList(outputData).toString());
-        sb.append(", type=").append(type);
-        sb.append(", next=").append(next);
-        sb.append('}');
-        return sb.toString();
+        return toString(100);
+    }
+
+    public String toString(long maxNoOfEventsToPrint) {
+        if (maxNoOfEventsToPrint == 0) {
+            return "...";
+        }
+        return "StreamEvent{ timestamp=" + timestamp +
+                ", beforeWindowData=" + (beforeWindowData == null ? "null" : Arrays.asList(beforeWindowData)
+                .toString()) +
+                ", onAfterWindowData=" + (onAfterWindowData == null ? "null" : Arrays.asList
+                (onAfterWindowData).toString()) +
+                ", outputData=" + (outputData == null ? "null" : Arrays.asList(outputData).toString()) +
+                ", type=" + type +
+                ", next=" + (next != null ? next.toString(maxNoOfEventsToPrint - 1) : "null") +
+                '}';
     }
 
     private void writeObject(ObjectOutputStream stream)
