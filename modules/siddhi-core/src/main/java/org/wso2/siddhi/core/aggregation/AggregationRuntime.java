@@ -205,8 +205,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
-            if (!isFirstEventArrived) {
-                this.recreateInMemoryData.recreateInMemoryData();
+            if (!isDistributed && !isFirstEventArrived) {
+                recreateInMemoryData(false);
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, baseExecutors,
@@ -431,14 +431,16 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData() {
+    public void recreateInMemoryData(boolean isFirstEventArrived) {
         // State only updated when first event arrives to IncrementalAggregationProcessor
         this.isFirstEventArrived = true;
         for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
                 this.incrementalExecutorMap.entrySet()) {
             durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
         }
-        this.recreateInMemoryData.recreateInMemoryData();
+        synchronized (this) {
+            this.recreateInMemoryData.recreateInMemoryData();
+        }
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
