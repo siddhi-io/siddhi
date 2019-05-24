@@ -433,10 +433,12 @@ public class AggregationRuntime implements MemoryCalculable {
 
     public void recreateInMemoryData(boolean isFirstEventArrived) {
         // State only updated when first event arrives to IncrementalAggregationProcessor
-        this.isFirstEventArrived = true;
-        for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                this.incrementalExecutorMap.entrySet()) {
-            durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
+        if (isFirstEventArrived) {
+            this.isFirstEventArrived = true;
+            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                    this.incrementalExecutorMap.entrySet()) {
+                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
+            }
         }
         synchronized (this) {
             this.recreateInMemoryData.recreateInMemoryData();
