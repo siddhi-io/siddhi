@@ -22,6 +22,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
@@ -129,7 +130,6 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                 compiledSelectionWithCache.getQuerySelector().
                         process(generateResetComplexEventChunk(outEvent.getOutputData().length, stateEventFactory));
             }
-
             if (cacheResultsAfterSelection != null) {
                 for (Event event: cacheResultsAfterSelection) {
                     objects.add(event.getData());
@@ -146,25 +146,31 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
                                                  Long offset) {
         CompiledSelectionWithCache compiledSelectionWithCache;
+        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent();
 
         ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
         int metaPosition = SiddhiConstants.UNKNOWN_STATE;
         List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
 
+        if (metaStateEvent.getOutputDataAttributes().size() == 0) {
+//            MetaStateEvent metaStateEventWithOutputData = new MetaStateEvent(metaStateEvent.getStreamEventCount());
+            for (Attribute outputAttribute: metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
+                metaStateEvent.getMetaStreamEvents()[0].addOutputData(outputAttribute);
+            }
+        }
+
         QuerySelector querySelector = SelectorParser.parse(selectorForTestStoreQuery,
                 returnStream,
-                matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent(), tableMap,
+                metaStateEvent, tableMap,
                 variableExpressionExecutorsForQuerySelector, metaPosition, ProcessingMode.BATCH,
                 false, siddhiQueryContextForTestStoreQuery);
-        QueryParserHelper.updateVariablePosition(matchingMetaInfoHolderForTestStoreQuery.
-                        getMetaStateEvent(),
+        QueryParserHelper.updateVariablePosition(metaStateEvent,
                 variableExpressionExecutorsForQuerySelector);
         querySelector.setEventPopulator(
-                StateEventPopulatorFactory.constructEventPopulator(matchingMetaInfoHolderForTestStoreQuery.
-                        getMetaStateEvent()));
+                StateEventPopulatorFactory.constructEventPopulator(metaStateEvent));
 
         compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector,
-                matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent());
+                metaStateEvent);
         return compiledSelectionWithCache;
     }
 

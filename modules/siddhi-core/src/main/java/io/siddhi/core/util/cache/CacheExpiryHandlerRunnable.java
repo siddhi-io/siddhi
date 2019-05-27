@@ -18,10 +18,14 @@
 package io.siddhi.core.util.cache;
 
 import com.sun.tools.javac.comp.Check;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
@@ -29,6 +33,7 @@ import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.parser.MatcherParser;
+import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.expression.Expression;
@@ -41,6 +46,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
+import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 
 /**
  * this class is a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
@@ -56,12 +64,14 @@ public class CacheExpiryHandlerRunnable {
     private List<VariableExpressionExecutor> variableExpressionExecutors;
     private Map<String, Table> tableMap;
     private AbstractQueryableRecordTable storeTable;
+    private SiddhiAppContext siddhiAppContext;
 
     public CacheExpiryHandlerRunnable(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap,
-                                      AbstractQueryableRecordTable storeTable) {
+                                      AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
         this.cacheTable = cacheTable;
         this.tableMap = tableMap;
         this.storeTable = storeTable;
+        this.siddhiAppContext = siddhiAppContext;
 
         MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
         tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
@@ -97,8 +107,35 @@ public class CacheExpiryHandlerRunnable {
         Expression leftExpressionForCompare = new Subtract(leftExpressionForSubtract, rightExpressionForSubtract);
         Expression deleteCondition = new Compare(leftExpressionForCompare, greaterThanOperator,
                 rightExpressionForCompare);
+        SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, "expiryDeleteQuery");
         return cacheTable.compileCondition(deleteCondition, matchingMetaInfoHolder, variableExpressionExecutors,
-                tableMap, null);
+                tableMap, siddhiQueryContext);
+    }
+
+    public void deleteExpiredEvents() {
+        CompiledCondition cc = generateExpiryCompiledCondition(siddhiAppContext.getTimestampGenerator().currentTime());
+        cacheTable.delete(generateDeleteEventChunk(),
+                cc);
+        System.out.println("d");
+        StateEvent stateEventForCaching = new StateEvent(1, 0);
+        StreamEvent loadedDataFromStore = null;
+        try {
+            loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
+                    storeTable.compiledConditionForCaching, //todo why dont u generate these here without taking from storetable
+                    storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
+        } catch (ConnectionUnavailableException e) {
+            e.printStackTrace();
+        }
+        int loadedDataSize = findEventChunkSize(loadedDataFromStore);
+        if (storeTable.maxCacheSize >= loadedDataSize) {
+            ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+            loadedCache.add(loadedDataFromStore);
+
+            Annotation primaryKey = getAnnotation("PrimaryKey", cacheTable.getTableDefinition().getAnnotations());
+
+//                    cacheTable.updateOrAdd(loadedCache);
+            System.out.println("d");
+        }
     }
 
     public Runnable checkAndExpireCache(int cacheMode) {
@@ -111,8 +148,7 @@ public class CacheExpiryHandlerRunnable {
 
             @Override
             public void run() {
-                cacheTable.delete(generateDeleteEventChunk(),
-                        generateExpiryCompiledCondition(new Timestamp(System.currentTimeMillis()).getTime()));
+                deleteExpiredEvents();
             }
         }
         return new CheckAndExpireCache(cacheMode);
