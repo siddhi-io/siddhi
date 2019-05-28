@@ -262,9 +262,10 @@ public class AggregationFilterTestCase {
 
                         "@info(name = 'query1') " +
                         "from inputStream as i join stockAggregation as s " +
+                        "on i.symbol == s.symbol " +
                         "within \"2017-06-** **:**:**\" " +
                         "per \"seconds\" " +
-                        "select AGG_TIMESTAMP, s.symbol, lastTradeValue, totalPrice " +
+                        "select AGG_TIMESTAMP, i.symbol, lastTradeValue, totalPrice " +
                         "order by AGG_TIMESTAMP " +
                         "insert all events into outputStream; ";
 
@@ -352,20 +353,14 @@ public class AggregationFilterTestCase {
             Thread.sleep(100);
 
             List<Object[]> expected = Arrays.asList(
-                    new Object[]{1496289950000L, "WSO2", 700f, 240.0},
-                    new Object[]{1496289952000L, "WSO2", 1600f, 160.0},
                     new Object[]{1496289954000L, "IBM", 9600f, 200.0},
                     new Object[]{1496289956000L, "IBM", 3500f, 1400.0},
                     new Object[]{1496290016000L, "IBM", 3600f, 400.0},
-                    new Object[]{1496290076000L, "IBM", 3600f, 600.0},
-                    new Object[]{1496293676000L, "CISCO", 14000f, 700.0},
-                    new Object[]{1496297276000L, "WSO2", 3360f, 60.0},
-                    new Object[]{1496383676000L, "CISCO", 8000f, 800.0},
-                    new Object[]{1496470076000L, "CISCO", 13500f, 900.0}
+                    new Object[]{1496290076000L, "IBM", 3600f, 600.0}
             );
-            SiddhiTestHelper.waitForEvents(100, 10, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 10000);
             AssertJUnit.assertTrue("Event arrived", eventArrived);
-            AssertJUnit.assertEquals("Number of success events", 10, inEventCount.get());
+            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         } finally {
             siddhiAppRuntime.shutdown();

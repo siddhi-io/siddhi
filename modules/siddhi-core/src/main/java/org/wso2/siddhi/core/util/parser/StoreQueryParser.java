@@ -261,6 +261,7 @@ public class StoreQueryParser {
                 aggregation.getAggregationDefinition());
         CompiledCondition compiledCondition = aggregation.compileExpression(onCondition, within, per,
                 metaStreamInfoHolder, variableExpressionExecutors, tableMap, queryName, siddhiAppContext);
+        ((IncrementalAggregateCompileCondition) compiledCondition).init();
         metaStreamInfoHolder = ((IncrementalAggregateCompileCondition) compiledCondition).
                 getAlteredMatchingMetaInfoHolder();
         FindStoreQueryRuntime findStoreQueryRuntime = new FindStoreQueryRuntime(aggregation, compiledCondition,
