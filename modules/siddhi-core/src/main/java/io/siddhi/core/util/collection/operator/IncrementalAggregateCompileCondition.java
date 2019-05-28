@@ -32,8 +32,10 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.Attribute;
@@ -70,6 +72,9 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private final boolean isDistributed;
     private final List<TimePeriod.Duration> incrementalDurations;
 
+    private MatchingMetaInfoHolder newMatchingHolderInfo;
+    private List<VariableExpressionExecutor> newVariableExpressionExecutors;
+
     public IncrementalAggregateCompileCondition(
             Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions,
             CompiledCondition inMemoryStoreCompileCondition,
@@ -79,7 +84,9 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             List<Attribute> additionalAttributes, MatchingMetaInfoHolder alteredMatchingMetaInfoHolder,
             ExpressionExecutor perExpressionExecutor, ExpressionExecutor startTimeEndTimeExpressionExecutor,
             List<ExpressionExecutor> timestampFilterExecutors, boolean isProcessingOnExternalTime,
-            List<TimePeriod.Duration> incrementalDurations, boolean isDistributed) {
+            List<TimePeriod.Duration> incrementalDurations, boolean isDistributed,
+            MatchingMetaInfoHolder newMatchingHolderInfo,
+            List<VariableExpressionExecutor> newVariableExpressionExecutors) {
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
         this.withinTableLowerGranularityCompileCondition = withinTableLowerGranularityCompileCondition;
@@ -99,6 +106,13 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.incrementalDurations = incrementalDurations;
         this.isDistributed = isDistributed;
+        this.newMatchingHolderInfo = newMatchingHolderInfo;
+        this.newVariableExpressionExecutors = newVariableExpressionExecutors;
+    }
+
+    public void init() {
+        QueryParserHelper.updateVariablePosition(newMatchingHolderInfo.getMetaStateEvent(),
+                newVariableExpressionExecutors);
     }
 
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,

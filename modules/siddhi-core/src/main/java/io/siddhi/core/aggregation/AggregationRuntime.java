@@ -418,8 +418,6 @@ public class AggregationRuntime implements MemoryCalculable {
         }
 
         QueryParserHelper.reduceMetaComplexEvent(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent());
-        QueryParserHelper.updateVariablePosition(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent(),
-                startEndExpressionExecutorList);
 
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as
@@ -432,7 +430,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 withinTableLowerGranularityCompileCondition, onCompiledCondition, tableMetaStreamEvent,
                 aggregateMetaSteamEvent, additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
                 startTimeEndTimeExpressionExecutor, timestampFilterExecutors, processingOnExternalTime,
-                incrementalDurations, isDistributed);
+                incrementalDurations, isDistributed, streamTableMetaInfoHolderWithStartEnd,
+                startEndExpressionExecutorList);
     }
 
     public void startPurging() {
