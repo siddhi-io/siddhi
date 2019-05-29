@@ -32,8 +32,6 @@ import java.util.Collection;
  * Implementation of {@link CollectionExecutor} which handle compare condition.
  */
 public class CompareCollectionExecutor implements CollectionExecutor {
-
-
     private final String attribute;
     private final Compare.Operator operator;
     private final ExpressionExecutor valueExpressionExecutor;
@@ -110,6 +108,10 @@ public class CompareCollectionExecutor implements CollectionExecutor {
         } else {
             return Cost.MULTI_RETURN_INDEX_MATCHING;
         }
+    }
+
+    public String getAttribute() {
+        return attribute;
     }
 
 }

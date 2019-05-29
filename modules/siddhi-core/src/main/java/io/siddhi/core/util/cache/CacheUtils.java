@@ -25,6 +25,9 @@ import io.siddhi.core.event.stream.StreamEvent;
 public class CacheUtils {
     public static int findEventChunkSize(StreamEvent streamEvent) {
         int chunkSize = 1;
+        if (streamEvent == null) {
+            return 0;
+        }
         StreamEvent streamEventCopy = streamEvent;
         while (streamEventCopy.hasNext()) {
             chunkSize = chunkSize + 1;

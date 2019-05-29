@@ -34,8 +34,6 @@ import java.util.List;
  * Implementation of {@link CollectionExecutor}
  */
 public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor {
-
-
     private final String compositePrimaryKey;
     private final List<ExpressionExecutor> multiPrimaryKeyExpressionExecutors;
 
@@ -99,5 +97,9 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
             }
             return stringBuilder.toString();
         }
+    }
+
+    public String getCompositePrimaryKey() {
+        return compositePrimaryKey;
     }
 }

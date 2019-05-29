@@ -17,7 +17,6 @@
  */
 package io.siddhi.core.util.cache;
 
-import com.sun.tools.javac.comp.Check;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -33,7 +32,6 @@ import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.parser.MatcherParser;
-import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.expression.Expression;
@@ -42,13 +40,11 @@ import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.LongConstant;
 import io.siddhi.query.api.expression.math.Subtract;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
-import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 
 /**
  * this class is a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
@@ -65,6 +61,7 @@ public class CacheExpiryHandlerRunnable {
     private Map<String, Table> tableMap;
     private AbstractQueryableRecordTable storeTable;
     private SiddhiAppContext siddhiAppContext;
+    private long expiryTime;
 
     public CacheExpiryHandlerRunnable(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap,
                                       AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
@@ -72,6 +69,7 @@ public class CacheExpiryHandlerRunnable {
         this.tableMap = tableMap;
         this.storeTable = storeTable;
         this.siddhiAppContext = siddhiAppContext;
+        this.expiryTime = expiryTime;
 
         MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
         tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
@@ -113,37 +111,94 @@ public class CacheExpiryHandlerRunnable {
     }
 
     public void deleteExpiredEvents() {
-        CompiledCondition cc = generateExpiryCompiledCondition(siddhiAppContext.getTimestampGenerator().currentTime());
-        cacheTable.delete(generateDeleteEventChunk(),
-                cc);
-        System.out.println("d");
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore = null;
-        try {
-            loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                    storeTable.compiledConditionForCaching, //todo why dont u generate these here without taking from storetable
-                    storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
-        } catch (ConnectionUnavailableException e) {
-            e.printStackTrace();
-        }
-        int loadedDataSize = findEventChunkSize(loadedDataFromStore);
-        if (storeTable.maxCacheSize >= loadedDataSize) {
-            ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
-            loadedCache.add(loadedDataFromStore);
 
-            Annotation primaryKey = getAnnotation("PrimaryKey", cacheTable.getTableDefinition().getAnnotations());
+        if (storeTable.getStoreTableSize() != -1 &&
+                storeTable.getStoreSizeLastCheckedTime() >
+                        siddhiAppContext.getTimestampGenerator().currentTime() - 30000) {
+            if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
+                try {
+                    loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
+                            storeTable.compiledConditionForCaching,
+                            storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
+                } catch (ConnectionUnavailableException e) {
 
-//                    cacheTable.updateOrAdd(loadedCache);
-            System.out.println("d");
+                }
+
+                CompiledCondition cc = generateExpiryCompiledCondition(
+                        siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
+                cacheTable.delete(generateDeleteEventChunk(), cc);
+                ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
+
+                while (true) {
+                    assert loadedDataFromStore != null;
+                    Object[] outputData = loadedDataFromStore.getOutputData();
+                    Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+                    System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+                    outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                            siddhiAppContext.getTimestampGenerator().currentTime();
+                    StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+                    eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+                    addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+                    if (loadedDataFromStore.getNext() == null) {
+                        break;
+                    }
+                    loadedDataFromStore = loadedDataFromStore.getNext();
+                }
+                cacheTable.add(addingEventChunkWithTimestamp);
+            } else {
+                CompiledCondition cc = generateExpiryCompiledCondition(siddhiAppContext.getTimestampGenerator().
+                        currentTime());
+                cacheTable.delete(generateDeleteEventChunk(),
+                        cc);
+            }
+        } else {
+            try {
+                loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
+                        storeTable.compiledConditionForCaching,
+                        storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
+            } catch (ConnectionUnavailableException e) {
+
+            }
+            storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
+            storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
+            if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
+                CompiledCondition cc = generateExpiryCompiledCondition(
+                        siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
+                cacheTable.delete(generateDeleteEventChunk(),
+                        cc);
+                ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
+
+                while (true) {
+                    Object[] outputData = loadedDataFromStore.getOutputData();
+                    Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+                    System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+                    outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                            siddhiAppContext.getTimestampGenerator().currentTime();
+                    StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+                    eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+                    addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+                    if (loadedDataFromStore.getNext() == null) {
+                        break;
+                    }
+                    loadedDataFromStore = loadedDataFromStore.getNext();
+                }
+                cacheTable.add(addingEventChunkWithTimestamp);
+            } else {
+                CompiledCondition cc = generateExpiryCompiledCondition(
+                        siddhiAppContext.getTimestampGenerator().currentTime());
+                cacheTable.delete(generateDeleteEventChunk(), cc);
+            }
         }
     }
 
     public Runnable checkAndExpireCache(int cacheMode) {
         class CheckAndExpireCache implements Runnable {
-            int cacheMode;
+//            int cacheMode;
 
             public CheckAndExpireCache(int cacheMode) {
-                this.cacheMode = cacheMode;
+//                this.cacheMode = cacheMode;
             }
 
             @Override
@@ -153,10 +208,4 @@ public class CacheExpiryHandlerRunnable {
         }
         return new CheckAndExpireCache(cacheMode);
     }
-
-//    public Runnable checkAndExpireCache = () -> {
-//
-//    System.out.println("1");
-//    System.out.println("2");
-//    };
 }

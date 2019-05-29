@@ -139,7 +139,37 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
+    }
 
+    public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                            CompiledCondition compiledCondition,
+                            CompiledUpdateSet compiledUpdateSet,
+                            AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
+                    updateOrAddingEventChunk,
+                    state.eventHolder,
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
+                    addingStreamEventExtractor);
+            if (failedEvents.getFirst() != null) {
+                int tableSize = this.size();
+                ComplexEventChunk<StreamEvent> failedEventsLimitCopy = new ComplexEventChunk<>();
+                failedEvents.reset();
+                while (true) {
+                    failedEventsLimitCopy.add(failedEvents.next());
+                    tableSize++;
+                    if (tableSize == maxTableSize || !failedEvents.hasNext()) {
+                        break;
+                    }
+                }
+                state.eventHolder.add(failedEventsLimitCopy);
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -152,7 +182,6 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
-
     }
 
     @Override

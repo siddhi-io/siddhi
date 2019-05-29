@@ -282,6 +282,8 @@ public class CacheExpiryAndReloadTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        stockStream.send(new Object[]{"WSO3", 44f, 2L});
+        deleteStream.send(new Object[]{"WSO2"});
         siddhiAppRuntime.shutdown();
     }
 
