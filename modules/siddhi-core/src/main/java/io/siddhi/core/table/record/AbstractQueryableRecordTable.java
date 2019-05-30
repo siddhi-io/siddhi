@@ -107,15 +107,15 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
-    public int maxCacheSize;
+    private int maxCacheSize;
     private int cacheMode = CACHE_MODE_BASIC_PRELOAD;
     private long cacheExpiryCheckIntervalInMillis;
     private boolean cacheEnabled = false;
     private boolean cacheExpiryEnabled = false;
     private InMemoryTable cacheTable;
-    public CompiledCondition compiledConditionForCaching;
-    public CompiledSelection compiledSelectionForCaching;
-    public Attribute[] outputAttributesForCaching;
+    private CompiledCondition compiledConditionForCaching;
+    private CompiledSelection compiledSelectionForCaching;
+    private Attribute[] outputAttributesForCaching;
     private TableDefinition cacheTableDefinition;
     protected SiddhiAppContext siddhiAppContext;
     private CacheExpiryHandlerRunnable cacheExpiryHandlerRunnable;
@@ -1191,6 +1191,22 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     public int getStoreTableSize() {
         return storeTableSize;
+    }
+
+    public int getMaxCacheSize() {
+        return maxCacheSize;
+    }
+
+    public CompiledCondition getCompiledConditionForCaching() {
+        return compiledConditionForCaching;
+    }
+
+    public CompiledSelection getCompiledSelectionForCaching() {
+        return compiledSelectionForCaching;
+    }
+
+    public Attribute[] getOutputAttributesForCaching() {
+        return outputAttributesForCaching;
     }
 
     /**

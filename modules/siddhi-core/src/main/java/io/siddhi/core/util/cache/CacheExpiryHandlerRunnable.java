@@ -122,11 +122,11 @@ public class CacheExpiryHandlerRunnable {
         if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
                         siddhiAppContext.getTimestampGenerator().currentTime() - 30000) {
             log.info(siddhiAppContext.getName() + ": store table size is new");
-            if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
+            if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 try {
                     loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                            storeTable.compiledConditionForCaching,
-                            storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
+                            storeTable.getCompiledConditionForCaching(),
+                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
                 } catch (ConnectionUnavailableException ignored) {
 
                 }
@@ -141,14 +141,14 @@ public class CacheExpiryHandlerRunnable {
             log.info(siddhiAppContext.getName() + ": store table size is old");
             try {
                 loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                        storeTable.compiledConditionForCaching,
-                        storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
+                        storeTable.getCompiledConditionForCaching(),
+                        storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
             } catch (ConnectionUnavailableException ignored) {
 
             }
             storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
             storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
-            if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
+            if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 deleteAndReloadExpiredEvents(loadedDataFromStore);
             } else {
                 CompiledCondition cc = generateExpiryCompiledCondition(
