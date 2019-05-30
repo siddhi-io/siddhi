@@ -43,6 +43,8 @@ import io.siddhi.query.api.expression.math.Subtract;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
@@ -62,6 +64,7 @@ public class CacheExpiryHandlerRunnable {
     private AbstractQueryableRecordTable storeTable;
     private SiddhiAppContext siddhiAppContext;
     private long expiryTime;
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     public CacheExpiryHandlerRunnable(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap,
                                       AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
@@ -110,43 +113,24 @@ public class CacheExpiryHandlerRunnable {
                 tableMap, siddhiQueryContext);
     }
 
-    public void deleteExpiredEvents() {
+    public void handleCacheExpiry() {
+        System.out.println("delete called");
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore = null;
 
-        if (storeTable.getStoreTableSize() != -1 &&
-                storeTable.getStoreSizeLastCheckedTime() >
+        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
                         siddhiAppContext.getTimestampGenerator().currentTime() - 30000) {
+            System.out.println("store size is new");
             if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
                 try {
                     loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
                             storeTable.compiledConditionForCaching,
                             storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
-                } catch (ConnectionUnavailableException e) {
+                } catch (ConnectionUnavailableException ignored) {
 
                 }
 
-                CompiledCondition cc = generateExpiryCompiledCondition(
-                        siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
-                cacheTable.delete(generateDeleteEventChunk(), cc);
-                ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
-
-                while (true) {
-                    assert loadedDataFromStore != null;
-                    Object[] outputData = loadedDataFromStore.getOutputData();
-                    Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
-                    System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
-                    outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
-                            siddhiAppContext.getTimestampGenerator().currentTime();
-                    StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
-                    eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
-                    addingEventChunkWithTimestamp.add(eventWithTimeStamp);
-                    if (loadedDataFromStore.getNext() == null) {
-                        break;
-                    }
-                    loadedDataFromStore = loadedDataFromStore.getNext();
-                }
-                cacheTable.add(addingEventChunkWithTimestamp);
+                deleteAndReloadExpiredEvents(loadedDataFromStore);
             } else {
                 CompiledCondition cc = generateExpiryCompiledCondition(siddhiAppContext.getTimestampGenerator().
                         currentTime());
@@ -154,43 +138,62 @@ public class CacheExpiryHandlerRunnable {
                         cc);
             }
         } else {
+            System.out.println("store size is old");
             try {
                 loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
                         storeTable.compiledConditionForCaching,
                         storeTable.compiledSelectionForCaching, storeTable.outputAttributesForCaching);
-            } catch (ConnectionUnavailableException e) {
+            } catch (ConnectionUnavailableException ignored) {
 
             }
             storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
             storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
             if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
-                CompiledCondition cc = generateExpiryCompiledCondition(
-                        siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
-                cacheTable.delete(generateDeleteEventChunk(),
-                        cc);
-                ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
-
-                while (true) {
-                    Object[] outputData = loadedDataFromStore.getOutputData();
-                    Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
-                    System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
-                    outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
-                            siddhiAppContext.getTimestampGenerator().currentTime();
-                    StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
-                    eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
-                    addingEventChunkWithTimestamp.add(eventWithTimeStamp);
-                    if (loadedDataFromStore.getNext() == null) {
-                        break;
-                    }
-                    loadedDataFromStore = loadedDataFromStore.getNext();
-                }
-                cacheTable.add(addingEventChunkWithTimestamp);
+                deleteAndReloadExpiredEvents(loadedDataFromStore);
             } else {
                 CompiledCondition cc = generateExpiryCompiledCondition(
                         siddhiAppContext.getTimestampGenerator().currentTime());
                 cacheTable.delete(generateDeleteEventChunk(), cc);
             }
         }
+    }
+
+    public void deleteAndReloadExpiredEvents(StreamEvent loadedDataFromStore) {
+        CompiledCondition cc = generateExpiryCompiledCondition(
+                siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
+        System.out.println("expiring events - old size");
+        ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
+
+        dataCopyLoop:
+        while (loadedDataFromStore != null) {
+            Object[] outputData = loadedDataFromStore.getOutputData();
+            Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+            System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+            outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+            StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+            eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+            addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+            if (loadedDataFromStore.getNext() == null) {
+                break dataCopyLoop;
+            }
+            loadedDataFromStore = loadedDataFromStore.getNext();
+        }
+        readWriteLock.writeLock().lock();
+        try {
+            cacheTable.delete(generateDeleteEventChunk(), cc);
+            if (loadedDataFromStore != null) {
+                cacheTable.add(addingEventChunkWithTimestamp);
+            }
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
+    }
+
+    public void simpleExpire() {
+        CompiledCondition cc = generateExpiryCompiledCondition(
+                siddhiAppContext.getTimestampGenerator().currentTime());
+        cacheTable.delete(generateDeleteEventChunk(), cc);
     }
 
     public Runnable checkAndExpireCache(int cacheMode) {
@@ -203,7 +206,9 @@ public class CacheExpiryHandlerRunnable {
 
             @Override
             public void run() {
-                deleteExpiredEvents();
+                System.out.println("handler running");
+                handleCacheExpiry();
+//                simpleExpire();
             }
         }
         return new CheckAndExpireCache(cacheMode);

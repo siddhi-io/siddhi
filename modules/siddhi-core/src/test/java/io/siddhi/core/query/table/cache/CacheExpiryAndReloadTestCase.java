@@ -363,4 +363,46 @@ public class CacheExpiryAndReloadTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from store table"), 3);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void expiryAndReloadTest5() throws InterruptedException, SQLException {
+        log.info("expiryAndReloadTest5");
+
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStream (symbol string); " +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
+                "expiry.check.interval=\"1 sec\"))\n" +
+                //"@Index(\"volume\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "@info(name = 'query2') " +
+                "from DeleteStream " +
+                "delete StockTable " +
+                "on StockTable.symbol == symbol";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStream = siddhiAppRuntime.getInputHandler("DeleteStream");
+        siddhiAppRuntime.start();
+
+        Event[] events;
+        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        Thread.sleep(2000);
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        siddhiAppRuntime.shutdown();
+    }
 }
