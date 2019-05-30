@@ -914,7 +914,6 @@ public class TimeBatchWindowTestCase {
                 }
                 eventArrived = true;
             }
-
         });
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();

@@ -68,7 +68,7 @@ import java.util.Map;
                 @Parameter(name = "start.time",
                         description = "This specifies an offset in milliseconds in order to start the " +
                                 "window at a time different to the standard time.",
-                        type = {DataType.INT},
+                        type = {DataType.INT, DataType.LONG},
                         optional = true,
                         defaultValue = "Timestamp of first event"),
                 @Parameter(name = "stream.current.event",
