@@ -45,20 +45,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Aggregation2TestCase {
 
     private static final Logger LOG = Logger.getLogger(Aggregation2TestCase.class);
-    private AtomicInteger inEventCount;
-    private AtomicInteger removeEventCount;
     private boolean eventArrived;
+    private AtomicInteger inEventCount;
     private List<Object[]> inEventsList;
-    private List<Object[]> removeEventsList;
 
     @BeforeMethod
     public void init() {
 
         inEventCount = new AtomicInteger(0);
-        removeEventCount = new AtomicInteger(0);
         eventArrived = false;
         inEventsList = new ArrayList<>();
-        removeEventsList = new ArrayList<>();
     }
 
     @Test
@@ -112,21 +108,20 @@ public class Aggregation2TestCase {
             }
 
             AssertJUnit.assertNotNull("Aggregation event list is null", events);
-            if (events != null) {
-                AssertJUnit.assertEquals("Check time windows", 2, events.length);
+            AssertJUnit.assertEquals("Check time windows", 2, events.length);
 
-                List<Object[]> eventsList = new ArrayList<>();
-                for (Event event : events) {
-                    eventsList.add(event.getData());
-                }
-
-                List<Object[]> expected = Arrays.asList(
-                        new Object[]{1496289900000L, "WSO2", 650.0, 216.66666666666666},
-                        new Object[]{1496289900000L, "IBM", 1500.0, 375.0}
-                );
-                AssertJUnit.assertEquals("Data Matched", true,
-                        SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
+            List<Object[]> eventsList = new ArrayList<>();
+            for (Event event : events) {
+                eventsList.add(event.getData());
             }
+
+            List<Object[]> expected = Arrays.asList(
+                    new Object[]{1496289900000L, "WSO2", 650.0, 216.66666666666666},
+                    new Object[]{1496289900000L, "IBM", 1500.0, 375.0}
+            );
+
+            AssertJUnit.assertTrue("Data Matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
+
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -175,8 +170,10 @@ public class Aggregation2TestCase {
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
+
             Assert.assertNotNull(events);
             AssertJUnit.assertEquals("Check time windows", 7, events.length);
+
             List<Object[]> eventsList = new ArrayList<>();
             for (Event event : events) {
                 eventsList.add(event.getData());
@@ -192,8 +189,7 @@ public class Aggregation2TestCase {
                     new Object[]{1496289953000L, "WSO2", 100.0}
             );
 
-            AssertJUnit.assertEquals("Data Matched", true,
-                    SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
+            AssertJUnit.assertTrue("Data Matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -240,14 +236,6 @@ public class Aggregation2TestCase {
                         }
                         eventArrived = true;
                     }
-                    if (removeEvents != null) {
-                        EventPrinter.print(timestamp, inEvents, removeEvents);
-                        for (Event event : removeEvents) {
-                            removeEventsList.add(event.getData());
-                            removeEventCount.incrementAndGet();
-                        }
-                    }
-                    eventArrived = true;
                 }
             });
 
@@ -301,10 +289,11 @@ public class Aggregation2TestCase {
             expected.add(new Object[]{283.0769230769231, 3680.0, 14000f});
 
             SiddhiTestHelper.waitForEvents(100, 1, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true,
-                    SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+
+            AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 1, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -312,7 +301,7 @@ public class Aggregation2TestCase {
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest49"},
             expectedExceptions = StoreQueryCreationException.class)
-    public void incrementalStreamProcessorTest50() throws InterruptedException {
+    public void incrementalStreamProcessorTest50() {
 
         LOG.info("incrementalStreamProcessorTest50 - Retrieval query syntax validating ");
 
@@ -378,14 +367,6 @@ public class Aggregation2TestCase {
                         }
                         eventArrived = true;
                     }
-                    if (removeEvents != null) {
-                        EventPrinter.print(timestamp, inEvents, removeEvents);
-                        for (Event event : removeEvents) {
-                            removeEventsList.add(event.getData());
-                            removeEventCount.incrementAndGet();
-                        }
-                    }
-                    eventArrived = true;
                 }
             });
 
@@ -447,12 +428,12 @@ public class Aggregation2TestCase {
 
             SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
 
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
-            AssertJUnit.assertEquals("In events matched", true,
-                    SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
-            AssertJUnit.assertEquals("Store Query events matched", true,
-                    SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
+            AssertJUnit.assertTrue("In events matched",
+                                                    SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
+            AssertJUnit.assertTrue("Store Query events matched",
+                                                SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
         } finally {
             siddhiAppRuntime.shutdown();
         }
