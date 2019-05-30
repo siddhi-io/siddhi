@@ -127,7 +127,10 @@ public class Scheduler implements Snapshotable {
             toNotifyQueue.put(time);
             schedule(time);     // Let the subclasses to schedule the scheduler
         } catch (InterruptedException e) {
-            log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
+            // InterruptedException ignored if scheduledExecutorService has already been shutdown
+            if (!scheduledExecutorService.isShutdown()) {
+                log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
+            }
         }
     }
 
