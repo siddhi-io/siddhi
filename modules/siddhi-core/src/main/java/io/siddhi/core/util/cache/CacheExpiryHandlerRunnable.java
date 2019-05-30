@@ -39,6 +39,7 @@ import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.LongConstant;
 import io.siddhi.query.api.expression.math.Subtract;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,7 @@ import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
  * expiry
  */
 public class CacheExpiryHandlerRunnable {
+    private static final Logger log = Logger.getLogger(CacheExpiryHandlerRunnable.class);
     private InMemoryTable cacheTable;
     private StreamEventFactory streamEventFactory;
     private MatchingMetaInfoHolder matchingMetaInfoHolder;
@@ -114,13 +116,12 @@ public class CacheExpiryHandlerRunnable {
     }
 
     public void handleCacheExpiry() {
-        System.out.println("delete called");
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore = null;
 
         if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
                         siddhiAppContext.getTimestampGenerator().currentTime() - 30000) {
-            System.out.println("store size is new");
+            log.info(siddhiAppContext.getName() + ": store table size is new");
             if (storeTable.getStoreTableSize() <= storeTable.maxCacheSize) {
                 try {
                     loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
@@ -129,7 +130,6 @@ public class CacheExpiryHandlerRunnable {
                 } catch (ConnectionUnavailableException ignored) {
 
                 }
-
                 deleteAndReloadExpiredEvents(loadedDataFromStore);
             } else {
                 CompiledCondition cc = generateExpiryCompiledCondition(siddhiAppContext.getTimestampGenerator().
@@ -138,7 +138,7 @@ public class CacheExpiryHandlerRunnable {
                         cc);
             }
         } else {
-            System.out.println("store size is old");
+            log.info(siddhiAppContext.getName() + ": store table size is old");
             try {
                 loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
                         storeTable.compiledConditionForCaching,
@@ -161,7 +161,6 @@ public class CacheExpiryHandlerRunnable {
     public void deleteAndReloadExpiredEvents(StreamEvent loadedDataFromStore) {
         CompiledCondition cc = generateExpiryCompiledCondition(
                 siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
-        System.out.println("expiring events - old size");
         ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
 
         dataCopyLoop:
@@ -206,7 +205,6 @@ public class CacheExpiryHandlerRunnable {
 
             @Override
             public void run() {
-                System.out.println("handler running");
                 handleCacheExpiry();
 //                simpleExpire();
             }
