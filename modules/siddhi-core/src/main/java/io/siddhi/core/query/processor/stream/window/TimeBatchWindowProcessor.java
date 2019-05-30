@@ -81,6 +81,7 @@ import java.util.Map;
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"window.time"}),
                 @ParameterOverload(parameterNames = {"window.time", "start.time"}),
+                @ParameterOverload(parameterNames = {"window.time", "stream.current.event"}),
                 @ParameterOverload(parameterNames = {"window.time", "start.time", "stream.current.event"})
         },
         examples = {

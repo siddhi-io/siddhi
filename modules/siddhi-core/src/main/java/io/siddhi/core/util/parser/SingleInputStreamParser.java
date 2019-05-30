@@ -17,7 +17,6 @@
  */
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.annotation.ProcessorAnnotationValidator;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
@@ -210,7 +209,6 @@ public class SingleInputStreamParser {
                             ((Window) streamHandler).getName());
             windowProcessor.initProcessor(metaStreamEvent, attributeExpressionExecutors,
                     configReader, outputExpectsExpiredEvents, findToBeExecuted, false, streamHandler, siddhiQueryContext);
-//            ProcessorAnnotationValidator.validateAnnotation(windowProcessor, attributeExpressionExecutors);
             return windowProcessor;
 
         } else if (streamHandler instanceof StreamFunction) {

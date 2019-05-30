@@ -17,7 +17,6 @@
  */
 package io.siddhi.core.query.processor.stream;
 
-//import io.siddhi.core.annotation.ProcessorAnnotationValidator;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -32,6 +31,7 @@ import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
+import io.siddhi.core.util.extension.validator.InputParameterValidator;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -76,10 +76,10 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
             this.inputDefinition = metaStreamEvent.getLastInputDefinition();
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             this.attributeExpressionLength = attributeExpressionExecutors.length;
+            InputParameterValidator.validateExpressionExecutors(this, attributeExpressionExecutors);
             StateFactory<S> stateFactory = init(metaStreamEvent, metaStreamEvent.getLastInputDefinition(),
                     attributeExpressionExecutors, configReader, streamEventClonerHolder, outputExpectsExpiredEvents,
                     findToBeExecuted, siddhiQueryContext);
-//            ProcessorAnnotationValidator.validateAnnotation(this, attributeExpressionExecutors);
             this.additionalAttributes = getReturnAttributes();
             this.stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, stateFactory);
             siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(this);

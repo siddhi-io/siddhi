@@ -168,7 +168,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
                         try {
                             abstractAnnotationProcessor.basicParameterValidation(name, description, namespace);
                             abstractAnnotationProcessor.parameterValidation(parameters);
-                            abstractAnnotationProcessor.parameterOverloadValidation(parameterOverloads);
+                            abstractAnnotationProcessor.parameterOverloadValidation(parameterOverloads, parameters);
                             abstractAnnotationProcessor.returnAttributesValidation(returnAttributes);
                             abstractAnnotationProcessor.systemParametersValidation(systemParameters);
                             abstractAnnotationProcessor.examplesValidation(examples);
