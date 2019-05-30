@@ -17,7 +17,6 @@
  */
 package org.wso2.siddhi.core.aggregation;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -34,59 +33,58 @@ import java.util.Map;
  * This class implements logic to process aggregates(after retrieval from tables) that were aggregated
  * using external timestamp.
  */
-public class IncrementalExternalTimestampDataAggregator {
+public class OutOfOrderEventsDataAggregator {
 
     private final GroupByKeyGenerator groupByKeyGenerator;
     private final BaseIncrementalValueStore baseIncrementalValueStore;
     private final Map<String, BaseIncrementalValueStore> baseIncrementalValueGroupByStore;
 
-    public IncrementalExternalTimestampDataAggregator(List<ExpressionExecutor> baseExecutors,
-                                     GroupByKeyGenerator groupByKeyGenerator,
-                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext,
-                                                      ExpressionExecutor shouldUpdateExpressionExecutor) {
-        StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+    public OutOfOrderEventsDataAggregator(List<ExpressionExecutor> baseExecutors,
+                                          ExpressionExecutor shouldUpdateTimestamp,
+                                          GroupByKeyGenerator groupByKeyGenerator,
+                                          MetaStreamEvent metaStreamEvent) {
 
+        StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         List<ExpressionExecutor> expressionExecutorsWithoutTime = baseExecutors.subList(1, baseExecutors.size());
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1,
-                expressionExecutorsWithoutTime, streamEventPool, siddhiAppContext, null,
-                shouldUpdateExpressionExecutor);
+
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(null, -1,
+                expressionExecutorsWithoutTime, shouldUpdateTimestamp, streamEventPool, null);
         this.baseIncrementalValueGroupByStore = new HashMap<>();
         this.groupByKeyGenerator = groupByKeyGenerator;
     }
 
     public ComplexEventChunk<StreamEvent> aggregateData(ComplexEventChunk<StreamEvent> retrievedData) {
-
         while (retrievedData.hasNext()) {
             StreamEvent streamEvent = retrievedData.next();
             String groupByKey = groupByKeyGenerator.constructEventKey(streamEvent);
             BaseIncrementalValueStore baseIncrementalValueStore = baseIncrementalValueGroupByStore
-                    .computeIfAbsent(
-                            groupByKey, k -> this.baseIncrementalValueStore.cloneStore(k, -1)
-                    );
+                    .computeIfAbsent(groupByKey, k -> this.baseIncrementalValueStore.cloneStore(-1));
             process(streamEvent, baseIncrementalValueStore);
         }
         return createEventChunkFromAggregatedData();
     }
+
     private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
+
         List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
+
         boolean shouldUpdate = true;
-        ExpressionExecutor shouldUpdateExpressionExecutor =
-                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+        ExpressionExecutor shouldUpdateTimestamp = baseIncrementalValueStore.getShouldUpdateTimestamp();
+        if (shouldUpdateTimestamp != null) {
+            shouldUpdate = ((boolean) shouldUpdateTimestamp.execute(streamEvent));
         }
 
         for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+
+            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+
             if (shouldUpdate) {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                 baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-            } else {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                }
+            } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
             }
         }
+
         baseIncrementalValueStore.setProcessed(true);
     }
 

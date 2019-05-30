@@ -51,14 +51,16 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 import static org.wso2.siddhi.query.api.expression.Expression.Time.timeToLong;
 
 /**
  * This class implements the logic which is needed to purge data which are related to incremental
  **/
-public class IncrementalDataPurging implements Runnable {
-    private static final Logger LOG = Logger.getLogger(IncrementalDataPurging.class);
+public class IncrementalDataPurger implements Runnable {
+    private static final Logger LOG = Logger.getLogger(IncrementalDataPurger.class);
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
     private boolean purgingEnabled = true;
     private Map<TimePeriod.Duration, Long> retentionPeriods = new EnumMap<>(TimePeriod.Duration.class);
@@ -66,8 +68,6 @@ public class IncrementalDataPurging implements Runnable {
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private SiddhiAppContext siddhiAppContext;
     private ScheduledFuture scheduledPurgingTaskStatus;
-    private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
-    private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
     private String purgingTimestampField;
     private Map<TimePeriod.Duration, Long> minimumDurationMap = new EnumMap<>(TimePeriod.Duration.class);
     private static final Long RETAIN_ALL = -1L;
@@ -90,9 +90,9 @@ public class IncrementalDataPurging implements Runnable {
         this.streamEventPool = streamEventPool;
         this.aggregationTables = aggregationTables;
         if (isProcessingOnExternalTime) {
-            purgingTimestampField = EXTERNAL_AGG_TIMESTAMP_FIELD;
+            purgingTimestampField = AGG_EXTERNAL_TIMESTAMP_COL;
         } else {
-            purgingTimestampField = INTERNAL_AGG_TIMESTAMP_FIELD;
+            purgingTimestampField = AGG_START_TIMESTAMP_COL;
         }
         aggregatedTimestampAttribute = new Attribute(purgingTimestampField, Attribute.Type.LONG);
 

@@ -24,10 +24,12 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.wso2.siddhi.core.util.ExpressionExecutorClonerUtil.getExpressionExecutorClone;
+import static org.wso2.siddhi.core.util.ExpressionExecutorClonerUtil.getExpressionExecutorClones;
 
 /**
  * Store for maintaining the base values related to incremental aggregation. (e.g. for average,
@@ -36,29 +38,33 @@ import java.util.Map;
 public class BaseIncrementalValueStore implements Snapshotable {
     private long timestamp; // This is the starting timeStamp of aggregates
     private Object[] values;
+    private String aggregatorName;
     private List<ExpressionExecutor> expressionExecutors;
-    private boolean isProcessed = false;
+    private ExpressionExecutor shouldUpdateTimestamp;
+
     private StreamEventPool streamEventPool;
     private String elementId;
     private SiddhiAppContext siddhiAppContext;
-    private String aggregatorName;
-    private ExpressionExecutor shouldUpdateExpressionExecutor;
 
-    public BaseIncrementalValueStore(long timeStamp, List<ExpressionExecutor> expressionExecutors,
+    private boolean isProcessed = false;
+
+    public BaseIncrementalValueStore(String aggregatorName, long initialTimeStamp,
+                                     List<ExpressionExecutor> expressionExecutors,
+                                     ExpressionExecutor shouldUpdateTimestamp,
                                      StreamEventPool streamEventPool,
-                                     SiddhiAppContext siddhiAppContext, String aggregatorName,
-                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
-        this.timestamp = timeStamp;
+                                     SiddhiAppContext siddhiAppContext) {
+        this.timestamp = initialTimeStamp;
         this.values = new Object[expressionExecutors.size() + 1];
+
+        this.aggregatorName = aggregatorName;
         this.expressionExecutors = expressionExecutors;
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+
         this.streamEventPool = streamEventPool;
         this.siddhiAppContext = siddhiAppContext;
-        this.aggregatorName = aggregatorName;
-        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
-        if (elementId == null) {
-            elementId = "IncrementalBaseStore-" + siddhiAppContext.getElementIdGenerator().createNewId();
-        }
+
         if (aggregatorName != null) {
+            elementId = "IncrementalBaseStore-" + siddhiAppContext.getElementIdGenerator().createNewId();
             siddhiAppContext.getSnapshotService().addSnapshotable(aggregatorName, this);
         }
     }
@@ -99,18 +105,14 @@ public class BaseIncrementalValueStore implements Snapshotable {
         return streamEvent;
     }
 
-    public BaseIncrementalValueStore cloneStore(String key, long timestamp) {
-        List<ExpressionExecutor> newExpressionExecutors = new ArrayList<>(expressionExecutors.size());
-        expressionExecutors
-                .forEach(expressionExecutor -> newExpressionExecutors.add(expressionExecutor.cloneExecutor(key)));
-        ExpressionExecutor newShouldUpdateExpressionExecutor =
-                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(key);
-        return new BaseIncrementalValueStore(timestamp, newExpressionExecutors, streamEventPool, siddhiAppContext,
-                aggregatorName, newShouldUpdateExpressionExecutor);
+    public BaseIncrementalValueStore cloneStore(long timestamp) {
+        return new BaseIncrementalValueStore(
+                aggregatorName, timestamp, getExpressionExecutorClones(expressionExecutors),
+                getExpressionExecutorClone(shouldUpdateTimestamp), streamEventPool, siddhiAppContext);
     }
 
-    public ExpressionExecutor getShouldUpdateExpressionExecutor() {
-        return shouldUpdateExpressionExecutor;
+    public ExpressionExecutor getShouldUpdateTimestamp() {
+        return shouldUpdateTimestamp;
     }
 
     @Override
@@ -139,8 +141,8 @@ public class BaseIncrementalValueStore implements Snapshotable {
         for (ExpressionExecutor expressionExecutor : expressionExecutors) {
             expressionExecutor.clean();
         }
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdateExpressionExecutor.clean();
+        if (shouldUpdateTimestamp != null) {
+            shouldUpdateTimestamp.clean();
         }
         if (aggregatorName != null) {
             siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);

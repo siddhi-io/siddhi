@@ -40,45 +40,57 @@ import org.wso2.siddhi.query.api.expression.condition.Compare;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_SHARD_ID_COL;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
+
 /**
  * This class is used to recreate in-memory data from the tables (Such as RDBMS) in incremental aggregation.
  * This ensures that the aggregation calculations are done correctly in case of server restart
  */
-public class RecreateInMemoryData {
+public class IncrementalExecutorsInitialiser {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+
+    private final boolean isDistributed;
+    private final String shardId;
+
     private final SiddhiAppContext siddhiAppContext;
     private final StreamEventPool streamEventPool;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
-    private final String shardId;
-    private final boolean isDistributed;
-    private boolean isRefreshed;
 
-    public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
-            Map<TimePeriod.Duration, Table> aggregationTables,
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
-            MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
-            Map<String, AggregationRuntime> aggregationMap, String shardId, boolean isDistributed) {
+    private boolean isInitialised;
+
+    public IncrementalExecutorsInitialiser(List<TimePeriod.Duration> incrementalDurations,
+                                           Map<TimePeriod.Duration, Table> aggregationTables,
+                                           Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
+                                           boolean isDistributed, String shardId, SiddhiAppContext siddhiAppContext,
+                                           MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap,
+                                           Map<String, Window> windowMap,
+                                           Map<String, AggregationRuntime> aggregationMap) {
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
+
+        this.isDistributed = isDistributed;
+        this.shardId = shardId;
+
         this.siddhiAppContext = siddhiAppContext;
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.tableMap = tableMap;
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
-        this.shardId = shardId;
-        this.isDistributed = isDistributed;
-        this.isRefreshed = false;
+
+        this.isInitialised = false;
     }
 
-    public void recreateInMemoryData() {
-        if (this.isRefreshed) {
+    public synchronized void initialiseExecutors() {
+        if (this.isInitialised) {
             return;
         }
+
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
@@ -89,16 +101,16 @@ public class RecreateInMemoryData {
             storeQuery = StoreQuery.query()
                     .from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
                     .select(Selector.selector()
-                            .orderBy(Expression.variable("AGG_TIMESTAMP"), OrderByAttribute.Order.DESC)
+                            .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
                             .limit(Expression.value(1))
                     );
         } else {
             storeQuery = StoreQuery.query().from(
                     InputStore.store(tableForMaxDuration.getTableDefinition().getId())
-                            .on(Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                            .on(Expression.compare(Expression.variable(AGG_SHARD_ID_COL), Compare.Operator.EQUAL,
                                     Expression.value(shardId))))
                     .select(Selector.selector()
-                            .orderBy(Expression.variable("AGG_TIMESTAMP"), OrderByAttribute.Order.DESC)
+                            .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
                             .limit(Expression.value(1))
                     );
         }
@@ -126,37 +138,39 @@ public class RecreateInMemoryData {
                 if (endOFLatestEventTimestamp == null) {
                     storeQuery = StoreQuery.query()
                             .from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                            .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
                 } else {
                     storeQuery = StoreQuery.query()
                             .from(InputStore.store(recreateFromTable.getTableDefinition().getId())
                                     .on(Expression.compare(
-                                            Expression.variable("AGG_TIMESTAMP"),
+                                            Expression.variable(AGG_START_TIMESTAMP_COL),
                                             Compare.Operator.GREATER_THAN_EQUAL,
                                             Expression.value(endOFLatestEventTimestamp)
                                     )))
-                            .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
                 }
             } else {
                 if (endOFLatestEventTimestamp == null) {
                     storeQuery = StoreQuery.query().from(
                             InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
-                                    Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                    Expression.compare(
+                                            Expression.variable(AGG_SHARD_ID_COL),
+                                            Compare.Operator.EQUAL,
                                             Expression.value(shardId))))
-                            .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
                 } else {
                     storeQuery = StoreQuery.query().from(
                             InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
                                     Expression.and(
                                             Expression.compare(
-                                                    Expression.variable("SHARD_ID"),
+                                                    Expression.variable(AGG_SHARD_ID_COL),
                                                     Compare.Operator.EQUAL,
                                                     Expression.value(shardId)),
                                             Expression.compare(
-                                                    Expression.variable("AGG_TIMESTAMP"),
+                                                    Expression.variable(AGG_START_TIMESTAMP_COL),
                                                     Compare.Operator.GREATER_THAN_EQUAL,
                                                     Expression.value(endOFLatestEventTimestamp)))))
-                            .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
                 }
             }
 
@@ -184,11 +198,11 @@ public class RecreateInMemoryData {
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             referenceToNextLatestEvent, rootDuration, null);
 
-                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
+                    rootIncrementalExecutor.setEmitTimestamp(emitTimeOfLatestEventInTable);
 
                 }
             }
         }
-        isRefreshed = true;
+        isInitialised = true;
     }
 }
