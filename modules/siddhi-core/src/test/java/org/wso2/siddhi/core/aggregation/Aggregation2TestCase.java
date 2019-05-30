@@ -24,12 +24,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.UnitTestAppender;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 
@@ -543,6 +545,88 @@ public class Aggregation2TestCase {
         siddhiAppRuntime.start();
     }
 
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest56"})
+    public void incrementalStreamProcessorTest57() throws InterruptedException {
+        LOG.info("Check interrupted exception being thrown when SiddhiRuntime has already been shutdown");
+        Logger logger = Logger.getLogger(Scheduler.class);
+        UnitTestAppender appender = new UnitTestAppender();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "group by symbol " +
+                "aggregate by timestamp every sec...hour ;";
 
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+        Thread eventSenderThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    stockStreamInputHandler.send(new Event[]{
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                    stockStreamInputHandler.send(new Event[]{
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                    stockStreamInputHandler.send(new Event[]{
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                            new Event(System.currentTimeMillis(),
+                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                    Thread.sleep(500L);
+                } catch (InterruptedException e) {
+                }
+            }
+        }, "EventSenderThread");
+        eventSenderThread.start();
+        Thread siddhiRuntimeShutdownThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                siddhiAppRuntime.shutdown();
+            }
+        }, "SiddhiRuntimeShutdownThread");
+        siddhiRuntimeShutdownThread.start();
+        Thread.sleep(10000L);
+        if (appender.getMessages() != null) {
+            AssertJUnit.assertFalse(appender.getMessages().contains("Error when adding time:"));
+        }
+        logger.removeAppender(appender);
+        siddhiAppRuntime.shutdown();
+    }
 }
 
