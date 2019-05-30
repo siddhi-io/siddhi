@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class AggregationFindQueryValidationTestCase {
@@ -31,7 +30,7 @@ public class AggregationFindQueryValidationTestCase {
     private static final Logger LOG = Logger.getLogger(AggregationFindQueryValidationTestCase.class);
 
     @Test(expectedExceptions = StoreQueryCreationException.class)
-    public void storeQueryValidationTestCase1() throws InterruptedException {
+    public void storeQueryValidationTestCase1() {
         LOG.info("storeQueryValidationTestCase1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream = "" +
@@ -59,7 +58,7 @@ public class AggregationFindQueryValidationTestCase {
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void storeQueryValidationTestCase2() throws InterruptedException {
+    public void storeQueryValidationTestCase2() {
         LOG.info("storeQueryValidationTestCase2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -83,18 +82,11 @@ public class AggregationFindQueryValidationTestCase {
                 "select * " +
                 "insert into ignore;";
 
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream  + triggerStream + query);
-        try {
-            InputHandler triggerStreamInputHandler = siddhiAppRuntime.getInputHandler("triggerStream");
-            siddhiAppRuntime.start();
-            triggerStreamInputHandler.send(new Object[]{6});
-        } finally {
-            siddhiAppRuntime.shutdown();
-        }
+        siddhiManager.createSiddhiAppRuntime(stockStream + triggerStream + query);
     }
 
     @Test
-    public void storeQueryValidationTestCase3() throws InterruptedException {
+    public void storeQueryValidationTestCase3() {
         LOG.info("storeQueryValidationTestCase3");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream = "" +

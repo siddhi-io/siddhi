@@ -170,13 +170,15 @@ public class DistinctCountAggregationTestCase {
                     new Object[]{1596412800000L, 1}
             );
             SiddhiTestHelper.waitForEvents(100, 8, inEventCount, 10000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Remove events matched", true, SiddhiTestHelper.isEventsMatch(
-                    removeEventsList, expected));
+
+            AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 8, inEventCount.get());
+            AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+
             AssertJUnit.assertEquals("Number of remove events", 8, removeEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        }  finally {
+            AssertJUnit.assertTrue("Remove events matched", SiddhiTestHelper.isEventsMatch(
+                    removeEventsList, expected));
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }
