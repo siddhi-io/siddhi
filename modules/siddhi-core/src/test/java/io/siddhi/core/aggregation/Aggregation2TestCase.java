@@ -100,7 +100,7 @@ public class Aggregation2TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             Event[] events = null;
             int i = 0;
 
@@ -171,7 +171,7 @@ public class Aggregation2TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
@@ -290,7 +290,7 @@ public class Aggregation2TestCase {
             // Thursday, June 1, 2017 5:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20, "2017-06-01 05:07:56"});
 
-            Thread.sleep(100);
+            Thread.sleep(2000);
             LocalDate currentDate = LocalDate.now();
             String year = String.valueOf(currentDate.getYear());
             inputStreamInputHandler.send(new Object[]{"IBM", 1, year + "-**-** **:**:**",

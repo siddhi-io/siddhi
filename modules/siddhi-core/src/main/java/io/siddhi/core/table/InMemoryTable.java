@@ -132,7 +132,7 @@ public class InMemoryTable extends Table {
                     state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
-            if (failedEvents != null) {
+            if (failedEvents.getFirst() != null) {
                 state.eventHolder.add(failedEvents);
             }
         } finally {
@@ -152,11 +152,6 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
-
-    }
-
-    @Override
-    protected void connect() throws ConnectionUnavailableException {
 
     }
 
@@ -213,6 +208,11 @@ public class InMemoryTable extends Table {
         return new InMemoryCompiledUpdateSet(expressionExecutorMap);
     }
 
+    @Override
+    protected void connectAndLoadCache() throws ConnectionUnavailableException {
+
+    }
+
     class TableState extends State {
 
         private final EventHolder eventHolder;
@@ -237,5 +237,9 @@ public class InMemoryTable extends Table {
         public void restore(Map<String, Object> state) {
             eventHolder.restore((SnapshotStateList) state.get("EventHolder"));
         }
+    }
+
+    public int size() {
+        return stateHolder.getState().eventHolder.size();
     }
 }

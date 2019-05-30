@@ -80,6 +80,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private ThroughputTracker throughputTrackerDelete;
     private ThroughputTracker throughputTrackerUpdateOrInsert;
     private ThroughputTracker throughputTrackerContains;
+    public Map<String, Table> tableMap;
 
     public void initTable(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
                           StreamEventCloner storeEventCloner,
@@ -404,7 +405,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         if (!isConnected.get()) {
             isTryingToConnect.set(true);
             try {
-                connect();
+                connectAndLoadCache();
                 isConnected.set(true);
                 synchronized (this) {
                     isTryingToConnect.set(false);
@@ -469,7 +470,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                                        Map<String, Table> tableMap,
                                                        SiddhiQueryContext siddhiQueryContext);
 
-    protected abstract void connect() throws ConnectionUnavailableException;
+    protected abstract void connectAndLoadCache() throws ConnectionUnavailableException;
 
     protected abstract void disconnect();
 

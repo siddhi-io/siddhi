@@ -33,6 +33,8 @@ import io.siddhi.core.window.Window;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+
 /**
  * Store Query Runtime holds the runtime information needed for executing the store query.
  */
@@ -90,8 +92,6 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                     break;
                 case AGGREGATE:
                     stateEvent = new StateEvent(2, 0);
-                    StreamEvent streamEvent = new StreamEvent(0, 2, 0);
-                    stateEvent.addEvent(0, streamEvent);
                     streamEvents = aggregation.find(stateEvent, compiledCondition, siddhiQueryContext);
                     break;
                 case DEFAULT:
@@ -101,7 +101,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                 return null;
             } else {
                 if (selector != null) {
-                    return executeSelector(streamEvents, eventType);
+                    return executeSelector(streamEvents, selector, stateEventFactory, eventType);
                 } else {
                     List<Event> events = new ArrayList<Event>();
                     while (streamEvents != null) {
@@ -144,35 +144,5 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
         ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
-    }
-
-    private Event[] executeSelector(StreamEvent streamEvents, MetaStreamEvent.EventType eventType) {
-        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
-        while (streamEvents != null) {
-
-            StreamEvent streamEvent = streamEvents;
-            streamEvents = streamEvents.getNext();
-            streamEvent.setNext(null);
-
-            StateEvent stateEvent = stateEventFactory.newInstance();
-            if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
-                stateEvent.addEvent(1, streamEvent);
-            } else {
-                stateEvent.addEvent(0, streamEvent);
-            }
-            complexEventChunk.add(stateEvent);
-        }
-        ComplexEventChunk outputComplexEventChunk = selector.execute(complexEventChunk);
-        if (outputComplexEventChunk != null) {
-            List<Event> events = new ArrayList<>();
-            outputComplexEventChunk.reset();
-            while (outputComplexEventChunk.hasNext()) {
-                ComplexEvent complexEvent = outputComplexEventChunk.next();
-                events.add(new Event(complexEvent.getTimestamp(), complexEvent.getOutputData()));
-            }
-            return events.toArray(new Event[0]);
-        } else {
-            return null;
-        }
     }
 }

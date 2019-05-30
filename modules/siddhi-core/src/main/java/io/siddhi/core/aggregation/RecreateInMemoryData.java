@@ -51,21 +51,22 @@ public class RecreateInMemoryData {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final SiddhiAppContext siddhiAppContext;
     private final StreamEventFactory streamEventFactory;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
     private final String shardId;
+    private final boolean isDistributed;
+    private boolean isRefreshed;
 
     public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
                                 Map<TimePeriod.Duration, Table> aggregationTables,
                                 Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                                 SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent, Map<String,
             Table> tableMap, Map<String, Window> windowMap,
-                                Map<String, AggregationRuntime> aggregationMap, String shardId,
-                                Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+                                Map<String, AggregationRuntime> aggregationMap, String shardId, boolean isDistributed) {
+
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -75,36 +76,21 @@ public class RecreateInMemoryData {
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
         this.shardId = shardId;
-        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
+        this.isDistributed = isDistributed;
+        this.isRefreshed = false;
     }
 
-    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
-        if (!refreshReadingExecutors && isFirstEventArrived) {
+    public void recreateInMemoryData() {
+        if (this.isRefreshed) {
             // Only cleared when executors change from reading to processing state in one node deployment
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
-                incrementalExecutor.setProcessingExecutor(true);
-                incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
-            }
+            return;
         }
-
-        // Clear all executors before recreating
-        Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-        if (refreshReadingExecutors) {
-            incrementalExecutorMap = this.incrementalExecutorMapForPartitions;
-        } else {
-            incrementalExecutorMap = this.incrementalExecutorMap;
-        }
-        incrementalExecutorMap.forEach(((duration, incrementalExecutor) -> incrementalExecutor.clearExecutor()));
-
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
         // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, refreshReadingExecutors,
-                endOFLatestEventTimestamp);
+        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
@@ -127,7 +113,7 @@ public class RecreateInMemoryData {
             // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            storeQuery = getStoreQuery(recreateFromTable, false, refreshReadingExecutors, endOFLatestEventTimestamp);
+            storeQuery = getStoreQuery(recreateFromTable, false, endOFLatestEventTimestamp);
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -157,10 +143,10 @@ public class RecreateInMemoryData {
                 }
             }
         }
+        this.isRefreshed = true;
     }
 
-    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, boolean refreshReadingExecutors,
-                                     Long endOFLatestEventTimestamp) {
+    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
         Selector selector = Selector.selector();
         if (isLargestGranularity) {
             selector = selector
@@ -172,7 +158,7 @@ public class RecreateInMemoryData {
         }
 
         InputStore inputStore;
-        if (shardId == null || refreshReadingExecutors) {
+        if (!this.isDistributed) {
             if (endOFLatestEventTimestamp == null) {
                 inputStore = InputStore.store(table.getTableDefinition().getId());
             } else {

@@ -17,8 +17,11 @@
  */
 package io.siddhi.core.query;
 
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.StoreQueryRuntimeException;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
@@ -71,7 +74,27 @@ public class SelectStoreQueryRuntime extends StoreQueryRuntime {
 
     @Override
     public void reset() {
+        if (selector != null) {
+            selector.process(generateResetComplexEventChunk(metaStreamEvent));
+        }
+    }
 
+    private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
+        StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getOutputData().size(),
+                metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());
+        streamEvent.setType(ComplexEvent.Type.RESET);
+
+        StateEvent stateEvent = stateEventFactory.newInstance();
+        if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
+            stateEvent.addEvent(1, streamEvent);
+        } else {
+            stateEvent.addEvent(0, streamEvent);
+        }
+        stateEvent.setType(ComplexEvent.Type.RESET);
+
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        complexEventChunk.add(stateEvent);
+        return complexEventChunk;
     }
 
     @Override
