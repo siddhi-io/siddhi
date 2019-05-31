@@ -165,8 +165,8 @@ public class CacheExpiryHandlerRunnable {
 
         dataCopyLoop:
         while (loadedDataFromStore != null) {
-            AbstractQueryableRecordTable.addDataToChunk(addingEventChunkWithTimestamp, loadedDataFromStore,
-                    siddhiAppContext);
+            AbstractQueryableRecordTable.addStreamEventWithTimeStampToChunk(addingEventChunkWithTimestamp,
+                    loadedDataFromStore, siddhiAppContext);
             if (loadedDataFromStore.getNext() == null) {
                 break dataCopyLoop;
             }

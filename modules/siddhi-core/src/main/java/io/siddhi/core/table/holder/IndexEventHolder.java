@@ -276,6 +276,14 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
+    public StreamEvent getEvent(Object key) {
+        return primaryKeyData.get(key);
+    }
+
+    public void deleteEvent(Object key) {
+        primaryKeyData.remove(key);
+    }
+
     @Override
     public Collection<StreamEvent> findEvents(String attribute, Compare.Operator operator, Object value) {
 

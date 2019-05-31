@@ -130,7 +130,8 @@ public final class SiddhiConstants {
     public static final String CACHE_QUERY_NAME = "table_cache_";
     public static final String CACHE_TABLE_TIMESTAMP = "timestamp";
     public static final String ANNOTATION_CACHE_EXPIRY_TIME = "expiry.time";
-    public static final String ANNOTATION_CACHE_EXPIRY_POLICY = "expiry.policy";
+    public static final String ANNOTATION_CACHE_POLICY = "cache.policy";
+    public static final String ANNOTATION_CACHE_POLICY_FIFO = "FIFO";
     public static final String ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL = "expiry.check.interval";
 //    public static final int CACHE_MODE_BASIC_PRELOAD = 1;
 

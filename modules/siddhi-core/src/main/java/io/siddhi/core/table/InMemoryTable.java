@@ -60,7 +60,7 @@ public class InMemoryTable extends Table {
     private TableDefinition tableDefinition;
     private StreamEventCloner tableStreamEventCloner;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private StateHolder<TableState> stateHolder;
+    StateHolder<TableState> stateHolder;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,

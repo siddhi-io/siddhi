@@ -169,6 +169,17 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
 
     @Override
     protected void add(List<Object[]> records) throws ConnectionUnavailableException {
+        inMemoryTable.add(objectListToComplexEventChunk(records));
+    }
+
+    private ComplexEventChunk<StreamEvent> objectListToComplexEventChunk(List<Object[]> records) {
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        for (Object[] record: records) {
+            StreamEvent event = storeEventPool.newInstance();
+            event.setOutputData(record);
+            complexEventChunk.add(event);
+        }
+        return complexEventChunk;
     }
 
     @Override
