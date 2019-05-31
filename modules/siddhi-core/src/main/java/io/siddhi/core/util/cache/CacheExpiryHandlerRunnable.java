@@ -165,14 +165,8 @@ public class CacheExpiryHandlerRunnable {
 
         dataCopyLoop:
         while (loadedDataFromStore != null) {
-            Object[] outputData = loadedDataFromStore.getOutputData();
-            Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
-            System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
-            outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
-                    siddhiAppContext.getTimestampGenerator().currentTime();
-            StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
-            eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
-            addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+            AbstractQueryableRecordTable.addDataToChunk(addingEventChunkWithTimestamp, loadedDataFromStore,
+                    siddhiAppContext);
             if (loadedDataFromStore.getNext() == null) {
                 break dataCopyLoop;
             }

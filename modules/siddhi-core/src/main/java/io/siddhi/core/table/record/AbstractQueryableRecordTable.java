@@ -51,7 +51,6 @@ import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecu
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
 import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
-import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
@@ -295,14 +294,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         break;
                     }
                     StreamEvent event = addingEventChunk.next();
-                    Object[] outputData = event.getOutputData();
-                    Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
-                    System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
-                    outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
-                            siddhiAppContext.getTimestampGenerator().currentTime();
-                    StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
-                    eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
-                    addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+                    addDataToChunk(addingEventChunkWithTimestamp, event, siddhiAppContext);
                     cacheSize++;
                 }
             } else {
@@ -348,6 +340,18 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         }
 //        cacheExpiryHandlerRunnable.handleCacheExpiry();
+    }
+
+    public static void addDataToChunk(ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp, StreamEvent event,
+                                      SiddhiAppContext siddhiAppContext) {
+        Object[] outputData = event.getOutputData();
+        Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+        System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+        outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                siddhiAppContext.getTimestampGenerator().currentTime();
+        StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+        eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+        addingEventChunkWithTimestamp.add(eventWithTimeStamp);
     }
 
     @Override
@@ -604,18 +608,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = new RecordTableCompiledUpdateSet();
-        Map<String, ExpressionExecutor> parentExecutorMap = new HashMap<>();
-        for (UpdateSet.SetAttribute setAttribute : updateSet.getSetAttributeList()) {
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder(setAttribute.getAssignmentExpression(),
-                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
-            CompiledExpression compiledExpression = compileSetAttribute(expressionBuilder);
-            recordTableCompiledUpdateSet.put(setAttribute.getTableVariable().getAttributeName(), compiledExpression);
-            Map<String, ExpressionExecutor> expressionExecutorMap =
-                    expressionBuilder.getVariableExpressionExecutorMap();
-            parentExecutorMap.putAll(expressionExecutorMap);
-        }
-        recordTableCompiledUpdateSet.setExpressionExecutorMap(parentExecutorMap);
+        CompiledUpdateSet recordTableCompiledUpdateSet = super.compileUpdateSet(updateSet,
+                matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
         if (cacheEnabled) {
             CompiledUpdateSet cacheCompileUpdateSet =  cacheTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
                     variableExpressionExecutors, tableMap, siddhiQueryContext);
@@ -875,15 +869,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
                     recordStoreCompiledSelection.compiledSelection, outputAttributes);
         }
-        if (records != null) {
-            while (records.hasNext()) {
-                Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                streamEvent.setOutputData(new Object[outputAttributes.length]);
-                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                streamEventComplexEventChunk.add(streamEvent);
-            }
-        }
+        addStreamEventToChunk(outputAttributes, streamEventComplexEventChunk, records);
         return streamEventComplexEventChunk.getFirst();
     }
 
@@ -946,21 +932,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                         matchingEvent);
                 if (cacheResults != null) {
-                    StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                            metaStateEvent);
-                    Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
-                            compiledSelectionWithCache.querySelector,
-                            stateEventFactory, MetaStreamEvent.EventType.TABLE);
-                    assert cacheResultsAfterSelection != null;
-                    for (Event event : cacheResultsAfterSelection) {
-                        Object[] record = event.getData();
-                        StreamEvent streamEvent = storeEventPool.newInstance();
-                        streamEvent.setOutputData(new Object[outputAttributes.length]);
-                        System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                        streamEventComplexEventChunk.add(streamEvent);
-                    }
-                    log.info(siddhiAppContext.getName() + ": sending results from cache");
-                    return streamEventComplexEventChunk.getFirst();
+                    return getStreamEvent(outputAttributes, streamEventComplexEventChunk, compiledSelectionWithCache,
+                            cacheResults);
                 } else {
                     return null;
                 }
@@ -975,21 +948,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
                     if (cacheResults != null) {
-                        StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                                metaStateEvent);
-                        Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
-                                compiledSelectionWithCache.querySelector,
-                                stateEventFactory, MetaStreamEvent.EventType.TABLE);
-                        assert cacheResultsAfterSelection != null;
-                        for (Event event : cacheResultsAfterSelection) {
-                            Object[] record = event.getData();
-                            StreamEvent streamEvent = storeEventPool.newInstance();
-                            streamEvent.setOutputData(new Object[outputAttributes.length]);
-                            System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                            streamEventComplexEventChunk.add(streamEvent);
-                        }
-                        log.info(siddhiAppContext.getName() + ": sending results from cache");
-                        return streamEventComplexEventChunk.getFirst();
+                        return getStreamEvent(outputAttributes, streamEventComplexEventChunk,
+                                compiledSelectionWithCache, cacheResults);
                     }
                 } finally {
                     readWriteLock.readLock().unlock();
@@ -1004,6 +964,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         recordStoreCompiledSelection.compiledSelection, outputAttributes);
             }
         }
+        addStreamEventToChunk(outputAttributes, streamEventComplexEventChunk, records);
+        log.warn(siddhiAppContext.getName() + ": sending results from store table");
+        return streamEventComplexEventChunk.getFirst();
+    }
+
+    private void addStreamEventToChunk(Attribute[] outputAttributes, ComplexEventChunk<StreamEvent>
+            streamEventComplexEventChunk, Iterator<Object[]> records) {
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
@@ -1013,7 +980,26 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 streamEventComplexEventChunk.add(streamEvent);
             }
         }
-        log.warn(siddhiAppContext.getName() + ": sending results from store table");
+    }
+
+    private StreamEvent getStreamEvent(Attribute[] outputAttributes,
+                                       ComplexEventChunk<StreamEvent> streamEventComplexEventChunk,
+                                       CompiledSelectionWithCache compiledSelectionWithCache,
+                                       StreamEvent cacheResults) {
+        StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
+                metaStateEvent);
+        Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
+                compiledSelectionWithCache.querySelector,
+                stateEventFactory, MetaStreamEvent.EventType.TABLE);
+        assert cacheResultsAfterSelection != null;
+        for (Event event : cacheResultsAfterSelection) {
+            Object[] record = event.getData();
+            StreamEvent streamEvent = storeEventPool.newInstance();
+            streamEvent.setOutputData(new Object[outputAttributes.length]);
+            System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+            streamEventComplexEventChunk.add(streamEvent);
+        }
+        log.info(siddhiAppContext.getName() + ": sending results from cache");
         return streamEventComplexEventChunk.getFirst();
     }
 
