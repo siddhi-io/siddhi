@@ -373,20 +373,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
         }
         List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
-        deletingEventChunk.reset();
-        long timestamp = 0L;
-        while (deletingEventChunk.hasNext()) {
-            StateEvent stateEvent = deletingEventChunk.next();
-
-            Map<String, Object> variableMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry :
-                    recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
-                variableMap.put(entry.getKey(), entry.getValue().execute(stateEvent));
-            }
-
-            deleteConditionParameterMaps.add(variableMap);
-            timestamp = stateEvent.getTimestamp();
-        }
+        long timestamp = deleteHelper(deletingEventChunk, recordStoreCompiledCondition, deleteConditionParameterMaps);
         if (cacheEnabled) {
             assert compiledConditionWithCache != null;
             readWriteLock.writeLock().lock();

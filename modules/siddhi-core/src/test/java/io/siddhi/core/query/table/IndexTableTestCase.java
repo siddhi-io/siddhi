@@ -102,7 +102,7 @@ public class IndexTableTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 55.6f, 100L});
             checkStockStream.send(new Object[]{"IBM", 100L});
-//            checkStockStream.send(new Object[]{"WSO2", 100L});
+            checkStockStream.send(new Object[]{"WSO2", 100L});
 
             List<Object[]> expected = Arrays.asList(
                     new Object[]{"IBM", 100L},

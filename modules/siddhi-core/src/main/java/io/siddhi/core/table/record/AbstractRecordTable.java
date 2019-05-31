@@ -194,6 +194,18 @@ public abstract class AbstractRecordTable extends Table {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
+        long timestamp = deleteHelper(deletingEventChunk, recordStoreCompiledCondition, deleteConditionParameterMaps);
+        if (recordTableHandler != null) {
+            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                    compiledCondition);
+        } else {
+            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+        }
+    }
+
+    public long deleteHelper(ComplexEventChunk<StateEvent> deletingEventChunk,
+                             RecordStoreCompiledCondition recordStoreCompiledCondition,
+                             List<Map<String, Object>> deleteConditionParameterMaps) {
         deletingEventChunk.reset();
         long timestamp = 0L;
         while (deletingEventChunk.hasNext()) {
@@ -208,12 +220,7 @@ public abstract class AbstractRecordTable extends Table {
             deleteConditionParameterMaps.add(variableMap);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                    compiledCondition);
-        } else {
-            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
-        }
+        return timestamp;
     }
 
     /**
