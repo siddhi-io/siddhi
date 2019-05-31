@@ -51,14 +51,16 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 import static io.siddhi.query.api.expression.Expression.Time.timeToLong;
 
 /**
  * This class implements the logic which is needed to purge data which are related to incremental
  **/
-public class IncrementalDataPurging implements Runnable {
-    private static final Logger LOG = Logger.getLogger(IncrementalDataPurging.class);
+public class IncrementalDataPurger implements Runnable {
+    private static final Logger LOG = Logger.getLogger(IncrementalDataPurger.class);
     private static final Long RETAIN_ALL = -1L;
     private static final String RETAIN_ALL_VALUES = "all";
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
@@ -87,9 +89,9 @@ public class IncrementalDataPurging implements Runnable {
         this.streamEventFactory = streamEventFactory;
         this.aggregationTables = aggregationTables;
         if (isProcessingOnExternalTime) {
-            purgingTimestampField = SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+            purgingTimestampField = AGG_EXTERNAL_TIMESTAMP_COL;
         } else {
-            purgingTimestampField = SiddhiConstants.AGG_START_TIMESTAMP_COL;
+            purgingTimestampField = AGG_START_TIMESTAMP_COL;
         }
         aggregatedTimestampAttribute = new Attribute(purgingTimestampField, Attribute.Type.LONG);
 

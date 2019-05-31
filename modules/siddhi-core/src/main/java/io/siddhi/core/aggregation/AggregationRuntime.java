@@ -69,63 +69,64 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * Aggregation runtime managing aggregation operations for aggregation definition.
  */
 public class AggregationRuntime implements MemoryCalculable {
-    private final AggregationDefinition aggregationDefinition;
-    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-    private final List<ExpressionExecutor> baseExecutorsForFind;
-    private ExpressionExecutor shouldUpdateTimestamp;
-    private final Map<TimePeriod.Duration, Table> aggregationTables;
-    private final MetaStreamEvent tableMetaStreamEvent;
-    private final MetaStreamEvent aggregateMetaSteamEvent;
-    private final LatencyTracker latencyTrackerFind;
-    private final ThroughputTracker throughputTrackerFind;
-    private final List<GroupByKeyGenerator> groupByKeyGeneratorList;
-    private List<TimePeriod.Duration> incrementalDurations;
-    private SingleStreamRuntime singleStreamRuntime;
-    private List<ExpressionExecutor> outputExpressionExecutors;
-    private RecreateInMemoryData recreateInMemoryData;
-    private boolean processingOnExternalTime;
-    private boolean isFirstEventArrived;
-    private IncrementalDataPurging incrementalDataPurging;
-    private List<List<ExpressionExecutor>> aggregateProcessExpressionExecutorsListForFind;
-    private List<String> tableAttributesNameList;
+    private AggregationDefinition aggregationDefinition;
+    private boolean isProcessingOnExternalTime;
     private boolean isDistributed;
+    private List<TimePeriod.Duration> incrementalDurations;
+    private Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+    private Map<TimePeriod.Duration, Table> aggregationTables;
+    private List<String> tableAttributesNameList;
+    private MetaStreamEvent aggregateMetaSteamEvent;
+    private List<ExpressionExecutor> outputExpressionExecutors;
+    private Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap;
+    private ExpressionExecutor shouldUpdateTimestamp;
+    private Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap;
 
-    public AggregationRuntime(AggregationDefinition aggregationDefinition,
+    private IncrementalDataPurger incrementalDataPurger;
+    private IncrementalExecutorsInitialiser incrementalExecutorsInitialiser;
+
+    private SingleStreamRuntime singleStreamRuntime;
+
+    private LatencyTracker latencyTrackerFind;
+    private ThroughputTracker throughputTrackerFind;
+
+    private boolean isFirstEventArrived;
+
+    public AggregationRuntime(AggregationDefinition aggregationDefinition, boolean isProcessingOnExternalTime,
+                              boolean isDistributed, List<TimePeriod.Duration> incrementalDurations,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
-                              SingleStreamRuntime singleStreamRuntime,
-                              List<TimePeriod.Duration> incrementalDurations,
-                              MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,
-                              LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
-                              RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
-                              List<GroupByKeyGenerator> groupByKeyGeneratorList,
-                              IncrementalDataPurging incrementalDataPurging,
-                              ExpressionExecutor shouldUpdateTimestamp, boolean isDistributed,
-                              List<List<ExpressionExecutor>> aggregateProcessExpressionExecutorsListForFind) {
+                              Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
+                              ExpressionExecutor shouldUpdateTimestamp,
+                              Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
+                              IncrementalDataPurger incrementalDataPurger,
+                              IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
+                              SingleStreamRuntime singleStreamRuntime, MetaStreamEvent tableMetaStreamEvent,
+                              LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind) {
+
         this.aggregationDefinition = aggregationDefinition;
+        this.isProcessingOnExternalTime = isProcessingOnExternalTime;
+        this.isDistributed = isDistributed;
+        this.incrementalDurations = incrementalDurations;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
-        this.incrementalDurations = incrementalDurations;
-        this.singleStreamRuntime = singleStreamRuntime;
-        this.tableMetaStreamEvent = tableMetaStreamEvent;
-        this.outputExpressionExecutors = outputExpressionExecutors;
-        this.latencyTrackerFind = latencyTrackerFind;
-        this.throughputTrackerFind = throughputTrackerFind;
-        this.recreateInMemoryData = recreateInMemoryData;
-        this.processingOnExternalTime = processingOnExternalTime;
-        this.groupByKeyGeneratorList = groupByKeyGeneratorList;
-        this.incrementalDataPurging = incrementalDataPurging;
-        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
-        this.aggregateProcessExpressionExecutorsListForFind = aggregateProcessExpressionExecutorsListForFind;
-        this.aggregateMetaSteamEvent = new MetaStreamEvent();
-        //Without timestamp executor
-        this.baseExecutorsForFind = aggregateProcessExpressionExecutorsListForFind.get(0).subList(1,
-                aggregateProcessExpressionExecutorsListForFind.get(0).size());
-        aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
         this.tableAttributesNameList = tableMetaStreamEvent.getInputDefinitions().get(0).getAttributeList()
                 .stream().map(Attribute::getName).collect(Collectors.toList());
-        this.isDistributed = isDistributed;
+        this.outputExpressionExecutors = outputExpressionExecutors;
+        this.aggregateProcessingExecutorsMap = aggregateProcessingExecutorsMap;
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+        this.groupByKeyGeneratorMap = groupByKeyGeneratorMap;
+
+        this.incrementalDataPurger = incrementalDataPurger;
+        this.incrementalExecutorsInitialiser = incrementalExecutorInitialiser;
+
+        this.singleStreamRuntime = singleStreamRuntime;
+        this.aggregateMetaSteamEvent = new MetaStreamEvent();
+        aggregationDefinition.getAttributeList().forEach(this.aggregateMetaSteamEvent::addOutputData);
+
+        this.latencyTrackerFind = latencyTrackerFind;
+        this.throughputTrackerFind = throughputTrackerFind;
 
     }
 
@@ -136,38 +137,33 @@ public class AggregationRuntime implements MemoryCalculable {
         metaStreamEvent.initializeAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
+    private static MetaStreamEvent alterMetaStreamEvent(boolean isStoreQuery, MetaStreamEvent originalMetaStreamEvent,
+                                                        List<Attribute> additionalAttributes) {
 
-    private static void cloneStreamDefinition(StreamDefinition originalStreamDefinition,
-                                              StreamDefinition newStreamDefinition) {
-        for (Attribute attribute : originalStreamDefinition.getAttributeList()) {
-            newStreamDefinition.attribute(attribute.getName(), attribute.getType());
+        StreamDefinition alteredStreamDef = new StreamDefinition();
+
+        if (!isStoreQuery) {
+            for (Attribute attribute : originalMetaStreamEvent.getLastInputDefinition().getAttributeList()) {
+                alteredStreamDef.attribute(attribute.getName(), attribute.getType());
+            }
         }
+
+        additionalAttributes.forEach(attribute -> alteredStreamDef.attribute(attribute.getName(), attribute.getType()));
+
+        initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, originalMetaStreamEvent.getInputReferenceId());
+        return originalMetaStreamEvent;
     }
 
-    private static MetaStreamEvent createNewMetaStreamEventWithStartEnd(MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                                                        List<Attribute> additionalAttributes) {
-        MetaStreamEvent metaStreamEventWithStartEnd;
-        StreamDefinition streamDefinitionWithStartEnd = new StreamDefinition();
-
-        if (matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1) {
-            metaStreamEventWithStartEnd = new MetaStreamEvent();
-        } else {
-            metaStreamEventWithStartEnd = matchingMetaInfoHolder.getMetaStateEvent()
-                    .getMetaStreamEvent(matchingMetaInfoHolder.getMatchingStreamEventIndex());
-            cloneStreamDefinition((StreamDefinition) metaStreamEventWithStartEnd.getLastInputDefinition(),
-                    streamDefinitionWithStartEnd);
-        }
-
-        additionalAttributes.forEach(attribute ->
-        streamDefinitionWithStartEnd.attribute(attribute.getName(), attribute.getType())
-        );
-        initMetaStreamEvent(metaStreamEventWithStartEnd, streamDefinitionWithStartEnd,
-                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0).getInputReferenceId());
-        return metaStreamEventWithStartEnd;
+    private static MetaStreamEvent createMetaStoreEvent(AbstractDefinition tableDefinition, String referenceId) {
+        MetaStreamEvent metaStreamEventForTable = new MetaStreamEvent();
+        metaStreamEventForTable.setEventType(MetaStreamEvent.EventType.TABLE);
+        initMetaStreamEvent(metaStreamEventForTable, tableDefinition, referenceId);
+        return metaStreamEventForTable;
     }
 
     private static MatchingMetaInfoHolder alterMetaInfoHolderForStoreQuery(
             MetaStreamEvent newMetaStreamEventWithStartEnd, MatchingMetaInfoHolder matchingMetaInfoHolder) {
+
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
         MetaStreamEvent incomingMetaStreamEvent = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0);
         metaStateEvent.addEvent(newMetaStreamEventWithStartEnd);
@@ -178,19 +174,14 @@ public class AggregationRuntime implements MemoryCalculable {
                 incomingMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
     }
 
-    private static MatchingMetaInfoHolder createNewStreamTableMetaInfoHolder(
-            MetaStreamEvent metaStreamEventWithStartEnd, AbstractDefinition tableDefinition, String referenceId) {
+    private static MatchingMetaInfoHolder createNewStreamTableMetaInfoHolder(MetaStreamEvent metaStreamEvent,
+                                                                             MetaStreamEvent metaStoreEvent) {
+
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
-        MetaStreamEvent metaStreamEventForTable = new MetaStreamEvent();
-
-        metaStreamEventForTable.setEventType(MetaStreamEvent.EventType.TABLE);
-        initMetaStreamEvent(metaStreamEventForTable, tableDefinition, referenceId);
-
-        metaStateEvent.addEvent(metaStreamEventWithStartEnd);
-        metaStateEvent.addEvent(metaStreamEventForTable);
+        metaStateEvent.addEvent(metaStreamEvent);
+        metaStateEvent.addEvent(metaStoreEvent);
         return new MatchingMetaInfoHolder(metaStateEvent, 0, 1,
-                metaStreamEventWithStartEnd.getLastInputDefinition(),
-                tableDefinition, UNKNOWN_STATE);
+                metaStreamEvent.getLastInputDefinition(), metaStoreEvent.getLastInputDefinition(), UNKNOWN_STATE);
     }
 
     public AggregationDefinition getAggregationDefinition() {
@@ -212,12 +203,12 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             if (!isDistributed && !isFirstEventArrived) {
                 // No need to initialise executors if it is distributed
-                recreateInMemoryData(false);
+                initialiseExecutors(false);
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
-                    aggregationDefinition, incrementalExecutorMap, aggregationTables, baseExecutorsForFind,
-                    outputExpressionExecutors, siddhiQueryContext, aggregateProcessExpressionExecutorsListForFind,
-                    groupByKeyGeneratorList, shouldUpdateTimestamp);
+                    incrementalExecutorMap, aggregateProcessingExecutorsMap, groupByKeyGeneratorMap,
+                    shouldUpdateTimestamp);
+
         } finally {
             SnapshotService.getSkipStateStorageThreadLocal().set(null);
             if (latencyTrackerFind != null &&
@@ -245,7 +236,7 @@ public class AggregationRuntime implements MemoryCalculable {
         List<String> lowerGranularityAttributes = new ArrayList<>();
         if (isDistributed) {
             //Add additional attributes to get base aggregation timestamps based on current timestamps
-            // for values calculated in inmemory in the shards
+            // for values calculated in in-memory in the shards
             for (int i = 0; i < lowerGranularitySize; i++) {
                 String attributeName = "_AGG_TIMESTAMP_FILTER_" + i;
                 additionalAttributes.add(new Attribute(attributeName, Attribute.Type.LONG));
@@ -255,31 +246,36 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Get table definition. Table definitions for all the tables used to persist aggregates are similar.
         // Therefore it's enough to get the definition from one table.
-        AbstractDefinition tableDefinition = ((Table) aggregationTables.values().toArray()[0]).getTableDefinition();
+        AbstractDefinition tableDefinition = aggregationTables.get(incrementalDurations.get(0)).getTableDefinition();
+
+        boolean isStoreQuery = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1;
 
         // Alter existing meta stream event or create new one if a meta stream doesn't exist
         // After calling this method the original MatchingMetaInfoHolder's meta stream event would be altered
-        MetaStreamEvent newMetaStreamEventWithStartEnd = createNewMetaStreamEventWithStartEnd(matchingMetaInfoHolder,
-                additionalAttributes);
-        MatchingMetaInfoHolder alteredMatchingMetaInfoHolder = null;
-
         // Alter meta info holder to contain stream event and aggregate both when it's a store query
-        if (matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1) {
-            matchingMetaInfoHolder = alterMetaInfoHolderForStoreQuery(newMetaStreamEventWithStartEnd,
+        MetaStreamEvent metaStreamEventForTableLookups;
+        if (isStoreQuery) {
+            metaStreamEventForTableLookups = alterMetaStreamEvent(true, new MetaStreamEvent(), additionalAttributes);
+            matchingMetaInfoHolder = alterMetaInfoHolderForStoreQuery(metaStreamEventForTableLookups,
                     matchingMetaInfoHolder);
-            alteredMatchingMetaInfoHolder = matchingMetaInfoHolder;
+        } else {
+            metaStreamEventForTableLookups = alterMetaStreamEvent(false,
+                    matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0), additionalAttributes);
         }
 
+
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
-        MatchingMetaInfoHolder streamTableMetaInfoHolderWithStartEnd = createNewStreamTableMetaInfoHolder(
-                newMetaStreamEventWithStartEnd, tableDefinition,
+        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition,
                 matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId());
+
+        // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
+        MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
+                metaStreamEventForTableLookups, metaStoreEventForTableLookups);
 
         // Create per expression executor
         ExpressionExecutor perExpressionExecutor;
         if (per != null) {
-            perExpressionExecutor = ExpressionParser.parseExpression(per,
-                    matchingMetaInfoHolder.getMetaStateEvent(),
+            perExpressionExecutor = ExpressionParser.parseExpression(per, matchingMetaInfoHolder.getMetaStateEvent(),
                     matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
                     false, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
             if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
@@ -306,21 +302,6 @@ public class AggregationRuntime implements MemoryCalculable {
                     "definition for granularity");
         }
 
-        // Create within expression
-        Expression timeFilterExpression;
-        if (processingOnExternalTime) {
-            timeFilterExpression = Expression.variable(AGG_EXTERNAL_TIMESTAMP_COL);
-        } else {
-            timeFilterExpression = Expression.variable(AGG_START_TIMESTAMP_COL);
-        }
-        Expression withinExpression;
-        Expression start = Expression.variable(additionalAttributes.get(0).getName());
-        Expression end = Expression.variable(additionalAttributes.get(1).getName());
-        Expression compareWithStartTime = Compare.compare(start, Compare.Operator.LESS_THAN_EQUAL,
-                timeFilterExpression);
-        Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
-        withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
-
         // Create start and end time expression
         Expression startEndTimeExpression;
         ExpressionExecutor startTimeEndTimeExpressionExecutor;
@@ -340,6 +321,21 @@ public class AggregationRuntime implements MemoryCalculable {
             throw new SiddhiAppCreationException("Syntax Error : Aggregation read query must contain a `within` " +
                     "definition for filtering of aggregation data.");
         }
+
+        // Create within expression
+        Expression timeFilterExpression;
+        if (isProcessingOnExternalTime) {
+            timeFilterExpression = Expression.variable(AGG_EXTERNAL_TIMESTAMP_COL);
+        } else {
+            timeFilterExpression = Expression.variable(AGG_START_TIMESTAMP_COL);
+        }
+        Expression withinExpression;
+        Expression start = Expression.variable(additionalAttributes.get(0).getName());
+        Expression end = Expression.variable(additionalAttributes.get(1).getName());
+        Expression compareWithStartTime = Compare.compare(start, Compare.Operator.LESS_THAN_EQUAL,
+                timeFilterExpression);
+        Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
+        withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
         List<ExpressionExecutor> timestampFilterExecutors = new ArrayList<>();
         if (isDistributed) {
@@ -361,18 +357,18 @@ public class AggregationRuntime implements MemoryCalculable {
         // Combine with and on condition for table query
         AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
         AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
-                newMetaStreamEventWithStartEnd.getInputReferenceId(),
-                newMetaStreamEventWithStartEnd.getLastInputDefinition().getAttributeList(),
+                metaStreamEventForTableLookups.getInputReferenceId(),
+                metaStreamEventForTableLookups.getLastInputDefinition().getAttributeList(),
                 this.tableAttributesNameList
         );
         aggregationExpressionBuilder.build(expressionVisitor);
         Expression reducedExpression = expressionVisitor.getReducedExpression();
         Expression withinExpressionTable = Expression.and(withinExpression, reducedExpression);
 
-        List<VariableExpressionExecutor> startEndExpressionExecutorList = new ArrayList<>();
+        List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
-                    streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList, tableMap,
+                    metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups, tableMap,
                     siddhiQueryContext);
             withinTableCompiledConditions.put(entry.getKey(), withinTableCompileCondition);
         }
@@ -381,8 +377,8 @@ public class AggregationRuntime implements MemoryCalculable {
         // This compile condition is used to check whether the running aggregates (in-memory data)
         // are within given duration
         withinInMemoryCompileCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true),
-                withinExpression, streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList,
-                tableMap, siddhiQueryContext);
+                withinExpression, metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups, tableMap,
+                siddhiQueryContext);
 
         // Create compile condition for in-memory data, in case of distributed
         // Look at the lower level granularities
@@ -391,7 +387,7 @@ public class AggregationRuntime implements MemoryCalculable {
         Expression lowerGranularity;
         if (isDistributed) {
             for (int i = 0; i < lowerGranularitySize; i++) {
-                if (processingOnExternalTime) {
+                if (isProcessingOnExternalTime) {
                     lowerGranularity = Expression.and(
                             Expression.compare(
                                     Expression.variable("AGG_TIMESTAMP"),
@@ -411,13 +407,13 @@ public class AggregationRuntime implements MemoryCalculable {
                 TimePeriod.Duration duration = this.incrementalDurations.get(i);
                 String tableName = aggregationName + "_" + duration.toString();
                 CompiledCondition compiledCondition = tableMap.get(tableName).compileCondition(lowerGranularity,
-                        streamTableMetaInfoHolderWithStartEnd, startEndExpressionExecutorList, tableMap,
+                        metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups, tableMap,
                         siddhiQueryContext);
                 withinTableLowerGranularityCompileCondition.put(duration, compiledCondition);
             }
         }
 
-        QueryParserHelper.reduceMetaComplexEvent(streamTableMetaInfoHolderWithStartEnd.getMetaStateEvent());
+        QueryParserHelper.reduceMetaComplexEvent(metaInfoHolderForTableLookups.getMetaStateEvent());
 
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as
@@ -426,19 +422,21 @@ public class AggregationRuntime implements MemoryCalculable {
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
-        return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
-                withinTableLowerGranularityCompileCondition, onCompiledCondition, tableMetaStreamEvent,
-                aggregateMetaSteamEvent, additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
-                startTimeEndTimeExpressionExecutor, timestampFilterExecutors, processingOnExternalTime,
-                incrementalDurations, isDistributed, streamTableMetaInfoHolderWithStartEnd,
-                startEndExpressionExecutorList);
+        return new IncrementalAggregateCompileCondition(aggregationName, isProcessingOnExternalTime, isDistributed,
+                incrementalDurations, aggregationTables, outputExpressionExecutors,
+                withinTableCompiledConditions, withinInMemoryCompileCondition,
+                withinTableLowerGranularityCompileCondition, onCompiledCondition, additionalAttributes,
+                perExpressionExecutor, startTimeEndTimeExpressionExecutor, timestampFilterExecutors,
+                aggregateMetaSteamEvent, matchingMetaInfoHolder, metaInfoHolderForTableLookups,
+                variableExpExecutorsForTableLookups);
+
     }
 
     public void startPurging() {
-        incrementalDataPurging.executeIncrementalDataPurging();
+        incrementalDataPurger.executeIncrementalDataPurging();
     }
 
-    public synchronized void recreateInMemoryData(boolean isFirstEventArrived) {
+    public void initialiseExecutors(boolean isFirstEventArrived) {
         // State only updated when first event arrives to IncrementalAggregationProcessor
         if (isFirstEventArrived) {
             this.isFirstEventArrived = true;
@@ -447,7 +445,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
             }
         }
-            this.recreateInMemoryData.recreateInMemoryData();
+        this.incrementalExecutorsInitialiser.initialiseExecutors();
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
