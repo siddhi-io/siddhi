@@ -189,12 +189,10 @@ public class CacheExpiryHandlerRunnable {
         cacheTable.delete(generateDeleteEventChunk(), cc);
     }
 
-    public Runnable checkAndExpireCache(int cacheMode) {
+    public Runnable checkAndExpireCache() {
         class CheckAndExpireCache implements Runnable {
-//            int cacheMode;
 
-            public CheckAndExpireCache(int cacheMode) {
-//                this.cacheMode = cacheMode;
+            public CheckAndExpireCache() {
             }
 
             @Override
@@ -203,6 +201,6 @@ public class CacheExpiryHandlerRunnable {
 //                simpleExpire();
             }
         }
-        return new CheckAndExpireCache(cacheMode);
+        return new CheckAndExpireCache();
     }
 }

@@ -49,8 +49,8 @@ public class CacheMissTestCase {
         log.info("== Table with cache INSERT tests completed ==");
     }
 
-    @Test(description = "deleteFromTableWithCacheTest1")
-    public void deleteFromTableWithCacheTest1() throws InterruptedException, SQLException {
+    @Test(description = "cacheMissTestCase1")
+    public void cacheMissTestCase1() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
@@ -87,6 +87,59 @@ public class CacheMissTestCase {
         } catch (NullPointerException ignore) {
 
         }
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.contains("sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("sending results from store table"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from store table"), 1);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "cacheMissTestCase2")
+    public void cacheMissTestCase2() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"1\"))\n" +
+                "@PrimaryKey('symbol') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on StockTable.symbol == symbol AND StockTable.price == price AND StockTable.volume == volume;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
+
+        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        Thread.sleep(1000);
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"WSO2\" ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
 
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();

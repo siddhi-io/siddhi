@@ -140,7 +140,7 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
                                                  Long offset) {
         CompiledSelectionWithCache compiledSelectionWithCache;
-        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent();
+        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent().clone();
 
         ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
         int metaPosition = SiddhiConstants.UNKNOWN_STATE;
