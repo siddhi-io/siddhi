@@ -37,6 +37,10 @@ import java.lang.annotation.Target;
  *                          {@literal @}Parameter(name = "firstParameterName", type = {DataType.INT, DataType.LONG}),
  *                          {@literal @}Parameter(name = "SecondParameterName", type = {DataType.STRING})
  *                      },
+ *                      parameterOverloads = {
+ *                           {@literal @}ParameterOverload(parameterNames={"firstParameterName","secondParameterName"}),
+ *                           {@literal @}ParameterOverload(parameterNames={"firstParameterName"})
+ *                       },
  *                      returnAttributes = {@literal @}ReturnAttribute(type = {DataType.INT, DataType.LONG}),
  *                      examples = {{@literal @}Example({"Example of the CustomExtension usage 1"}),
  *                                  {@literal @}Example({"Example of the CustomExtension usage 2"})}
@@ -57,6 +61,8 @@ public @interface Extension {
     String description() default "";
 
     Parameter[] parameters() default {};
+
+    ParameterOverload[] parameterOverloads() default {};
 
     SystemParameter[] systemParameter() default {};
 

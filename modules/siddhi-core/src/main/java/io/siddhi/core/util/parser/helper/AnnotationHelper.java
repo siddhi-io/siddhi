@@ -18,6 +18,8 @@
 
 package io.siddhi.core.util.parser.helper;
 
+import io.siddhi.annotation.Extension;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.annotation.Element;
 
 import java.util.ArrayList;
@@ -68,6 +70,15 @@ public class AnnotationHelper {
             regexs.add(createRegexFromGlob("*.*"));
         }
         return regexs;
-
     }
+
+    public static String createAnnotationKey(Extension annotation) {
+        if (!annotation.namespace().isEmpty()) {
+            return annotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
+                    annotation.name();
+        } else {
+            return annotation.name();
+        }
+    }
+
 }

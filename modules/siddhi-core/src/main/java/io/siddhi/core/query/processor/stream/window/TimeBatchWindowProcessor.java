@@ -20,6 +20,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -67,7 +68,7 @@ import java.util.Map;
                 @Parameter(name = "start.time",
                         description = "This specifies an offset in milliseconds in order to start the " +
                                 "window at a time different to the standard time.",
-                        type = {DataType.INT},
+                        type = {DataType.INT, DataType.LONG},
                         optional = true,
                         defaultValue = "Timestamp of first event"),
                 @Parameter(name = "stream.current.event",
@@ -76,6 +77,12 @@ import java.util.Map;
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "false")
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"window.time"}),
+                @ParameterOverload(parameterNames = {"window.time", "start.time"}),
+                @ParameterOverload(parameterNames = {"window.time", "stream.current.event"}),
+                @ParameterOverload(parameterNames = {"window.time", "start.time", "stream.current.event"})
         },
         examples = {
                 @Example(

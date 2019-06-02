@@ -24,6 +24,7 @@ import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.extension.validator.InputParameterValidator;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -32,6 +33,7 @@ import org.apache.log4j.Logger;
 /**
  * Parent abstract class for Function Executors. Function executor will have one or more input parameters and single
  * return value.
+ *
  * @param <S> current state for the Function Executor
  */
 public abstract class FunctionExecutor<S extends State> implements ExpressionExecutor {
@@ -54,6 +56,7 @@ public abstract class FunctionExecutor<S extends State> implements ExpressionExe
         try {
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             attributeSize = attributeExpressionExecutors.length;
+            InputParameterValidator.validateExpressionExecutors(this, attributeExpressionExecutors);
             StateFactory<S> stateFactory = init(attributeExpressionExecutors, configReader, this.siddhiQueryContext);
             stateHolder = this.siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, stateFactory);
         } catch (Throwable t) {

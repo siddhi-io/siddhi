@@ -1297,9 +1297,9 @@ log(<STRING> priority, <STRING> log.message, <BOOL> is.event.logged)
     <tr>
         <td style="vertical-align: top">log.message</td>
         <td style="vertical-align: top; word-wrap: break-word">This message will be logged.</td>
-        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top"><siddhi app name> :</td>
         <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
@@ -1346,6 +1346,14 @@ insert into barStream;
 <p style="word-wrap: break-word">This will only log fooStream:events.</p>
 
 <span id="example-5" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 5</span>
+```
+from fooStream#log()
+select *
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will only log fooStream:events.</p>
+
+<span id="example-6" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 6</span>
 ```
 from fooStream#log("Sample Event :")
 select *

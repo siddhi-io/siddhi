@@ -19,11 +19,14 @@ package io.siddhi.annotation.processor;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -92,7 +95,7 @@ public class AbstractAnnotationProcessor {
             } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
                 //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
-                                "name {0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
+                                "name {0} annotated in class {1} is not in proper format 'abc.def.ghi'.",
                         parameterName, extensionClassFullName));
             }
             //Check if the @Parameter description is empty.
@@ -112,6 +115,45 @@ public class AbstractAnnotationProcessor {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                             "name:{0} -> defaultValue annotated in class {1} cannot be null or empty for the " +
                             "optional parameter.", parameterName, extensionClassFullName));
+                }
+            }
+        }
+    }
+
+    /**
+     * This method uses for validate @Extension / @ParameterOverload element.
+     *
+     * @param parameterOverloads parameter array which needs to be validate.
+     * @param parameters         the set of supported parameters
+     * @throws AnnotationValidationException whenever if the validate rule violate, throws the annotation validate
+     *                                       exception with proper message.
+     */
+    public void parameterOverloadValidation(ParameterOverload[] parameterOverloads, Parameter[] parameters)
+            throws AnnotationValidationException {
+
+        Map<String, Parameter> parameterMap = new HashMap<>();
+        for (Parameter parameter : parameters) {
+            parameterMap.put(parameter.name(), parameter);
+        }
+
+        for (ParameterOverload parameterOverload : parameterOverloads) {
+            String[] overloadParameterNames = parameterOverload.parameterNames();
+            for (String overloadParameterName : overloadParameterNames) {
+                //Check if the @Parameter name is empty.
+                if (overloadParameterName.isEmpty()) {
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                                    "@ParameterOverload -> parameterNames annotated in class {0} is null or empty.",
+                            extensionClassFullName));
+                } else if (!PARAMETER_NAME_PATTERN.matcher(overloadParameterName).find()) {
+                    //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                            "@ParameterOverload -> parameterNames {0} annotated in class {1} is not " +
+                            "in proper format 'abc.def.ghi'.", overloadParameterName, extensionClassFullName));
+                }
+                if (!parameterMap.containsKey(overloadParameterName)) {
+                    throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                            "@ParameterOverload -> parameterNames {0} annotated in class {1} is not defined in " +
+                            "@Extension -> @Parameter.", overloadParameterName, extensionClassFullName));
                 }
             }
         }

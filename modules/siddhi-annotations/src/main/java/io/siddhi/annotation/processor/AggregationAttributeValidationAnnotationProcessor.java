@@ -61,7 +61,7 @@ public class AggregationAttributeValidationAnnotationProcessor extends AbstractA
             //super classes except the Sink & SinkMapper.
             if (parameter.dynamic()) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter ->" +
-                                " name:{0} -> dynamic property cannot be true annotated in class {1}.", parameterName,
+                                " name:{0} -> dynamic property cannot be annotated true in class {1}.", parameterName,
                         extensionClassFullName));
             }
         }
