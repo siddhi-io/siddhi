@@ -678,4 +678,9 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
         this.isOperationLogEnabled = true;
     }
+
+    @Override
+    public int size() {
+        return primaryKeyData.size();
+    }
 }

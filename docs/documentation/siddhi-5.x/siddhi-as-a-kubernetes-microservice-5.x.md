@@ -7,16 +7,17 @@ Here, the Siddhi applications containing stream processing logic can be written 
 
 ## Prerequisites 
 
-* A Kubernetes cluster v1.11.8 or higher.
+* A Kubernetes cluster v1.10.11 or higher. 
 
     1. [Minikube](https://github.com/kubernetes/minikube#installation)
     2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
-    3. Or any other Kubernetes cluster
+    3. [Docker for Mac](https://docs.docker.com/docker-for-mac/install/)
+    4. Or any other Kubernetes cluster
    
 * Admin privileges to install Siddhi operator  
 
 !!! Note "Minikube"
-    For Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
+    Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
     <pre>
     minikube addons enable ingress
     </pre>
@@ -28,13 +29,17 @@ Here, the Siddhi applications containing stream processing logic can be written 
             --clusterrole=cluster-admin --user=your-address@email.com
     </pre>  
     
+!!! Note "Docker for Mac"
+    Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Docker for mac following the official [documentation](https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac)
+    or disable Siddhi operator's [automatically ingress creation](#deploy-siddhi-apps-without-ingress-creation).
+    
 ## Install Siddhi Operator
 
 To install the Siddhi Kubernetes operator run the following commands.
 
 ```
-kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/prerequisites.yaml
-kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/siddhi-operator.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/prerequisites.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/siddhi-operator.yaml
 ```
 You can verify the installation by making sure the following deployments are running in your Kubernetes cluster. 
 
@@ -109,6 +114,9 @@ Then, add the host `siddhi` and related external IP (`ADDRESS`) to the `/etc/hos
 
 !!! Note "Minikube"
     For Minikube, you have to use Minikube IP as the external IP. Hence, run `minikube ip` command to get the IP of the Minikube cluster.
+    
+!!! Note "Docker for Mac"
+    For Docker for Mac, you have to use `0.0.0.0` as the external IP.    
 
 Use the following CURL command to send events to `monitor-app` deployed in Kubernetes.
 

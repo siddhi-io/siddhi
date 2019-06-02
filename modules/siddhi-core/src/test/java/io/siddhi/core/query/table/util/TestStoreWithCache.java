@@ -19,31 +19,25 @@ package io.siddhi.core.query.table.util;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
-import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.table.record.AbstractRecordTable;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
-import io.siddhi.query.api.util.AnnotationHelper;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 
 /**
- * Custom store for testing purposes.
+ * Custom store for testing of in memory cache for store tables.
  */
 @Extension(
-        name = "test",
+        name = "testWithCache",
         namespace = "store",
         description = "Using this implementation a testing for store extension can be done.",
         examples = {
@@ -54,97 +48,77 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                 )
         }
 )
-public class TestStore extends AbstractRecordTable {
-    public static Map<String, String> systemConfigs;
-
+public class TestStoreWithCache extends AbstractQueryableRecordTable {
     @Override
-    protected void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext, StreamEventCloner
-            storeEventCloner, ConfigReader configReader) {
+    protected void connect() throws ConnectionUnavailableException {
 
     }
 
     @Override
-    protected void connectAndLoadCache() throws ConnectionUnavailableException {
+    protected RecordIterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
+                                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
+        return null;
+    }
 
+    @Override
+    protected CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
+                                                 List<ExpressionBuilder> groupByExpressionBuilder,
+                                                 ExpressionBuilder havingExpressionBuilder,
+                                                 List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
+                                                 Long offset) {
+        return null;
     }
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
-        systemConfigs = new HashMap<>();
-        systemConfigs = AnnotationHelper.getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations())
-                .getElements().stream().collect(Collectors.toMap(
-                        Element::getKey, Element::getValue
-                ));
+
     }
 
     @Override
     protected void add(List<Object[]> records) throws ConnectionUnavailableException {
-        //Not Applicable
+
     }
 
     @Override
     protected RecordIterator<Object[]> find(Map<String, Object> findConditionParameterMap,
-                                            CompiledCondition compiledCondition)
-            throws ConnectionUnavailableException {
-        //Not Applicable
+                                            CompiledCondition compiledCondition) throws ConnectionUnavailableException {
         return null;
     }
 
     @Override
     protected boolean contains(Map<String, Object> containsConditionParameterMap,
                                CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        //Not Applicable
         return false;
     }
 
     @Override
     protected void delete(List<Map<String, Object>> deleteConditionParameterMaps,
                           CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        //Not Applicable
-    }
 
+    }
 
     @Override
-    protected void update(CompiledCondition updateCondition,
-                          List<Map<String, Object>> updateConditionParameterMaps,
+    protected void update(CompiledCondition updateCondition, List<Map<String, Object>> updateConditionParameterMaps,
                           Map<String, CompiledExpression> updateSetExpressions,
                           List<Map<String, Object>> updateSetParameterMaps) throws ConnectionUnavailableException {
-        //Not Applicable
+
     }
 
-    /**
-     * Try updating the records if they exist else add the records
-     *
-     * @param updateCondition              the compiledCondition against which records should be matched for update
-     * @param updateConditionParameterMaps map of matching StreamVariable Ids and their values corresponding to the
-     *                                     compiled condition based on which the records will be updated
-     * @param updateSetExpressions         the set of updates mappings and related complied expressions
-     * @param updateSetParameterMaps       map of matching StreamVariable Ids and their values corresponding to the
-     *                                     update set
-     * @param addingRecords                the values for adding new records if the update condition did not match
-     */
     @Override
     protected void updateOrAdd(CompiledCondition updateCondition,
                                List<Map<String, Object>> updateConditionParameterMaps,
                                Map<String, CompiledExpression> updateSetExpressions,
                                List<Map<String, Object>> updateSetParameterMaps,
-                               List<Object[]> addingRecords)
-            throws ConnectionUnavailableException {
-        //Not Applicable
+                               List<Object[]> addingRecords) throws ConnectionUnavailableException {
+
     }
 
     @Override
     protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
-        return null;    //not implemented
+        return null;
     }
 
-    /**
-     * Compiles the expression in a set clause
-     *
-     * @param expressionBuilder helps visiting the conditions in order to compile the condition
-     * @return compiled expression that can be used for matching events in find, contains, delete, update and
-     * updateOrAdd
-     */
     @Override
     protected CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder) {
         return null;
@@ -152,11 +126,11 @@ public class TestStore extends AbstractRecordTable {
 
     @Override
     protected void disconnect() {
-        //Not Applicable
+
     }
 
     @Override
     protected void destroy() {
-        //Not Applicable
+
     }
 }

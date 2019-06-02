@@ -250,13 +250,17 @@ public class ExpressionParser {
                                 processingMode, outputExpectsExpiredEvents, siddhiQueryContext));
             } else if (expression instanceof Compare) {
                 if (((Compare) expression).getOperator() == Compare.Operator.EQUAL) {
-                    return parseEqualCompare(
-                            parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState,
-                                    tableMap, executorList, groupBy, defaultStreamEventIndex,
-                                    processingMode, outputExpectsExpiredEvents, siddhiQueryContext),
-                            parseExpression(((Compare) expression).getRightExpression(), metaEvent, currentState,
-                                    tableMap, executorList, groupBy, defaultStreamEventIndex,
-                                    processingMode, outputExpectsExpiredEvents, siddhiQueryContext));
+                    Expression leftExpression = ((Compare) expression).getLeftExpression();
+                    Expression rightExpression = ((Compare) expression).getRightExpression();
+                    ExpressionExecutor leftExpressionExecutor = parseExpression(
+                            leftExpression, metaEvent, currentState,
+                            tableMap, executorList, groupBy, defaultStreamEventIndex,
+                            processingMode, outputExpectsExpiredEvents, siddhiQueryContext);
+                    ExpressionExecutor rightExpressionExecutor = parseExpression(
+                            rightExpression, metaEvent, currentState,
+                            tableMap, executorList, groupBy, defaultStreamEventIndex,
+                            processingMode, outputExpectsExpiredEvents, siddhiQueryContext);
+                    return parseEqualCompare(leftExpressionExecutor, rightExpressionExecutor);
                 } else if (((Compare) expression).getOperator() == Compare.Operator.NOT_EQUAL) {
                     return parseNotEqualCompare(
                             parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState,

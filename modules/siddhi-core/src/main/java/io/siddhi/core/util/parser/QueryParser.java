@@ -251,6 +251,4 @@ public class QueryParser {
         }
         return queryRuntime;
     }
-
-
 }

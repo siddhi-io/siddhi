@@ -201,6 +201,7 @@ public class QueryParserHelper {
                         .getCompiledCondition() instanceof IncrementalAggregateCompileCondition) {
                     IncrementalAggregateCompileCondition compiledCondition = (IncrementalAggregateCompileCondition) (
                             (JoinProcessor) processor).getCompiledCondition();
+                    compiledCondition.init();
                     ComplexEventPopulater complexEventPopulater = StreamEventPopulaterFactory
                             .constructEventPopulator(metaStreamEvent, 0, compiledCondition.getAdditionalAttributes());
                     compiledCondition.setComplexEventPopulater(complexEventPopulater);
