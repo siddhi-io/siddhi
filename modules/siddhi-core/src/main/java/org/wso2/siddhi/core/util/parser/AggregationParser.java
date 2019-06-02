@@ -514,35 +514,8 @@ public class AggregationParser {
             Expression[] baseAggregators = incrementalAttributeAggregator.getBaseAggregators();
 
             for (int i = 0; i < baseAttributes.length; i++) {
-                for (int i1 = i; i1 < incrementalAttributeAggregators.size(); i1++) {
-                    IncrementalAttributeAggregator otherAttributeAggregator = incrementalAttributeAggregators.get(i1);
-                    if (otherAttributeAggregator != incrementalAttributeAggregator) {
-                        Attribute[] otherBaseAttributes = otherAttributeAggregator.getBaseAttributes();
-                        Expression[] otherBaseAttributeInitialValues = otherAttributeAggregator
-                                .getBaseAttributeInitialValues();
-                        Expression[] otherBaseAggregators = otherAttributeAggregator.getBaseAggregators();
-                        for (int j = 0; j < otherBaseAttributes.length; j++) {
-                            if (baseAttributes[i].equals(otherBaseAttributes[j])) {
-                                if (!baseAttributeInitialValues[i].equals(otherBaseAttributeInitialValues[j])) {
-                                    throw new SiddhiAppCreationException("BaseAttributes having same name should " +
-                                            "be defined with same initial values, but baseAttribute '" +
-                                            baseAttributes[i] + "' is defined in '" +
-                                            incrementalAttributeAggregator.getClass().getName() + "' and '" +
-                                            otherAttributeAggregator.getClass().getName() +
-                                            "' with different initial values.");
-                                }
-                                if (!baseAggregators[i].equals(otherBaseAggregators[j])) {
-                                    throw new SiddhiAppCreationException("BaseAttributes having same name should " +
-                                            "be defined with same baseAggregators, but baseAttribute '" +
-                                            baseAttributes[i] + "' is defined in '" +
-                                            incrementalAttributeAggregator.getClass().getName() + "' and '" +
-                                            otherAttributeAggregator.getClass().getName() +
-                                            "' with different baseAggregators.");
-                                }
-                            }
-                        }
-                    }
-                }
+                validateBaseAggregators(incrementalAttributeAggregators, incrementalAttributeAggregator, baseAttributes,
+                        baseAttributeInitialValues, baseAggregators, i);
 
                 if (!finalBaseAttributes.contains(baseAttributes[i])) {
                     finalBaseAttributes.add(baseAttributes[i]);
@@ -551,6 +524,41 @@ public class AggregationParser {
                     incomingExpressionExecutors.add(ExpressionParser.parseExpression(baseAttributeInitialValues[i],
                             incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
                             siddhiAppContext, false, 0, aggregatorName));
+                }
+            }
+        }
+    }
+
+    private static void validateBaseAggregators(List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
+                                                IncrementalAttributeAggregator incrementalAttributeAggregator,
+                                                Attribute[] baseAttributes, Expression[] baseAttributeInitialValues,
+                                                Expression[] baseAggregators, int i) {
+        for (int i1 = i; i1 < incrementalAttributeAggregators.size(); i1++) {
+            IncrementalAttributeAggregator otherAttributeAggregator = incrementalAttributeAggregators.get(i1);
+            if (otherAttributeAggregator != incrementalAttributeAggregator) {
+                Attribute[] otherBaseAttributes = otherAttributeAggregator.getBaseAttributes();
+                Expression[] otherBaseAttributeInitialValues = otherAttributeAggregator
+                        .getBaseAttributeInitialValues();
+                Expression[] otherBaseAggregators = otherAttributeAggregator.getBaseAggregators();
+                for (int j = 0; j < otherBaseAttributes.length; j++) {
+                    if (baseAttributes[i].equals(otherBaseAttributes[j])) {
+                        if (!baseAttributeInitialValues[i].equals(otherBaseAttributeInitialValues[j])) {
+                            throw new SiddhiAppCreationException("BaseAttributes having same name should " +
+                                    "be defined with same initial values, but baseAttribute '" +
+                                    baseAttributes[i] + "' is defined in '" +
+                                    incrementalAttributeAggregator.getClass().getName() + "' and '" +
+                                    otherAttributeAggregator.getClass().getName() +
+                                    "' with different initial values.");
+                        }
+                        if (!baseAggregators[i].equals(otherBaseAggregators[j])) {
+                            throw new SiddhiAppCreationException("BaseAttributes having same name should " +
+                                    "be defined with same baseAggregators, but baseAttribute '" +
+                                    baseAttributes[i] + "' is defined in '" +
+                                    incrementalAttributeAggregator.getClass().getName() + "' and '" +
+                                    otherAttributeAggregator.getClass().getName() +
+                                    "' with different baseAggregators.");
+                        }
+                    }
                 }
             }
         }

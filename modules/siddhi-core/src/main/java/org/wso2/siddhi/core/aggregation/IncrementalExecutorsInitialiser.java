@@ -94,31 +94,14 @@ public class IncrementalExecutorsInitialiser {
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
-        // Get all events from table corresponding to max duration
+        // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery;
-        if (!isDistributed) {
-            storeQuery = StoreQuery.query()
-                    .from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
-                    .select(Selector.selector()
-                            .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
-                            .limit(Expression.value(1))
-                    );
-        } else {
-            storeQuery = StoreQuery.query().from(
-                    InputStore.store(tableForMaxDuration.getTableDefinition().getId())
-                            .on(Expression.compare(Expression.variable(AGG_SHARD_ID_COL), Compare.Operator.EQUAL,
-                                    Expression.value(shardId))))
-                    .select(Selector.selector()
-                            .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
-                            .limit(Expression.value(1))
-                    );
-        }
+        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
 
-        // Get latest event timestamp in tableForMaxDuration
+        // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
         events = storeQueryRuntime.execute();
         if (events != null) {
             Long lastData = (Long) events[events.length - 1].getData(0);
@@ -132,48 +115,10 @@ public class IncrementalExecutorsInitialiser {
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
+            // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            if (!isDistributed) {
-                if (endOFLatestEventTimestamp == null) {
-                    storeQuery = StoreQuery.query()
-                            .from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
-                } else {
-                    storeQuery = StoreQuery.query()
-                            .from(InputStore.store(recreateFromTable.getTableDefinition().getId())
-                                    .on(Expression.compare(
-                                            Expression.variable(AGG_START_TIMESTAMP_COL),
-                                            Compare.Operator.GREATER_THAN_EQUAL,
-                                            Expression.value(endOFLatestEventTimestamp)
-                                    )))
-                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
-                }
-            } else {
-                if (endOFLatestEventTimestamp == null) {
-                    storeQuery = StoreQuery.query().from(
-                            InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
-                                    Expression.compare(
-                                            Expression.variable(AGG_SHARD_ID_COL),
-                                            Compare.Operator.EQUAL,
-                                            Expression.value(shardId))))
-                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
-                } else {
-                    storeQuery = StoreQuery.query().from(
-                            InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
-                                    Expression.and(
-                                            Expression.compare(
-                                                    Expression.variable(AGG_SHARD_ID_COL),
-                                                    Compare.Operator.EQUAL,
-                                                    Expression.value(shardId)),
-                                            Expression.compare(
-                                                    Expression.variable(AGG_START_TIMESTAMP_COL),
-                                                    Compare.Operator.GREATER_THAN_EQUAL,
-                                                    Expression.value(endOFLatestEventTimestamp)))))
-                            .select(Selector.selector().orderBy(Expression.variable(AGG_START_TIMESTAMP_COL)));
-                }
-            }
-
+            storeQuery = getStoreQuery(recreateFromTable, false, endOFLatestEventTimestamp);
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -203,6 +148,51 @@ public class IncrementalExecutorsInitialiser {
                 }
             }
         }
-        isInitialised = true;
+        this.isInitialised = true;
+    }
+
+    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
+        Selector selector = Selector.selector();
+        if (isLargestGranularity) {
+            selector = selector
+                    .orderBy(
+                            Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
+                    .limit(Expression.value(1));
+        } else {
+            selector = selector.orderBy(Expression.variable(AGG_START_TIMESTAMP_COL));
+        }
+
+        InputStore inputStore;
+        if (!this.isDistributed) {
+            if (endOFLatestEventTimestamp == null) {
+                inputStore = InputStore.store(table.getTableDefinition().getId());
+            } else {
+                inputStore = InputStore.store(table.getTableDefinition().getId())
+                        .on(Expression.compare(
+                                Expression.variable(AGG_START_TIMESTAMP_COL),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(endOFLatestEventTimestamp)
+                        ));
+            }
+        } else {
+            if (endOFLatestEventTimestamp == null) {
+                inputStore = InputStore.store(table.getTableDefinition().getId()).on(
+                        Expression.compare(Expression.variable(AGG_SHARD_ID_COL), Compare.Operator.EQUAL,
+                                Expression.value(shardId)));
+            } else {
+                inputStore = InputStore.store(table.getTableDefinition().getId()).on(
+                        Expression.and(
+                                Expression.compare(
+                                        Expression.variable(AGG_SHARD_ID_COL),
+                                        Compare.Operator.EQUAL,
+                                        Expression.value(shardId)),
+                                Expression.compare(
+                                        Expression.variable(AGG_START_TIMESTAMP_COL),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.value(endOFLatestEventTimestamp))));
+            }
+        }
+
+        return StoreQuery.query().from(inputStore).select(selector);
     }
 }
