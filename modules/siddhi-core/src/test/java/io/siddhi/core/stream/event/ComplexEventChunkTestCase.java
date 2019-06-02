@@ -18,11 +18,13 @@
 
 package io.siddhi.core.stream.event;
 
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -216,5 +218,38 @@ public class ComplexEventChunkTestCase {
         streamEventChunk.remove();
     }
 
+    @Test
+    public void eventChunkTest5() {
+        //Test self looping events
+
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(true);
+
+        StreamEvent streamEvent1 = new StreamEvent(0, 0, 3);
+        streamEvent1.setOutputData(new Object[]{"IBM", 100L, 100L});
+
+        StreamEvent streamEvent2 = new StreamEvent(0, 0, 3);
+        streamEvent2.setOutputData(new Object[]{"WSO2", 200L, 100L});
+
+        StreamEvent streamEvent3 = new StreamEvent(0, 0, 3);
+        streamEvent3.setOutputData(new Object[]{"WSO2", 300L, 100L});
+
+        StreamEvent streamEvent4 = new StreamEvent(0, 0, 3);
+        streamEvent4.setOutputData(new Object[]{"WSO2", 400L, 100L});
+
+        streamEvent1.setNext(streamEvent2);
+        streamEvent2.setNext(streamEvent3);
+        streamEvent3.setNext(streamEvent4);
+        streamEvent4.setNext(streamEvent1);
+        complexEventChunk.add(streamEvent1);
+
+        Assert.assertTrue(complexEventChunk.getLast().getNext() == null);
+
+        while (complexEventChunk.hasNext()) {
+            count++;
+            complexEventChunk.next();
+        }
+
+        Assert.assertEquals(count, 4, "Event Count");
+    }
 
 }
