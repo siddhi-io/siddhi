@@ -162,6 +162,10 @@ Find the detail information on asking questions, providing feedback, reporting i
 - [ ] Support high available Siddhi deployment with NATS via Kubernetes CRD
 - [ ] Support distributed Siddhi deployment with NATS via Kubernetes CRD
 
+## Events
+
+[![Siddhi talk and workshop at BigData Days, Moscow (8-10 October 2019)](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/events/big-data-days-2019-siddhi-banner.png?raw=true "Big Data Days")](https://bigdatadays.ru/en/sriskandarajah-suhothayan/)
+
 ## Support 
 [WSO2](https://wso2.com/) provides production, and query support for Siddhi and its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>. For more details contact via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>
 
