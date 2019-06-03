@@ -36,6 +36,10 @@
         <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.core.event.stream.StreamEvent"/>
+        <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>

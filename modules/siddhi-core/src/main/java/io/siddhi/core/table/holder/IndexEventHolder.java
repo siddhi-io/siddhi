@@ -123,6 +123,14 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     }
 
+    public void replace(Object key, StreamEvent streamEvent) {
+        primaryKeyData.replace(key, streamEvent);
+    }
+
+//    public String getPrimaryKey(StreamEvent streamEvent) {
+//        primaryKeyData.
+//    }
+
     @Override
     public Set<Object> getAllPrimaryKeyValues() {
         if (primaryKeyData != null) {

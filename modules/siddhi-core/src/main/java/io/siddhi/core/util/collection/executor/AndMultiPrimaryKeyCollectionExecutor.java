@@ -63,6 +63,10 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
         }
     }
 
+    public List<ExpressionExecutor> getMultiPrimaryKeyExpressionExecutors() {
+        return multiPrimaryKeyExpressionExecutors;
+    }
+
     public Collection<StreamEvent> findEvents(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder) {
         return indexedEventHolder.findEvents(compositePrimaryKey, Compare.Operator.EQUAL,
                 constructPrimaryKeyValue(matchingEvent, multiPrimaryKeyExpressionExecutors));

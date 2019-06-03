@@ -58,8 +58,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class InMemoryTable extends Table {
 
     private TableDefinition tableDefinition;
-    private StreamEventCloner tableStreamEventCloner;
-    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    StreamEventCloner tableStreamEventCloner;
+    ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     StateHolder<TableState> stateHolder;
 
     @Override

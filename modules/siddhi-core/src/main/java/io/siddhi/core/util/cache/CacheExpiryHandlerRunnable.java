@@ -86,7 +86,7 @@ public class CacheExpiryHandlerRunnable {
         tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
         streamEventFactory = new StreamEventFactory(tableMetaStreamEvent);
 
-        rightExpressionForSubtract = new Variable("timestamp");
+        rightExpressionForSubtract = new Variable("timestamp"); // todo CACHE_TABLE_TIMESTAMP_ADDED siddhi constant
         ((Variable) rightExpressionForSubtract).setStreamId(cacheTable.getTableDefinition().getId());
         rightExpressionForCompare = new LongConstant(expiryTime);
         greaterThanOperator = Compare.Operator.GREATER_THAN;
@@ -165,7 +165,7 @@ public class CacheExpiryHandlerRunnable {
 
         dataCopyLoop:
         while (loadedDataFromStore != null) {
-            AbstractQueryableRecordTable.addStreamEventWithTimeStampToChunk(addingEventChunkWithTimestamp,
+            AbstractQueryableRecordTable.addRequiredFieldsToOutputData(addingEventChunkWithTimestamp,
                     loadedDataFromStore, siddhiAppContext);
             if (loadedDataFromStore.getNext() == null) {
                 break dataCopyLoop;

@@ -17,44 +17,9 @@
  */
 package io.siddhi.core.table;
 
-import io.siddhi.core.table.holder.IndexEventHolder;
-
 /**
- * Extension of InMemoryTable to be used as cache for store tables. This has methods for cache policies
+ * common interface for FIFO, LRU, and LFU cache tables
  */
-public class CacheTable extends InMemoryTable {
-    private String cachePolicy;
-
-    public void setCachePolicy(String cachePolicy) {
-        this.cachePolicy = cachePolicy;
-    }
-
-    public void deleteOneEntryUsingCachePolicy() {
-        if (cachePolicy.equals("FIFO")) {
-            deleteOneEntryUsingFIFO();
-        }
-    }
-
-    private void deleteOneEntryUsingFIFO() {
-        try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
-            Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
-
-            long minTimestamp = Long.MAX_VALUE;
-            Object keyOfMinTimestamp = null;
-
-            for (Object key: keys) {
-                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[data.length - 1];
-                if (timestamp < minTimestamp) {
-                    minTimestamp = timestamp;
-                    keyOfMinTimestamp = key;
-                }
-            }
-            indexEventHolder.deleteEvent(keyOfMinTimestamp);
-
-        } catch (ClassCastException ignored) {
-
-        }
-    }
+public interface CacheTable {
+    void deleteOneEntryUsingCachePolicy();
 }
