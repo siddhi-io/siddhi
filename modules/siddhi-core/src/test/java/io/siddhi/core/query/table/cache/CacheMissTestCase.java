@@ -20,6 +20,7 @@ package io.siddhi.core.query.table.cache;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.table.util.TestAppender;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
@@ -29,6 +30,7 @@ import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.sql.SQLException;
@@ -38,6 +40,15 @@ import java.util.List;
 
 public class CacheMissTestCase {
     private static final Logger log = Logger.getLogger(CachePreLoadingTestCase.class);
+    private int inEventCount;
+    private int removeEventCount;
+    private boolean eventArrived;
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
+    }
 
     @BeforeClass
     public static void startTest() {
@@ -157,7 +168,7 @@ public class CacheMissTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase3")
+    @Test(description = "cacheMissTestCase3") // using query api
     public void cacheMissTestCase3() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
@@ -206,9 +217,99 @@ public class CacheMissTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), false);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), true);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from store table"), 1);
+        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
+        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "cacheMissTestCase4") // using find api (join query)
+    public void cacheMissTestCase4() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"2\", cache.policy=\"FIFO\"))\n" +
+                "@PrimaryKey('symbol') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on StockTable.symbol == symbol AND StockTable.price == price AND StockTable.volume == volume;" +
+                "" +
+                "@info(name = 'query3') " +
+                "from CheckStockStream#window.length(1) join StockTable " +
+                " on CheckStockStream.symbol==StockTable.symbol " +
+                "select CheckStockStream.symbol as checkSymbol, StockTable.symbol as symbol, " +
+                "StockTable.volume as volume  " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.addCallback("query3", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2", "WSO2", 1L});
+                                break;
+                            default:
+                                Assert.assertSame(inEventCount, 1);
+                        }
+                    }
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
+        stockStream.send(new Object[]{"CISCO", 75.6f, 3L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"APPLE", 75.6f, 4L});
+        Thread.sleep(100);
+        checkStockStream.send(new Object[]{"WSO2"});
+
+//        Event[] events = siddhiAppRuntime.query("" +
+//                "from StockTable " +
+//                "on symbol == \"WSO2\" ");
+//        EventPrinter.print(events);
+//        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+//        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
+//        Assert.assertEquals(logMessages.contains("sending results from store table"), true);
+//        Assert.assertEquals(Collections.frequency(logMessages, "sending results from store table"), 1);
 
         siddhiAppRuntime.shutdown();
     }

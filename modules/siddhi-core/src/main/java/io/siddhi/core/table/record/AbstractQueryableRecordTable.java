@@ -667,14 +667,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         // handle compile condition type conv
         RecordStoreCompiledCondition recordStoreCompiledCondition;
-        CompiledConditionWithCache compiledConditionAggregation = null;
+        CompiledConditionWithCache compiledConditionWithCache = null;
         findMatchingEvent = matchingEvent;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            compiledConditionAggregation = (CompiledConditionWithCache)
+            compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionAggregation.getStoreCompileCondition());
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
         } else {
             recordStoreCompiledCondition =
                     ((RecordStoreCompiledCondition) compiledCondition);
@@ -687,13 +687,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         Iterator<Object[]> records;
+        StreamEvent cacheResults;
         // when table is smaller than max cache send results from cache
         if (cacheEnabled & storeTableSize <= maxCacheSize) {
-            assert compiledConditionAggregation != null;
+            assert compiledConditionWithCache != null;
             readWriteLock.readLock().lock();
             try {
-                StreamEvent cacheResults = cacheTable.find(compiledConditionAggregation.getCacheCompileCondition(),
+                cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                         matchingEvent);
+                log.info(siddhiAppContext.getName() + ": sending results from cache");
                 return cacheResults;
             } finally {
                 readWriteLock.readLock().unlock();
@@ -702,27 +704,54 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
                 readWriteLock.readLock().lock();
                 try {
-                    StreamEvent cacheResults = cacheTable.find(compiledConditionAggregation.getCacheCompileCondition(),
+                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
                     if (cacheResults != null) {
                         return cacheResults;
                     }
-                    if (recordTableHandler != null) {
-                        records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                                recordStoreCompiledCondition.compiledCondition);
-                    } else {
-                        records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-                    }
+                } finally {
+                    readWriteLock.readLock().unlock();
+                }
+                // cache miss
+                if (recordTableHandler != null) {
+                    records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                            recordStoreCompiledCondition.compiledCondition);
+                } else {
+                    records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+                }
+                if (records == null) {
+                    return null;
+                }
+                ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
+                Object[] recordSelectAll = records.next();
+                StreamEvent streamEvent = storeEventPool.newInstance();
+                streamEvent.setOutputData(new Object[recordSelectAll.length]);
+                System.arraycopy(recordSelectAll, 0, streamEvent.getOutputData(), 0, recordSelectAll.length);
+
+                if (cacheTable.size() == maxCacheSize) {
+                    ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
+                }
+                addStreamEventWithTimeStampToChunk(cacheMissEntry, streamEvent, siddhiAppContext);
+//                cacheMissEntry.add(streamEvent);
+                cacheTable.add(cacheMissEntry);
+                readWriteLock.readLock().lock();
+                try {
+                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                            matchingEvent);
+                    log.info(siddhiAppContext.getName() + ": sending results from cache");
+                    return cacheResults;
                 } finally {
                     readWriteLock.readLock().unlock();
                 }
             }
-            if (recordTableHandler != null) {
-                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                        recordStoreCompiledCondition.compiledCondition);
-            } else {
-                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-            }
+        }
+
+        // when cache is not enabled or cache query conditions are not satisfied
+        if (recordTableHandler != null) {
+            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                    recordStoreCompiledCondition.compiledCondition);
+        } else {
+            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
         }
 
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
@@ -962,7 +991,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     recordsFromSelectAll = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
                             csForSlectAll, outputAttributes);
                 }
-                if (!recordsFromSelectAll.hasNext()) {
+                if (recordsFromSelectAll == null) {
                     return null;
                 }
                 ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
@@ -975,7 +1004,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
                 addStreamEventWithTimeStampToChunk(cacheMissEntry, streamEvent, siddhiAppContext);
-                cacheMissEntry.add(streamEvent);
+//                cacheMissEntry.add(streamEvent);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
                 try {
@@ -991,7 +1020,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     readWriteLock.readLock().unlock();
                 }
             }
-            // when cache miss occurs OR query conditions are not satisfied check from store
+            // query conditions are not satisfied check from store/ cache not enabled
             if (recordTableHandler != null) {
                 records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
                         recordStoreCompiledCondition.compiledCondition,
@@ -1002,7 +1031,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         }
         addStreamEventToChunk(outputAttributes, streamEventComplexEventChunk, records);
-        log.warn(siddhiAppContext.getName() + ": sending results from store table");
+        log.info(siddhiAppContext.getName() + ": sending results from store table");
         return streamEventComplexEventChunk.getFirst();
     }
 
