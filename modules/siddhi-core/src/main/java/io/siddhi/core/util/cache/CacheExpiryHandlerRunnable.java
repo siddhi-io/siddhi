@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
@@ -165,8 +166,8 @@ public class CacheExpiryHandlerRunnable {
 
         dataCopyLoop:
         while (loadedDataFromStore != null) {
-            AbstractQueryableRecordTable.addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp,
-                    loadedDataFromStore, siddhiAppContext);
+            addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp,
+                    loadedDataFromStore, siddhiAppContext, storeTable.getCachePolicy(), true);
             if (loadedDataFromStore.getNext() == null) {
                 break dataCopyLoop;
             }

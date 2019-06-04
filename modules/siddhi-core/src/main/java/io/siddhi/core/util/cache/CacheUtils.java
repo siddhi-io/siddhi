@@ -17,6 +17,9 @@
  */
 package io.siddhi.core.util.cache;
 
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 
 /**
@@ -34,5 +37,61 @@ public class CacheUtils {
             streamEventCopy = streamEventCopy.getNext();
         }
         return chunkSize;
+    }
+
+    public static void addRequiredFieldsToDataForCache(Object addingEventChunkForCache, Object event,
+                                                       SiddhiAppContext siddhiAppContext, String cachePolicy,
+                                                       boolean cacheExpiryEnabled) {
+        if (event instanceof StreamEvent) {
+            StreamEvent eventForCache = checkPoliocyAndAddFields(event, siddhiAppContext, cachePolicy,
+                    cacheExpiryEnabled);
+            ((ComplexEventChunk<StreamEvent>) addingEventChunkForCache).add(eventForCache);
+        } else if (event instanceof StateEvent) {
+            StreamEvent eventForCache = checkPoliocyAndAddFields(((StateEvent) event).getStreamEvent(0),
+                    siddhiAppContext, cachePolicy, cacheExpiryEnabled);
+            StateEvent stateEvent = new StateEvent(1, eventForCache.getOutputData().length);
+            stateEvent.addEvent(0, eventForCache);
+            ((ComplexEventChunk<StateEvent>) addingEventChunkForCache).add(stateEvent);
+        }
+    }
+
+    private static StreamEvent checkPoliocyAndAddFields(Object event,
+                                                 SiddhiAppContext siddhiAppContext, String cachePolicy,
+                                                 boolean cacheExpiryEnabled) {
+        Object[] outputDataForCache = null;
+        Object[] outputData = ((StreamEvent) event).getOutputData();
+        if (cachePolicy.equals("FIFO")) {
+            outputDataForCache = new Object[outputData.length + 1];
+            outputDataForCache[outputDataForCache.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+        } else if (cacheExpiryEnabled) {
+            if (cachePolicy.equals("LRU")) {
+                outputDataForCache = new Object[outputData.length + 2];
+                outputDataForCache[outputDataForCache.length - 2] =
+                        outputDataForCache[outputDataForCache.length - 1] =
+                                siddhiAppContext.getTimestampGenerator().currentTime();
+            } else if (cachePolicy.equals("LFU")) {
+                outputDataForCache = new Object[outputData.length + 2];
+                outputDataForCache[outputDataForCache.length - 2] =
+                        siddhiAppContext.getTimestampGenerator().currentTime();
+                outputDataForCache[outputDataForCache.length - 1] = 1;
+            }
+        } else {
+            if (cachePolicy.equals("LRU")) {
+                outputDataForCache = new Object[outputData.length + 1];
+                outputDataForCache[outputDataForCache.length - 1] =
+                        siddhiAppContext.getTimestampGenerator().currentTime();
+            } else if (cachePolicy.equals("LFU")) {
+                outputDataForCache = new Object[outputData.length + 1];
+                outputDataForCache[outputDataForCache.length - 1] = 1;
+            }
+        }
+
+        assert outputDataForCache != null;
+        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
+        eventForCache.setOutputData(outputDataForCache);
+
+        return eventForCache;
     }
 }
