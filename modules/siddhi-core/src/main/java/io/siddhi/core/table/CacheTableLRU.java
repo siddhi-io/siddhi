@@ -17,10 +17,12 @@
  */
 package io.siddhi.core.table;
 
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
 import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
@@ -67,7 +69,6 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         TableState state = stateHolder.getState();
         try {
             if (((Operator) compiledCondition).contains(matchingEvent, state.eventHolder)) {
-                //todo: update last used time
                 String primaryKey;
 
                 if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
@@ -91,6 +92,62 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
+    }
+
+    @Override
+    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
+                       CompiledUpdateSet compiledUpdateSet) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
+            String primaryKey;
+
+            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                primaryKey = getPrimaryKey(compiledCondition, updatingEventChunk.getFirst());
+                StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+//                    StreamEvent foundEventCopy = foundEvent.clone();
+                if (usedEvent != null) {
+                    usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
+                    indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
+                }
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
+    }
+
+    private String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+        StringBuilder primaryKey = new StringBuilder();
+        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
+        Object[] data = streamEvent.getOutputData();
+
+        if (compiledCondition instanceof OverwriteTableIndexOperator) {
+            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
+            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
+                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
+                        getCollectionExecutor();
+                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
+                for (ExpressionExecutor ee : lis) {
+                    if (ee instanceof VariableExpressionExecutor) {
+                        VariableExpressionExecutor vee = (VariableExpressionExecutor) ee;
+                        primaryKey.append(data[vee.getPosition()[3]]);
+                        primaryKey.append(":-:");
+                    }
+                }
+            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
+                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
+                if (executor.getValueExpressionExecutor() instanceof VariableExpressionExecutor) {
+                    VariableExpressionExecutor vee = (VariableExpressionExecutor) executor.getValueExpressionExecutor();
+                    primaryKey.append(data[vee.getPosition()[3]]);
+//                    primaryKey.append(":-:");
+                }
+            }
+        }
+        return primaryKey.toString();
     }
 
     private String getPrimaryKeyFromMatchingEvent(StateEvent matchingEvent) {
