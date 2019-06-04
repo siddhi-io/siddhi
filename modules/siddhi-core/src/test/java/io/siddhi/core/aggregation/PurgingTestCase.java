@@ -26,6 +26,7 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -34,8 +35,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class IncrementalPurgingTestCase {
-    private static final Logger LOG = Logger.getLogger(IncrementalPurgingTestCase.class);
+public class PurgingTestCase {
+    private static final Logger LOG = Logger.getLogger(PurgingTestCase.class);
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void incrementalPurgingTest1() {
@@ -87,13 +88,17 @@ public class IncrementalPurgingTestCase {
                 "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
+
+        AssertJUnit.assertNotNull("Initial queried events cannot be null", events);
         AssertJUnit.assertEquals("Number of events before purging", 6, events.length);
         Thread.sleep(120100);
+
         events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
         AssertJUnit.assertNull("No events expected after purging", events);
+
         siddhiAppRuntime.shutdown();
     }
 
@@ -133,11 +138,12 @@ public class IncrementalPurgingTestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             Thread.sleep(1000);
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
             EventPrinter.print(events);
+
             AssertJUnit.assertEquals("Check time windows", 7, events.length);
             List<Object[]> eventsList = new ArrayList<>();
             for (Event event : events) {
@@ -155,9 +161,12 @@ public class IncrementalPurgingTestCase {
             AssertJUnit.assertTrue("Data Matched",
                     SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
             Thread.sleep(80000);
+
             events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
             EventPrinter.print(events);
+            Assert.assertNull(events);
+
         } finally {
             siddhiAppRuntime.shutdown();
         }

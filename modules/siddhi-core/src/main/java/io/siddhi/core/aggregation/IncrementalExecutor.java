@@ -48,46 +48,53 @@ import java.util.concurrent.Executors;
 public class IncrementalExecutor implements Executor {
     private static final Logger LOG = Logger.getLogger(IncrementalExecutor.class);
 
+    private final String aggregatorName;
+    private TimePeriod.Duration duration;
+    private Table table;
+    private boolean isRoot;
+    private boolean isProcessingExecutor;
+    private Executor next;
+
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
     private final StateHolder<ExecutorState> stateHolder;
-    private final String aggregatorName;
-    private final String siddhiAppName;
-    private TimePeriod.Duration duration;
-    private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
     private StreamEventFactory streamEventFactory;
-    private Executor next;
+
+    private final String siddhiAppName;
     private Scheduler scheduler;
-    private boolean isRoot;
-    private boolean isProcessingExecutor;
     private ExecutorService executorService;
 
-    private BaseIncrementalValueStore baseIncrementalValueStore = null;
+    private BaseIncrementalValueStore baseIncrementalValueStore;
 
-    public IncrementalExecutor(TimePeriod.Duration duration, List<ExpressionExecutor> processExpressionExecutors,
-                               GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent,
-                               IncrementalExecutor child, boolean isRoot, Table table,
-                               SiddhiQueryContext siddhiQueryContext, String aggregatorName,
-                               ExpressionExecutor shouldUpdateTimestamp) {
+    public IncrementalExecutor(String aggregatorName, TimePeriod.Duration duration,
+                               List<ExpressionExecutor> processExpressionExecutors,
+                               ExpressionExecutor shouldUpdateTimestamp, GroupByKeyGenerator groupByKeyGenerator,
+                               boolean isRoot, Table table, IncrementalExecutor child,
+                               SiddhiQueryContext siddhiQueryContext, MetaStreamEvent metaStreamEvent) {
+        this.aggregatorName = aggregatorName;
         this.duration = duration;
-        this.next = child;
         this.isRoot = isRoot;
         this.table = table;
-        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+        this.next = child;
+
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
-        this.isProcessingExecutor = false;
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+
         this.groupByKeyGenerator = groupByKeyGenerator;
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(processExpressionExecutors, streamEventFactory,
-                siddhiQueryContext, aggregatorName, shouldUpdateTimestamp, -1, true, false);
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(aggregatorName, -1,
+                processExpressionExecutors, shouldUpdateTimestamp, streamEventFactory, siddhiQueryContext, true,
+                false);
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
         setNextExecutor(child);
 
+        this.siddhiAppName = siddhiQueryContext.getSiddhiAppContext().getName();
         this.stateHolder = siddhiQueryContext.generateStateHolder(
                 aggregatorName + "-" + this.getClass().getName(), false, () -> new ExecutorState());
         this.executorService = Executors.newSingleThreadExecutor();
-        this.aggregatorName = aggregatorName;
-        this.siddhiAppName = siddhiQueryContext.getSiddhiAppContext().getName();
+
+        this.isProcessingExecutor = false;
+
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -240,16 +247,7 @@ public class IncrementalExecutor implements Executor {
         }
     }
 
-    public long getNextEmitTime() {
-        ExecutorState state = stateHolder.getState();
-        try {
-            return state.nextEmitTime;
-        } finally {
-            stateHolder.returnState(state);
-        }
-    }
-
-    public void setValuesForInMemoryRecreateFromTable(long emitTimeOfLatestEventInTable) {
+    public void setEmitTime(long emitTimeOfLatestEventInTable) {
         ExecutorState state = stateHolder.getState();
         try {
             state.nextEmitTime = emitTimeOfLatestEventInTable;
@@ -258,17 +256,10 @@ public class IncrementalExecutor implements Executor {
         }
     }
 
-    public boolean isProcessingExecutor() {
-        return isProcessingExecutor;
-    }
-
     public void setProcessingExecutor(boolean processingExecutor) {
         isProcessingExecutor = processingExecutor;
     }
 
-    public void clearExecutor() {
-        cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
-    }
 
     class ExecutorState extends State {
         private long nextEmitTime = -1;

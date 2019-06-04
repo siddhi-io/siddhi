@@ -132,5 +132,5 @@ public final class SiddhiConstants {
     public static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
     public static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
-    public static final String SHARD_ID_COL = "SHARD_ID";
+    public static final String AGG_SHARD_ID_COL = "SHARD_ID";
 }
