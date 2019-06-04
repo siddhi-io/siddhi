@@ -81,7 +81,7 @@ public class AggregationFilterTestCase {
             InputHandler inputStreamInputHandler = siddhiAppRuntime.getInputHandler("inputStream");
             siddhiAppRuntime.start();
 
-            // Thursday, June 1, 2017 4:05:50 AM (add 5.30 to get corresponding IST time)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "2017-06-01 04:05:50"});
 
             // Thursday, June 1, 2017 4:05:51 AM
@@ -91,15 +91,14 @@ public class AggregationFilterTestCase {
             stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, "2017-06-01 04:05:52"});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, "2017-06-01 04:05:52"});
 
-            // Thursday, June 1, 2017 4:05:50 AM (out of order. must be processed with 1st event for 50th second)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, "2017-06-01 04:05:50"});
 
             // Thursday, June 1, 2017 4:05:54 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, "2017-06-01 04:05:54"});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, "2017-06-01 04:05:54"});
 
-            // Thursday, June 1, 2017 4:05:50 AM (out of order. should not be processed since events for 50th second is
-            // no longer in the buffer and @IgnoreEventsOlderThanBuffer is true)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 50f, 60f, 90L, 6, "2017-06-01 04:05:50"});
 
             // Thursday, June 1, 2017 4:05:56 AM
@@ -127,6 +126,7 @@ public class AggregationFilterTestCase {
                     new Object[]{"IBM", 600.0, 600.0, 3600f}
             );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
@@ -195,16 +195,14 @@ public class AggregationFilterTestCase {
             stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, "2017-06-01 04:05:52"});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, "2017-06-01 04:05:52"});
 
-            // Thursday, June 1, 2017 4:05:50 AM (out of order. must be processed with 1st event for 50th second)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, "2017-06-01 04:05:50"});
 
             // Thursday, June 1, 2017 4:05:54 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, "2017-06-01 04:05:54"});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, "2017-06-01 04:05:54"});
 
-            // Thursday, June 1, 2017 4:05:50 AM (out of order and older than buffer. should be processed with the
-            // current minimum event [which is 51st second] in the buffer since @IgnoreEventsOlderThanBuffer is not set.
-            // IgnoreEventsOlderThanBuffer is false by default)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 50f, 60f, 90L, 6, "2017-06-01 04:05:50"});
 
             // Thursday, June 1, 2017 4:05:56 AM
@@ -232,6 +230,7 @@ public class AggregationFilterTestCase {
                     new Object[]{"IBM", 600.0, 600.0, 3600f, 1496290020000L}
             );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
@@ -298,8 +297,7 @@ public class AggregationFilterTestCase {
             stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L});
 
-            // Thursday, June 1, 2017 4:05:50 AM (out of order. since there's no buffer, this must be processed with
-            // 52nd second's data. since IgnoreEventsOlderThanBuffer is false by default, the event must not be dropped)
+            // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L});
 
@@ -359,6 +357,7 @@ public class AggregationFilterTestCase {
                     new Object[]{1496290076000L, "IBM", 3600f, 600.0}
             );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 10000);
+
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isEventsMatch(inEventsList, expected));

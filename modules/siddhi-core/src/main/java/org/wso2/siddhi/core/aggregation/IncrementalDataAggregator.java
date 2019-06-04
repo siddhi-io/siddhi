@@ -18,7 +18,6 @@
 
 package org.wso2.siddhi.core.aggregation;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -42,19 +41,22 @@ import java.util.Map;
 public class IncrementalDataAggregator {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration aggregateForDuration;
+
     private final BaseIncrementalValueStore baseIncrementalValueStore;
     private final Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration aggregateForDuration, long oldestEventTimeStamp,
                                      List<ExpressionExecutor> baseExecutors,
-                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext,
-                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
+                                     ExpressionExecutor shouldUpdateTimestamp, MetaStreamEvent metaStreamEvent
+                                     ) {
         this.incrementalDurations = incrementalDurations;
         this.aggregateForDuration = aggregateForDuration;
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(oldestEventTimeStamp, baseExecutors,
-                streamEventPool, siddhiAppContext, null, shouldUpdateExpressionExecutor);
+        List<ExpressionExecutor> expressionExecutorsWithoutTime = baseExecutors.subList(1, baseExecutors.size());
+
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(null, oldestEventTimeStamp,
+                expressionExecutorsWithoutTime, shouldUpdateTimestamp, streamEventPool, null);
         this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
     }
 
@@ -95,7 +97,7 @@ public class IncrementalDataAggregator {
             if (groupByKey != null) {
                 BaseIncrementalValueStore aBaseIncrementalValueStore =
                         this.baseIncrementalValueStoreGroupByMap.computeIfAbsent(
-                                groupByKey, k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
+                                groupByKey, k -> baseIncrementalValueStore.cloneStore(startTimeOfAggregates));
                 process(streamEvent, aBaseIncrementalValueStore);
             } else {
                 process(streamEvent, this.baseIncrementalValueStore);
@@ -104,25 +106,26 @@ public class IncrementalDataAggregator {
     }
 
     private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
+
         List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
+
         boolean shouldUpdate = true;
-        ExpressionExecutor shouldUpdateExpressionExecutor =
-                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+        ExpressionExecutor shouldUpdateTimestamp = baseIncrementalValueStore.getShouldUpdateTimestamp();
+        if (shouldUpdateTimestamp != null) {
+            shouldUpdate = ((boolean) shouldUpdateTimestamp.execute(streamEvent));
         }
 
         for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+
+            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+
             if (shouldUpdate) {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                 baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-            } else {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                }
+            } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
             }
         }
+
         baseIncrementalValueStore.setProcessed(true);
     }
 
