@@ -18,7 +18,9 @@
 package io.siddhi.core.event;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -34,6 +36,16 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     protected E lastReturned;
     protected E last;
     protected boolean isBatch = false;
+
+    public List<E> toList() {
+        this.reset();
+        List<E> list = new ArrayList<>();
+        do {
+            list.add(this.next());
+        } while (this.hasNext());
+        this.reset();
+        return list;
+    }
 
     public ComplexEventChunk(boolean isBatch) {
         this.isBatch = isBatch;

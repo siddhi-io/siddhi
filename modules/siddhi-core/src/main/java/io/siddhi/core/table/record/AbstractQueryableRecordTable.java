@@ -129,6 +129,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     protected StateEvent containsMatchingEvent;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
+    private String cachePolicy;
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -173,7 +174,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 //                ((CacheTable) cacheTable).setCachePolicy(cachePolicy);
             }
 
-            String cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
+            cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
 
             if (cacheExpiryEnabled) {
                 cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
@@ -325,7 +326,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         break;
                     }
                     StreamEvent event = addingEventChunk.next();
-                    addRequiredFieldsToOutputData(addingEventChunkWithTimestamp, event, siddhiAppContext);
+                    addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp, event, siddhiAppContext);
                     cacheSize++;
                 }
 //            } else {
@@ -350,11 +351,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
-//                if (cacheExpiryEnabled) {
+                if (cacheExpiryEnabled || cachePolicy.equals("FIFO") || cachePolicy.equals("LRU")) {
                     cacheTable.add(addingEventChunkWithTimestamp);
-//                } else {
-//                    cacheTable.add(addingEventChunkForCache);
-//                }
+                } else {
+                    cacheTable.add(addingEventChunkForCache);
+                }
                 if (recordTableHandler != null) {
                     recordTableHandler.add(timestamp, records);
                 } else {
@@ -373,16 +374,29 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 //        cacheExpiryHandlerRunnable.handleCacheExpiry();
     }
 
-    public static void addRequiredFieldsToOutputData(ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp,
-                                                     StreamEvent event, SiddhiAppContext siddhiAppContext) {
-        Object[] outputData = event.getOutputData();
-        Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
-        System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
-        outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
-                siddhiAppContext.getTimestampGenerator().currentTime();
-        StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
-        eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
-        addingEventChunkWithTimestamp.add(eventWithTimeStamp);
+    public static void addRequiredFieldsToDataForCache(Object addingEventChunkWithTimestamp,
+                                                       Object event, SiddhiAppContext siddhiAppContext) {
+        if (event instanceof StreamEvent) {
+            Object[] outputData = ((StreamEvent) event).getOutputData();
+            Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+            System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+            outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+            StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+            eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+            ((ComplexEventChunk<StreamEvent>) addingEventChunkWithTimestamp).add(eventWithTimeStamp);
+        } else if (event instanceof StateEvent) {
+            Object[] outputData = ((StateEvent) event).getStreamEvent(0).getOutputData();
+            Object[] outputDataWithTimeStamp = new Object[outputData.length + 1];
+            System.arraycopy(outputData, 0 , outputDataWithTimeStamp, 0, outputData.length);
+            outputDataWithTimeStamp[outputDataWithTimeStamp.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+            StreamEvent eventWithTimeStamp = new StreamEvent(0, 0, outputDataWithTimeStamp.length);
+            eventWithTimeStamp.setOutputData(outputDataWithTimeStamp);
+            StateEvent stateEvent = new StateEvent(1, eventWithTimeStamp.getOutputData().length);
+            stateEvent.addEvent(0, eventWithTimeStamp);
+            ((ComplexEventChunk<StateEvent>) addingEventChunkWithTimestamp).add(stateEvent);
+        }
     }
 
     @Override
@@ -592,12 +606,26 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         if (cacheEnabled) {
             assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
+            ComplexEventChunk<StateEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
+            updateOrAddingEventChunk.reset();
+//            if (cacheExpiryEnabled) {
+            while (updateOrAddingEventChunk.hasNext()) {
+                StateEvent event = updateOrAddingEventChunk.next();
+                addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp, event, siddhiAppContext);
+            }
             readWriteLock.writeLock().lock();
             try {
-                cacheTable.updateOrAddWithMaxSize(updateOrAddingEventChunk,
-                        compiledConditionWithCache.getCacheCompileCondition(),
-                        compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor,
-                        maxCacheSize);
+                if (cacheExpiryEnabled || cachePolicy.equals("FIFO") || cachePolicy.equals("LRU")) {
+                    cacheTable.updateOrAddWithMaxSize(addingEventChunkWithTimestamp,
+                            compiledConditionWithCache.getCacheCompileCondition(),
+                            compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor,
+                            maxCacheSize);
+                } else {
+                    cacheTable.updateOrAddWithMaxSize(updateOrAddingEventChunk,
+                            compiledConditionWithCache.getCacheCompileCondition(),
+                            compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor,
+                            maxCacheSize);
+                }
                 if (recordTableHandler != null) {
                     recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
                             updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
@@ -758,7 +786,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                addRequiredFieldsToOutputData(cacheMissEntry, streamEvent, siddhiAppContext);
+                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext);
 //                cacheMissEntry.add(streamEvent);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
@@ -1030,7 +1058,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                addRequiredFieldsToOutputData(cacheMissEntry, streamEvent, siddhiAppContext);
+                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext);
 //                cacheMissEntry.add(streamEvent);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();

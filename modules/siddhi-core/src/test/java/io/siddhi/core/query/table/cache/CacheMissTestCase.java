@@ -724,4 +724,172 @@ public class CacheMissTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(description = "cacheMissTestCase12") // 1 primary key & LRu & update or add func
+    public void cacheMissTestCase12() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"2\", cache.policy=\"LRU\"))\n" +
+                "@PrimaryKey(\'symbol\') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "   on StockTable.symbol==symbol;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"CISCO", 66.5f, 3L});
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+        });
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+
+//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
+        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
+        Thread.sleep(10);
+        updateStockStream.send(new Object[]{"CISCO", 66.5f, 3L});
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "cacheMissTestCase13") // 2 primary keys & LRu & update or add func
+    public void cacheMissTestCase13() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"2\", cache.policy=\"LRU\"))\n" +
+                "@PrimaryKey(\'symbol\', \'price\') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "   on (StockTable.symbol == symbol AND StockTable.price == price);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"CISCO", 66.5f, 3L});
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+        });
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+
+//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
+        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
+        Thread.sleep(10);
+        updateStockStream.send(new Object[]{"CISCO", 66.5f, 3L});
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(description = "cacheMissTestCase14") // 2 primary keys & LRu & update or add func with update
+    public void cacheMissTestCase14() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"2\", cache.policy=\"LRU\"))\n" +
+                "@PrimaryKey(\'symbol\', \'price\') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "   on (StockTable.symbol == symbol AND StockTable.price == price);";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2", 55.6f, 3L});
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+        });
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+
+//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
+        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
+        Thread.sleep(10);
+        updateStockStream.send(new Object[]{"WSO2", 55.6f, 3L});
+
+        siddhiAppRuntime.shutdown();
+    }
 }

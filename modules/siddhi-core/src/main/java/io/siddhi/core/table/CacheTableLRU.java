@@ -24,6 +24,7 @@ import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.holder.IndexEventHolder;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
 import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
@@ -103,15 +104,65 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
             ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet);
             String primaryKey;
+            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+                for (StateEvent matchingEvent: updatingEventChunk.toList()) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+//                    StreamEvent foundEventCopy = foundEvent.clone();
+                    if (usedEvent != null) {
+                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
+                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
+                    }
+                }
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                                       CompiledCondition compiledCondition,
+                                       CompiledUpdateSet compiledUpdateSet,
+                                       AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
+                    updateOrAddingEventChunk,
+                    state.eventHolder,
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
+                    addingStreamEventExtractor);
+            if (failedEvents != null && failedEvents.getFirst() != null) {
+                int tableSize = this.size();
+                ComplexEventChunk<StreamEvent> failedEventsLimitCopy = new ComplexEventChunk<>();
+                failedEvents.reset();
+                while (true) {
+                    failedEventsLimitCopy.add(failedEvents.next());
+                    tableSize++;
+                    if (tableSize == maxTableSize || !failedEvents.hasNext()) {
+                        break;
+                    }
+                }
+                state.eventHolder.add(failedEventsLimitCopy);
+            }
+            while (this.size() > maxTableSize) {
+                this.deleteOneEntryUsingCachePolicy();
+            }
+            String primaryKey;
 
             if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
-                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
-                primaryKey = getPrimaryKey(compiledCondition, updatingEventChunk.getFirst());
-                StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
 //                    StreamEvent foundEventCopy = foundEvent.clone();
-                if (usedEvent != null) {
-                    usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
-                    indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
+                    if (usedEvent != null) {
+                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
+                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
+                    }
                 }
             }
         } finally {
