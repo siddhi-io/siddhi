@@ -1394,7 +1394,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             this.variableExpressionExecutorMap = variableExpressionExecutorMap;
             this.compiledSelection = compiledSelection;
         }
-
     }
 
     /**

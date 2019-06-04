@@ -23,6 +23,7 @@ import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
+import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
@@ -44,7 +45,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
             //todo: update last used time
             String primaryKey;
 
-            try {
+            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
                 IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
                 primaryKey = getPrimaryKeyFromCompileCondition(compiledCondition);
                 if (foundEvent != null) {
@@ -52,10 +53,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
                     foundEventCopy.getOutputData()[foundEvent.getOutputData().length - 1] = System.currentTimeMillis();
                     indexEventHolder.replace(primaryKey, foundEventCopy);
                 }
-            } catch (ClassCastException ignored) {
-
             }
-
             return foundEvent;
         } finally {
             stateHolder.returnState(state);
@@ -63,21 +61,77 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         }
     }
 
-    private String getPrimaryKeyFromCompileCondition(CompiledCondition compiledCondition) {
-        StringBuilder primaryKey = new StringBuilder();
+    @Override
+    public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
+        readWriteLock.readLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-            AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-                    getCollectionExecutor();
-            List<ExpressionExecutor> lis =  executor.getMultiPrimaryKeyExpressionExecutors();
-            for (ExpressionExecutor ee: lis) {
-                primaryKey.append(((ConstantExpressionExecutor) ee).getValue());
-                primaryKey.append(":-:");
-            }
-        } catch (ClassCastException e) {
+            if (((Operator) compiledCondition).contains(matchingEvent, state.eventHolder)) {
+                //todo: update last used time
+                String primaryKey;
 
+                if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    primaryKey = getPrimaryKeyFromCompileCondition(compiledCondition);
+                    if (primaryKey == null || primaryKey.equals("")) {
+                        primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
+                    }
+                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+//                    StreamEvent foundEventCopy = foundEvent.clone();
+                    if (usedEvent != null) {
+                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
+                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.readLock().unlock();
+        }
+    }
+
+    private String getPrimaryKeyFromMatchingEvent(StateEvent matchingEvent) {
+        StringBuilder primaryKey = new StringBuilder();
+        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
+        Object[] data = streamEvent.getOutputData();
+        for (Object object: data) {
+            primaryKey.append(object);
+            primaryKey.append(":-:");
         }
         return primaryKey.toString();
+    }
+
+    private String getPrimaryKeyFromCompileCondition(CompiledCondition compiledCondition) {
+        StringBuilder primaryKey = new StringBuilder();
+        if (compiledCondition instanceof OverwriteTableIndexOperator) {
+            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
+
+            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
+                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
+                        getCollectionExecutor();
+//                primaryKey.append(executor.getCompositePrimaryKey());
+                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
+                for (ExpressionExecutor ee : lis) {
+                    if (ee instanceof ConstantExpressionExecutor) {
+                        primaryKey.append(((ConstantExpressionExecutor) ee).getValue());
+                        primaryKey.append(":-:");
+                    }
+                }
+            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
+                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
+                if (executor.getValueExpressionExecutor() instanceof ConstantExpressionExecutor) {
+                    primaryKey.append(((ConstantExpressionExecutor) executor.getValueExpressionExecutor()).getValue());
+                } else {
+                    return null;
+                }
+            }
+            return primaryKey.toString();
+        } else {
+            return null;
+        }
     }
 
     @Override

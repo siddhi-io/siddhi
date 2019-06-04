@@ -81,6 +81,10 @@ public class CompareCollectionExecutor implements CollectionExecutor {
         }
     }
 
+    public ExpressionExecutor getValueExpressionExecutor() {
+        return valueExpressionExecutor;
+    }
+
     public Collection<StreamEvent> findEvents(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder) {
         if (operator == Compare.Operator.NOT_EQUAL) {
             //for not equal trigger sequential scan
