@@ -31,7 +31,7 @@ import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEven
 /**
  * cache table with LRU entry removal
  */
-public class CacheTableLRU extends InMemoryTable implements CacheTable {
+public class CacheTableLRU extends CacheTable {
 
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {

@@ -87,7 +87,8 @@ public class CacheExpiryHandlerRunnable {
         tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
         streamEventFactory = new StreamEventFactory(tableMetaStreamEvent);
 
-        rightExpressionForSubtract = new Variable("timestamp.added");
+        rightExpressionForSubtract = new Variable("timestamp.added"); //todo: move to constant
+        //todo: write compile consition that internally takes current time after compiling
         ((Variable) rightExpressionForSubtract).setStreamId(cacheTable.getTableDefinition().getId());
         rightExpressionForCompare = new LongConstant(expiryTime);
         greaterThanOperator = Compare.Operator.GREATER_THAN;
@@ -120,8 +121,8 @@ public class CacheExpiryHandlerRunnable {
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore = null;
 
-        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
-                        siddhiAppContext.getTimestampGenerator().currentTime() - 30000) {
+        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() > //todo: remove store table load size check in find and query
+                        siddhiAppContext.getTimestampGenerator().currentTime() - 30000) { //todo: use a multiple of cache expiry param
             log.info(siddhiAppContext.getName() + ": store table size is new");
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 try {
@@ -139,15 +140,15 @@ public class CacheExpiryHandlerRunnable {
                         cc);
             }
         } else {
-            log.info(siddhiAppContext.getName() + ": store table size is old");
+            log.info(siddhiAppContext.getName() + ": store table size is old"); //todo: change the message meaningful
             try {
                 loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
                         storeTable.getCompiledConditionForCaching(),
                         storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
             } catch (ConnectionUnavailableException ignored) {
-
-            }
-            storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
+            //todo: log a warining saying that not able to connect. move
+            } //todo": if cache is greater than store size delete everythong efficiently without going through
+            storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore)); //todo: move everything inside try catch
             storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 deleteAndReloadExpiredEvents(loadedDataFromStore);
@@ -161,7 +162,7 @@ public class CacheExpiryHandlerRunnable {
 
     private void deleteAndReloadExpiredEvents(StreamEvent loadedDataFromStore) {
         CompiledCondition cc = generateExpiryCompiledCondition(
-                siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100);
+                siddhiAppContext.getTimestampGenerator().currentTime() + expiryTime + 100); //todo: dont use this clean
         ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>();
 
         dataCopyLoop:
@@ -198,6 +199,7 @@ public class CacheExpiryHandlerRunnable {
 
             @Override
             public void run() {
+                //todo: add try catch
                 handleCacheExpiry();
 //                simpleExpire();
             }

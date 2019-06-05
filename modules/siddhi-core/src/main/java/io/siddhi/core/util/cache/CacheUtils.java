@@ -58,13 +58,13 @@ public class CacheUtils {
         } else if (event instanceof StateEvent) {
             StreamEvent eventForCache = checkPoliocyAndAddFields(((StateEvent) event).getStreamEvent(0),
                     siddhiAppContext, cachePolicy, cacheExpiryEnabled);
-            StateEvent stateEvent = new StateEvent(1, eventForCache.getOutputData().length);
+            StateEvent stateEvent = new StateEvent(1, eventForCache.getOutputData().length); //todo: create state and stream event factory and use
             stateEvent.addEvent(0, eventForCache);
             ((ComplexEventChunk<StateEvent>) addingEventChunkForCache).add(stateEvent);
         }
     }
 
-    private static StreamEvent checkPoliocyAndAddFields(Object event,
+    private static StreamEvent checkPoliocyAndAddFields(Object event, //todo: move these logics to respective cache classes
                                                  SiddhiAppContext siddhiAppContext, String cachePolicy,
                                                  boolean cacheExpiryEnabled) {
         Object[] outputDataForCache = null;

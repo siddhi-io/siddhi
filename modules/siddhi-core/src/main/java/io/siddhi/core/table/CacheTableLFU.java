@@ -32,7 +32,7 @@ import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEven
 /**
  * cache table with FIFO entry removal
  */
-public class CacheTableLFU extends InMemoryTable implements CacheTable {
+public class CacheTableLFU extends CacheTable {
 
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {

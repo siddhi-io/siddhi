@@ -50,7 +50,7 @@ public class CacheExpireTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
-                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\"))\n" +
+                "retention.period=\"1 sec\", purge.interval=\"1 sec\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         String query1 = "" +
@@ -107,7 +107,7 @@ public class CacheExpireTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
-                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\", policy=\"FIFO\"))\n" +
+                "retention.period=\"1 sec\", purge.interval=\"1 sec\", policy=\"FIFO\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -166,7 +166,7 @@ public class CacheExpireTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
-                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\", policy=\"LFU\"))\n" +
+                "retention.period=\"1 sec\", purge.interval=\"1 sec\", policy=\"LFU\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 

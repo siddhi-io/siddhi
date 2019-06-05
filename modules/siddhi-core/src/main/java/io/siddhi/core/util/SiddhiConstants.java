@@ -128,13 +128,14 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_CACHE = "Cache";
     public static final String CACHE_TABLE_SIZE = "Size";
     public static final String CACHE_QUERY_NAME = "table_cache_";
-    public static final String CACHE_TABLE_TIMESTAMP_ADDED = "timestamp.added";
+    public static final String CACHE_TABLE_TIMESTAMP_ADDED = "timestamp.added"; //todo: use capital and underscore
+    //todo: uyse underscore infront
     public static final String CACHE_TABLE_TIMESTAMP_LRU = "timestamp.lru";
     public static final String CACHE_TABLE_COUNT_LFU = "count.lfu";
-    public static final String ANNOTATION_CACHE_EXPIRY_TIME = "expiry.time";
+    public static final String ANNOTATION_CACHE_RETENTION_PERIOD = "retention.period";
     public static final String ANNOTATION_CACHE_POLICY = "cache.policy";
     public static final String ANNOTATION_CACHE_POLICY_FIFO = "FIFO";
-    public static final String ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL = "expiry.check.interval";
+    public static final String ANNOTATION_CACHE_PURGE_INTERVAL = "purge.interval";
 
     public static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";

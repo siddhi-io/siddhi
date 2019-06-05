@@ -30,8 +30,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+                "purge.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -83,8 +83,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+                "purge.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -157,8 +157,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+                "purge.interval=\"1 sec\"))\n" +
                 "@PrimaryKey('symbol') " +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -232,8 +232,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+                "purge.interval=\"1 sec\"))\n" +
                 "@PrimaryKey('symbol') " +
                 "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
@@ -307,8 +307,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
 //        String streams = "" +
 //                "define stream StockStream (symbol string, price float, volume long); " +
 //                "define stream DeleteStream (symbol string); " +
-//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-//                "expiry.check.interval=\"1 sec\"))\n" +
+//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+//                "purge.interval=\"1 sec\"))\n" +
 //                "@PrimaryKey('symbol') " +
 //                "@Index(\"volume\")" +
 //                "define table StockTable (symbol string, price float, volume long); ";
@@ -345,8 +345,8 @@ public class CacheExpiryAndReloadTestCase { //todo: validate all return events
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", retention.period=\"1 sec\", " +
+                "purge.interval=\"1 sec\"))\n" +
                 "@PrimaryKey('symbol') " +
                 "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";

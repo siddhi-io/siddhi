@@ -20,7 +20,7 @@ package io.siddhi.core.table;
 /**
  * common interface for FIFO, LRU, and LFU cache tables
  */
-public interface CacheTable {
+public abstract class CacheTable extends InMemoryTable { //can be abstract class
 
-    void deleteOneEntryUsingCachePolicy();
+    public abstract void deleteOneEntryUsingCachePolicy();
 }

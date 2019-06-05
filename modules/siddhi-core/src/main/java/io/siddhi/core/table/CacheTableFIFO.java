@@ -22,7 +22,7 @@ import io.siddhi.core.table.holder.IndexEventHolder;
 /**
  * cache table with FIFO entry removal
  */
-public class CacheTableFIFO extends InMemoryTable implements CacheTable {
+public class CacheTableFIFO extends CacheTable {
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {

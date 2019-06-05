@@ -91,8 +91,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL;
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_EXPIRY_TIME;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_PURGE_INTERVAL;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PERIOD;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_POLICY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
@@ -114,7 +114,8 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
     private int maxCacheSize;
-    private long cacheExpiryCheckIntervalInMillis;
+    private long purgeInterval; //todo: have a default value. if not given use expiry time
+    //todo: purge interval - change query param also & change expiry time as retention period
     private boolean cacheEnabled = false;
     private boolean cacheExpiryEnabled = false;
     private InMemoryTable cacheTable;
@@ -153,17 +154,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
             }
 
-            if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY) == null) {
-                throw new SiddhiAppCreationException(siddhiAppContext.getName() + ": cache policy must be given to " +
-                        "enable cache.");
-                // todo: throw error. cache policy must
-            }
-
             cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
 
-            if (cacheExpiryEnabled) {
+            if (cachePolicy == null) {
+                cachePolicy = "FIFO";
+            }
+
+            if (cacheExpiryEnabled) { //todo: write init for cache also and do these inside respective cache tabes
                 cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
-                if (cachePolicy.equals("FIFO")) {
+                if (cachePolicy.equals("FIFO")) { //todo: ignore case
                     cacheTable = new CacheTableFIFO();
                 } else if (cachePolicy.equals("LRU")) {
                     cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
@@ -185,7 +184,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
             }
 
-            // initialize cache table
+            // initialize cache table //todo: consider moving to cache super class?
             MetaStreamEvent cacheTableMetaStreamEvent = new MetaStreamEvent();
             cacheTableMetaStreamEvent.addInputDefinition(cacheTableDefinition);
             for (Attribute attribute : cacheTableDefinition.getAttributeList()) {
@@ -198,15 +197,19 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             cacheTable.initTable(cacheTableDefinition, cacheTableStreamEventFactory,
                     cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
 
-            // if cache expiry enabled create expiry handler
-            if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_EXPIRY_TIME) != null) {
+            // if cache expiry enabled create expiry handler //todo: mpve to load cache
+            if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_RETENTION_PERIOD) != null) {
                 cacheExpiryEnabled = true;
-                long cacheExpirationTimeInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
-                        getElement(ANNOTATION_CACHE_EXPIRY_TIME));
-                cacheExpiryCheckIntervalInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
-                        getElement(ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL));
+                long retentionPeriod = Expression.Time.timeToLong(cacheTableAnnotation.
+                        getElement(ANNOTATION_CACHE_RETENTION_PERIOD));
+                if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_PURGE_INTERVAL) == null) {
+                    purgeInterval = retentionPeriod;
+                } else {
+                    purgeInterval = Expression.Time.timeToLong(cacheTableAnnotation.
+                            getElement(ANNOTATION_CACHE_PURGE_INTERVAL));
+                }
                 scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
-                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(cacheExpirationTimeInMillis, cacheTable,
+                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(retentionPeriod, cacheTable,
                         tableMap, this, siddhiAppContext);
             }
 
@@ -231,12 +234,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             compiledSelectionForCaching = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
-            List<MetaStateEventAttribute> outputDataAttribs = ((CompiledSelectionWithCache) compiledSelectionForCaching)
-                    .metaStateEvent.getOutputDataAttributes();
-            if (outputDataAttribs.get(outputDataAttribs.size() - 1).getAttribute().getName().
-                    equalsIgnoreCase("timestamp")) { //todo change?
-                outputDataAttribs.remove(outputDataAttribs.size() - 1);
-            }
+
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
             QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
             QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
@@ -245,7 +243,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    protected void connectAndLoadCache() throws ConnectionUnavailableException {
+    protected void connectAndLoadCache() throws ConnectionUnavailableException { //todo: this can get called multiple times. so clean it before preloading. may be in disconnect
         connect();
         if (cacheEnabled) {
             StateEvent stateEventForCaching = new StateEvent(1, 0);
@@ -255,12 +253,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (preLoadedData != null) {
                 int preLoadedDataSize = findEventChunkSize(preLoadedData);
                 if (preLoadedDataSize <= maxCacheSize) {
-                    ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>();
+                    ComplexEventChunk<StreamEvent> loadedCache = new ComplexEventChunk<>(true);
                     loadedCache.add(preLoadedData);
                     cacheTable.addEvents(loadedCache, preLoadedDataSize);
                 } else {
                     int tableSize = 0;
-                    ComplexEventChunk<StreamEvent> loadedCacheLimitCopy = new ComplexEventChunk<>();
+                    ComplexEventChunk<StreamEvent> loadedCacheLimitCopy = new ComplexEventChunk<>(true);
                     while (true) {
                         loadedCacheLimitCopy.add(preLoadedData);
                         tableSize++;
@@ -269,18 +267,19 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         }
                         preLoadedData = preLoadedData.getNext();
                     }
-                    cacheTable.add(loadedCacheLimitCopy);
+                    cacheTable.add(loadedCacheLimitCopy); //todo: create a super class for all caches implement an
+                    // todo: add which will fill the table to the brim. can be used for runtime adds
                 }
             }
             if (cacheExpiryEnabled) {
-                scheduledExecutorServiceForCacheExpiry.
+                scheduledExecutorServiceForCacheExpiry. //todo: create the expiry handler here and pass.
                         scheduleAtFixedRate(cacheExpiryHandlerRunnable.checkAndExpireCache(), 0,
-                                cacheExpiryCheckIntervalInMillis, TimeUnit.MILLISECONDS);
+                        purgeInterval, TimeUnit.MILLISECONDS);
             }
         }
     }
 
-    private CompiledCondition generateCacheCompileCondition(Expression condition,
+    private CompiledCondition generateCacheCompileCondition(Expression condition, //todo: move this function to the cache super class
                                                             MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
                                                             SiddhiQueryContext siddhiQueryContext,
                                                             List<VariableExpressionExecutor>
@@ -314,7 +313,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return query(matchingEvent, compiledCondition, compiledSelection, null);
     }
 
-    @Override
+    @Override //todo: try to move to cache table super class that calls ART add without duplicating code
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         ComplexEventChunk<StreamEvent> addingEventChunkForCache = null;
 
@@ -359,7 +358,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 add(records);
             }
         }
-//        cacheExpiryHandlerRunnable.handleCacheExpiry();
     }
 
     @Override
@@ -378,11 +376,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
         long timestamp = deleteHelper(deletingEventChunk, recordStoreCompiledCondition, deleteConditionParameterMaps);
-        if (cacheEnabled) {
+        if (cacheEnabled) { //todo: move thiswith previous if else
             assert compiledConditionWithCache != null;
             readWriteLock.writeLock().lock();
             try {
-                cacheTable.delete(deletingEventChunk,
+                cacheTable.delete(deletingEventChunk, //todo: call super method
                         compiledConditionWithCache.getCacheCompileCondition());
                 if (recordTableHandler != null) {
                     recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
@@ -671,7 +669,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     storeTableSize == -1) {
                 StateEvent stateEventForCaching = new StateEvent(1, 0);
                 StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching);
+                        compiledSelectionForCaching, outputAttributesForCaching); //todo: if store table sioze becomes smaller than cache reload them into cache
                 storeTableSize = findEventChunkSize(preLoadedData);
             }
         }
@@ -706,7 +704,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             try {
                 cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                         matchingEvent);
-                log.info(siddhiAppContext.getName() + ": sending results from cache");
+                log.info(siddhiAppContext.getName() + ": sending results from cache"); //todo: make these debug logs
                 return cacheResults;
             } finally {
                 readWriteLock.readLock().unlock();
@@ -857,6 +855,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
+    //todo: use threadlocal variable to decide query from store inside query
     public StreamEvent queryFromStore(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
