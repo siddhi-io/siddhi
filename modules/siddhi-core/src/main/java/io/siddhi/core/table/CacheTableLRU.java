@@ -20,18 +20,14 @@ package io.siddhi.core.table;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.executor.ConstantExpressionExecutor;
-import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
-import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
-import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
-import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
 
-import java.util.List;
+import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
+import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromCompileCondition;
+import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
 /**
  * cache table with LRU entry removal
@@ -45,16 +41,14 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         try {
             StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.eventHolder,
                     tableStreamEventCloner);
-            //todo: update last used time
             String primaryKey;
 
             if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
                 IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
                 primaryKey = getPrimaryKeyFromCompileCondition(compiledCondition);
-                if (foundEvent != null) {
-                    StreamEvent foundEventCopy = foundEvent.clone();
-                    foundEventCopy.getOutputData()[foundEvent.getOutputData().length - 1] = System.currentTimeMillis();
-                    indexEventHolder.replace(primaryKey, foundEventCopy);
+                StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+                if (usedEvent != null) {
+                    usedEvent.getOutputData()[foundEvent.getOutputData().length - 1] = System.currentTimeMillis();
                 }
             }
             return foundEvent;
@@ -79,10 +73,8 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
                         primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
                     }
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-//                    StreamEvent foundEventCopy = foundEvent.clone();
                     if (usedEvent != null) {
                         usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
-                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
                     }
                 }
                 return true;
@@ -101,21 +93,19 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
-            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
             String primaryKey;
             if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
                 for (StateEvent matchingEvent: updatingEventChunk.toList()) {
                     IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-//                    StreamEvent foundEventCopy = foundEvent.clone();
                     if (usedEvent != null) {
                         usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
-                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
                     }
                 }
             }
+            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
@@ -130,6 +120,18 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
+            String primaryKey;
+
+            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+                    if (usedEvent != null) {
+                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
+                    }
+                }
+            }
             ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
                     updateOrAddingEventChunk,
                     state.eventHolder,
@@ -151,99 +153,15 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
             while (this.size() > maxTableSize) {
                 this.deleteOneEntryUsingCachePolicy();
             }
-            String primaryKey;
-
-            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
-                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-//                    StreamEvent foundEventCopy = foundEvent.clone();
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = System.currentTimeMillis();
-                        indexEventHolder.replace(primaryKey, usedEvent); // todo not needed. pass by reference
-                    }
-                }
-            }
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
     }
 
-    private String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        StringBuilder primaryKey = new StringBuilder();
-        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
-        Object[] data = streamEvent.getOutputData();
-
-        if (compiledCondition instanceof OverwriteTableIndexOperator) {
-            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
-                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-                        getCollectionExecutor();
-                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
-                for (ExpressionExecutor ee : lis) {
-                    if (ee instanceof VariableExpressionExecutor) {
-                        VariableExpressionExecutor vee = (VariableExpressionExecutor) ee;
-                        primaryKey.append(data[vee.getPosition()[3]]);
-                        primaryKey.append(":-:");
-                    }
-                }
-            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
-                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
-                if (executor.getValueExpressionExecutor() instanceof VariableExpressionExecutor) {
-                    VariableExpressionExecutor vee = (VariableExpressionExecutor) executor.getValueExpressionExecutor();
-                    primaryKey.append(data[vee.getPosition()[3]]);
-//                    primaryKey.append(":-:");
-                }
-            }
-        }
-        return primaryKey.toString();
-    }
-
-    private String getPrimaryKeyFromMatchingEvent(StateEvent matchingEvent) {
-        StringBuilder primaryKey = new StringBuilder();
-        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
-        Object[] data = streamEvent.getOutputData();
-        for (Object object: data) {
-            primaryKey.append(object);
-            primaryKey.append(":-:");
-        }
-        return primaryKey.toString();
-    }
-
-    private String getPrimaryKeyFromCompileCondition(CompiledCondition compiledCondition) {
-        StringBuilder primaryKey = new StringBuilder();
-        if (compiledCondition instanceof OverwriteTableIndexOperator) {
-            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-
-            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
-                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-                        getCollectionExecutor();
-//                primaryKey.append(executor.getCompositePrimaryKey());
-                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
-                for (ExpressionExecutor ee : lis) {
-                    if (ee instanceof ConstantExpressionExecutor) {
-                        primaryKey.append(((ConstantExpressionExecutor) ee).getValue());
-                        primaryKey.append(":-:");
-                    }
-                }
-            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
-                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
-                if (executor.getValueExpressionExecutor() instanceof ConstantExpressionExecutor) {
-                    primaryKey.append(((ConstantExpressionExecutor) executor.getValueExpressionExecutor()).getValue());
-                } else {
-                    return null;
-                }
-            }
-            return primaryKey.toString();
-        } else {
-            return null;
-        }
-    }
 
     @Override
-    public void deleteOneEntryUsingCachePolicy() { //todo: chage from fifo to lru logic
+    public void deleteOneEntryUsingCachePolicy() {
         try {
             IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
             Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
