@@ -132,7 +132,7 @@ public class InMemoryTable extends Table {
                     state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
-            if (failedEvents.getFirst() != null) {
+            if (failedEvents != null && failedEvents.getFirst() != null) {
                 state.eventHolder.add(failedEvents);
             }
         } finally {

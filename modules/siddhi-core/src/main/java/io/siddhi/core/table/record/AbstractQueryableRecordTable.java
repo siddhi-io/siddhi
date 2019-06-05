@@ -741,7 +741,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
                         cacheExpiryEnabled);
-//                cacheMissEntry.add(streamEvent);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
                 try {
@@ -973,7 +972,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 readWriteLock.readLock().unlock();
             }
         } else { // when store is bigger than max cache size
-            boolean cacheMissOccured = false;
             if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
                 // if query conrains all primary keys and has == only for them
                 assert compiledConditionWithCache != null;
@@ -988,7 +986,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 } finally {
                     readWriteLock.readLock().unlock();
                 }
-                cacheMissOccured = true;
 
                 // read all fields of missed entry from store
                 CompiledSelection csForSlectAll = generateCSForSelectAll();
@@ -1014,7 +1011,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
                         cacheExpiryEnabled);
-//                cacheMissEntry.add(streamEvent);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
                 try {

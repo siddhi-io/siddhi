@@ -22,7 +22,6 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.core.table.holder.IndexedEventHolder;
-import io.siddhi.core.table.holder.ListEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
