@@ -42,172 +42,15 @@ public class CacheExpireTestCase {
         log.info("== Table with cache INSERT tests completed ==");
     }
 
-//    @Test
-//    public void insertIntoTableWithCacheTest1() throws InterruptedException, SQLException {
-//        //Configure siddhi to insert events data to table only from specific fields of the stream.
-//        log.info("insertIntoTableWithCacheTest1");
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        String streams = "" +
-//                "define stream StockStream (symbol string, price float, volume long); " +
-//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
-//                //"@Index(\"volume\")" +
-//                "define table StockTable (symbol string, price float, volume long); ";
-//
-//        String query1 = "" +
-//                "@info(name = 'query1') " +
-//                "from StockStream\n" +
-//                "select symbol, price, volume\n" +
-//                "insert into StockTable ;";
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-//        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-//        siddhiAppRuntime.start();
-//
-//        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-//        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-//        Thread.sleep(1000);
-//
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable ");
-//        EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
-//
-//        siddhiAppRuntime.shutdown();
-//    }
-//
-//    @Test
-//    public void insertIntoTableWithCacheTest2() throws InterruptedException, SQLException {
-//        //Configure siddhi to insert events data to table only from specific fields of the stream.
-//        log.info("insertIntoTableWithCacheTest1");
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        String streams = "" +
-//                "define stream StockStream (symbol string, price float, volume long); " +
-//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
-//                //"@Index(\"volume\")" +
-//                "define table StockTable (symbol string, price float, volume long); ";
-//
-//        String query1 = "" +
-//                "@info(name = 'query1') " +
-//                "from StockStream\n" +
-//                "select symbol, price, volume\n" +
-//                "insert into StockTable ;";
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-//        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-//        siddhiAppRuntime.start();
-//
-////        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-////        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-//        Event[] eventsIn = new Event[2];
-//        eventsIn[0] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L});
-//        eventsIn[1] = new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L});
-//        stockStream.send(eventsIn);
-//
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable ");
-//        EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
-//
-//        siddhiAppRuntime.shutdown();
-//    }
-//
-//    @Test
-//    public void insertIntoTableWithCacheTest3() throws InterruptedException, SQLException {
-//        //Configure siddhi to insert events data to table only from specific fields of the stream.
-//        log.info("insertIntoTableWithCacheTest1");
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        String streams = "" +
-//                "define stream StockStream (symbol string, price float, volume long); " +
-//                "define stream DeleteStream (symbol string); " +
-//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\", expiry.time=\"1 sec\"))\n" +
-//                //"@Index(\"volume\")" +
-//                "define table StockTable (symbol string, price float, volume long); ";
-//
-//        String query1 = "" +
-//                "@info(name = 'query1') " +
-//                "from StockStream\n" +
-//                "select symbol, price, volume\n" +
-//                "insert into StockTable ;" +
-//                "@info(name = 'query2') " +
-//                "from DeleteStream " +
-//                "delete StockTable " +
-//                "on StockTable.symbol == symbol";
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-//        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-//        InputHandler deleteStream = siddhiAppRuntime.getInputHandler("DeleteStream");
-//        siddhiAppRuntime.start();
-//
-//        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        Thread.sleep(1000);
-//        deleteStream.send(new Object[]{"WSO"});
-//        stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
-//        stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
-//        Thread.sleep(1000);
-//        stockStream.send(new Object[]{"IBM", 75.6f, 4L});
-//        stockStream.send(new Object[]{"WS2", 55.6f, 5L});
-//        stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
-//        deleteStream.send(new Object[]{"WSO"});
-////        deleteStream.send(new Object[]{new Timestamp(System.currentTimeMillis()).getTime()});
-////        Thread.sleep(1000);
-//
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable ");
-//        EventPrinter.print(events);
-////        AssertJUnit.assertEquals(2, events.length);
-//
-//        siddhiAppRuntime.shutdown();
-//    }
-//
-//    @Test
-//    public void insertIntoTableWithCacheTest4() throws InterruptedException, SQLException {
-//        //Configure siddhi to insert events data to table only from specific fields of the stream.
-//        log.info("insertIntoTableWithCacheTest1");
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        String streams = "" +
-//                "define stream StockStream (symbol string, price float, volume long, timestamp long); " +
-//                "define stream DeleteStream (currentTime long); " +
-//                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
-//                //"@Index(\"volume\")" +
-//                "define table StockTable (symbol string, price float, volume long, timestamp long); ";
-//
-//        String query1 = "" +
-//                "@info(name = 'query1') " +
-//                "from StockStream\n" +
-//                "select symbol, price, volume, timestamp\n" +
-//                "insert into StockTable ;" +
-//                "@info(name = 'query2') " +
-//                "from DeleteStream " +
-//                "delete StockTable " +
-//                "on currentTime - StockTable.timestamp > 1000L";
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-//        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-//        InputHandler deleteStream = siddhiAppRuntime.getInputHandler("DeleteStream");
-//        siddhiAppRuntime.start();
-//
-//        stockStream.send(new Object[]{"WSO2", 55.6f, 100L, new Timestamp(System.currentTimeMillis()).getTime()});
-//        Thread.sleep(1100);
-//        stockStream.send(new Object[]{"IBM", 75.6f, 100L, new Timestamp(System.currentTimeMillis()).getTime()});
-////        deleteStream.send(new Object[]{"WSO2"});
-//        deleteStream.send(new Object[]{new Timestamp(System.currentTimeMillis()).getTime()});
-////        Thread.sleep(1000);
-//
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable ");
-//        EventPrinter.print(events);
-////        AssertJUnit.assertEquals(2, events.length);
-//
-//        siddhiAppRuntime.shutdown();
-//    }
-
     @Test
-    public void insertIntoTableWithCacheTest5() throws InterruptedException, SQLException {
-        //Configure siddhi to insert events data to table only from specific fields of the stream.
-        log.info("insertIntoTableWithCacheTest1");
+    public void cacheExpireTestCase1() throws InterruptedException {
+        log.info("cacheExpireTestCase1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\"))\n" +
-                //"@Index(\"volume\")" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
+                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         String query1 = "" +
@@ -257,15 +100,14 @@ public class CacheExpireTestCase {
     }
 
     @Test
-    public void insertIntoTableWithCacheTest6() throws InterruptedException, SQLException {
-        //Configure siddhi to insert events data to table only from specific fields of the stream.
-        log.info("insertIntoTableWithCacheTest1");
+    public void cacheExpireTestCase2() throws InterruptedException {
+        log.info("cacheExpireTestCase2");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", expiry.time=\"1 sec\", " +
-                "expiry.check.interval=\"1 sec\", policy=\"FIFO\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
+                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\", policy=\"FIFO\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -285,6 +127,66 @@ public class CacheExpireTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        Thread.sleep(2000);
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+
+        stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
+        stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        Thread.sleep(2000);
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+
+        stockStream.send(new Object[]{"IBM", 75.6f, 4L});
+        stockStream.send(new Object[]{"WS2", 55.6f, 5L});
+        Thread.sleep(2000);
+        stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
+
+        events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+//        AssertJUnit.assertEquals(2, events.length);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void cacheExpireTestCase3() throws InterruptedException, SQLException {
+        log.info("cacheExpireTestCase3");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStream (symbol string); " +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
+                "expiry.time=\"1 sec\", expiry.check.interval=\"1 sec\", policy=\"LFU\"))\n" +
+                //"@Index(\"volume\")" +
+                "define table StockTable (symbol string, price float, volume long); ";
+
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, price, volume\n" +
+                "insert into StockTable ;" +
+                "@info(name = 'query2') " +
+                "from DeleteStream " +
+                "delete StockTable " +
+                "on StockTable.symbol == symbol";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStream = siddhiAppRuntime.getInputHandler("DeleteStream");
+        siddhiAppRuntime.start();
+
+        Event[] events;
+        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(200);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);

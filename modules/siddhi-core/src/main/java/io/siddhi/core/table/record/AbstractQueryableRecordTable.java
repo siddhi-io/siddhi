@@ -152,18 +152,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     cacheTableDefinition.annotation(annotation);
                 }
             }
-            if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_EXPIRY_TIME) != null) {
-                cacheExpiryEnabled = true;
-                long cacheExpirationTimeInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
-                        getElement(ANNOTATION_CACHE_EXPIRY_TIME));
-                cacheExpiryCheckIntervalInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
-                        getElement(ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL));
-                scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
-                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(cacheExpirationTimeInMillis, cacheTable,
-                        tableMap, this, siddhiAppContext);
-            }
 
             if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY) == null) {
+                throw new SiddhiAppCreationException(siddhiAppContext.getName() + ": cache policy must be given to " +
+                        "enable cache.");
                 // todo: throw error. cache policy must
             }
 
@@ -206,6 +198,18 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             cacheTable.initTable(cacheTableDefinition, cacheTableStreamEventFactory,
                     cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
 
+            // if cache expiry enabled create expiry handler
+            if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_EXPIRY_TIME) != null) {
+                cacheExpiryEnabled = true;
+                long cacheExpirationTimeInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
+                        getElement(ANNOTATION_CACHE_EXPIRY_TIME));
+                cacheExpiryCheckIntervalInMillis = Expression.Time.timeToLong(cacheTableAnnotation.
+                        getElement(ANNOTATION_CACHE_EXPIRY_CHECK_INTERVAL));
+                scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
+                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(cacheExpirationTimeInMillis, cacheTable,
+                        tableMap, this, siddhiAppContext);
+            }
+
             // creating objects needed to load cache
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
                     CACHE_QUERY_NAME + tableDefinition.getId());
@@ -230,7 +234,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             List<MetaStateEventAttribute> outputDataAttribs = ((CompiledSelectionWithCache) compiledSelectionForCaching)
                     .metaStateEvent.getOutputDataAttributes();
             if (outputDataAttribs.get(outputDataAttribs.size() - 1).getAttribute().getName().
-                    equalsIgnoreCase("timestamp")) {
+                    equalsIgnoreCase("timestamp")) { //todo change?
                 outputDataAttribs.remove(outputDataAttribs.size() - 1);
             }
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
@@ -402,7 +406,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
                        CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
-        //todo: handle timestamp fpr cache ??
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
         CompiledConditionWithCache compiledConditionWithCache = null;
@@ -811,7 +814,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    public void checkExecutorsIO(List<String> primaryKeysArray, CollectionExecutor collectionExecutor) {
+    private void checkExecutorsIO(List<String> primaryKeysArray, CollectionExecutor collectionExecutor) {
         try {
             CompareCollectionExecutor comp = (CompareCollectionExecutor) collectionExecutor;
             primaryKeysArray.remove(comp.getAttribute());
@@ -828,8 +831,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    public void recursivelyCheckExecutorsSEQO(List<String> primaryKeysArray, ExpressionExecutor expressionExecutor,
-                                             int storePosition) {
+    private void recursivelyCheckExecutorsSEQO(List<String> primaryKeysArray, ExpressionExecutor expressionExecutor,
+                                               int storePosition) {
         try {
             VariableExpressionExecutor variableExpressionExecutor = (VariableExpressionExecutor) expressionExecutor;
             if (variableExpressionExecutor.getPosition()[0] == storePosition) {
