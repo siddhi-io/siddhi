@@ -27,7 +27,7 @@ public class CacheTableFIFO extends InMemoryTable implements CacheTable {
     @Override
     public void deleteOneEntryUsingCachePolicy() {
         try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
             Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
 
             long minTimestamp = Long.MAX_VALUE;

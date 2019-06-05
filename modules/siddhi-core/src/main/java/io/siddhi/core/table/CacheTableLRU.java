@@ -38,12 +38,12 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         TableState state = stateHolder.getState();
         readWriteLock.readLock().lock();
         try {
-            StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.eventHolder,
+            StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
                     tableStreamEventCloner);
             String primaryKey;
 
-            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
-                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
+                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                 primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                 StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                 if (usedEvent != null) {
@@ -62,11 +62,11 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         readWriteLock.readLock().lock();
         TableState state = stateHolder.getState();
         try {
-            if (((Operator) compiledCondition).contains(matchingEvent, state.eventHolder)) {
+            if (((Operator) compiledCondition).contains(matchingEvent, state.getEventHolder())) {
                 String primaryKey;
 
-                if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     if (primaryKey == null || primaryKey.equals("")) {
                         primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
@@ -93,9 +93,9 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         TableState state = stateHolder.getState();
         try {
             String primaryKey;
-            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
                 for (StateEvent matchingEvent: updatingEventChunk.toList()) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
@@ -103,7 +103,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
                     }
                 }
             }
-            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
+            ((Operator) compiledCondition).update(updatingEventChunk, state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet);
         } finally {
             stateHolder.returnState(state);
@@ -121,9 +121,9 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
         try {
             String primaryKey;
 
-            if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
                 for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
@@ -133,7 +133,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
             }
             ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
                     updateOrAddingEventChunk,
-                    state.eventHolder,
+                    state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
@@ -147,7 +147,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
                         break;
                     }
                 }
-                state.eventHolder.add(failedEventsLimitCopy);
+                state.getEventHolder().add(failedEventsLimitCopy);
             }
             while (this.size() > maxTableSize) {
                 this.deleteOneEntryUsingCachePolicy();
@@ -162,7 +162,7 @@ public class CacheTableLRU extends InMemoryTable implements CacheTable {
     @Override
     public void deleteOneEntryUsingCachePolicy() {
         try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
+            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
             Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
 
             long minTimestamp = Long.MAX_VALUE;

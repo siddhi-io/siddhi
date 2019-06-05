@@ -246,11 +246,13 @@ public class InMemoryTable extends Table {
      * class to store the state of table
      */
     public class TableState extends State {
-
-        public final EventHolder eventHolder;
+        private final EventHolder eventHolder;
 
         public TableState(EventHolder eventHolder) {
             this.eventHolder = eventHolder;
+        }
+        public EventHolder getEventHolder() {
+            return eventHolder;
         }
 
         @Override
