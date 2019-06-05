@@ -157,33 +157,4 @@ public class CacheUtils {
         }
         return primaryKey.toString();
     }
-
-//    public static String getPrimaryKeyFromCompileCondition(CompiledCondition compiledCondition) {
-//        StringBuilder primaryKey = new StringBuilder();
-//        if (compiledCondition instanceof OverwriteTableIndexOperator) {
-//            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-//
-//            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
-//                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-//                        getCollectionExecutor();
-//                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
-//                for (ExpressionExecutor ee : lis) {
-//                    if (ee instanceof ConstantExpressionExecutor) {
-//                        primaryKey.append(((ConstantExpressionExecutor) ee).getValue());
-//                        primaryKey.append(":-:");
-//                    }
-//                }
-//            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
-//                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
-//                if (executor.getValueExpressionExecutor() instanceof ConstantExpressionExecutor) {
-//                    primaryKey.append(((ConstantExpressionExecutor) executor.getValueExpressionExecutor()).getValue());
-//                } else {
-//                    return null;
-//                }
-//            }
-//            return primaryKey.toString();
-//        } else {
-//            return null;
-//        }
-//    }
 }
