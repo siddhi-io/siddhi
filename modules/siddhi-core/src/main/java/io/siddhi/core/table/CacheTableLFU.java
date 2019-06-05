@@ -27,7 +27,6 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
 
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
-import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromCompileCondition;
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
 /**
@@ -46,7 +45,7 @@ public class CacheTableLFU extends InMemoryTable implements CacheTable {
 
             if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
                 IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
-                primaryKey = getPrimaryKeyFromCompileCondition(compiledCondition);
+                primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                 StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                 if (usedEvent != null) {
                     usedEvent.getOutputData()[foundEvent.getOutputData().length - 1] =
@@ -70,7 +69,7 @@ public class CacheTableLFU extends InMemoryTable implements CacheTable {
 
                 if (stateHolder.getState().eventHolder instanceof IndexEventHolder) {
                     IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().eventHolder;
-                    primaryKey = getPrimaryKeyFromCompileCondition(compiledCondition);
+                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     if (primaryKey == null || primaryKey.equals("")) {
                         primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
                     }
