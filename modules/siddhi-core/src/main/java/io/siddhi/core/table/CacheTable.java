@@ -18,23 +18,44 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.record.RecordTableHandler;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.expression.Expression;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
 
 /**
  * common interface for FIFO, LRU, and LFU cache tables
  */
 public abstract class CacheTable extends InMemoryTable {
+    private int maxSize;
+    private boolean cacheExpiryEnabled;
+    private SiddhiAppContext siddhiAppContext;
+    private String cachePolicy;
 
     public void initCacheTable(TableDefinition cacheTableDefinition, ConfigReader configReader,
                                SiddhiAppContext siddhiAppContext, RecordTableHandler recordTableHandler,
-                               boolean cacheExpiryEnabled) {
-
+                               boolean cacheExpiryEnabled, int maxSize, String cachePolicy) {
+        this.maxSize = maxSize;
+        this.cacheExpiryEnabled = cacheExpiryEnabled;
+        this.siddhiAppContext = siddhiAppContext;
+        this.cachePolicy = cachePolicy;
         addRequiredFieldsToCacheTableDefinition(cacheTableDefinition, cacheExpiryEnabled);
 
         // initialize cache table
@@ -51,8 +72,68 @@ public abstract class CacheTable extends InMemoryTable {
                 cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
     }
 
+    public void addStreamEvent(StreamEvent streamEvent) {
+        int tableSize = 0;
+        ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
+        while (true) {
+            addEventsLimitCopy.add(streamEvent);
+            tableSize++;
+            if (tableSize == maxSize || streamEvent.getNext() == null) {
+                break;
+            }
+            streamEvent = streamEvent.getNext();
+        }
+        this.add(addEventsLimitCopy);
+    }
+
+    public void addUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
+        int sizeAfterAdding = this.size();
+        ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>();
+        addingEventChunk.reset();
+        while (addingEventChunk.hasNext()) {
+            if (sizeAfterAdding == maxSize) {
+                break;
+            }
+            StreamEvent event = addingEventChunk.next();
+            addRequiredFieldsToDataForCache(addingEventChunkForCache, event, siddhiAppContext, cachePolicy,
+                    cacheExpiryEnabled);
+            sizeAfterAdding++;
+        }
+        add(addingEventChunkForCache);
+    }
+
+    public void deleteAll() {
+        stateHolder.getState().getEventHolder().deleteAll();
+    }
+
     abstract void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition,
                                                           boolean cacheExpiryEnabled);
 
     public abstract void deleteOneEntryUsingCachePolicy();
+
+    public CompiledCondition generateCacheCompileCondition(Expression condition,
+                                                            MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
+                                                            SiddhiQueryContext siddhiQueryContext,
+                                                            List<VariableExpressionExecutor>
+                                                                    storeVariableExpressionExecutors) {
+        MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
+                getMetaStreamEvents().length);
+        for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
+                getMetaStreamEvents()) {
+            metaStateEvent.addEvent(referenceMetaStreamEvent);
+        }
+        MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(
+                metaStateEvent,
+                storeMatchingMetaInfoHolder.getMatchingStreamEventIndex(),
+                storeMatchingMetaInfoHolder.getStoreEventIndex(),
+                storeMatchingMetaInfoHolder.getMatchingStreamDefinition(),
+                this.tableDefinition,
+                storeMatchingMetaInfoHolder.getCurrentState());
+
+        Map<String, Table> tableMap = new ConcurrentHashMap<>();
+        tableMap.put(this.tableDefinition.getId(), this);
+
+        return super.compileCondition(condition, matchingMetaInfoHolder,
+                storeVariableExpressionExecutors, tableMap, siddhiQueryContext);
+    }
 }
