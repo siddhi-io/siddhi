@@ -254,7 +254,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
-        CompiledConditionWithCache compiledConditionWithCache = null;
+        CompiledConditionWithCache compiledConditionWithCache;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
@@ -281,8 +281,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                        CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
-        CompiledConditionWithCache compiledConditionWithCache = null;
-        CompiledUpdateSetWithCache compiledUpdateSetWithCache = null;
+        CompiledConditionWithCache compiledConditionWithCache;
+        CompiledUpdateSetWithCache compiledUpdateSetWithCache;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
@@ -292,13 +292,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-        } else {
-            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
-            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
-        }
-
-        if (cacheEnabled) {
-            assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
             readWriteLock.writeLock().lock();
             try {
                 cacheTable.update(updatingEventChunk, compiledConditionWithCache.getCacheCompileCondition(),
@@ -308,6 +301,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 readWriteLock.writeLock().unlock();
             }
         } else {
+            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
+            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
             super.update(updatingEventChunk, recordStoreCompiledCondition, recordTableCompiledUpdateSet);
         }
     }
@@ -317,44 +312,25 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             throws ConnectionUnavailableException {
         containsMatchingEvent = matchingEvent;
         RecordStoreCompiledCondition recordStoreCompiledCondition;
-        CompiledConditionWithCache compiledConditionWithCache = null;
+        CompiledConditionWithCache compiledConditionWithCache;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-        } else {
-            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
-        }
-        Map<String, Object> containsConditionParameterMap = new HashMap<>();
-        for (Map.Entry<String, ExpressionExecutor> entry :
-                recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
-            containsConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-        if (cacheEnabled) {
-            assert compiledConditionWithCache != null;
+
             readWriteLock.readLock().lock();
             try {
                 if (cacheTable.contains(matchingEvent, compiledConditionWithCache.getCacheCompileCondition())) {
                     return true;
                 }
-                if (recordTableHandler != null) {
-                    return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
-                            recordStoreCompiledCondition.compiledCondition);
-                } else {
-                    return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-                }
+                return super.contains(matchingEvent, recordStoreCompiledCondition);
             } finally {
                 readWriteLock.readLock().unlock();
             }
         } else {
-            if (recordTableHandler != null) {
-                return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
-                        recordStoreCompiledCondition.compiledCondition);
-            } else {
-                return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-            }
+            return super.contains(matchingEvent, compiledCondition);
         }
     }
 
