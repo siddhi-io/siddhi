@@ -21,14 +21,17 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.record.RecordTableHandler;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -73,12 +76,12 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public void addStreamEvent(StreamEvent streamEvent) {
-        int tableSize = 0;
+        int sizeAfterAdding = 0;
         ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
         while (true) {
             addEventsLimitCopy.add(streamEvent);
-            tableSize++;
-            if (tableSize == maxSize || streamEvent.getNext() == null) {
+            sizeAfterAdding++;
+            if (sizeAfterAdding == maxSize || streamEvent.getNext() == null) {
                 break;
             }
             streamEvent = streamEvent.getNext();
@@ -88,7 +91,7 @@ public abstract class CacheTable extends InMemoryTable {
 
     public void addUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
         int sizeAfterAdding = this.size();
-        ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>();
+        ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>(true);
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             if (sizeAfterAdding == maxSize) {
@@ -100,6 +103,45 @@ public abstract class CacheTable extends InMemoryTable {
             sizeAfterAdding++;
         }
         add(addingEventChunkForCache);
+    }
+
+    public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                                       CompiledCondition compiledCondition,
+                                       CompiledUpdateSet compiledUpdateSet,
+                                       AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
+        updateOrAddingEventChunk.reset();
+        while (updateOrAddingEventChunk.hasNext()) {
+            StateEvent event = updateOrAddingEventChunk.next();
+            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext, cachePolicy,
+                    cacheExpiryEnabled);
+        }
+
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
+        try {
+            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
+                    updateOrAddingEventChunkForCache,
+                    state.getEventHolder(),
+                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
+                    addingStreamEventExtractor);
+            if (failedEvents != null && failedEvents.getFirst() != null) {
+                int sizeAfterAdding = this.size();
+                ComplexEventChunk<StreamEvent> failedEventsLimitCopy = new ComplexEventChunk<>(true);
+                failedEvents.reset();
+                while (true) {
+                    failedEventsLimitCopy.add(failedEvents.next());
+                    sizeAfterAdding++;
+                    if (sizeAfterAdding == maxTableSize || !failedEvents.hasNext()) {
+                        break;
+                    }
+                }
+                state.getEventHolder().add(failedEventsLimitCopy);
+            }
+        } finally {
+            stateHolder.returnState(state);
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     public void deleteAll() {

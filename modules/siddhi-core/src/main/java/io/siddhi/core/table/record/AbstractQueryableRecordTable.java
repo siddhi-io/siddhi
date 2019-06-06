@@ -335,89 +335,35 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk, //todo: handle timestamp for cache
+    public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                             CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
                             AddingStreamEventExtractor addingStreamEventExtractor)
             throws ConnectionUnavailableException {
-        RecordStoreCompiledCondition recordStoreCompiledCondition;
-        RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
-        CompiledConditionWithCache compiledConditionWithCache = null;
-        CompiledUpdateSetWithCache compiledUpdateSetWithCache = null;
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            compiledConditionWithCache = (CompiledConditionWithCache)
+            CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.compiledCondition;
-            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
+            RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-            compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
-            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
+            CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
+            RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
-        } else {
-            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
-            recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
-        }
-        List<Map<String, Object>> updateConditionParameterMaps = new ArrayList<>();
-        List<Map<String, Object>> updateSetParameterMaps = new ArrayList<>();
-        List<Object[]> addingRecords = new ArrayList<>();
-        updateOrAddingEventChunk.reset();
-        long timestamp = 0L;
-        while (updateOrAddingEventChunk.hasNext()) {
-            StateEvent stateEvent = updateOrAddingEventChunk.next();
 
-            Map<String, Object> variableMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry :
-                    recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
-                variableMap.put(entry.getKey(), entry.getValue().execute(stateEvent));
-            }
-            updateConditionParameterMaps.add(variableMap);
-
-            Map<String, Object> variableMapForUpdateSet = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry :
-                    recordTableCompiledUpdateSet.getExpressionExecutorMap().entrySet()) {
-                variableMapForUpdateSet.put(entry.getKey(), entry.getValue().execute(stateEvent));
-            }
-            updateSetParameterMaps.add(variableMapForUpdateSet);
-            addingRecords.add(stateEvent.getStreamEvent(0).getOutputData());
-            timestamp = stateEvent.getTimestamp();
-        }
-        if (cacheEnabled) {
-            assert compiledConditionWithCache != null & compiledUpdateSetWithCache != null;
-            ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>();
-            updateOrAddingEventChunk.reset();
-//            if (cacheExpiryEnabled) {
-            while (updateOrAddingEventChunk.hasNext()) {
-                StateEvent event = updateOrAddingEventChunk.next();
-                addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext, cachePolicy,
-                        cacheExpiryEnabled);
-            }
             readWriteLock.writeLock().lock();
             try {
-                cacheTable.updateOrAddWithMaxSize(updateOrAddingEventChunkForCache,
+                ((CacheTable) cacheTable).updateOrAddWithMaxSize(updateOrAddingEventChunk,
                         compiledConditionWithCache.getCacheCompileCondition(),
                         compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor,
                         maxCacheSize);
-                if (recordTableHandler != null) {
-                    recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
-                            updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                            updateSetParameterMaps, addingRecords);
-                } else {
-                    updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                            recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
-                }
+                super.updateOrAdd(updateOrAddingEventChunk, recordStoreCompiledCondition, recordTableCompiledUpdateSet,
+                        addingStreamEventExtractor);
             } finally {
                 readWriteLock.writeLock().unlock();
             }
         } else {
-            if (recordTableHandler != null) {
-                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
-                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                        updateSetParameterMaps, addingRecords);
-            } else {
-                updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
-            }
+            super.updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    addingStreamEventExtractor);
         }
-
     }
 
     @Override
