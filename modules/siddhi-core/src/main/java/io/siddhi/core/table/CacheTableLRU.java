@@ -24,7 +24,11 @@ import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
 
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_LRU;
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
@@ -158,6 +162,16 @@ public class CacheTableLRU extends CacheTable {
         }
     }
 
+
+    @Override
+    void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
+        if (cacheExpiryEnabled) {
+            cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
+            cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
+        } else {
+            cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
+        }
+    }
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {

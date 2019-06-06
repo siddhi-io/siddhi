@@ -112,7 +112,10 @@ public class CacheUtils {
     public static String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {
         StringBuilder primaryKey = new StringBuilder();
         StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
-        Object[] data = streamEvent.getOutputData();
+        Object[] data = null;
+        if (streamEvent != null) {
+            data = streamEvent.getOutputData();
+        }
 
         if (compiledCondition instanceof OverwriteTableIndexOperator) {
             OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;

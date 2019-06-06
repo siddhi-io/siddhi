@@ -114,8 +114,7 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
     private int maxCacheSize;
-    private long purgeInterval; //todo: have a default value. if not given use expiry time
-    //todo: purge interval - change query param also & change expiry time as retention period
+    private long purgeInterval;
     private boolean cacheEnabled = false;
     private boolean cacheExpiryEnabled = false;
     private InMemoryTable cacheTable;
@@ -160,42 +159,16 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 cachePolicy = "FIFO";
             }
 
-            if (cacheExpiryEnabled) { //todo: write init for cache also and do these inside respective cache tabes
-                cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
-                if (cachePolicy.equals("FIFO")) { //todo: ignore case
-                    cacheTable = new CacheTableFIFO();
-                } else if (cachePolicy.equals("LRU")) {
-                    cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
-                    cacheTable = new CacheTableLRU();
-                } else if (cachePolicy.equals("LFU")) {
-                    cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
-                    cacheTable = new CacheTableLFU();
-                }
-            } else {
-                if (cachePolicy.equals("FIFO")) {
-                    cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
-                    cacheTable = new CacheTableFIFO();
-                } else if (cachePolicy.equals("LRU")) {
-                    cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
-                    cacheTable = new CacheTableLRU();
-                } else if (cachePolicy.equals("LFU")) {
-                    cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
-                    cacheTable = new CacheTableLFU();
-                }
+            if (cachePolicy.equalsIgnoreCase("FIFO")) {
+                cacheTable = new CacheTableFIFO();
+            } else if (cachePolicy.equalsIgnoreCase("LRU")) {
+                cacheTable = new CacheTableLRU();
+            } else if (cachePolicy.equalsIgnoreCase("LFU")) {
+                cacheTable = new CacheTableLFU();
             }
 
-            // initialize cache table //todo: consider moving to cache super class?
-            MetaStreamEvent cacheTableMetaStreamEvent = new MetaStreamEvent();
-            cacheTableMetaStreamEvent.addInputDefinition(cacheTableDefinition);
-            for (Attribute attribute : cacheTableDefinition.getAttributeList()) {
-                cacheTableMetaStreamEvent.addOutputData(attribute);
-            }
-
-            StreamEventFactory cacheTableStreamEventFactory = new StreamEventFactory(cacheTableMetaStreamEvent);
-            StreamEventCloner cacheTableStreamEventCloner = new StreamEventCloner(cacheTableMetaStreamEvent,
-                    cacheTableStreamEventFactory);
-            cacheTable.initTable(cacheTableDefinition, cacheTableStreamEventFactory,
-                    cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
+            ((CacheTable) cacheTable).initCacheTable(cacheTableDefinition, configReader, siddhiAppContext,
+                    recordTableHandler, cacheExpiryEnabled);
 
             // if cache expiry enabled create expiry handler //todo: mpve to load cache
             if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_RETENTION_PERIOD) != null) {

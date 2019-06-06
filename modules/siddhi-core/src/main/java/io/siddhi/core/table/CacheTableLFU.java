@@ -25,7 +25,11 @@ import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
 
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_COUNT_LFU;
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
 import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
@@ -159,6 +163,16 @@ public class CacheTableLFU extends CacheTable {
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
+        if (cacheExpiryEnabled) {
+            cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
+            cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
+        } else {
+            cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
         }
     }
 

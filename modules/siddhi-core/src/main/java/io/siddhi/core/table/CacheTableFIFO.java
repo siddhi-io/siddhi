@@ -18,11 +18,20 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.table.holder.IndexEventHolder;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
+
+import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 
 /**
  * cache table with FIFO entry removal
  */
 public class CacheTableFIFO extends CacheTable {
+
+    @Override
+    void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
+        cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
+    }
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {
