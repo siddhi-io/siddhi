@@ -69,28 +69,28 @@ public class CacheUtils {
                                                  boolean cacheExpiryEnabled) {
         Object[] outputDataForCache = null;
         Object[] outputData = ((StreamEvent) event).getOutputData();
-        if (cachePolicy.equals("FIFO")) {
+        if (cachePolicy.equalsIgnoreCase("FIFO")) {
             outputDataForCache = new Object[outputData.length + 1];
             outputDataForCache[outputDataForCache.length - 1] =
                     siddhiAppContext.getTimestampGenerator().currentTime();
         } else if (cacheExpiryEnabled) {
-            if (cachePolicy.equals("LRU")) {
+            if (cachePolicy.equalsIgnoreCase("LRU")) {
                 outputDataForCache = new Object[outputData.length + 2];
                 outputDataForCache[outputDataForCache.length - 2] =
                         outputDataForCache[outputDataForCache.length - 1] =
                                 siddhiAppContext.getTimestampGenerator().currentTime();
-            } else if (cachePolicy.equals("LFU")) {
+            } else if (cachePolicy.equalsIgnoreCase("LFU")) {
                 outputDataForCache = new Object[outputData.length + 2];
                 outputDataForCache[outputDataForCache.length - 2] =
                         siddhiAppContext.getTimestampGenerator().currentTime();
                 outputDataForCache[outputDataForCache.length - 1] = 1;
             }
         } else {
-            if (cachePolicy.equals("LRU")) {
+            if (cachePolicy.equalsIgnoreCase("LRU")) {
                 outputDataForCache = new Object[outputData.length + 1];
                 outputDataForCache[outputDataForCache.length - 1] =
                         siddhiAppContext.getTimestampGenerator().currentTime();
-            } else if (cachePolicy.equals("LFU")) {
+            } else if (cachePolicy.equalsIgnoreCase("LFU")) {
                 outputDataForCache = new Object[outputData.length + 1];
                 outputDataForCache[outputDataForCache.length - 1] = 1;
             }
@@ -137,7 +137,6 @@ public class CacheUtils {
                 } else if (executor.getValueExpressionExecutor() instanceof VariableExpressionExecutor) {
                     VariableExpressionExecutor vee = (VariableExpressionExecutor) executor.getValueExpressionExecutor();
                     primaryKey.append(data[vee.getPosition()[3]]);
-//                    primaryKey.append(":-:");
                 } else {
                     return null;
                 }

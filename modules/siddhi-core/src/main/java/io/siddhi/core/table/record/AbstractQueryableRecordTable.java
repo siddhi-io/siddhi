@@ -150,11 +150,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
 
-            if (cachePolicy == null) {
+            if (cachePolicy == null || cachePolicy.equalsIgnoreCase("FIFO")) {
                 cachePolicy = "FIFO";
-            }
-
-            if (cachePolicy.equalsIgnoreCase("FIFO")) {
                 cacheTable = new CacheTableFIFO();
             } else if (cachePolicy.equalsIgnoreCase("LRU")) {
                 cacheTable = new CacheTableLRU();
@@ -264,33 +261,18 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     compiledConditionTemp.compiledCondition;
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-        } else {
-            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
-        }
-        List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
-        long timestamp = deleteHelper(deletingEventChunk, recordStoreCompiledCondition, deleteConditionParameterMaps);
-        if (cacheEnabled) { //todo: move thiswith previous if else
-            assert compiledConditionWithCache != null;
+
             readWriteLock.writeLock().lock();
             try {
-                cacheTable.delete(deletingEventChunk, //todo: call super method
+                cacheTable.delete(deletingEventChunk,
                         compiledConditionWithCache.getCacheCompileCondition());
-                if (recordTableHandler != null) {
-                    recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                            compiledCondition);
-                } else {
-                    delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
-                }
+                super.delete(deletingEventChunk, recordStoreCompiledCondition);
             } finally {
                 readWriteLock.writeLock().unlock();
             }
         } else {
-            if (recordTableHandler != null) {
-                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                        compiledCondition);
-            } else {
-                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
-            }
+            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
+            super.delete(deletingEventChunk, recordStoreCompiledCondition);
         }
     }
 
