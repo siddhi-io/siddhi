@@ -96,7 +96,7 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
-import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
+import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
 import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
@@ -127,6 +127,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
     private String cachePolicy;
+    private long storeSizeCheckInterval = 10000;
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -369,7 +370,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
-
+        if (cacheEnabled) {
+            // check if we need to check the size of store
+            if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
+                    getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
+                StateEvent stateEventForCaching = new StateEvent(1, 0);
+                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
+                        compiledSelectionForCaching, outputAttributesForCaching);
+                storeTableSize = findEventChunkSize(preLoadedData);
+                storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            }
+        }
         // handle compile condition type conv
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache = null;
@@ -437,7 +448,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
+                ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext,
                         cacheExpiryEnabled);
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
@@ -645,6 +656,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
         findMatchingEvent = matchingEvent;
+        if (cacheEnabled) {
+            // check if we need to check the size of store
+            if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
+                    getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
+                StateEvent stateEventForCaching = new StateEvent(1, 0);
+                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
+                        compiledSelectionForCaching, outputAttributesForCaching);
+                storeTableSize = findEventChunkSize(preLoadedData);
+                storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            }
+        }
 
         // handle condition type convs
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
@@ -751,7 +773,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
+                ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext,
                         cacheExpiryEnabled);
                 cacheTable.add(cacheMissEntry);
                 if (log.isDebugEnabled()) {

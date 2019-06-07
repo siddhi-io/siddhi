@@ -52,7 +52,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_EXPIRE_CURRENT_TIME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
-import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
@@ -66,17 +65,17 @@ public class CacheExpiryHandler {
     private Map<String, Table> tableMap;
     private AbstractQueryableRecordTable storeTable;
     private SiddhiAppContext siddhiAppContext;
-    private long expiryTime;
+    private long retentionPeriod;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private CompiledCondition cacheExpiryCompiledCondition;
 
-    public CacheExpiryHandler(long expiryTime, InMemoryTable cacheTable, Map<String, Table> tableMap,
+    public CacheExpiryHandler(long retentionPeriod, InMemoryTable cacheTable, Map<String, Table> tableMap,
                               AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
         this.cacheTable = cacheTable;
         this.tableMap = tableMap;
         this.storeTable = storeTable;
         this.siddhiAppContext = siddhiAppContext;
-        this.expiryTime = expiryTime;
+        this.retentionPeriod = retentionPeriod;
         this.cacheExpiryCompiledCondition = generateExpiryCompiledCondition();
     }
 
@@ -103,7 +102,7 @@ public class CacheExpiryHandler {
 
         Variable rightExpressionForSubtract = new Variable(CACHE_TABLE_TIMESTAMP_ADDED);
         rightExpressionForSubtract.setStreamId(cacheTable.getTableDefinition().getId());
-        Expression rightExpressionForCompare = new LongConstant(expiryTime);
+        Expression rightExpressionForCompare = new LongConstant(retentionPeriod);
         Compare.Operator greaterThanOperator = Compare.Operator.GREATER_THAN;
 
         MetaStreamEvent currentTimeMetaStreamEvent = new MetaStreamEvent();
@@ -136,7 +135,7 @@ public class CacheExpiryHandler {
         StreamEvent loadedDataFromStore;
 
         if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
-                        siddhiAppContext.getTimestampGenerator().currentTime() - expiryTime * 10) {
+                        siddhiAppContext.getTimestampGenerator().currentTime() - retentionPeriod * 10) {
             if (log.isDebugEnabled()) {
                 log.debug(siddhiAppContext.getName() + ": checking size of store table");
             }
@@ -177,8 +176,8 @@ public class CacheExpiryHandler {
         ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>(true);
 
         while (loadedDataFromStore != null) {
-            addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp,
-                    loadedDataFromStore, siddhiAppContext, storeTable.getCachePolicy(), true);
+            ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp,
+                    loadedDataFromStore, siddhiAppContext, true);
             if (loadedDataFromStore.getNext() == null) {
                 break;
             }

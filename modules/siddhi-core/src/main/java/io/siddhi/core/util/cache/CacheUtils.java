@@ -17,8 +17,6 @@
  */
 package io.siddhi.core.util.cache;
 
-import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
@@ -46,63 +44,6 @@ public class CacheUtils {
             streamEventCopy = streamEventCopy.getNext();
         }
         return chunkSize;
-    }
-
-    public static void addRequiredFieldsToDataForCache(Object addingEventChunkForCache, Object event,
-                                                       SiddhiAppContext siddhiAppContext, String cachePolicy,
-                                                       boolean cacheExpiryEnabled) {
-        if (event instanceof StreamEvent) {
-            StreamEvent eventForCache = checkPoliocyAndAddFields(event, siddhiAppContext, cachePolicy,
-                    cacheExpiryEnabled);
-            ((ComplexEventChunk<StreamEvent>) addingEventChunkForCache).add(eventForCache);
-        } else if (event instanceof StateEvent) {
-            StreamEvent eventForCache = checkPoliocyAndAddFields(((StateEvent) event).getStreamEvent(0),
-                    siddhiAppContext, cachePolicy, cacheExpiryEnabled);
-            StateEvent stateEvent = new StateEvent(((StateEvent) event).getStreamEvents().length,
-                    eventForCache.getOutputData().length); //todo: create state and stream event factory and use
-            stateEvent.addEvent(0, eventForCache);
-            ((ComplexEventChunk<StateEvent>) addingEventChunkForCache).add(stateEvent);
-        }
-    }
-
-    private static StreamEvent checkPoliocyAndAddFields(Object event, //todo: move these logics to respective cache classes
-                                                 SiddhiAppContext siddhiAppContext, String cachePolicy,
-                                                 boolean cacheExpiryEnabled) {
-        Object[] outputDataForCache = null;
-        Object[] outputData = ((StreamEvent) event).getOutputData();
-        if (cachePolicy.equalsIgnoreCase("FIFO")) {
-            outputDataForCache = new Object[outputData.length + 1];
-            outputDataForCache[outputDataForCache.length - 1] =
-                    siddhiAppContext.getTimestampGenerator().currentTime();
-        } else if (cacheExpiryEnabled) {
-            if (cachePolicy.equalsIgnoreCase("LRU")) {
-                outputDataForCache = new Object[outputData.length + 2];
-                outputDataForCache[outputDataForCache.length - 2] =
-                        outputDataForCache[outputDataForCache.length - 1] =
-                                siddhiAppContext.getTimestampGenerator().currentTime();
-            } else if (cachePolicy.equalsIgnoreCase("LFU")) {
-                outputDataForCache = new Object[outputData.length + 2];
-                outputDataForCache[outputDataForCache.length - 2] =
-                        siddhiAppContext.getTimestampGenerator().currentTime();
-                outputDataForCache[outputDataForCache.length - 1] = 1;
-            }
-        } else {
-            if (cachePolicy.equalsIgnoreCase("LRU")) {
-                outputDataForCache = new Object[outputData.length + 1];
-                outputDataForCache[outputDataForCache.length - 1] =
-                        siddhiAppContext.getTimestampGenerator().currentTime();
-            } else if (cachePolicy.equalsIgnoreCase("LFU")) {
-                outputDataForCache = new Object[outputData.length + 1];
-                outputDataForCache[outputDataForCache.length - 1] = 1;
-            }
-        }
-
-        assert outputDataForCache != null;
-        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
-        StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
-        eventForCache.setOutputData(outputDataForCache);
-
-        return eventForCache;
     }
 
     public static String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {

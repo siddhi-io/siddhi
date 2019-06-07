@@ -17,6 +17,10 @@
  */
 package io.siddhi.core.table;
 
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -55,5 +59,21 @@ public class CacheTableFIFO extends CacheTable {
         } catch (ClassCastException ignored) {
 
         }
+    }
+
+    @Override
+    protected StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
+                                                  boolean cacheExpiryEnabled) {
+        Object[] outputDataForCache;
+        Object[] outputData = ((StreamEvent) event).getOutputData();
+            outputDataForCache = new Object[outputData.length + 1];
+            outputDataForCache[outputDataForCache.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+
+        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
+        eventForCache.setOutputData(outputDataForCache);
+
+        return eventForCache;
     }
 }

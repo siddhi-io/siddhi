@@ -17,6 +17,7 @@
  */
 package io.siddhi.core.table;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -124,11 +125,30 @@ public class CacheTableLFU extends CacheTable {
                                        CompiledCondition compiledCondition,
                                        CompiledUpdateSet compiledUpdateSet,
                                        AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
+        updateOrAddingEventChunk.reset();
+        while (updateOrAddingEventChunk.hasNext()) {
+            StateEvent event = updateOrAddingEventChunk.next();
+            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext,
+                    cacheExpiryEnabled);
+        }
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
+            String primaryKey;
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
+                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+                    if (usedEvent != null) {
+                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] =
+                                (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+                    }
+                }
+            }
             ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
-                    updateOrAddingEventChunk,
+                    updateOrAddingEventChunkForCache,
                     state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
@@ -144,18 +164,6 @@ public class CacheTableLFU extends CacheTable {
                     }
                 }
                 state.getEventHolder().add(failedEventsLimitCopy);
-            }
-            String primaryKey;
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] =
-                                (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
-                    }
-                }
             }
             while (this.size() > maxTableSize) {
                 this.deleteOneEntryUsingCachePolicy();
@@ -195,5 +203,26 @@ public class CacheTableLFU extends CacheTable {
             }
             indexEventHolder.deleteEvent(keyOfMinCount);
         }
+    }
+
+    @Override
+    protected StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
+                                                  boolean cacheExpiryEnabled) {
+        Object[] outputDataForCache;
+        Object[] outputData = ((StreamEvent) event).getOutputData();
+        if (cacheExpiryEnabled) {
+            outputDataForCache = new Object[outputData.length + 2];
+            outputDataForCache[outputDataForCache.length - 2] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+            outputDataForCache[outputDataForCache.length - 1] = 1;
+        } else {
+            outputDataForCache = new Object[outputData.length + 1];
+            outputDataForCache[outputDataForCache.length - 1] = 1;
+        }
+        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
+        eventForCache.setOutputData(outputDataForCache);
+
+        return eventForCache;
     }
 }

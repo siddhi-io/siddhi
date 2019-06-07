@@ -17,6 +17,7 @@
  */
 package io.siddhi.core.table;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -120,6 +121,13 @@ public class CacheTableLRU extends CacheTable {
                                        CompiledCondition compiledCondition,
                                        CompiledUpdateSet compiledUpdateSet,
                                        AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
+        updateOrAddingEventChunk.reset();
+        while (updateOrAddingEventChunk.hasNext()) {
+            StateEvent event = updateOrAddingEventChunk.next();
+            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext,
+                    cacheExpiryEnabled);
+        }
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
@@ -136,7 +144,7 @@ public class CacheTableLRU extends CacheTable {
                 }
             }
             ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
-                    updateOrAddingEventChunk,
+                    updateOrAddingEventChunkForCache,
                     state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
@@ -195,5 +203,27 @@ public class CacheTableLRU extends CacheTable {
         } catch (ClassCastException ignored) {
 
         }
+    }
+
+    @Override
+    protected StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
+                                                  boolean cacheExpiryEnabled) {
+        Object[] outputDataForCache;
+        Object[] outputData = ((StreamEvent) event).getOutputData();
+        if (cacheExpiryEnabled) {
+            outputDataForCache = new Object[outputData.length + 2];
+            outputDataForCache[outputDataForCache.length - 2] =
+                    outputDataForCache[outputDataForCache.length - 1] =
+                            siddhiAppContext.getTimestampGenerator().currentTime();
+        } else {
+            outputDataForCache = new Object[outputData.length + 1];
+            outputDataForCache[outputDataForCache.length - 1] =
+                    siddhiAppContext.getTimestampGenerator().currentTime();
+        }
+        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
+        eventForCache.setOutputData(outputDataForCache);
+
+        return eventForCache;
     }
 }

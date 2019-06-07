@@ -41,15 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
-
 /**
  * common interface for FIFO, LRU, and LFU cache tables
  */
 public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
-    private boolean cacheExpiryEnabled;
-    private SiddhiAppContext siddhiAppContext;
+    boolean cacheExpiryEnabled;
+    SiddhiAppContext siddhiAppContext;
     private String cachePolicy;
 
     public void initCacheTable(TableDefinition cacheTableDefinition, ConfigReader configReader,
@@ -98,8 +96,7 @@ public abstract class CacheTable extends InMemoryTable {
                 break;
             }
             StreamEvent event = addingEventChunk.next();
-            addRequiredFieldsToDataForCache(addingEventChunkForCache, event, siddhiAppContext, cachePolicy,
-                    cacheExpiryEnabled);
+            addRequiredFieldsToDataForCache(addingEventChunkForCache, event, siddhiAppContext, cacheExpiryEnabled);
             sizeAfterAdding++;
         }
         add(addingEventChunkForCache);
@@ -113,7 +110,7 @@ public abstract class CacheTable extends InMemoryTable {
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
             StateEvent event = updateOrAddingEventChunk.next();
-            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext, cachePolicy,
+            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext,
                     cacheExpiryEnabled);
         }
 
@@ -152,6 +149,25 @@ public abstract class CacheTable extends InMemoryTable {
                                                           boolean cacheExpiryEnabled);
 
     public abstract void deleteOneEntryUsingCachePolicy();
+
+    public void addRequiredFieldsToDataForCache(Object addingEventChunkForCache, Object event,
+                                                SiddhiAppContext siddhiAppContext,
+                                                boolean cacheExpiryEnabled) {
+        if (event instanceof StreamEvent) {
+            StreamEvent eventForCache = checkPolicyAndAddFields(event, siddhiAppContext, cacheExpiryEnabled);
+            ((ComplexEventChunk<StreamEvent>) addingEventChunkForCache).add(eventForCache);
+        } else if (event instanceof StateEvent) {
+            StreamEvent eventForCache = checkPolicyAndAddFields(((StateEvent) event).getStreamEvent(0),
+                    siddhiAppContext, cacheExpiryEnabled);
+            StateEvent stateEvent = new StateEvent(((StateEvent) event).getStreamEvents().length,
+                    eventForCache.getOutputData().length);
+            stateEvent.addEvent(0, eventForCache);
+            ((ComplexEventChunk<StateEvent>) addingEventChunkForCache).add(stateEvent);
+        }
+    }
+
+    protected abstract StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
+                                                           boolean cacheExpiryEnabled);
 
     public CompiledCondition generateCacheCompileCondition(Expression condition,
                                                             MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
