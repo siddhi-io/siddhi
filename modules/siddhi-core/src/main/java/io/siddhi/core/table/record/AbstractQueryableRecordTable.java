@@ -48,7 +48,7 @@ import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.cache.CacheExpiryHandlerRunnable;
+import io.siddhi.core.util.cache.CacheExpiryHandler;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
@@ -97,7 +97,6 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCache;
-import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
 import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
@@ -118,7 +117,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private Attribute[] outputAttributesForCaching;
     private TableDefinition cacheTableDefinition;
     protected SiddhiAppContext siddhiAppContext;
-    private CacheExpiryHandlerRunnable cacheExpiryHandlerRunnable;
+    private CacheExpiryHandler cacheExpiryHandler;
     private ScheduledExecutorService scheduledExecutorServiceForCacheExpiry;
     protected StateEvent findMatchingEvent;
     protected Selector selectorForTestStoreQuery;
@@ -174,7 +173,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             getElement(ANNOTATION_CACHE_PURGE_INTERVAL));
                 }
                 scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
-                cacheExpiryHandlerRunnable = new CacheExpiryHandlerRunnable(retentionPeriod, cacheTable,
+                cacheExpiryHandler = new CacheExpiryHandler(retentionPeriod, cacheTable,
                         tableMap, this, siddhiAppContext);
             }
 
@@ -221,7 +220,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
             if (cacheExpiryEnabled) {
                 scheduledExecutorServiceForCacheExpiry.
-                        scheduleAtFixedRate(cacheExpiryHandlerRunnable.checkAndExpireCache(), 0,
+                        scheduleAtFixedRate(cacheExpiryHandler.checkAndExpireCache(), 0,
                         purgeInterval, TimeUnit.MILLISECONDS);
             }
         }
@@ -522,11 +521,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 return false;
             }
         }
-        if (primaryKeysArray.size() == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return primaryKeysArray.size() == 0;
     }
 
     private void checkExecutorsIO(List<String> primaryKeysArray, CollectionExecutor collectionExecutor) {
@@ -540,7 +535,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 for (String key: compositeKeys) {
                     primaryKeysArray.remove(key);
                 }
-            } catch (ClassCastException e2) {
+            } catch (ClassCastException ignored) {
 
             }
         }
@@ -553,7 +548,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (variableExpressionExecutor.getPosition()[0] == storePosition) {
                 primaryKeysArray.remove(variableExpressionExecutor.getAttribute().getName());
             }
-            return;
         } catch (ClassCastException e) {
             try {
                 EqualCompareConditionExpressionExecutor eql =
@@ -566,7 +560,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     recursivelyCheckExecutorsSEQO(primaryKeysArray, and.getLeftConditionExecutor(), storePosition);
                     recursivelyCheckExecutorsSEQO(primaryKeysArray, and.getRightConditionExecutor(), storePosition);
                 } catch (ClassCastException e3) {
-                    return;
                 }
             }
         }
@@ -628,17 +621,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             throws ConnectionUnavailableException {
         findMatchingEvent = matchingEvent;
 
-        if (cacheEnabled) {
-            // check if store size is old
-            if (storeSizeLastCheckedTime < siddhiAppContext.getTimestampGenerator().currentTime() - 30000 ||
-                    storeTableSize == -1) {
-                StateEvent stateEventForCaching = new StateEvent(1, 0);
-                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching);
-                storeTableSize = findEventChunkSize(preLoadedData);
-            }
-        }
-
         // handle condition type convs
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         RecordStoreCompiledCondition recordStoreCompiledCondition;
@@ -676,7 +658,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         if (cacheEnabled && storeTableSize <= maxCacheSize) { // when store is smaller than max cache size
             // return results from cache
-            assert compiledConditionWithCache != null;
             readWriteLock.readLock().lock();
             try {
                 cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
@@ -693,7 +674,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         } else { // when store is bigger than max cache size
             if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
                 // if query conrains all primary keys and has == only for them
-                assert compiledConditionWithCache != null;
                 readWriteLock.readLock().lock();
                 try {
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
@@ -771,9 +751,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 MatchingMetaInfoHolder(metaStateEventForSelectAll, -1, 0, tableDefinition, tableDefinition, 0);
 
         List<OutputAttribute> outputAttributesAll = new ArrayList<>();
-//                MetaStreamEvent metaStreamEvent = matchingMetaInfoHolderForSlectAll.getMetaStateEvent()
-//                .getMetaStreamEvent(
-//                        matchingMetaInfoHolderForSlectAll.getStoreEventIndex());
         List<Attribute> attributeList = tableDefinition.getAttributeList();
         for (Attribute attribute : attributeList) {
             outputAttributesAll.add(new OutputAttribute(new Variable(attribute.getName())));
