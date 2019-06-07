@@ -48,7 +48,6 @@ public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
     boolean cacheExpiryEnabled;
     SiddhiAppContext siddhiAppContext;
-    private String cachePolicy;
 
     public void initCacheTable(TableDefinition cacheTableDefinition, ConfigReader configReader,
                                SiddhiAppContext siddhiAppContext, RecordTableHandler recordTableHandler,
@@ -56,7 +55,6 @@ public abstract class CacheTable extends InMemoryTable {
         this.maxSize = maxSize;
         this.cacheExpiryEnabled = cacheExpiryEnabled;
         this.siddhiAppContext = siddhiAppContext;
-        this.cachePolicy = cachePolicy;
         addRequiredFieldsToCacheTableDefinition(cacheTableDefinition, cacheExpiryEnabled);
 
         // initialize cache table

@@ -89,9 +89,9 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_POLICY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_PURGE_INTERVAL;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PERIOD;
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_POLICY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;

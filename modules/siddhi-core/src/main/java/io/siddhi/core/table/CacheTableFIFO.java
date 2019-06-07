@@ -18,8 +18,6 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.query.api.definition.Attribute;

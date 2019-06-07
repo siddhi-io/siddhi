@@ -60,7 +60,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     private static final Logger LOG = Logger.getLogger(Table.class);
 
-    public TableDefinition tableDefinition;
+    protected TableDefinition tableDefinition;
 
     private AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();

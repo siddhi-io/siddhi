@@ -56,8 +56,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * In-memory event table implementation of SiddhiQL.
  */
 public class InMemoryTable extends Table {
-
-    TableDefinition tableDefinition;
     StreamEventCloner tableStreamEventCloner;
     ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     StateHolder<TableState> stateHolder;
