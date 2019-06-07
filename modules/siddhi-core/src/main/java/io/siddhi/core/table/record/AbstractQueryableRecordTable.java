@@ -367,6 +367,76 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException {
+
+        // handle compile condition type conv
+        RecordStoreCompiledCondition recordStoreCompiledCondition;
+        CompiledConditionWithCache compiledConditionWithCache = null;
+        findMatchingEvent = matchingEvent;
+        if (cacheEnabled) {
+            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
+            compiledConditionWithCache = (CompiledConditionWithCache)
+                    compiledConditionTemp.compiledCondition;
+            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+        } else {
+            recordStoreCompiledCondition =
+                    ((RecordStoreCompiledCondition) compiledCondition);
+        }
+
+        StreamEvent cacheResults;
+        // when table is smaller than max cache send results from cache
+        if (cacheEnabled & storeTableSize <= maxCacheSize) {
+            assert compiledConditionWithCache != null;
+            readWriteLock.readLock().lock();
+            try {
+                cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                        matchingEvent);
+                log.info(siddhiAppContext.getName() + ": sending results from cache"); //todo: make these debug logs
+                return cacheResults;
+            } finally {
+                readWriteLock.readLock().unlock();
+            }
+        } else {
+            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
+                readWriteLock.readLock().lock();
+                try {
+                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                            matchingEvent);
+                    if (cacheResults != null) {
+                        return cacheResults;
+                    }
+                } finally {
+                    readWriteLock.readLock().unlock();
+                }
+                // cache miss
+                ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
+                StreamEvent streamEvent = super.find(recordStoreCompiledCondition, matchingEvent);
+
+                if (cacheTable.size() == maxCacheSize) {
+                    ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
+                }
+                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
+                        cacheExpiryEnabled);
+                cacheTable.add(cacheMissEntry);
+                readWriteLock.readLock().lock();
+                try {
+                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                            matchingEvent);
+                    log.info(siddhiAppContext.getName() + ": sending results from cache");
+                    return cacheResults;
+                } finally {
+                    readWriteLock.readLock().unlock();
+                }
+            }
+        }
+
+        // when cache is not enabled or cache query conditions are not satisfied
+        return super.find(recordStoreCompiledCondition, matchingEvent);
+    }
+
+    @Override
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
@@ -420,121 +490,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         } else {
             return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
         }
-    }
-
-    @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
-            throws ConnectionUnavailableException {
-        if (cacheEnabled) {
-            // check if store size is old
-            if (storeSizeLastCheckedTime < siddhiAppContext.getTimestampGenerator().currentTime() - 30000 ||
-                    storeTableSize == -1) {
-                StateEvent stateEventForCaching = new StateEvent(1, 0);
-                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching); //todo: if store table sioze becomes smaller than cache reload them into cache
-                storeTableSize = findEventChunkSize(preLoadedData);
-            }
-        }
-
-        // handle compile condition type conv
-        RecordStoreCompiledCondition recordStoreCompiledCondition;
-        CompiledConditionWithCache compiledConditionWithCache = null;
-        findMatchingEvent = matchingEvent;
-        if (cacheEnabled) {
-            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
-            recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
-        } else {
-            recordStoreCompiledCondition =
-                    ((RecordStoreCompiledCondition) compiledCondition);
-        }
-
-        Map<String, Object> findConditionParameterMap = new HashMap<>();
-        for (Map.Entry<String, ExpressionExecutor> entry : recordStoreCompiledCondition.variableExpressionExecutorMap
-                .entrySet()) {
-            findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-
-        Iterator<Object[]> records;
-        StreamEvent cacheResults;
-        // when table is smaller than max cache send results from cache
-        if (cacheEnabled & storeTableSize <= maxCacheSize) {
-            assert compiledConditionWithCache != null;
-            readWriteLock.readLock().lock();
-            try {
-                cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                        matchingEvent);
-                log.info(siddhiAppContext.getName() + ": sending results from cache"); //todo: make these debug logs
-                return cacheResults;
-            } finally {
-                readWriteLock.readLock().unlock();
-            }
-        } else {
-            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
-                readWriteLock.readLock().lock();
-                try {
-                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                            matchingEvent);
-                    if (cacheResults != null) {
-                        return cacheResults;
-                    }
-                } finally {
-                    readWriteLock.readLock().unlock();
-                }
-                // cache miss
-                if (recordTableHandler != null) {
-                    records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                            recordStoreCompiledCondition.compiledCondition);
-                } else {
-                    records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-                }
-                if (records == null) {
-                    return null;
-                }
-                ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
-                Object[] recordSelectAll = records.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                streamEvent.setOutputData(new Object[recordSelectAll.length]);
-                System.arraycopy(recordSelectAll, 0, streamEvent.getOutputData(), 0, recordSelectAll.length);
-
-                if (cacheTable.size() == maxCacheSize) {
-                    ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
-                }
-                addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext, cachePolicy,
-                        cacheExpiryEnabled);
-                cacheTable.add(cacheMissEntry);
-                readWriteLock.readLock().lock();
-                try {
-                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                            matchingEvent);
-                    log.info(siddhiAppContext.getName() + ": sending results from cache");
-                    return cacheResults;
-                } finally {
-                    readWriteLock.readLock().unlock();
-                }
-            }
-        }
-
-        // when cache is not enabled or cache query conditions are not satisfied
-        if (recordTableHandler != null) {
-            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
-        } else {
-            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-        }
-
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-        if (records != null) {
-            while (records.hasNext()) {
-                Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                streamEventComplexEventChunk.add(streamEvent);
-            }
-        }
-        return streamEventComplexEventChunk.getFirst();
     }
 
     private boolean checkCompileConditionForPKAndEquals(CompiledCondition compiledCondition,

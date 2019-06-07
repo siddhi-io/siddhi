@@ -123,6 +123,7 @@ public class CacheExpiryHandlerRunnable {
 
         if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() > //todo: remove store table load size check in find and query
                         siddhiAppContext.getTimestampGenerator().currentTime() - 30000) { //todo: use a multiple of cache expiry param
+            //todo: if store table sioze becomes smaller than cache reload them into cache
             log.info(siddhiAppContext.getName() + ": store table size is new");
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 try {
