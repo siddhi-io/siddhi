@@ -50,6 +50,14 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
         this.allAttributesList.addAll(tableAttributesNameList);
     }
 
+    public boolean applyReducedExpression() {
+        Object peek = this.conditionOperands.peek();
+        if (peek instanceof String) {
+            return false;
+        }
+        return true;
+    }
+
     public Expression getReducedExpression() {
         Object pop = this.conditionOperands.pop();
         if (pop instanceof String) {
@@ -62,14 +70,24 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitAnd() {
         Object rightOperand = this.conditionOperands.pop();
         Object leftOperand = this.conditionOperands.pop();
-        if (!(rightOperand instanceof String) && !(leftOperand instanceof String)) {
-            this.conditionOperands.push(
-                    Expression.and(
-                            ((Expression) leftOperand), ((Expression) rightOperand)
-                    )
-            );
+
+        boolean isLeftOperandString = leftOperand instanceof String;
+        if (isLeftOperandString) {
+            if (rightOperand instanceof String) {
+                this.conditionOperands.push("true");
+            } else {
+                this.conditionOperands.push(rightOperand);
+            }
         } else {
-            this.conditionOperands.push("true");
+            if (rightOperand instanceof String) {
+                this.conditionOperands.push(leftOperand);
+            } else {
+                this.conditionOperands.push(
+                        Expression.and(
+                                ((Expression) leftOperand), ((Expression) rightOperand)
+                        )
+                );
+            }
         }
     }
 
@@ -77,14 +95,24 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitOr() {
         Object rightOperand = this.conditionOperands.pop();
         Object leftOperand = this.conditionOperands.pop();
-        if (!(rightOperand instanceof String) && !(leftOperand instanceof String)) {
-            this.conditionOperands.push(
-                    Expression.or(
-                            ((Expression) leftOperand), ((Expression) rightOperand)
-                    )
-            );
+
+        boolean isLeftOperandString = leftOperand instanceof String;
+        if (isLeftOperandString) {
+            if (rightOperand instanceof String) {
+                this.conditionOperands.push("true");
+            } else {
+                this.conditionOperands.push(rightOperand);
+            }
         } else {
-            this.conditionOperands.push("true");
+            if (rightOperand instanceof String) {
+                this.conditionOperands.push(leftOperand);
+            } else {
+                this.conditionOperands.push(
+                        Expression.or(
+                                ((Expression) leftOperand), ((Expression) rightOperand)
+                        )
+                );
+            }
         }
     }
 

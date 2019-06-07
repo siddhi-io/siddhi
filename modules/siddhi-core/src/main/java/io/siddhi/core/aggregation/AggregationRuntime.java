@@ -362,8 +362,15 @@ public class AggregationRuntime implements MemoryCalculable {
                 this.tableAttributesNameList
         );
         aggregationExpressionBuilder.build(expressionVisitor);
+        boolean shouldApplyReducedCondition = expressionVisitor.applyReducedExpression();
         Expression reducedExpression = expressionVisitor.getReducedExpression();
-        Expression withinExpressionTable = Expression.and(withinExpression, reducedExpression);
+
+        Expression withinExpressionTable;
+        if (shouldApplyReducedCondition) {
+            withinExpressionTable = Expression.and(withinExpression, reducedExpression);
+        } else {
+            withinExpressionTable = withinExpression;
+        }
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
@@ -396,13 +403,21 @@ public class AggregationRuntime implements MemoryCalculable {
                             withinExpressionTable
                     );
                 } else {
-                    lowerGranularity = Expression.and(
-                            Expression.compare(
-                                    Expression.variable("AGG_TIMESTAMP"),
-                                    Compare.Operator.GREATER_THAN_EQUAL,
-                                    Expression.variable(lowerGranularityAttributes.get(i))),
-                            reducedExpression
-                    );
+                    if (shouldApplyReducedCondition) {
+                        lowerGranularity = Expression.and(
+                                Expression.compare(
+                                        Expression.variable("AGG_TIMESTAMP"),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable(lowerGranularityAttributes.get(i))),
+                                reducedExpression
+                        );
+                    } else {
+                        lowerGranularity =
+                                Expression.compare(
+                                        Expression.variable("AGG_TIMESTAMP"),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable(lowerGranularityAttributes.get(i)));
+                    }
                 }
                 TimePeriod.Duration duration = this.incrementalDurations.get(i);
                 String tableName = aggregationName + "_" + duration.toString();
