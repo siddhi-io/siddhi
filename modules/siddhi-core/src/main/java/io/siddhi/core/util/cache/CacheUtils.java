@@ -105,11 +105,6 @@ public class CacheUtils {
         return eventForCache;
     }
 
-//    public static int getReverseIndexOfData(String cachePolicy, boolean cacheExpiryEnabled, String dataColumn) {
-//        if ()
-//    }
-
-
     public static String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {
         StringBuilder primaryKey = new StringBuilder();
         StreamEvent streamEvent = matchingEvent.getStreamEvent(0);

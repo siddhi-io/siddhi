@@ -23,6 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -72,20 +73,24 @@ public class CacheExpireTestCase {
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(2, events.length);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"IBM", 75.6f, 4L});
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
@@ -95,7 +100,7 @@ public class CacheExpireTestCase {
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
+        AssertJUnit.assertEquals(1, events.length);
         siddhiAppRuntime.shutdown();
     }
 

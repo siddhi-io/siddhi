@@ -56,7 +56,7 @@ import static io.siddhi.core.util.cache.CacheUtils.addRequiredFieldsToDataForCac
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
- * this class is a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
+ * this class has a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
  * expiry
  */
 public class CacheExpiryHandler {
@@ -77,8 +77,7 @@ public class CacheExpiryHandler {
         this.storeTable = storeTable;
         this.siddhiAppContext = siddhiAppContext;
         this.expiryTime = expiryTime;
-
-        cacheExpiryCompiledCondition = generateExpiryCompiledCondition();
+        this.cacheExpiryCompiledCondition = generateExpiryCompiledCondition();
     }
 
     private ComplexEventChunk<StateEvent> generateDeleteEventChunk() {
@@ -134,47 +133,47 @@ public class CacheExpiryHandler {
 
     private void handleCacheExpiry() {
         StateEvent stateEventForCaching = new StateEvent(1, 0);
-        StreamEvent loadedDataFromStore = null;
+        StreamEvent loadedDataFromStore;
 
-        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() > //todo: remove store table load size check in find and query
-                        siddhiAppContext.getTimestampGenerator().currentTime() - 30000) { //todo: use a multiple of cache expiry param
-            //todo: if store table sioze becomes smaller than cache reload them into cache
-            log.info(siddhiAppContext.getName() + ": store table size is new");
+        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
+                        siddhiAppContext.getTimestampGenerator().currentTime() - expiryTime * 10) {
+            if (log.isDebugEnabled()) {
+                log.debug(siddhiAppContext.getName() + ": checking size of store table");
+            }
+            try {
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                try {
-                    loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                            storeTable.getCompiledConditionForCaching(),
-                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-                } catch (ConnectionUnavailableException ignored) {
-
-                }
-                deleteAndReloadExpiredEvents(loadedDataFromStore);
+                loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
+                        storeTable.getCompiledConditionForCaching(),
+                        storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
+                clearCacheAndReload(loadedDataFromStore);
             } else {
                 CompiledCondition cc = cacheExpiryCompiledCondition;
                 cacheTable.delete(generateDeleteEventChunk(),
                         cc);
             }
+            } catch (ConnectionUnavailableException e) {
+                throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+            }
         } else {
-            log.info(siddhiAppContext.getName() + ": store table size is old"); //todo: change the message meaningful
             try {
                 loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
                         storeTable.getCompiledConditionForCaching(),
                         storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-            } catch (ConnectionUnavailableException ignored) {
-            //todo: log a warining saying that not able to connect. move
-            } //todo": if cache is greater than store size delete everythong efficiently without going through
-            storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore)); //todo: move everything inside try catch
-            storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
-            if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                deleteAndReloadExpiredEvents(loadedDataFromStore);
-            } else {
-                CompiledCondition cc = cacheExpiryCompiledCondition;
-                cacheTable.delete(generateDeleteEventChunk(), cc);
+                storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
+                storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
+                if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
+                    clearCacheAndReload(loadedDataFromStore);
+                } else {
+                    CompiledCondition cc = cacheExpiryCompiledCondition;
+                    cacheTable.delete(generateDeleteEventChunk(), cc);
+                }
+            } catch (Exception e) {
+                throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
             }
         }
     }
 
-    private void deleteAndReloadExpiredEvents(StreamEvent loadedDataFromStore) {
+    private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
         ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>(true);
 
         while (loadedDataFromStore != null) {
@@ -196,11 +195,6 @@ public class CacheExpiryHandler {
         }
     }
 
-//    public void simpleExpire() {
-//        CompiledCondition cc = generateExpiryCompiledCondition(
-//                siddhiAppContext.getTimestampGenerator().currentTime());
-//        cacheTable.delete(generateDeleteEventChunk(), cc);
-//    }
 
     public Runnable checkAndExpireCache() {
         class CheckAndExpireCache implements Runnable {
@@ -215,7 +209,6 @@ public class CacheExpiryHandler {
                 } catch (Exception e) {
                     throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
                 }
-//                simpleExpire();
             }
         }
         return new CheckAndExpireCache();
