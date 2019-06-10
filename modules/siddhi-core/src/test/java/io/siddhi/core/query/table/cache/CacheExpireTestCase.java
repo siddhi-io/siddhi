@@ -104,7 +104,7 @@ public class CacheExpireTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"cacheExpireTestCase1"})
     public void cacheExpireTestCase2() throws InterruptedException {
         log.info("cacheExpireTestCase2");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -167,7 +167,7 @@ public class CacheExpireTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"cacheExpireTestCase2"})
     public void cacheExpireTestCase3() throws InterruptedException, SQLException {
         log.info("cacheExpireTestCase3");
         SiddhiManager siddhiManager = new SiddhiManager();

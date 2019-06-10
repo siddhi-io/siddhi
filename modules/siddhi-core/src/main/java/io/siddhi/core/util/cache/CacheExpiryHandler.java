@@ -141,10 +141,15 @@ public class CacheExpiryHandler {
             }
             try {
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                        storeTable.getCompiledConditionForCaching(),
-                        storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-                clearCacheAndReload(loadedDataFromStore);
+                AbstractQueryableRecordTable.queryFromStore.set(Boolean.TRUE);
+                try {
+                    loadedDataFromStore = storeTable.query(stateEventForCaching,
+                            storeTable.getCompiledConditionForCaching(),
+                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
+                    clearCacheAndReload(loadedDataFromStore);
+                } finally {
+                    AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
+                }
             } else {
                 CompiledCondition cc = cacheExpiryCompiledCondition;
                 cacheTable.delete(generateDeleteEventChunk(),
@@ -155,11 +160,16 @@ public class CacheExpiryHandler {
             }
         } else {
             try {
-                loadedDataFromStore = storeTable.queryFromStore(stateEventForCaching,
-                        storeTable.getCompiledConditionForCaching(),
-                        storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-                storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
-                storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
+                AbstractQueryableRecordTable.queryFromStore.set(Boolean.TRUE);
+                try {
+                    loadedDataFromStore = storeTable.query(stateEventForCaching,
+                            storeTable.getCompiledConditionForCaching(),
+                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
+                    storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
+                    storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
+                } finally {
+                    AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
+                }
                 if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                     clearCacheAndReload(loadedDataFromStore);
                 } else {

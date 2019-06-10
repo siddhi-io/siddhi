@@ -126,6 +126,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private String cachePolicy;
     private long storeSizeCheckInterval = 10000;
     private long retentionPeriod;
+//    public static ThreadLocal<Boolean> queryFromStore = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -208,8 +209,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             ((CacheTable) cacheTable).deleteAll();
             StateEvent stateEventForCaching = new StateEvent(1, 0);
-            StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                    compiledSelectionForCaching, outputAttributesForCaching);
+            StreamEvent preLoadedData;
+            queryFromStore.set(Boolean.TRUE);
+            try {
+                preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                        compiledSelectionForCaching, outputAttributesForCaching);
+            } finally {
+                queryFromStore.set(Boolean.FALSE);
+            }
 
             if (preLoadedData != null) {
                 ((CacheTable) cacheTable).addStreamEvent(preLoadedData);
@@ -370,10 +377,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
                     getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
                 StateEvent stateEventForCaching = new StateEvent(1, 0);
-                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching);
-                storeTableSize = findEventChunkSize(preLoadedData);
-                storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                queryFromStore.set(Boolean.TRUE);
+                try {
+                    StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                            compiledSelectionForCaching, outputAttributesForCaching);
+                    storeTableSize = findEventChunkSize(preLoadedData);
+                    storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                } finally {
+                    queryFromStore.set(Boolean.FALSE);
+                }
             }
         }
         // handle compile condition type conv
@@ -651,15 +663,20 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
         findMatchingEvent = matchingEvent;
-        if (cacheEnabled) {
+        if (cacheEnabled && !queryFromStore.get()) {
             // check if we need to check the size of store
             if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
                     getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
                 StateEvent stateEventForCaching = new StateEvent(1, 0);
-                StreamEvent preLoadedData = queryFromStore(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching);
-                storeTableSize = findEventChunkSize(preLoadedData);
-                storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                queryFromStore.set(Boolean.TRUE);
+                try {
+                    StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                            compiledSelectionForCaching, outputAttributesForCaching);
+                    storeTableSize = findEventChunkSize(preLoadedData);
+                    storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                } finally {
+                    queryFromStore.set(Boolean.FALSE);
+                }
             }
         }
 
@@ -669,7 +686,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         RecordStoreCompiledSelection recordStoreCompiledSelection;
         CompiledConditionWithCache compiledConditionWithCache = null;
         CompiledSelectionWithCache compiledSelectionWithCache = null;
-        StreamEvent cacheResults = null;
+        StreamEvent cacheResults;
 
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
@@ -698,7 +715,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         Iterator<Object[]> records;
 
-        if (cacheEnabled && storeTableSize <= maxCacheSize) { // when store is smaller than max cache size
+        // when store is smaller than max cache size
+        if (cacheEnabled && storeTableSize <= maxCacheSize && !queryFromStore.get()) {
             // return results from cache
             readWriteLock.readLock().lock();
             try {
@@ -717,10 +735,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 readWriteLock.readLock().unlock();
             }
         } else { // when store is bigger than max cache size
-            if (log.isDebugEnabled()) {
+            if (log.isDebugEnabled() && !queryFromStore.get()) {
                 log.debug(siddhiAppContext.getName() + ": store table size is bigger than cache.");
             }
-            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
+            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition) &&
+                    !queryFromStore.get()) {
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": cache constraints satisfied. Checking cache");
                 }
@@ -784,7 +803,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     readWriteLock.readLock().unlock();
                 }
             }
-            if (log.isDebugEnabled()) {
+            if (log.isDebugEnabled() && !queryFromStore.get()) {
                 log.debug(siddhiAppContext.getName() + ": sending results from store");
             }
             // query conditions are not satisfied check from store/ cache not enabled
@@ -1109,6 +1128,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             this.recordStoreCompiledSelection = recordStoreCompiledSelection;
             this.querySelector = querySelector;
             this.metaStateEvent = metaStateEvent;
+        }
+
+        public RecordStoreCompiledSelection getRecordStoreCompiledSelection() {
+            return recordStoreCompiledSelection;
         }
 
         public QuerySelector getQuerySelector() {
