@@ -398,7 +398,7 @@ public abstract class AbstractRecordTable extends Table {
      */
     protected class RecordStoreCompiledCondition implements CompiledCondition {
         protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
-        public CompiledCondition compiledCondition;
+        private CompiledCondition compiledCondition;
 
         RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
                                      CompiledCondition compiledCondition) {
@@ -406,6 +406,8 @@ public abstract class AbstractRecordTable extends Table {
             this.compiledCondition = compiledCondition;
         }
 
+        public CompiledCondition getCompiledCondition() {
+            return compiledCondition;
+        }
     }
-
 }

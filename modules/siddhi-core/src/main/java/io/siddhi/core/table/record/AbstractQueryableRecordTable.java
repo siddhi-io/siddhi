@@ -94,6 +94,7 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PER
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
+import static io.siddhi.core.util.SiddhiConstants.COMPOSITE_PRIMARY_KEY_REGEX;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
@@ -263,7 +264,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    (compiledConditionTemp.getCompiledCondition());
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
 
@@ -291,7 +292,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
             compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
@@ -321,7 +322,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
 
@@ -347,7 +348,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    compiledConditionTemp.getCompiledCondition();
             RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(
                     compiledConditionTemp.variableExpressionExecutorMap,
                     compiledConditionWithCache.getStoreCompileCondition());
@@ -398,7 +399,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
                     variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
         } else {
@@ -551,7 +552,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         ExpressionExecutor expressionExecutor = null;
         int storePosition;
         RecordStoreCompiledCondition rscc = (RecordStoreCompiledCondition) compiledCondition;
-        CompiledConditionWithCache ccwc = (CompiledConditionWithCache) rscc.compiledCondition;
+        CompiledConditionWithCache ccwc = (CompiledConditionWithCache) rscc.getCompiledCondition();
         CompiledCondition cacheCC = ccwc.getCacheCompileCondition();
         try {
             SnapshotableEventQueueOperator operator = (SnapshotableEventQueueOperator) cacheCC;
@@ -577,7 +578,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         } catch (ClassCastException e1) {
             try {
                 AndMultiPrimaryKeyCollectionExecutor mul = (AndMultiPrimaryKeyCollectionExecutor) collectionExecutor;
-                String[] compositeKeys = mul.getCompositePrimaryKey().split(":-:");
+                String[] compositeKeys = mul.getCompositePrimaryKey().split(COMPOSITE_PRIMARY_KEY_REGEX);
                 for (String key: compositeKeys) {
                     primaryKeysArray.remove(key);
                 }
@@ -644,7 +645,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
+                    compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(
                     compiledConditionTemp.variableExpressionExecutorMap,
                     compiledConditionWithCache.getStoreCompileCondition());
@@ -720,9 +721,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 Iterator<Object[]> recordsFromSelectAll;
                 if (recordTableHandler != null) {
                     recordsFromSelectAll = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                            recordStoreCompiledCondition.compiledCondition, csForSlectAll, outputAttributes);
+                            recordStoreCompiledCondition.getCompiledCondition(), csForSlectAll, outputAttributes);
                 } else {
-                    recordsFromSelectAll = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
+                    recordsFromSelectAll = query(parameterMap, recordStoreCompiledCondition.getCompiledCondition(),
                             csForSlectAll, outputAttributes);
                 }
                 if (recordsFromSelectAll == null || !recordsFromSelectAll.hasNext()) {
@@ -762,10 +763,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             // query conditions are not satisfied check from store/ cache not enabled
             if (recordTableHandler != null) {
                 records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                        recordStoreCompiledCondition.compiledCondition,
+                        recordStoreCompiledCondition.getCompiledCondition(),
                         recordStoreCompiledSelection.compiledSelection, outputAttributes);
             } else {
-                records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
+                records = query(parameterMap, recordStoreCompiledCondition.getCompiledCondition(),
                         recordStoreCompiledSelection.compiledSelection, outputAttributes);
             }
         }
@@ -1097,8 +1098,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     private class RecordStoreCompiledSelection implements CompiledSelection {
-
-
         private final Map<String, ExpressionExecutor> variableExpressionExecutorMap;
         private final CompiledSelection compiledSelection;
 

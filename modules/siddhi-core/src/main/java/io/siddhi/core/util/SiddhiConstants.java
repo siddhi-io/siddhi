@@ -135,6 +135,7 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_CACHE_RETENTION_PERIOD = "retention.period";
     public static final String ANNOTATION_CACHE_POLICY = "cache.policy";
     public static final String ANNOTATION_CACHE_PURGE_INTERVAL = "purge.interval";
+    public static final String COMPOSITE_PRIMARY_KEY_REGEX = ":-:";
 
     public static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
