@@ -126,7 +126,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private String cachePolicy;
     private long storeSizeCheckInterval = 10000;
     private long retentionPeriod;
-//    public static ThreadLocal<Boolean> queryFromStore = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    public static ThreadLocal<Boolean> queryFromStore = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,

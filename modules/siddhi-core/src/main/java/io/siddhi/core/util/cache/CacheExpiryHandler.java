@@ -131,6 +131,7 @@ public class CacheExpiryHandler {
     }
 
     private void handleCacheExpiry() {
+        log.debug(siddhiAppContext.getName() + ": CacheExpiryHandler started");
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore;
 
@@ -180,6 +181,7 @@ public class CacheExpiryHandler {
                 throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
             }
         }
+        log.debug(siddhiAppContext.getName() + ": CacheExpiryHandler ended");
     }
 
     private void clearCacheAndReload(StreamEvent loadedDataFromStore) {

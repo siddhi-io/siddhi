@@ -21,7 +21,6 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
-import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
@@ -70,101 +69,78 @@ public class CacheExpireTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(1300);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(1, events.length);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(1300);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(2, events.length);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"IBM", 75.6f, 4L});
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
-        Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
+        Thread.sleep(1300);
 
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(1, events.length);
+        AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(dependsOnMethods = {"cacheExpireTestCase1"})
     public void cacheExpireTestCase2() throws InterruptedException {
         log.info("cacheExpireTestCase2");
-        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiManager siddhiManager2 = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockStream2 (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"LRU\", " +
                 "retention.period=\"1 sec\", purge.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
-                "define table StockTable (symbol string, price float, volume long); ";
+                "define table StockTable2 (symbol string, price float, volume long); ";
 
         String query1 = "" +
                 "@info(name = 'query1') " +
-                "from StockStream\n" +
+                "from StockStream2\n" +
                 "select symbol, price, volume\n" +
-                "insert into StockTable ;" +
+                "insert into StockTable2 ;" +
                 "@info(name = 'query2') " +
                 "from DeleteStream " +
-                "delete StockTable " +
-                "on StockTable.symbol == symbol";
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-        InputHandler deleteStream = siddhiAppRuntime.getInputHandler("DeleteStream");
-        siddhiAppRuntime.start();
+                "delete StockTable2 " +
+                "on StockTable2.symbol == symbol";
+        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream2 = siddhiAppRuntime2.getInputHandler("StockStream2");
+        InputHandler deleteStream = siddhiAppRuntime2.getInputHandler("DeleteStream");
+        siddhiAppRuntime2.start();
 
         Event[] events;
-        stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-        Thread.sleep(100);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        AssertJUnit.assertEquals(1, events.length);
-        EventPrinter.print(events);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
+        stockStream2.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(1300);
+        events = siddhiAppRuntime2.query("" +
+                "from StockTable2 ");
         AssertJUnit.assertNull(events);
 
-        stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
-        stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(2, events.length);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
+        stockStream2.send(new Object[]{"WSO4", 55.6f, 2L});
+        stockStream2.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(1300);
+        events = siddhiAppRuntime2.query("" +
+                "from StockTable2 ");
         AssertJUnit.assertNull(events);
 
-        stockStream.send(new Object[]{"IBM", 75.6f, 4L});
-        stockStream.send(new Object[]{"WS2", 55.6f, 5L});
-        Thread.sleep(2000);
-        stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
+        stockStream2.send(new Object[]{"IBM", 75.6f, 4L});
+        stockStream2.send(new Object[]{"WS2", 55.6f, 5L});
+        stockStream2.send(new Object[]{"WSOr", 55.6f, 6L});
+        Thread.sleep(1300);
 
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(1, events.length);
-        siddhiAppRuntime.shutdown();
+        events = siddhiAppRuntime2.query("" +
+                "from StockTable2 ");
+        AssertJUnit.assertNull(events);
+        siddhiAppRuntime2.shutdown();
     }
 
     @Test(dependsOnMethods = {"cacheExpireTestCase2"})
@@ -195,38 +171,26 @@ public class CacheExpireTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-        Thread.sleep(200);
+        Thread.sleep(1300);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(1, events.length);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(1300);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(2, events.length);
-        Thread.sleep(2000);
-        events = siddhiAppRuntime.query("" +
-                "from StockTable ");
-        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"IBM", 75.6f, 4L});
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
-        Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
+        Thread.sleep(1300);
 
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
-        EventPrinter.print(events);
-        AssertJUnit.assertEquals(1, events.length);
+        AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
     }
 }
