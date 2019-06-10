@@ -77,10 +77,10 @@ public abstract class CacheTable extends InMemoryTable {
         while (true) {
             addEventsLimitCopy.add(streamEvent);
             sizeAfterAdding++;
+            streamEvent = streamEvent.getNext();
             if (sizeAfterAdding == maxSize || streamEvent.getNext() == null) {
                 break;
             }
-            streamEvent = streamEvent.getNext();
         }
         this.add(addEventsLimitCopy);
     }

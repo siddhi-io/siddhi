@@ -21,8 +21,8 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.table.util.TestAppender;
-import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
@@ -53,6 +53,7 @@ public class CachePreLoadingTestCase {
     public void insertIntoTableWithCacheTest1() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         //Configure siddhi to insert events data to table only from specific fields of the stream.
         log.info("insertIntoTableWithCacheTest1");
@@ -62,24 +63,13 @@ public class CachePreLoadingTestCase {
                 "@Store(type=\"testStoreForCachePreLoading\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
-//        String query1 = "" +
-//                "@info(name = 'query1') " +
-//                "from StockStream\n" +
-//                "select symbol, volume\n" +
-//                "insert into StockTable ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
 
-//        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-//        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-//        Thread.sleep(1000);
-//
-//        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager.createSiddhiAppRuntime(streams + query1);
-//        siddhiAppRuntime2.start();
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(2, events.length);
 
         final List<LoggingEvent> log = appender.getLog();
@@ -91,9 +81,17 @@ public class CachePreLoadingTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), true);
+        Assert.assertEquals(Collections.
+                frequency(logMessages, "store table size is smaller than max cache. Sending results from cache"), 1);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), false);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), false);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), false);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }

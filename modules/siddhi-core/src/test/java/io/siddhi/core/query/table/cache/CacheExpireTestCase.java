@@ -111,8 +111,8 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
-                "retention.period=\"1 sec\", purge.interval=\"1 sec\", policy=\"FIFO\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"LRU\", " +
+                "retention.period=\"1 sec\", purge.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -135,21 +135,25 @@ public class CacheExpireTestCase {
         Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
+        AssertJUnit.assertEquals(1, events.length);
         EventPrinter.print(events);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(2, events.length);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"IBM", 75.6f, 4L});
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
@@ -159,7 +163,7 @@ public class CacheExpireTestCase {
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
+        AssertJUnit.assertEquals(1, events.length);
         siddhiAppRuntime.shutdown();
     }
 
@@ -170,8 +174,8 @@ public class CacheExpireTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStream (symbol string); " +
-                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"FIFO\", " +
-                "retention.period=\"1 sec\", purge.interval=\"1 sec\", policy=\"LFU\"))\n" +
+                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"LFU\", " +
+                "retention.period=\"1 sec\", purge.interval=\"1 sec\"))\n" +
                 //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
@@ -195,20 +199,24 @@ public class CacheExpireTestCase {
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertEquals(2, events.length);
         Thread.sleep(2000);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
+        AssertJUnit.assertNull(events);
 
         stockStream.send(new Object[]{"IBM", 75.6f, 4L});
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
@@ -218,7 +226,7 @@ public class CacheExpireTestCase {
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
-//        AssertJUnit.assertEquals(2, events.length);
+        AssertJUnit.assertEquals(1, events.length);
         siddhiAppRuntime.shutdown();
     }
 }

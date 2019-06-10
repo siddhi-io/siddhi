@@ -83,7 +83,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -117,8 +116,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private Attribute[] outputAttributesForCaching;
     private TableDefinition cacheTableDefinition;
     protected SiddhiAppContext siddhiAppContext;
-    private CacheExpiryHandler cacheExpiryHandler;
-    private ScheduledExecutorService scheduledExecutorServiceForCacheExpiry;
     protected StateEvent findMatchingEvent;
     protected Selector selectorForTestStoreQuery;
     protected SiddhiQueryContext siddhiQueryContextForTestStoreQuery;
@@ -128,6 +125,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private long storeSizeLastCheckedTime;
     private String cachePolicy;
     private long storeSizeCheckInterval = 10000;
+    private long retentionPeriod;
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -159,13 +157,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 cacheTable = new CacheTableLFU();
             }
 
-            ((CacheTable) cacheTable).initCacheTable(cacheTableDefinition, configReader, siddhiAppContext,
-                    recordTableHandler, cacheExpiryEnabled, maxCacheSize, cachePolicy);
-
-            // if cache expiry enabled create expiry handler
+            // check if cache expiry enabled and initialize relevant parameters
             if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_RETENTION_PERIOD) != null) {
                 cacheExpiryEnabled = true;
-                long retentionPeriod = Expression.Time.timeToLong(cacheTableAnnotation.
+                retentionPeriod = Expression.Time.timeToLong(cacheTableAnnotation.
                         getElement(ANNOTATION_CACHE_RETENTION_PERIOD));
                 if (cacheTableAnnotation.getElement(ANNOTATION_CACHE_PURGE_INTERVAL) == null) {
                     purgeInterval = retentionPeriod;
@@ -173,10 +168,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     purgeInterval = Expression.Time.timeToLong(cacheTableAnnotation.
                             getElement(ANNOTATION_CACHE_PURGE_INTERVAL));
                 }
-                scheduledExecutorServiceForCacheExpiry = siddhiAppContext.getScheduledExecutorService();
-                cacheExpiryHandler = new CacheExpiryHandler(retentionPeriod, cacheTable,
-                        tableMap, this, siddhiAppContext);
             }
+
+            ((CacheTable) cacheTable).initCacheTable(cacheTableDefinition, configReader, siddhiAppContext,
+                    recordTableHandler, cacheExpiryEnabled, maxCacheSize, cachePolicy);
 
             // creating objects needed to load cache
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
@@ -220,9 +215,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 ((CacheTable) cacheTable).addStreamEvent(preLoadedData);
             }
             if (cacheExpiryEnabled) {
-                scheduledExecutorServiceForCacheExpiry.
-                        scheduleAtFixedRate(cacheExpiryHandler.checkAndExpireCache(), 0,
-                        purgeInterval, TimeUnit.MILLISECONDS);
+                siddhiAppContext.getScheduledExecutorService().scheduleAtFixedRate(
+                        new CacheExpiryHandler(retentionPeriod, cacheTable, tableMap, this, siddhiAppContext).
+                                checkAndExpireCache(), 0, purgeInterval, TimeUnit.MILLISECONDS);
             }
         }
     }
