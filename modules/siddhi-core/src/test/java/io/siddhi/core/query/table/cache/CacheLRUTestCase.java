@@ -24,6 +24,7 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.table.util.TestAppender;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
@@ -52,6 +53,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase6() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -97,9 +99,21 @@ public class CacheLRUTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
+
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -108,6 +122,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase7() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -153,9 +168,20 @@ public class CacheLRUTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -164,6 +190,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase8() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -224,6 +251,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase9() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -271,8 +299,6 @@ public class CacheLRUTestCase {
         InputHandler checkInStockStream = siddhiAppRuntime.getInputHandler("CheckInStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 4L});
@@ -280,11 +306,37 @@ public class CacheLRUTestCase {
         checkInStockStream.send(new Object[]{"WSO2", 55.6f});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
+        Thread.sleep(10);
 
-//        Event[] events = siddhiAppRuntime.query("" + //todo: how to validate events in cache??
-//                "from StockTable ");
-//        EventPrinter.print(events);
-//        AssertJUnit.assertEquals(1, events.length);
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"APPLE\" AND price == 75.6f ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -293,6 +345,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase10() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -335,13 +388,43 @@ public class CacheLRUTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
         Thread.sleep(10);
         updateStockStream.send(new Object[]{"WSO2", 66.5f, 3L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"APPLE\" ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -350,6 +433,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase11() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -392,13 +476,43 @@ public class CacheLRUTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
         Thread.sleep(10);
         updateStockStream.send(new Object[]{"WSO2", 55.6f, 3L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"APPLE\" AND price == 75.6f ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -407,6 +521,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase12() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -448,8 +563,6 @@ public class CacheLRUTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
@@ -463,6 +576,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase13() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -504,8 +618,6 @@ public class CacheLRUTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
@@ -519,6 +631,7 @@ public class CacheLRUTestCase {
     public void cacheMissTestCase14() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -560,25 +673,59 @@ public class CacheLRUTestCase {
         InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
         siddhiAppRuntime.start();
 
-//        deleteStockStream.send(new Object[]{"WSO2", 55.6f, 1L});
-//        deleteStockStream.send(new Object[]{"IBM", 75.6f, 2L});
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
         Thread.sleep(10);
         stockStream.send(new Object[]{"APPLE", 75.6f, 2L});
         Thread.sleep(10);
         updateStockStream.send(new Object[]{"WSO2", 55.6f, 3L});
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"APPLE\" AND price == 75.6f ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
 
     @Test
     public void testTableJoinQuery2() throws InterruptedException, SQLException {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
+        logger.addAppender(appender);
         log.info("testTableJoinQuery2 - OUT 1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string); " +
-                "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"LRU\"))\n" +
+                "@Store(type=\"testStoreForCacheMiss\", @Cache(size=\"2\", cache.policy=\"LRU\"))\n" +
                 "@PrimaryKey(\'symbol\') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
@@ -587,7 +734,7 @@ public class CacheLRUTestCase {
                 "insert into StockTable ;" +
                 "" +
                 "@info(name = 'query2') " +
-                "from CheckStockStream#window.length(1) join StockTable " +
+                "from CheckStockStream join StockTable " +
                 " on CheckStockStream.symbol==StockTable.symbol " +
                 "select CheckStockStream.symbol as checkSymbol, StockTable.symbol as symbol, " +
                 "StockTable.volume as volume  " +
@@ -626,11 +773,42 @@ public class CacheLRUTestCase {
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
         checkStockStream.send(new Object[]{"WSO2"});
-        Thread.sleep(1000);
+        Thread.sleep(10);
+        stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
+        Thread.sleep(11000);
 
-        Assert.assertEquals(inEventCount, 1, "Number of success events");
-        Assert.assertEquals(removeEventCount, 0, "Number of remove events");
-        Assert.assertEquals(true, eventArrived, "Event arrived");
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"IBM\" ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages,
+                "store table size is smaller than max cache. Sending results from cache"), 1);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 1);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 1);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 1);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                1);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
+
         siddhiAppRuntime.shutdown();
     }
 }

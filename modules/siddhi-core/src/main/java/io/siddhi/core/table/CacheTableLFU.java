@@ -137,13 +137,15 @@ public class CacheTableLFU extends CacheTable {
         try {
             String primaryKey;
             if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                for (StateEvent matchingEvent: updateOrAddingEventChunk.toList()) {
+                for (StateEvent matchingEvent: updateOrAddingEventChunkForCache.toList()) {
                     IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] =
-                                (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+                        int newUsage = (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+//                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = newUsage;
+                        matchingEvent.getStreamEvent(0).getOutputData()[matchingEvent.getStreamEvent(0).
+                                getOutputData().length - 1] = newUsage;
                     }
                 }
             }

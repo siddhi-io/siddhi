@@ -28,6 +28,10 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.core.table.record.AbstractQueryableRecordTable"/>
+        <Bug pattern="MS_SHOULD_BE_FINAL"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.core.event.state.MetaStateEvent"/>
         <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
     </Match>

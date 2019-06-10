@@ -86,18 +86,16 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public void addUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
-        int sizeAfterAdding = this.size();
         ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>(true);
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
-            if (sizeAfterAdding == maxSize) {
-                break;
-            }
             StreamEvent event = addingEventChunk.next();
             addRequiredFieldsToDataForCache(addingEventChunkForCache, event, siddhiAppContext, cacheExpiryEnabled);
-            sizeAfterAdding++;
         }
-        add(addingEventChunkForCache);
+        super.add(addingEventChunkForCache);
+        while (this.size() > maxSize) {
+            this.deleteOneEntryUsingCachePolicy();
+        }
     }
 
     public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
@@ -121,17 +119,10 @@ public abstract class CacheTable extends InMemoryTable {
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
-                int sizeAfterAdding = this.size();
-                ComplexEventChunk<StreamEvent> failedEventsLimitCopy = new ComplexEventChunk<>(true);
-                failedEvents.reset();
-                while (true) {
-                    failedEventsLimitCopy.add(failedEvents.next());
-                    sizeAfterAdding++;
-                    if (sizeAfterAdding == maxTableSize || !failedEvents.hasNext()) {
-                        break;
-                    }
-                }
-                state.getEventHolder().add(failedEventsLimitCopy);
+                state.getEventHolder().add(failedEvents);
+            }
+            while (this.size() > maxSize) {
+                this.deleteOneEntryUsingCachePolicy();
             }
         } finally {
             stateHolder.returnState(state);

@@ -63,5 +63,6 @@ public class ListEventHolder extends SnapshotableStreamEventQueue implements Eve
     @Override
     public void deleteAll() {
         super.clear();
+        size = 0;
     }
 }

@@ -124,7 +124,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
     private String cachePolicy;
-    private long storeSizeCheckInterval = 10000;
+    private long storeSizeCheckInterval;
     private long retentionPeriod;
     public static ThreadLocal<Boolean> queryFromStore = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
@@ -169,6 +169,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     purgeInterval = Expression.Time.timeToLong(cacheTableAnnotation.
                             getElement(ANNOTATION_CACHE_PURGE_INTERVAL));
                 }
+                storeSizeCheckInterval = purgeInterval * 5;
+            } else {
+                storeSizeCheckInterval = 10000;
             }
 
             ((CacheTable) cacheTable).initCacheTable(cacheTableDefinition, configReader, siddhiAppContext,
@@ -608,56 +611,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    //todo: use threadlocal variable to decide query from store inside query
-    public StreamEvent queryFromStore(StateEvent matchingEvent, CompiledCondition compiledCondition,
-                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
-            throws ConnectionUnavailableException {
-        findMatchingEvent = matchingEvent;
-
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
-        RecordStoreCompiledCondition recordStoreCompiledCondition;
-        RecordStoreCompiledSelection recordStoreCompiledSelection;
-        CompiledConditionWithCache compiledConditionWithCache;
-        CompiledSelectionWithCache compiledSelectionWithCache;
-
-        if (cacheEnabled) {
-            RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
-            compiledConditionWithCache = (CompiledConditionWithCache)
-                    compiledConditionTemp.compiledCondition;
-            recordStoreCompiledCondition = new RecordStoreCompiledCondition(
-                    compiledConditionTemp.variableExpressionExecutorMap,
-                    compiledConditionWithCache.getStoreCompileCondition());
-
-            compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
-            recordStoreCompiledSelection = compiledSelectionWithCache.recordStoreCompiledSelection;
-        } else {
-            recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
-            recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
-        }
-
-        Map<String, Object> parameterMap = new HashMap<>();
-        for (Map.Entry<String, ExpressionExecutor> entry :
-                recordStoreCompiledCondition.variableExpressionExecutorMap.entrySet()) {
-            parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-        for (Map.Entry<String, ExpressionExecutor> entry :
-                recordStoreCompiledSelection.variableExpressionExecutorMap.entrySet()) {
-            parameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
-        }
-
-        Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                    recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
-        } else {
-            records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
-        }
-        addStreamEventToChunk(outputAttributes, streamEventComplexEventChunk, records);
-        return streamEventComplexEventChunk.getFirst();
-    }
-
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
@@ -772,7 +725,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     recordsFromSelectAll = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
                             csForSlectAll, outputAttributes);
                 }
-                if (recordsFromSelectAll == null) {
+                if (recordsFromSelectAll == null || !recordsFromSelectAll.hasNext()) {
                     if (log.isDebugEnabled()) {
                         log.debug(siddhiAppContext.getName() + ": store also miss. sending null");
                     }

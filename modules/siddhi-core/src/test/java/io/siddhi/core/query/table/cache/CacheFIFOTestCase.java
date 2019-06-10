@@ -88,6 +88,12 @@ public class CacheFIFOTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
+        events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"CISCO\" ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -97,9 +103,20 @@ public class CacheFIFOTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 2);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 2);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 2);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                2);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -128,7 +145,7 @@ public class CacheFIFOTestCase {
                 "   on StockTable.symbol == symbol AND StockTable.price == price AND StockTable.volume == volume;" +
                 "" +
                 "@info(name = 'query3') " +
-                "from CheckStockStream#window.length(1) join StockTable " +
+                "from CheckStockStream join StockTable " +
                 " on CheckStockStream.symbol==StockTable.symbol " +
                 "select CheckStockStream.symbol as checkSymbol, StockTable.symbol as symbol, " +
                 "StockTable.volume as volume  " +
@@ -150,8 +167,11 @@ public class CacheFIFOTestCase {
                             case 1:
                                 Assert.assertEquals(event.getData(), new Object[]{"WSO2", "WSO2", 1L});
                                 break;
+                            case 2:
+                                Assert.assertEquals(event.getData(), new Object[]{"CISCO", "CISCO", 3L});
+                                break;
                             default:
-                                Assert.assertSame(inEventCount, 1);
+                                Assert.assertSame(inEventCount, 2);
                         }
                     }
                     eventArrived = true;
@@ -171,12 +191,7 @@ public class CacheFIFOTestCase {
         stockStream.send(new Object[]{"APPLE", 75.6f, 4L});
         Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO2"});
-
-//        Event[] events = siddhiAppRuntime.query("" +
-//                "from StockTable " +
-//                "on symbol == \"WSO2\" ");
-//        EventPrinter.print(events);
-//        AssertJUnit.assertEquals(1, events.length);
+        checkStockStream.send(new Object[]{"CISCO"});
 
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
@@ -187,9 +202,20 @@ public class CacheFIFOTestCase {
             }
             logMessages.add(message);
         }
-//        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-//        Assert.assertEquals(logMessages.contains("sending results from store table"), true);
-//        Assert.assertEquals(Collections.frequency(logMessages, "sending results from store table"), 1);
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 2);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 2);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 2);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                2);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
@@ -234,6 +260,12 @@ public class CacheFIFOTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
+        events = siddhiAppRuntime.query("" +
+                "from StockTable " +
+                "on symbol == \"CISCO\" AND price == 75.6f ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(1, events.length);
+
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -243,9 +275,20 @@ public class CacheFIFOTestCase {
             }
             logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("sending results from cache"), true);
-        Assert.assertEquals(logMessages.contains("sending results from store table"), false);
-        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache"), 1);
+        Assert.assertEquals(logMessages.
+                contains("store table size is smaller than max cache. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("store table size is bigger than cache."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "store table size is bigger than cache."), 2);
+        Assert.assertEquals(logMessages.contains("cache constraints satisfied. Checking cache"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache constraints satisfied. Checking cache"), 2);
+        Assert.assertEquals(logMessages.contains("cache hit. Sending results from cache"), false);
+        Assert.assertEquals(logMessages.contains("cache miss. Loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "cache miss. Loading from store"), 2);
+        Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
+        Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
+                2);
+        Assert.assertEquals(logMessages.contains("sending results from store"), false);
 
         siddhiAppRuntime.shutdown();
     }
