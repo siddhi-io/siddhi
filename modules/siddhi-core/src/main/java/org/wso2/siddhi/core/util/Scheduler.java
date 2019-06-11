@@ -87,9 +87,9 @@ public class Scheduler implements Snapshotable {
                 });
     }
 
-    public void schedule(long time) {
+    private void schedule(long time, boolean force) {
         if (!siddhiAppContext.isPlayback()) {
-            if (!running && toNotifyQueue.size() == 1) {
+            if (!running && (toNotifyQueue.size() == 1 || force)) {
                 try {
                     mutex.acquire();
                     if (!running) {
@@ -125,7 +125,7 @@ public class Scheduler implements Snapshotable {
         try {
             // Insert the time into the queue
             toNotifyQueue.put(time);
-            schedule(time);     // Let the subclasses to schedule the scheduler
+            schedule(time, false);     // Let the subclasses to schedule the scheduler
         } catch (InterruptedException e) {
             // InterruptedException ignored if scheduledExecutorService has already been shutdown
             if (!scheduledExecutorService.isShutdown()) {
@@ -180,7 +180,7 @@ public class Scheduler implements Snapshotable {
     /**
      * Go through the timestamps stored in the {@link #toNotifyQueue} and send the TIMER events for the expired events.
      */
-    protected void sendTimerEvents() {
+    private void sendTimerEvents() {
         Long toNotifyTime = toNotifyQueue.peek();
         long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
         while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
@@ -223,7 +223,7 @@ public class Scheduler implements Snapshotable {
     public void switchToLiveMode() {
         Long toNotifyTime = toNotifyQueue.peek();
         if (toNotifyTime != null) {
-            schedule(toNotifyTime);
+            schedule(toNotifyTime, true);
         }
     }
 
