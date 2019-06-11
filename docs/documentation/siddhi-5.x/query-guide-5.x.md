@@ -1033,11 +1033,11 @@ Filters provide a way of filtering input stream events based on a specified cond
 
 **Purpose**
 
-Filter helps to select the events that are relevant for the processing and omit the ones that are not needed.
+Filter helps to select the events that are relevant for the processing and omit the ones that are not.
 
 **Syntax**
 
-Filter conditions should be defined in square brackets next to the input stream as shown below.
+Filter conditions should be defined in square brackets (`[]`) next to the input stream as shown below.
 
 ```sql
 from <input stream>[<filter condition>]
@@ -1058,39 +1058,30 @@ insert into HighTempStream;
 
 ### Window
 
-Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation.
-Each input stream can only have a maximum of one window.
+Window provides a way to capture a subset of events from an input stream and retain them for a period of time based on a specified criterion. The criterion defines when and how the events should be evicted from the windows. Such as events getting evicted from the window based on the time duration, or number of events and they events are evicted in a sliding (one by one) or tumbling (batch) manner.
+
+Within a query, each input stream can at most have only one window associated with it.
 
 **Purpose**
 
-To create subsets of events within a stream based on time duration, number of events, etc for processing.
-A window can operate in a sliding or tumbling (batch) manner.
+Windows help to retain events based on a criterion, such that the values of those events can be aggregated, or checked if an event of interest is within the window or not.
 
 **Syntax**
 
-The `#window` prefix should be inserted next to the relevant stream in order to use a window.
+Window should be defined by using the `#window` prefix next to the input stream as shown below.
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-insert <event type> into <output stream>
+insert <ouput event type>? into <output stream>
 ```
+
 !!! note
-    Filter condition can be applied both before and/or after the window
+    Filter conditions can be applied both before and/or after the window.
 
-**Example**
+**Example 1**
 
-If you want to identify the maximum temperature out of the last 10 events, you need to define a `length` window of 10 events.
- This window operates in a sliding mode where the following 3 subsets are calculated when a list of 12 events are received in a sequential order.
-
-|Subset|Event Range|
-|------|-----------|
-| 1 | 1-10 |
-| 2 | 2-11 |
-|3| 3-12 |
-
-The following query finds the maximum temperature out of **last 10 events** from the `TempStream` stream,
-and inserts the results into the `MaxTempStream` stream.
+Query to find out the maximum temperature out of the **last 10 events**, using the window of `length` 10 and `max()` aggregation function, from the `TempStream` stream and insert the results into the `MaxTempStream` stream.
 
 ```sql
 from TempStream#window.length(10)
@@ -1098,17 +1089,17 @@ select max(temp) as maxTemp
 insert into MaxTempStream;
 ```
 
-If you define the maximum temperature reading out of every 10 events, you need to define a `lengthBatch` window of 10 events.
-This window operates as a batch/tumbling mode where the following 3 subsets are calculated when a list of 30 events are received in a sequential order.
+Here, the `length` window operates in a sliding manner where the following 3 event subsets are calculated and outputted when a list of 12 events are received in sequential order.
 
 |Subset|Event Range|
 |------|-----------|
-| 1    | 1-10      |
-| 2    | 11-20     |
-| 3    | 21-30     |
+| 1 | 1 - 10 |
+| 2 | 2 - 11 |
+| 3 | 3 - 12 |
 
-The following query finds the maximum temperature out of **every 10 events** from the `TempStream` stream,
-and inserts the results into the `MaxTempStream` stream.
+**Example 2**
+
+Query to find out the maximum temperature out of the **every 10 events**, using the window of `lengthBatch` 10 and `max()` aggregation function, from the `TempStream` stream and insert the results into the `MaxTempStream` stream.
 
 ```sql
 from TempStream#window.lengthBatch(10)
@@ -1116,47 +1107,130 @@ select max(temp) as maxTemp
 insert into MaxTempStream;
 ```
 
+Here, the window operates in a batch/tumbling manner where the following 3 event subsets are calculated and outputted when a list of 30 events are received in a sequential order.
+
+|Subset|Event Range|
+|------|-----------|
+| 1    | 1 - 10      |
+| 2    | 11 - 20     |
+| 3    | 21 - 30     |
+
+**Example 3**
+
+Query to find out the maximum temperature out of the events arrived **during last 10 minutes**, using the window of `time` 10 minutes and `max()` aggregation function, from the `TempStream` stream and insert the results into the `MaxTempStream` stream.
+
+```sql
+from TempStream#window.time(10 min)
+select max(temp) as maxTemp
+insert into MaxTempStream;
+```
+
+Here, the `time` window operates in a sliding manner with millisecond accuracy, where it will process events in the following 3 time durations and output aggregated events when a list of events are received in a sequential order.
+
+|Subset|Time Range (in ms)|
+|------|-----------|
+| 1 | 1:00:00.001 - 1:10:00.000 |
+| 2 | 1:00:01.001 - 1:10:01.000 |
+| 3 | 1:00:01.033 - 1:10:01.034 |
+
+**Example 4**
+
+Query to find out the maximum temperature out of the events arriving **every 10 minutes**, using the window of `timeBatch` 10 and `max()` aggregation function, from the `TempStream` stream and insert the results into the `MaxTempStream` stream.
+
+```sql
+from TempStream#window.timeBatch(10 min)
+select max(temp) as maxTemp
+insert into MaxTempStream;
+```
+
+Here, the window operates in a batch/tumbling manner where the window will process evetns in the following 3 time durations and output aggregated events when a list of events are received in a sequential order.
+
+|Subset|Time Range (in ms)|
+|------|-----------|
+| 1 | 1:00:00.001 - 1:10:00.000 |
+| 2 | 1:10:00.001 - 1:20:00.000 |
+| 3 | 1:20:00.001 - 1:30:00.000 |
+
+**Inbuilt windows**
+
+Following are some inbuilt Siddhi windows, for more functions refer [execution extensions](http://siddhi.io/extensions/) .
+
+|Inbuilt function | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#time-window">time</a> | Retains events based on time in a sliding manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#timebatch-window">timeBatch</a> | Retains events based on time in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#length-window">length</a> | Retains events based on number of events in a sliding manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#lengthbatch-window">lengthBatch</a> | Retains events based on number of events in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#timelength-window">timeLength</a> | Retains events based on time and number of events in a sliding manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#session-window">session</a> | Retains events for each session based on session key. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#batch-window">batch</a> | Retains events of last arrived event chunk. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#sort-window">sort</a> | Retains top-k or bottom-k events based on a parameter value. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#cron-window">cron</a> | Retains events based on cron time in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#externaltime-window">externalTime</a> | Retains events based on event time value passed as a parameter in a sliding manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#externaltimebatch-window">externalTimeBatch</a> | Retains events based on event time value passed as a parameter in a a tumbling/batch manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#delay-window">delay</a> | Retains events and delays the output by the given time period in a sliding manner.|
+
+### Output event types
+
+Query output depends on the `current` and `expired` output event types it produces based on its internal processing state. By default all queries produce `current` events upon event arrival, and queries containing windows additionally produce `expired` events when events expire from the windows.
+
+**Purpose**
+
+Output event types help to specify when a query should output events to the stream, such as output upon current events, expired events or upon both current and expired events.
+
+**Syntax**
+
+Output event type should be defined in between `insert` and `into` keywords for insert queries as follows.
+
+```sql
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+insert <output event type> into <output stream>
+```
+Output event type should be defined next to the `for` keyword for delete queries as follows.
+
+```sql
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+delete <table> (for <output event type>)?
+    on <condition>
+```
+
+Output event type should be defined next to the `for` keyword for update queries as follows.
+
+
+```sql
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+update <table> (for <output event type>)?
+    set <table>.<attribute name> = (<attribute name>|<expression>)?, <table>.<attribute name> = (<attribute name>|<expression>)?, ...
+    on <condition>
+```
+
+Output event type should be defined next to the `for` keyword for update or insert queries as follows.
+
+```sql
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+update or insert into <table> (for <output event type>)?
+    set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
+    on <condition>
+```
+
 !!! note
-    Similar operations can be done based on time via `time` windows and `timeBatch` windows and for others.
-    Code segments such as `#window.time(10 min)` considers events that arrive during the last 10 minutes in a sliding manner, and the `#window.timeBatch(2 min)` considers events that arrive every 2 minutes in a tumbling manner.
+    Controlling query output based on the output event types neither alters query execution nor its accuracy.  
 
-Following are some inbuilt windows shipped with Siddhi. For more window types, see execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
-
-* [time](http://siddhi.io/api/latest/#time-window)
-* [timeBatch](http://siddhi.io/api/latest/#timebatch-window)
-* [batch](http://siddhi.io/api/latest/#batch-window)
-* [timeLength](http://siddhi.io/api/latest/#timelength-window)
-* [length](http://siddhi.io/api/latest/#length-window)
-* [lengthBatch](http://siddhi.io/api/latest/#lengthbatch-window)
-* [sort](http://siddhi.io/api/latest/#sort-window)
-* [frequent](http://siddhi.io/api/latest/#frequent-window)
-* [lossyFrequent](http://siddhi.io/api/latest/#lossyfrequent-window)
-* [session](http://siddhi.io/api/latest/#session-window)
-* [cron](http://siddhi.io/api/latest/#cron-window)
-* [externalTime](http://siddhi.io/api/latest/#externaltime-window)
-<a class="headerlink" name="output-event-types" href="#output-event-types" title="Permanent link"></a>
-* [externalTimeBatch](http://siddhi.io/api/latest/#externaltimebatch-window)
-* [delay](http://siddhi.io/api/latest/#delay-window)
-
-**Output event types**
-
-Projection of the query depends on the output event types such as, `current` and `expired` event types.
- By default all queries produce `current` events and only queries with windows produce `expired` events
- when events expire from the window. You can specify whether the output of a query should be only current events, only expired events or both current and expired events.
-
- **Note!** Controlling the output event types does not alter the execution within the query, and it does not affect the accuracy of the query execution.  
-
- The following keywords can be used with the output stream to manipulate output.
+The output event types can be defined using the following keywords to manipulate query output.
 
 | Output event types | Description |
 |-------------------|-------------|
-| `current events` | Outputs events when incoming events arrive to be processed by the query. </br> This is default when no specific output event type is specified.|
-| `expired events` | Outputs events when events expires from the window. |
+| `current events` | Outputs events only when incoming events arrive to be processed by the query. </br> This is default behavior when no specific output event type is specified.|
+| `expired events` | Outputs events only when events expires from the window. |
 | `all events` | Outputs events when incoming events arrive to be processed by the query as well as </br> when events expire from the window. |
 
-The output event type keyword can be used between `insert` and `into` as shown in the following example.
-
 **Example**
+
+The output event type keyword can be used between `insert` and `into` as shown in the following example.
 
 This query delays all events in a stream by 1 minute.  
 
@@ -3224,7 +3298,7 @@ To install and implement the siddhi-io extension archetype, follow the procedure
                     -Dversion=1.0.0-SNAPSHOT
 
 2. Enter the mandatory properties prompted, please see the description for all properties below.
-           
+
     |Properties | Description | Mandatory | Default Value |
     |------------- |-------------| ---- | ----- |
     |_nameOfFunction | Name of the custom function to be created | Y | - |
@@ -3263,11 +3337,11 @@ To implement the siddhi-io extension archetype, follow the procedure below:
                    -Dversion=1.0.0-SNAPSHOT
 
 1. Enter the mandatory properties prompted, please see the description for all properties below.
-           
+
     | Properties | Description | Mandatory | Default Value |
     | ------------- |-------------| ---- | ----- |
-    | _IOType | Type of IO for which Siddhi-io extension is written | Y | - 
-    | groupIdPostfix| Type of the IO is added as postfix to the groupId as a convention | N | {_IOType} 
+    | _IOType | Type of IO for which Siddhi-io extension is written | Y | -
+    | groupIdPostfix| Type of the IO is added as postfix to the groupId as a convention | N | {_IOType}
     | artifactId | Artifact Id of the project | N | siddhi-io-{_IOType}
     | classNameOfSink | Class name of the Sink | N | {_IOType}Sink
     | classNameOfSource | Class name of the Source | N | {_IOType}Source
@@ -3299,15 +3373,15 @@ To implement the siddhi-map extension archetype, follow the procedure below:
                     -Dversion=1.0.0-SNAPSHOT
 
 2. Enter the mandatory properties prompted, please see the description for all properties below.
-       
+
     | Properties | Description | Mandatory | Default Value |
     | ------------- |-------------| ---- | ----- |
-    | _mapType | Type of Mapper for which Siddhi-map extension is written | Y | - 
-    | groupIdPostfix| Type of the Map is added as postfix to the groupId as a convention | N | {_mapType} 
+    | _mapType | Type of Mapper for which Siddhi-map extension is written | Y | -
+    | groupIdPostfix| Type of the Map is added as postfix to the groupId as a convention | N | {_mapType}
     | artifactId | Artifact Id of the project | N | siddhi-map-{_mapType}
     | classNameOfSinkMapper | Class name of the Sink Mapper| N | {_mapType}SinkMapper
     | classNameOfSourceMapper | Class name of the Source Mapper | N | {_mapType}SourceMapper   
-    
+
 3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
 **siddhi-script**
@@ -3329,11 +3403,11 @@ To implement the siddhi-script extension archetype, follow the procedure below:
                    -Dversion=1.0.0-SNAPSHOT
 
 2. Enter the mandatory properties prompted, please see the description for all properties below.
-       
+
     | Properties | Description | Mandatory | Default Value |
     | ------------- |-------------| ---- | ----- |
-    | _nameOfScript | Name of Custom Script for which Siddhi-script extension is written | Y | - 
-    | groupIdPostfix| Name of the Script is added as postfix to the groupId as a convention | N | {_nameOfScript} 
+    | _nameOfScript | Name of Custom Script for which Siddhi-script extension is written | Y | -
+    | groupIdPostfix| Name of the Script is added as postfix to the groupId as a convention | N | {_nameOfScript}
     | artifactId | Artifact Id of the project | N | siddhi-script-{_nameOfScript}
     | classNameOfScript | Class name of the Script | N | Eval{_nameOfScript}
 
@@ -3358,11 +3432,11 @@ To implement the siddhi-store extension archetype, follow the procedure below:
                   -Dversion=1.0.0-SNAPSHOT
 
 2. Enter the mandatory properties prompted, please see the description for all properties below.
-                          
+
     | Properties | Description | Mandatory | Default Value |
     | ------------- |-------------| ---- | ----- |
-    | _storeType | Type of Store for which Siddhi-store extension is written | Y | - 
-    | groupIdPostfix| Type of the Store is added as postfix to the groupId as a convention | N | {_storeType} 
+    | _storeType | Type of Store for which Siddhi-store extension is written | Y | -
+    | groupIdPostfix| Type of the Store is added as postfix to the groupId as a convention | N | {_storeType}
     | artifactId | Artifact Id of the project | N | siddhi-store-{_storeType}
     | className | Class name of the Store | N | {_storeType}EventTable
 
