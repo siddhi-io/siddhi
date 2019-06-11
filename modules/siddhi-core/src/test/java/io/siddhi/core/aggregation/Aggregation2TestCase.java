@@ -551,160 +551,6 @@ public class Aggregation2TestCase {
         siddhiAppRuntime.start();
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
-    public void sumAggregatorTest57() throws InterruptedException {
-
-        LOG.info("sumAggregator Test 57");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('sumAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight double, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(3) " +
-                "select sum(weight,deviceId) as total " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(55, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{10.0, "Box1"});
-        inputHandler.send(new Object[]{20.0, "Box2"});
-        inputHandler.send(new Object[]{25.0, "Box3"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-    }
-
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
-    public void sumAggregatorTest58() throws InterruptedException {
-
-        LOG.info("sumAggregator Test 58");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('sumAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight double, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(3) " +
-                "select sum(deviceId) as total " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(3, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{10.0, "Box1"});
-        inputHandler.send(new Object[]{20.0, "Box2"});
-        inputHandler.send(new Object[]{25.0, "Box3"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-    }
-
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
-    public void avgAggregatorTest59() throws InterruptedException {
-
-        LOG.info("avgAggregator Test 59");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('avgAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight double, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(5) " +
-                "select avg(weight,deviceId) as avgWeight " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{20.0, "Box1"});
-        inputHandler.send(new Object[]{30.0, "Box2"});
-        inputHandler.send(new Object[]{20.0, "Box3"});
-        inputHandler.send(new Object[]{40.0, "Box4"});
-        inputHandler.send(new Object[]{20.0, "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
-    }
-
-    @Test
-    public void avgAggregatorTest60() throws InterruptedException {
-
-        LOG.info("avgAggregator Test 60");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('avgAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight string, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(5) " +
-                "select avg(weight) as avgWeight " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"20", "Box1"});
-        inputHandler.send(new Object[]{"30", "Box2"});
-        inputHandler.send(new Object[]{"20", "Box3"});
-        inputHandler.send(new Object[]{"40", "Box4"});
-        inputHandler.send(new Object[]{"20", "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
-    }
-
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest56"})
     public void incrementalStreamProcessorTest57() throws InterruptedException {
         LOG.info("Check interrupted exception being thrown when SiddhiRuntime has already been shutdown");
@@ -725,61 +571,53 @@ public class Aggregation2TestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
         InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
         siddhiAppRuntime.start();
-        Thread eventSenderThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    stockStreamInputHandler.send(new Event[]{
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
-                    stockStreamInputHandler.send(new Event[]{
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
-                    stockStreamInputHandler.send(new Event[]{
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
-                            new Event(System.currentTimeMillis(),
-                                    new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
-                    Thread.sleep(500L);
-                } catch (InterruptedException e) {
-                }
+        Thread eventSenderThread = new Thread(() -> {
+            try {
+                stockStreamInputHandler.send(new Event[]{
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                stockStreamInputHandler.send(new Event[]{
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                stockStreamInputHandler.send(new Event[]{
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L}),
+                        new Event(System.currentTimeMillis(),
+                                new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L})});
+                Thread.sleep(500L);
+            } catch (InterruptedException ignored) {
             }
         }, "EventSenderThread");
         eventSenderThread.start();
-        Thread siddhiRuntimeShutdownThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                siddhiAppRuntime.shutdown();
-            }
-        }, "SiddhiRuntimeShutdownThread");
+        Thread siddhiRuntimeShutdownThread = new Thread(siddhiAppRuntime::shutdown, "SiddhiRuntimeShutdownThread");
         siddhiRuntimeShutdownThread.start();
         Thread.sleep(10000L);
         if (appender.getMessages() != null) {
