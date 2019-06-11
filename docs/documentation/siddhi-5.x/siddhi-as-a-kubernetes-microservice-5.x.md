@@ -52,6 +52,9 @@ siddhi-parser     1         1         1            1           1m
 
 ```
 
+!!! Note "Custom siddhi-runner"
+    If you need to change the `siddhi-runner` image for all the `SiddhiProcess` deployments, you can replace your docker image and image tag with the `SIDDHI_RUNNER_IMAGE` and `SIDDHI_RUNNER_IMAGE_TAG` environment variables in the `siddhi-operator.yaml` file. To create custom siddhi-runner image refer [this documentation](config-guide-5.x.md#adding-to-siddhi-docker-microservice). If your custom docker image from a private Docker registry or repository, then you can specify relevant kubernetes secret by changing `SIDDHI_RUNNER_IMAGE_SECRET` environment variable in the `siddhi-operator.yaml` file. For more details about the private docker images refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
+
 ## Deploy and run Siddhi App
 
 Siddhi applications can be deployed on Kubernetes using the Siddhi operator. 
@@ -101,6 +104,9 @@ NAME      HOSTS     ADDRESS     PORTS     AGE
 siddhi    siddhi    10.0.2.15   80, 443   1m
 
 ```
+
+!!! Note "Custom siddhi-runner"
+    If you need to change the `siddhi-runner` image for a specific `SiddhiProcess` deployment, you can replace your docker image and image tag with the `image` and `imageTag` entries in the `monitor-app.yaml` file. To create custom siddhi-runner image refer [this documentation](config-guide-5.x.md#adding-to-siddhi-docker-microservice). If your custom docker image from a private Docker registry or repository, then you can specify relevant kubernetes secret by changing `imagePullSecret` entry in the `siddhi-operator.yaml` file. For more details about the private docker images refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
 
 **_Invoke Siddhi Applications_**
 
