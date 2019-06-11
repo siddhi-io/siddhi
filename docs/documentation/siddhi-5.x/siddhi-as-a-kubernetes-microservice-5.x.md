@@ -52,7 +52,7 @@ siddhi-parser     1         1         1            1           1m
 
 ```
 
-!!! Note "Custom siddhi-runner"
+!!! Note "Using a custom-built siddhi-runner image"
     If you need to use a custom-built `siddhi-runner` image for all the `SiddhiProcess` deployments, you have to configure `SIDDHI_RUNNER_IMAGE` and `SIDDHI_RUNNER_IMAGE_TAG` environment variables with the custom-built image name and image tag respectively in the `siddhi-operator.yaml` file. 
     Refer the documentation on creating custom siddhi-runner images bundling additional JARs [here](config-guide-5.x.md#adding-to-siddhi-docker-microservice).
     If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as `SIDDHI_RUNNER_IMAGE_SECRET` environment variable in the `siddhi-operator.yaml` file. For more details on using docker images from private registries/repositories refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
@@ -107,7 +107,7 @@ siddhi    siddhi    10.0.2.15   80, 443   1m
 
 ```
 
-!!! Note "Custom siddhi-runner"
+!!! Note "Using a custom-built siddhi-runner image"
     If you need to use a custom-built `siddhi-runner` image for a specific `SiddhiProcess` deployment, you have to configure `image` and `imageTag` arguments with the custom-built image name and image tag respectively in the `monitor-app.yaml` file. 
     Refer the documentation on creating custom siddhi-runner images bundling additional JARs [here](config-guide-5.x.md#adding-to-siddhi-docker-microservice).
     If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as `imagePullSecret` argument in the `monitor-app.yaml` file. For more details on using docker images from private registries/repositories refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
