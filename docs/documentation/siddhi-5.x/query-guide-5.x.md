@@ -993,7 +993,7 @@ add(1 hour and 25 minutes, startTime + 56)
 
 **Inbuilt functions**
 
-Following are some inbuilt Siddhi functions, for more functions refer [execution extensions](http://siddhi.io/extensions/) .
+Following are some inbuilt Siddhi functions, for more functions refer [execution extensions](http://siddhi.io/extensions/).
 
 |Inbuilt function | Description|
 | ------------- |-------------|
@@ -1079,6 +1079,26 @@ insert <ouput event type>? into <output stream>
 !!! note
     Filter conditions can be applied both before and/or after the window.
 
+**Inbuilt windows**
+
+Following are some inbuilt Siddhi windows, for more windows refer [execution extensions](http://siddhi.io/extensions/).
+
+|Inbuilt function | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#time-window">time</a> | Retains events based on time in a sliding manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#timebatch-window">timeBatch</a> | Retains events based on time in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#length-window">length</a> | Retains events based on number of events in a sliding manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#lengthbatch-window">lengthBatch</a> | Retains events based on number of events in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#timelength-window">timeLength</a> | Retains events based on time and number of events in a sliding manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#session-window">session</a> | Retains events for each session based on session key. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#batch-window">batch</a> | Retains events of last arrived event chunk. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#sort-window">sort</a> | Retains top-k or bottom-k events based on a parameter value. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#cron-window">cron</a> | Retains events based on cron time in a tumbling/batch manner. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#externaltime-window">externalTime</a> | Retains events based on event time value passed as a parameter in a sliding manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#externaltimebatch-window">externalTimeBatch</a> | Retains events based on event time value passed as a parameter in a a tumbling/batch manner.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#delay-window">delay</a> | Retains events and delays the output by the given time period in a sliding manner.|
+
+
 **Example 1**
 
 Query to find out the maximum temperature out of the **last 10 events**, using the window of `length` 10 and `max()` aggregation function, from the `TempStream` stream and insert the results into the `MaxTempStream` stream.
@@ -1151,88 +1171,67 @@ Here, the window operates in a batch/tumbling manner where the window will proce
 | 2 | 1:10:00.001 - 1:20:00.000 |
 | 3 | 1:20:00.001 - 1:30:00.000 |
 
-**Inbuilt windows**
+### Event Type
 
-Following are some inbuilt Siddhi windows, for more functions refer [execution extensions](http://siddhi.io/extensions/) .
-
-|Inbuilt function | Description|
-| ------------- |-------------|
-| <a target="_blank" href="http://siddhi.io/api/latest/#time-window">time</a> | Retains events based on time in a sliding manner.|
-| <a target="_blank" href="http://siddhi.io/api/latest/#timebatch-window">timeBatch</a> | Retains events based on time in a tumbling/batch manner. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#length-window">length</a> | Retains events based on number of events in a sliding manner. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#lengthbatch-window">lengthBatch</a> | Retains events based on number of events in a tumbling/batch manner. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#timelength-window">timeLength</a> | Retains events based on time and number of events in a sliding manner. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#session-window">session</a> | Retains events for each session based on session key. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#batch-window">batch</a> | Retains events of last arrived event chunk. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#sort-window">sort</a> | Retains top-k or bottom-k events based on a parameter value. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#cron-window">cron</a> | Retains events based on cron time in a tumbling/batch manner. |
-| <a target="_blank" href="http://siddhi.io/api/latest/#externaltime-window">externalTime</a> | Retains events based on event time value passed as a parameter in a sliding manner.|
-| <a target="_blank" href="http://siddhi.io/api/latest/#externaltimebatch-window">externalTimeBatch</a> | Retains events based on event time value passed as a parameter in a a tumbling/batch manner.|
-| <a target="_blank" href="http://siddhi.io/api/latest/#delay-window">delay</a> | Retains events and delays the output by the given time period in a sliding manner.|
-
-### Output event types
-
-Query output depends on the `current` and `expired` output event types it produces based on its internal processing state. By default all queries produce `current` events upon event arrival, and queries containing windows additionally produce `expired` events when events expire from the windows.
+Query output depends on the `current` and `expired` event types it produces based on its internal processing state. By default all queries produce `current` events upon event arrival to the query. The queries containing windows additionally produce `expired` events when events expire from the windows.
 
 **Purpose**
 
-Output event types help to specify when a query should output events to the stream, such as output upon current events, expired events or upon both current and expired events.
+Event type helps to specify when a query should output events to the stream, such as output upon current events, expired events or upon both current and expired events.
 
 **Syntax**
 
-Output event type should be defined in between `insert` and `into` keywords for insert queries as follows.
+Event type should be defined in between `insert` and `into` keywords for insert queries as follows.
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-insert <output event type> into <output stream>
+insert <event type> into <output stream>
 ```
-Output event type should be defined next to the `for` keyword for delete queries as follows.
+
+Event type should be defined next to the `for` keyword for delete queries as follows.
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-delete <table> (for <output event type>)?
+delete <table> (for <event type>)?
     on <condition>
 ```
 
-Output event type should be defined next to the `for` keyword for update queries as follows.
-
+Event type should be defined next to the `for` keyword for update queries as follows.
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-update <table> (for <output event type>)?
+update <table> (for <event type>)?
     set <table>.<attribute name> = (<attribute name>|<expression>)?, <table>.<attribute name> = (<attribute name>|<expression>)?, ...
     on <condition>
 ```
 
-Output event type should be defined next to the `for` keyword for update or insert queries as follows.
+Event type should be defined next to the `for` keyword for update or insert queries as follows.
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-update or insert into <table> (for <output event type>)?
+update or insert into <table> (for <event type>)?
     set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
     on <condition>
 ```
 
 !!! note
-    Controlling query output based on the output event types neither alters query execution nor its accuracy.  
+    Controlling query output based on the event types neither alters query execution nor its accuracy.  
 
-The output event types can be defined using the following keywords to manipulate query output.
+The event types can be defined using the following keywords to manipulate query output.
 
-| Output event types | Description |
+| Event types | Description |
 |-------------------|-------------|
-| `current events` | Outputs events only when incoming events arrive to be processed by the query. </br> This is default behavior when no specific output event type is specified.|
+| `current events` | Outputs events only when incoming events arrive to be processed by the query. </br> This is default behavior when no specific event type is specified.|
 | `expired events` | Outputs events only when events expires from the window. |
 | `all events` | Outputs events when incoming events arrive to be processed by the query as well as </br> when events expire from the window. |
 
 **Example**
 
-The output event type keyword can be used between `insert` and `into` as shown in the following example.
-
-This query delays all events in a stream by 1 minute.  
+Query to output only the expired events from a 1 minute time window to the `DelayedTempStream` stream. This can be used for delaying the events by a minute.
 
 ```sql
 from TempStream#window.time(1 min)
@@ -1240,12 +1239,22 @@ select *
 insert expired events into DelayedTempStream
 ```
 
-### Aggregate function
+!!! Note
+    This is just to illustrate how expired events work, it is recommended to use [delay](http://siddhi.io/api/latest/#delay-window) window for usecases where we need to delay events by a given time period.
 
-Aggregate functions perform aggregate calculations in the query.
-When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start of the Siddhi application.
+### Aggregate Function
+
+Aggregate functions are pre-configured aggregation operations that can consumes zero, or more parameters from multiple events and always produce a single value as result. They can be only used in the query projection (as part of the `select` clause). When a query comprises a window, the aggregation will be contained to the events in the window, and when it does not have a window, the aggregation is performed from the first event the query has received.
+
+**Purpose**
+
+Aggregate functions encapsulate pre-configured reusable aggregate logic allowing users to aggregate values of multiple events together. When used with batch/tumbling windows this can also help to reduce the number of output events produced.  
 
 **Syntax**
+
+Aggregate function can be used in query projection (as part of the `select` clause) alone or as a part of another expression. In all cases, the output produced by the query should be properly mapped to the output stream attribute using the `as` keyword.
+
+The syntax of aggregate function is as follows,
 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
@@ -1253,37 +1262,44 @@ select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>,
 insert into <output stream>;
 ```
 
-**Aggregate Parameters**
+Here `<aggregate function>` uniquely identifies the aggregate function. The `<parameter>` defined input parameters the aggregate function can accept. The input parameters can be attributes, constant values, results of other functions or aggregate functions, results of mathematical or logical expressions, or time values. The number and type of parameters an aggregate function accepts depend on the function itself.
 
-Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions, or time parameters.
-Aggregate parameters configured in a query  depends on the aggregate function being called.
+**Inbuilt aggregate functions**
+
+Following are some inbuilt aggregation functions, for more functions refer [execution extensions](http://siddhi.io/extensions/).
+
+|Inbuilt aggregate function | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#sum-aggregate-function">sum</a> | Calculates the sum from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#count-aggregate-function">count</a> | Calculates the count from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#distinctcount-aggregate-function">distinctCount</a> | Calculates the distinct count based on a parameter from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#avg-aggregate-function">avg</a> | Calculates the average from a set of values.|
+| <a target="_blank" href="http://siddhi.io/api/latest/#max-aggregate-function">max</a> | Finds the maximum value from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#min-aggregate-function">max</a> | Finds the minimum value from a set of values. |
+
+| <a target="_blank" href="http://siddhi.io/api/latest/#maxforever-aggregate-function">maxForever</a> | Finds the maximum value from all events throughout its lifetime irrespective of the windows. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#minforever-aggregate-function">minForever</a> | Finds the minimum value from all events throughout its lifetime irrespective of the windows. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#stddev-aggregate-function">stdDev</a> | Calculates the standard deviation from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#and-aggregate-function">and</a> | Calculates boolean and from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#or-aggregate-function">or</a> | Calculates boolean or from a set of values. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#unionset-aggregate-function">unionSet</a> | Calculates union as a Set from a set of values. |
 
 **Example**
 
-The following query calculates the average value for the `temp` attribute of the `TempStream` stream. This calculation is done for the last 10 minutes in a sliding manner, and the result is output as `avgTemp` to the `AvgTempStream` output stream.
+Query to calculate average, maximum, and minimum values on `temp` attribute of the `TempStream` stream in a sliding manner, from the events arrived over the last 10 minutes and to produce outputs `avgTemp`, `maxTemp` and `minTemp` respectively to the `AvgTempStream` output stream.
 
 ```sql
 from TempStream#window.time(10 min)
-select avg(temp) as avgTemp, roomNo, deviceID
+select avg(temp) as avgTemp, max(temp) as maxTemp, min(temp) as minTemp
 insert into AvgTempStream;
 ```
-Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions, see execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
-
-+ [avg](http://siddhi.io/api/latest/#avg-aggregate-function)
-+ [sum](http://siddhi.io/api/latest/#sum-aggregate-function)
-+ [max](http://siddhi.io/api/latest/#max-aggregate-function)
-+ [min](http://siddhi.io/api/latest/#min-aggregate-function)
-+ [count](http://siddhi.io/api/latest/#count-aggregate-function)
-+ [distinctCount](http://siddhi.io/api/latest/#distinctcount-aggregate-function)
-+ [maxForever](http://siddhi.io/api/latest/#maxforever-aggregate-function)
-+ [minForever](http://siddhi.io/api/latest/#minforever-aggregate-function)
-+ [stdDev](http://siddhi.io/api/latest/#stddev-aggregate-function)
 
 ### Group By
 
 Group By allows you to group the aggregate based on specified attributes.
 
 **Syntax**
+
 The syntax for the Group By aggregate function is as follows:
 
 ```sql
@@ -1294,6 +1310,7 @@ insert into <output stream>;
 ```
 
 **Example**
+
 The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
 for a sliding time window of 10 minutes.
 
@@ -1309,9 +1326,11 @@ insert into AvgTempStream;
 Having allows you to filter events after processing the `select` statement.
 
 **Purpose**
+
 This allows you to filter the aggregation output.
 
 **Syntax**
+
 The syntax for the Having clause is as follows:
 
 ```sql
@@ -1339,6 +1358,7 @@ Order By allows you to order the aggregated result in ascending and/or descendin
 ascending manner. User can use 'desc' keyword to order in descending manner.
 
 **Syntax**
+
 The syntax for the Order By clause is as follows:
 
 ```sql
@@ -1369,6 +1389,7 @@ When events are emitted as a batch, offset allows you to offset beginning of the
 With this users can specify which set of events need be emitted.
 
 **Syntax**
+
 The syntax for the Limit & Offset clause is as follows:
 
 ```sql
@@ -1385,6 +1406,7 @@ insert into <output stream>;
 Here both `limit` and `offset` are optional where `limit` by default output all the events and `offset` by default set to `0`.
 
 **Example**
+
 The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
 for every 10 minutes and emits two events with highest average temperature.
 
@@ -1414,6 +1436,7 @@ insert into HighestAvgTempStream;
 Joins allow you to get a combined result from two streams in real-time based on a specified condition.
 
 **Purpose**
+
 Streams are stateless. Therefore, in order to join two streams, they need to be connected to a window so that there is a pool of events that can be used for joining. Joins also accept conditions to join the appropriate events from each stream.
 
 During the joining process each incoming event of each stream is matched against all the events in the other
@@ -2151,8 +2174,8 @@ select <attribute name>, <attribute name>, ...
 insert into <table>
 ```
 
-Similar to streams, you need to use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords in order to insert only the specific output event types.
-For more information, see [output event type](#output-event-types)
+Similar to streams, you need to use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords in order to insert only the specific event types.
+For more information, see [Event Type](#event-type)
 
 **Example**
 
@@ -2227,15 +2250,15 @@ To delete selected events that are stored in a table.
 ```sql
 from <input stream>
 select <attribute name>, <attribute name>, ...
-delete <table> (for <output event type>)?
+delete <table> (for <event type>)?
     on <condition>
 ```
 
 The `condition` element specifies the basis on which events are selected to be deleted.
 When specifying the condition, table attributes should be referred to with the table name.
 
-To execute delete for specific output event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](#output-event-types)
+To execute delete for specific event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. For more information, see [Event Type](#event-type)
 
 !!! note
     Table attributes must be always referred to with the table name as follows:
@@ -2265,7 +2288,7 @@ This operator updates selected event attributes stored in a table based on a con
 ```sql
 from <input stream>
 select <attribute name>, <attribute name>, ...
-update <table> (for <output event type>)?
+update <table> (for <event type>)?
     set <table>.<attribute name> = (<attribute name>|<expression>)?, <table>.<attribute name> = (<attribute name>|<expression>)?, ...
     on <condition>
 ```
@@ -2275,8 +2298,8 @@ When specifying the `condition`, table attributes must be referred to with the t
 
 You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be a stream/table attribute a mathematical operation, or other. When the `set` clause is not provided, all the attributes in the table are updated.
 
-To execute an update for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](#output-event-types).
+To execute an update for specific event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. For more information, see [Event Type](#event-type).
 
 !!! note
     Table attributes must be always referred to with the table name as shown below:
@@ -2307,7 +2330,7 @@ else insert the entry as a new attribute.
 ```sql
 from <input stream>
 select <attribute name>, <attribute name>, ...
-update or insert into <table> (for <output event type>)?
+update or insert into <table> (for <event type>)?
     set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
     on <condition>
 ```
@@ -2322,8 +2345,8 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
 !!! note
     When the attribute to the right is a table attribute, the operations supported differ based on the database type.
 
-To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more see [output event type](#output-event-types).
+To execute update upon specific event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. To understand more see [Event Type](#event-type).
 
 !!! note
     Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
@@ -2593,7 +2616,7 @@ Events can be inserted to a named window from one or more queries and it can pro
 The syntax for a named window is as follows:
 
 ```sql
-define window <window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <output event type>;
+define window <window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <event type>;
 ```
 
 The following parameters are configured in a table definition:
@@ -2604,21 +2627,21 @@ The following parameters are configured in a table definition:
 | `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 | `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
-| `output <output event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [output event type](#output-event-types).
+| `output <event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [Event Type](#event-type).
 
 
 **Examples**
 
 + Returning all output when events arrive and when events expire from the window.
 
-    In this query, the output event type is not specified. Therefore, it returns both current and expired events as the output.
+    In this query, the event type is not specified. Therefore, it returns both current and expired events as the output.
 
 ```sql
   define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second);
 ```
 + Returning an output only when events expire from the window.
 
-    In this query, the output event type of the window is `expired events`. Therefore, it only returns the events that have expired from the window as the output.
+    In this query, the event type of the window is `expired events`. Therefore, it only returns the events that have expired from the window as the output.
 
 ```sql
   define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events;
@@ -2641,9 +2664,9 @@ select <attribute name>, <attribute name>, ...
 insert into <window>
 ```
 
-To insert only events of a specific output event type, add the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords (similar to how it is done for streams).
+To insert only events of a specific event type, add the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords (similar to how it is done for streams).
 
-For more information, see [output event type](#output-event-types).
+For more information, see [Event Type](#event-type).
 
 **Example**
 
