@@ -1029,7 +1029,7 @@ insert into RoomTempStream;
 
 ### Filter
 
-Filters provide a way of filtering input stream events based on a specified condition. It accepts any type of condition including a combination of functions and/or attributes  that produces a Boolean result. Filters allow events to pass through if the condition results in `true`, and drops if it results in a `false`.  
+Filters provide a way of filtering input stream events based on a specified condition. It accepts any type of condition including a combination of functions and/or attributes  that produces a Boolean result. Filters allow events to passthrough if the condition results in `true`, and drops if it results in a `false`.  
 
 **Purpose**
 
@@ -1296,23 +1296,28 @@ insert into AvgTempStream;
 
 ### Group By
 
-Group By allows you to group the aggregate based on specified attributes.
+Group By provides a way of grouping events based on one or more specified attributes to perform aggregate operations.
+
+**Purpose**
+
+Group By allows users to aggregate values of multiple events based on the given group by fields.
 
 **Syntax**
 
-The syntax for the Group By aggregate function is as follows:
+The syntax for the Group By aggregate function is as follows.
 
 ```sql
 from <input stream>#window.<window name>(...)
 select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
-group by <attribute1 name>, <attribute2 name> ...
+group by <attribute1 name>, <attribute2 name>, ...
 insert into <output stream>;
 ```
 
+Here the group by attributes should be defined next to the `group by` keyword separating each attribute by a comma.
+
 **Example**
 
-The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
-for a sliding time window of 10 minutes.
+Query to calculate the average `temp` per `roomNo` and `deviceID` combination, from the `TempStream` stream those have arrived during the last 10 minutes time window in a sliding manner.
 
 ```sql
 from TempStream#window.time(10 min)
@@ -1323,15 +1328,15 @@ insert into AvgTempStream;
 
 ### Having
 
-Having allows you to filter events after processing the `select` statement.
+Having provide a way of filtering events based queries output stream attributes based on a specified condition. It accepts any type of condition including a combination of functions and/or attributes that produces a Boolean result. Having allow events to passthrough if the condition results in `true`, and drops if it results in a `false`.  
 
 **Purpose**
 
-This allows you to filter the aggregation output.
+Having helps to select the events that are relevant for the output based on the attributes those are produced by the `select` statement and omit the ones that are not.
 
 **Syntax**
 
-The syntax for the Having clause is as follows:
+The syntax for the Having clause is as follows.
 
 ```sql
 from <input stream>#window.<window name>( ... )
@@ -1340,6 +1345,8 @@ group by <attribute1 name>, <attribute2 name> ...
 having <condition>
 insert into <output stream>;
 ```
+
+Here the having `<condition>` should be defined next to the `having` keyword and having can be used with or without `group by` statement.
 
 **Example**
 
@@ -1354,8 +1361,7 @@ insert into AlertStream;
 
 ### Order By
 
-Order By allows you to order the aggregated result in ascending and/or descending order based on specified attributes. By default ordering will be done in
-ascending manner. User can use 'desc' keyword to order in descending manner.
+Order By, orders the query results in ascending and or descending order based on one or more specified attributes.  When order by is defined based on an attribute, Siddhi by default orders the events in ascending order, and by adding `desc` keyword, the events can be ordered in descending order.
 
 **Syntax**
 
@@ -1366,14 +1372,15 @@ from <input stream>#window.<window name>( ... )
 select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
 group by <attribute1 name>, <attribute2 name> ...
 having <condition>
-order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?, ...
+order by <attribute1 name> (asc|desc)?, <attribute2 name> (asc|desc)?, ...
 insert into <output stream>;
 ```
 
+Here the group by attributes should be defined next to the `group by` keyword separating each by a comma, and optionally specifying event ordering using `asc` or `desc` keywords.
+
 **Example**
 
-The following query calculates the average temperature per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
-by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
+Query to calculate the average temperature per `roomNo` and `deviceID` combination for every 10 minutes, and order the generated output events in ascending order by `avgTemp` and then in descending order by `roomNo` (if the more than one event have the same `avgTemp` value).
 
 ```sql
 from TempStream#window.timeBatch(10 min)
