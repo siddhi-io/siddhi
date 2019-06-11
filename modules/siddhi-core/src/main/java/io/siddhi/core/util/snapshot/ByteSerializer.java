@@ -79,7 +79,7 @@ public class ByteSerializer {
         }
         long end = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
-            log.debug("Decoded in :" + (end - start) + " msec");
+            log.debug("SiddhiApp '" + siddhiAppContext.getName() + "' decoded in: " + (end - start) + " milliseconds");
         }
         return out;
     }
