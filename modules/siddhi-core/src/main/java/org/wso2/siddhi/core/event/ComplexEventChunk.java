@@ -17,6 +17,9 @@
  */
 package org.wso2.siddhi.core.event;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -27,6 +30,8 @@ import java.util.NoSuchElementException;
  * @param <E> sub types of ComplexEvent such as StreamEvent and StateEvent
  */
 public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, Serializable {
+
+    private static final Logger log = Logger.getLogger(ComplexEventChunk.class);
 
     private static final long serialVersionUID = 3185987841726255019L;
     protected E first;
@@ -104,8 +109,20 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
 
     private E getLastEvent(E complexEvents) {
         E lastEvent = complexEvents;
-        while (lastEvent != null && lastEvent.getNext() != null) {
+        while (lastEvent != null && lastEvent.getNext() != null
+                && lastEvent.getNext() != complexEvents) {
             lastEvent = (E) lastEvent.getNext();
+        }
+        if (lastEvent != null && lastEvent.getNext() == complexEvents) {
+            //to detach the loop
+            lastEvent.setNext(null);
+            if (Level.WARN.isGreaterOrEqual(log.getEffectiveLevel())) {
+                //To help finding the root cause of the event loop, such that it can be fixed.
+                //if this is an legitimate usecase increase the log level to ERROR for class ComplexEventChunk
+                Exception exception = new RuntimeException("Unexpected event loop found!");
+                log.warn(exception.getMessage() + " If the usecase is legitimate, increase the log " +
+                        "level to ERROR for class: " + this.getClass().getName(), exception);
+            }
         }
         return lastEvent;
     }
