@@ -2160,10 +2160,39 @@ The following is a list of currently supported store types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">Redis</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">Cassandra</a>
 
+**Caching in Memory**
+
+Store tables are persisted in high i/o latency storage. Hence, it is beneficial to maintain a cache of store tables in 
+memory which has low latency. Siddhi supports caching of store tables through `@cache` annotation. It should be used 
+within `@store` annotation in a nested fashion as shown below.
+
+```sql
+@store(type='store_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN', 
+        @cache(size=10, cache.policy=FIFO))
+define table TableName (attribute1 Type1, attributeN TypeN);
+```
+
+In the above example we have defined a cache with a maximum size of 10 rows with first-in first-out cache policy. 
+The following table contains the cache parameters.
+
+| Parameter | Mandatory/Optional | Default Value | Description |
+|-----------|--------------------|---------------|-------------|
+|size|Mandatory| - | maximum number of rows to be cached|
+|cache.policy|Optional|FIFO|policy to free up cache when cache miss occurs. There are 3 allowed policies.<br />1. FIFO - First-In, First-Out<br />2. LRU - Least Recently Used<br />3. LFU - Least Frequently Used |
+|retention.period|Optional|-|If user specifies this parameter then cache expiry is enabled. For example if this is 5 min, rows older than 5 mins will be removed and in some cases reloaded from store|
+|purge.interval|optional|equal to retention period|When cache expiry is enabled, a thread will be created for every purge.interval which will check for expired rows and remove them.|
+
+The following is an example of caching with expiry.
+
 **Operators on Table (and Store)**
 
 The following operators can be performed on tables (and stores).
 
+```sql
+@store(type='store_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN', 
+        @cache(size=10, retention.period=5 min, purge.interval=1 min))
+define table TableName (attribute1 Type1, attributeN TypeN);
+```
 
 ### Insert
 
