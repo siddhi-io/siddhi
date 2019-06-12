@@ -29,15 +29,18 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +54,8 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * based on the logical conditions defined herewith.
  */
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
+    private static final Logger LOG = Logger.getLogger(IncrementalAggregateCompileCondition.class);
+
     private final String aggregationName;
     private final boolean isProcessingOnExternalTime;
     private final boolean isDistributed;
@@ -58,6 +63,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private Map<TimePeriod.Duration, Table> aggregationTableMap;
     private List<ExpressionExecutor> outputExpressionExecutors;
 
+    private boolean isOptimisedLookup;
+    private Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions;
     private CompiledCondition inMemoryStoreCompileCondition;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition;
@@ -82,7 +89,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     public IncrementalAggregateCompileCondition(
             String aggregationName, boolean isProcessingOnExternalTime, boolean isDistributed,
             List<TimePeriod.Duration> incrementalDurations, Map<TimePeriod.Duration, Table> aggregationTableMap,
-            List<ExpressionExecutor> outputExpressionExecutors,
+            List<ExpressionExecutor> outputExpressionExecutors, boolean isOptimisedLookup,
+            Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection,
             Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions,
             CompiledCondition inMemoryStoreCompileCondition,
             Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition,
@@ -100,6 +108,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.aggregationTableMap = aggregationTableMap;
         this.outputExpressionExecutors = outputExpressionExecutors;
 
+        this.isOptimisedLookup = isOptimisedLookup;
+        this.withinTableCompiledSelection = withinTableCompiledSelection;
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
         this.withinTableLowerGranularityCompileCondition = withinTableLowerGranularityCompileCondition;
@@ -181,8 +191,26 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         Table tableForPerDuration = aggregationTableMap.get(perValue);
 
-        StreamEvent withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
-                withinTableCompiledConditions.get(perValue));
+        StreamEvent withinMatchFromPersistedEvents = null;
+        if (isOptimisedLookup) {
+            try {
+                withinMatchFromPersistedEvents = ((QueryableProcessor) tableForPerDuration)
+                        .query(
+                                matchingEvent,
+                                withinTableCompiledConditions.get(perValue),
+                                withinTableCompiledSelection.get(perValue),
+                                tableMetaStreamEvent.getLastInputDefinition()
+                                        .getAttributeList().toArray(new Attribute[0])
+                        );
+            } catch (ConnectionUnavailableException e) {
+                // TODO: ???
+                LOG.error("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
+                        + "as the datasource is unavailable.");
+            }
+        } else {
+            withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
+                    withinTableCompiledConditions.get(perValue));
+        }
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
 
         // Optimization step.
@@ -193,6 +221,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             if (isDistributed) {
+                // TODO: Optimise too ?
                 int perValueIndex = this.incrementalDurations.indexOf(perValue);
                 if (perValueIndex != 0) {
                     Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();

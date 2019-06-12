@@ -37,6 +37,7 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator;
 import io.siddhi.core.table.Table;
@@ -336,8 +337,22 @@ public class AggregationParser {
                     isProcessingOnExternalTime, isDistributed);
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
-                    processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations, aggregationTables,
-                    siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
+                    processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
+                    aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
+
+            boolean isOptimisedLookup =
+                    aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+
+            List<OutputAttribute> defaultSelectorList = new ArrayList<>();
+            List<Variable> defaultGroupByList = new ArrayList<>();
+            // TODO Do a check to see if all functions can be passed down, else optimisation is false
+            if (isOptimisedLookup) {
+                defaultSelectorList.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
+                        isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),
+                        finalBaseExpressions, incomingOutputStreamDefinition));
+                defaultGroupByList.addAll(constructDefaultGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
+                        groupByVariableList));
+            }
 
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
             incrementalDataPurger.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
@@ -375,9 +390,10 @@ public class AggregationParser {
 
             AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
                     isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
-                    aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind, shouldUpdateTimestamp,
-                    groupByKeyGeneratorMapForReading, incrementalDataPurger,
-                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
+                    aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind,
+                    shouldUpdateTimestamp, groupByKeyGeneratorMapForReading, isOptimisedLookup, defaultSelectorList,
+                    defaultGroupByList, incrementalDataPurger, incrementalExecutorsInitialiser,
+                    ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
                     latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
@@ -390,6 +406,92 @@ public class AggregationParser {
             ExceptionUtil.populateQueryContext(t, aggregationDefinition, siddhiAppContext);
             throw t;
         }
+    }
+
+    private static List<Variable> constructDefaultGroupByVariableList(boolean isProcessingOnExternalTime,
+                                                                      boolean isGroupBy,
+                                                                      List<Variable> groupByVariableList) {
+        List<Variable> defaultGroupByList = new ArrayList<>();
+
+        if (isProcessingOnExternalTime) {
+            defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+        } else {
+            defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
+        }
+
+        if (isGroupBy) {
+            defaultGroupByList.addAll(groupByVariableList);
+        }
+        return defaultGroupByList;
+    }
+
+    private static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
+                                                               boolean isDistributed,
+                                                               boolean isLatestEventColAdded,
+                                                               int baseAggregatorBeginIndex,
+                                                               int numGroupByVariables,
+                                                               List<Expression> finalBaseExpressions,
+                                                               StreamDefinition incomingOutputStreamDefinition) {
+
+        List<OutputAttribute> selectorList = new ArrayList<>();
+        List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
+
+        int i = 0;
+        //Add timestamp selector
+        OutputAttribute timestampAttribute;
+        if (isProcessingOnExternalTime) {
+            timestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                    Expression.function("max", new Variable(AGG_START_TIMESTAMP_COL)));
+        } else {
+            timestampAttribute = new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL));
+        }
+        selectorList.add(timestampAttribute);
+        i++;
+
+        if (isDistributed) {
+            i++;
+        }
+
+        if (isProcessingOnExternalTime) {
+            OutputAttribute externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            selectorList.add(externalTimestampAttribute);
+            i++;
+        }
+
+        for (int j = 0; j < numGroupByVariables; j++) {
+            OutputAttribute groupByAttribute = new OutputAttribute(new Variable(attributeList.get(i).getName()));
+            selectorList.add(groupByAttribute);
+            i++;
+        }
+
+        if (isLatestEventColAdded) {
+            baseAggregatorBeginIndex = baseAggregatorBeginIndex - 1;
+        }
+
+        for (; i < baseAggregatorBeginIndex; i++) {
+            OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                    Expression.function("latest",
+                            new Variable(attributeList.get(i).getName()),
+                            new Variable(AGG_LAST_TIMESTAMP_COL))
+            );
+            selectorList.add(outputAttribute);
+        }
+
+        if (isLatestEventColAdded) {
+            OutputAttribute lastTimestampAttribute = new OutputAttribute(AGG_LAST_TIMESTAMP_COL,
+                    Expression.function("max", new Variable(AGG_LAST_TIMESTAMP_COL)));
+            selectorList.add(lastTimestampAttribute);
+            i++;
+        }
+
+        for (int k = 0; k < finalBaseExpressions.size(); k++) {
+            OutputAttribute outputAttribute =
+                    new OutputAttribute(attributeList.get(i).getName(), finalBaseExpressions.get(k));
+            selectorList.add(outputAttribute);
+            i++;
+        }
+
+        return selectorList;
     }
 
     private static Map<TimePeriod.Duration, IncrementalExecutor> buildIncrementalExecutors(

@@ -30,9 +30,11 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.parser.ExpressionParser;
@@ -50,6 +52,8 @@ import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.api.execution.query.selection.OutputAttribute;
+import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.AttributeFunction;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
@@ -83,6 +87,9 @@ public class AggregationRuntime implements MemoryCalculable {
     private Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap;
     private ExpressionExecutor shouldUpdateTimestamp;
     private Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap;
+    private boolean isOptimisedLookup;
+    private List<OutputAttribute> defaultSelectorList;
+    private List<Variable> defaultGroupByList;
 
     private IncrementalDataPurger incrementalDataPurger;
     private IncrementalExecutorsInitialiser incrementalExecutorsInitialiser;
@@ -102,7 +109,8 @@ public class AggregationRuntime implements MemoryCalculable {
                               Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
                               ExpressionExecutor shouldUpdateTimestamp,
                               Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
-                              IncrementalDataPurger incrementalDataPurger,
+                              boolean isOptimisedLookup, List<OutputAttribute> defaultSelectorList,
+                              List<Variable> defaultGroupByList, IncrementalDataPurger incrementalDataPurger,
                               IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
                               SingleStreamRuntime singleStreamRuntime, MetaStreamEvent tableMetaStreamEvent,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind) {
@@ -119,6 +127,9 @@ public class AggregationRuntime implements MemoryCalculable {
         this.aggregateProcessingExecutorsMap = aggregateProcessingExecutorsMap;
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
         this.groupByKeyGeneratorMap = groupByKeyGeneratorMap;
+        this.isOptimisedLookup = isOptimisedLookup;
+        this.defaultSelectorList = defaultSelectorList;
+        this.defaultGroupByList = defaultGroupByList;
 
         this.incrementalDataPurger = incrementalDataPurger;
         this.incrementalExecutorsInitialiser = incrementalExecutorInitialiser;
@@ -268,8 +279,9 @@ public class AggregationRuntime implements MemoryCalculable {
 
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
+        String aggReferenceId = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId();
         MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition,
-                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId());
+                aggReferenceId);
 
         // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
         MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
@@ -382,6 +394,51 @@ public class AggregationRuntime implements MemoryCalculable {
         }
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
+
+        Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection = new HashMap<>();
+        // TODO: Get query group by
+        if (isOptimisedLookup) {
+            Selector selector = Selector.selector();
+            if (aggReferenceId != null) {
+                for (OutputAttribute outputAttribute : defaultSelectorList) {
+                    if (outputAttribute.getExpression() instanceof Variable) {
+                        ((Variable) outputAttribute.getExpression()).setStreamId(aggReferenceId);
+                    } else {
+                        for (Expression parameter :
+                                ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
+                            ((Variable) parameter).setStreamId(aggReferenceId);
+                        }
+                    }
+                }
+            }
+            selector.addSelectionList(defaultSelectorList);
+
+            List<Variable> groupByList = new ArrayList<>();
+            if (isProcessingOnExternalTime &&
+                    defaultGroupByList.contains(new Variable(AGG_START_TIMESTAMP_COL))) {
+                groupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+                defaultGroupByList.remove(new Variable(AGG_START_TIMESTAMP_COL));
+                groupByList.addAll(defaultGroupByList);
+            } else {
+                groupByList = defaultGroupByList;
+            }
+            if (aggReferenceId != null) {
+                defaultGroupByList.forEach((groupBy) -> groupBy.setStreamId(aggReferenceId));
+            }
+            selector.addGroupByList(groupByList);
+
+            aggregationTables.entrySet().forEach(
+                    (durationTableEntry -> {
+                        CompiledSelection compiledSelection = ((QueryableProcessor) durationTableEntry.getValue())
+                                .compileSelection(
+                                        selector, tableDefinition.getAttributeList(), metaInfoHolderForTableLookups,
+                                        variableExpExecutorsForTableLookups, tableMap, siddhiQueryContext
+                                );
+                        withinTableCompiledSelection.put(durationTableEntry.getKey(), compiledSelection);
+                    })
+            );
+        }
+
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
                     metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups, tableMap,
@@ -448,11 +505,11 @@ public class AggregationRuntime implements MemoryCalculable {
 
         return new IncrementalAggregateCompileCondition(aggregationName, isProcessingOnExternalTime, isDistributed,
                 incrementalDurations, aggregationTables, outputExpressionExecutors,
-                withinTableCompiledConditions, withinInMemoryCompileCondition,
-                withinTableLowerGranularityCompileCondition, onCompiledCondition, additionalAttributes,
-                perExpressionExecutor, startTimeEndTimeExpressionExecutor, timestampFilterExecutors,
-                aggregateMetaSteamEvent, matchingMetaInfoHolder, metaInfoHolderForTableLookups,
-                variableExpExecutorsForTableLookups);
+                isOptimisedLookup, withinTableCompiledSelection, withinTableCompiledConditions,
+                withinInMemoryCompileCondition, withinTableLowerGranularityCompileCondition, onCompiledCondition,
+                additionalAttributes, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
+                timestampFilterExecutors, aggregateMetaSteamEvent, matchingMetaInfoHolder,
+                metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups);
 
     }
 
