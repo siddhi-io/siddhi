@@ -502,7 +502,7 @@ public class AggregationParser {
 
         for (; i < baseAggregatorBeginIndex; i++) {
             OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
-                    Expression.function("latest",
+                    Expression.function("incrementalAggregator", "latest",
                             new Variable(attributeList.get(i).getName()),
                             new Variable(AGG_LAST_TIMESTAMP_COL))
             );
