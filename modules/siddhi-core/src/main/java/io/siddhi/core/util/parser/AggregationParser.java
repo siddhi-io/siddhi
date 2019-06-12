@@ -354,20 +354,17 @@ public class AggregationParser {
             }
 
             List<OutputAttribute> defaultSelectorList = new ArrayList<>();
-            List<OutputAttribute> selectorListWithoutTimestamp = new ArrayList<>();
             List<Variable> defaultGroupByList = new ArrayList<>();
-            List<Variable> groupByListWOTimestamp = new ArrayList<>();
+            List<String> groupByAttributeNamesListWOTimestamp = new ArrayList<>();
             if (isOptimisedLookup) {
                 defaultSelectorList.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
                         isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),
-                        finalBaseExpressions, incomingOutputStreamDefinition, false));
-                selectorListWithoutTimestamp.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
-                        isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),
-                        finalBaseExpressions, incomingOutputStreamDefinition, true));
-                defaultGroupByList.addAll(constructDefaultGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
-                        groupByVariableList, false));
-                groupByListWOTimestamp.addAll(constructDefaultGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
-                        groupByVariableList, true));
+                        finalBaseExpressions, incomingOutputStreamDefinition, true, new ArrayList<>()));
+                defaultGroupByList.addAll(constructGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
+                        groupByVariableList));
+                defaultGroupByList.forEach((groupBy) ->
+                                                groupByAttributeNamesListWOTimestamp.add(groupBy.getAttributeName()));
+                groupByAttributeNamesListWOTimestamp.remove(0);
             }
 
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
@@ -408,8 +405,9 @@ public class AggregationParser {
                     isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
                     aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind,
                     shouldUpdateTimestamp, groupByKeyGeneratorMapForReading, isOptimisedLookup, defaultSelectorList,
-                    selectorListWithoutTimestamp, defaultGroupByList, groupByListWOTimestamp, incrementalDataPurger,
-                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
+                    defaultGroupByList, groupByAttributeNamesListWOTimestamp, isLatestEventColAdded, baseAggregatorBeginIndex,
+                    finalBaseExpressions, incrementalDataPurger, incrementalExecutorsInitialiser,
+                    ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
                     latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
@@ -424,18 +422,15 @@ public class AggregationParser {
         }
     }
 
-    private static List<Variable> constructDefaultGroupByVariableList(boolean isProcessingOnExternalTime,
-                                                                      boolean isGroupBy,
-                                                                      List<Variable> groupByVariableList,
-                                                                      boolean isWithoutTimestamp) {
+    private static List<Variable> constructGroupByVariableList(boolean isProcessingOnExternalTime,
+                                                               boolean isGroupBy,
+                                                               List<Variable> groupByVariableList) {
         List<Variable> defaultGroupByList = new ArrayList<>();
 
-        if (!isWithoutTimestamp) {
-            if (isProcessingOnExternalTime) {
-                defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
-            } else {
-                defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
-            }
+        if (isProcessingOnExternalTime) {
+            defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+        } else {
+            defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
         }
 
         if (isGroupBy) {
@@ -444,22 +439,24 @@ public class AggregationParser {
         return defaultGroupByList;
     }
 
-    private static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
-                                                               boolean isDistributed,
-                                                               boolean isLatestEventColAdded,
-                                                               int baseAggregatorBeginIndex,
-                                                               int numGroupByVariables,
-                                                               List<Expression> finalBaseExpressions,
-                                                               StreamDefinition incomingOutputStreamDefinition,
-                                                               boolean isWithoutTimestamp) {
+    public static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
+                                                              boolean isDistributed,
+                                                              boolean isLatestEventColAdded,
+                                                              int baseAggregatorBeginIndex,
+                                                              int numGroupByVariables,
+                                                              List<Expression> finalBaseExpressions,
+                                                              AbstractDefinition incomingOutputStreamDefinition,
+                                                              boolean isDefault, List<Variable> newGroupByList) {
 
         List<OutputAttribute> selectorList = new ArrayList<>();
         List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
+        List<String> queryGroupByNames = newGroupByList.stream()
+                                .map(Variable::getAttributeName).collect(Collectors.toList());
 
         int i = 0;
         //Add timestamp selector
         OutputAttribute timestampAttribute;
-        if (isProcessingOnExternalTime || isWithoutTimestamp) {
+        if (isProcessingOnExternalTime) {
             timestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
                     Expression.function("min", new Variable(AGG_START_TIMESTAMP_COL)));
         } else {
@@ -474,18 +471,25 @@ public class AggregationParser {
 
         if (isProcessingOnExternalTime) {
             OutputAttribute externalTimestampAttribute;
-            if (isWithoutTimestamp) {
-                externalTimestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
-                        Expression.function("min", new Variable(AGG_EXTERNAL_TIMESTAMP_COL)));
-            } else {
+            if (isDefault || queryGroupByNames.contains(AGG_START_TIMESTAMP_COL)) {
                 externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            } else {
+                externalTimestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("max", new Variable(AGG_EXTERNAL_TIMESTAMP_COL)));
             }
             selectorList.add(externalTimestampAttribute);
             i++;
         }
 
         for (int j = 0; j < numGroupByVariables; j++) {
-            OutputAttribute groupByAttribute = new OutputAttribute(new Variable(attributeList.get(i).getName()));
+            OutputAttribute groupByAttribute;
+            Variable variable = new Variable(attributeList.get(i).getName());
+            if (isDefault || queryGroupByNames.contains(variable.getAttributeName())) {
+                groupByAttribute = new OutputAttribute(variable);
+            } else {
+                groupByAttribute = new OutputAttribute(variable.getAttributeName(),
+                        Expression.function("max", new Variable(variable.getAttributeName())));
+            }
             selectorList.add(groupByAttribute);
             i++;
         }
