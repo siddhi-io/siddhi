@@ -203,13 +203,17 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                                         .getAttributeList().toArray(new Attribute[0])
                         );
             } catch (ConnectionUnavailableException e) {
-                // TODO: ???
-                LOG.error("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
-                        + "as the datasource is unavailable.");
+                // Store query does not have retry logi and normal mode is used
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
+                            + "as the datasource is unavailable.");
+                }
+                withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
+                                                                        withinTableCompiledConditions.get(perValue));
             }
         } else {
             withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
-                    withinTableCompiledConditions.get(perValue));
+                                                                        withinTableCompiledConditions.get(perValue));
         }
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
 
