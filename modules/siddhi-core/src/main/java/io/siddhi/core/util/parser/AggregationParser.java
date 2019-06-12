@@ -466,6 +466,8 @@ public class AggregationParser {
         i++;
 
         if (isDistributed) {
+            selectorList.add(new OutputAttribute(AGG_SHARD_ID_COL, Expression.function("min",
+                                                                            new Variable(AGG_SHARD_ID_COL))));
             i++;
         }
 

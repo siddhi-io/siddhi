@@ -242,7 +242,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                                                 .query(
                                                         matchingEvent,
                                                         entry.getValue(),
-                                                        withinTableCompiledSelection.get(perValue),
+                                                        withinTableCompiledSelection.get(entry.getKey()),
                                                         tableMetaStreamEvent.getLastInputDefinition()
                                                                 .getAttributeList().toArray(new Attribute[0])
                                                 );
