@@ -600,7 +600,6 @@ public class SelectOptimisationAggregationTestCase {
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
 
-            // TODO: 12/06/19 Same test select name also
             List<Object[]> expected = Arrays.asList(
                     new Object[]{"WSO2", 4L},
                     new Object[]{"IBM", 6L},

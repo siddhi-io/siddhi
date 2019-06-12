@@ -89,7 +89,9 @@ public class AggregationRuntime implements MemoryCalculable {
     private Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap;
     private boolean isOptimisedLookup;
     private List<OutputAttribute> defaultSelectorList;
+    private List<OutputAttribute> selectorListWOTimestamp;
     private List<Variable> defaultGroupByList;
+    private List<Variable> groupByListWOTimestamp;
 
     private IncrementalDataPurger incrementalDataPurger;
     private IncrementalExecutorsInitialiser incrementalExecutorsInitialiser;
@@ -110,7 +112,8 @@ public class AggregationRuntime implements MemoryCalculable {
                               ExpressionExecutor shouldUpdateTimestamp,
                               Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
                               boolean isOptimisedLookup, List<OutputAttribute> defaultSelectorList,
-                              List<Variable> defaultGroupByList, IncrementalDataPurger incrementalDataPurger,
+                              List<OutputAttribute> selectorListWOTimestamp, List<Variable> defaultGroupByList,
+                              List<Variable> groupByListWOTimestamp, IncrementalDataPurger incrementalDataPurger,
                               IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
                               SingleStreamRuntime singleStreamRuntime, MetaStreamEvent tableMetaStreamEvent,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind) {
@@ -129,7 +132,9 @@ public class AggregationRuntime implements MemoryCalculable {
         this.groupByKeyGeneratorMap = groupByKeyGeneratorMap;
         this.isOptimisedLookup = isOptimisedLookup;
         this.defaultSelectorList = defaultSelectorList;
+        this.selectorListWOTimestamp = selectorListWOTimestamp;
         this.defaultGroupByList = defaultGroupByList;
+        this.groupByListWOTimestamp = groupByListWOTimestamp;
 
         this.incrementalDataPurger = incrementalDataPurger;
         this.incrementalExecutorsInitialiser = incrementalExecutorInitialiser;
@@ -393,14 +398,22 @@ public class AggregationRuntime implements MemoryCalculable {
             withinExpressionTable = withinExpression;
         }
 
+        boolean isQueryGroupByDifferent = !queryGroupByList.isEmpty() &&
+                                                    !queryGroupByList.contains(new Variable(AGG_START_TIMESTAMP_COL));
+
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
 
         Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection = new HashMap<>();
-        // TODO: Get query group by
         if (isOptimisedLookup) {
+            List<OutputAttribute> selectorList;
+            if (isQueryGroupByDifferent) {
+                selectorList = selectorListWOTimestamp;
+            } else {
+                selectorList = defaultSelectorList;
+            }
             Selector selector = Selector.selector();
             if (aggReferenceId != null) {
-                for (OutputAttribute outputAttribute : defaultSelectorList) {
+                for (OutputAttribute outputAttribute : selectorList) {
                     if (outputAttribute.getExpression() instanceof Variable) {
                         ((Variable) outputAttribute.getExpression()).setStreamId(aggReferenceId);
                     } else {
@@ -411,14 +424,11 @@ public class AggregationRuntime implements MemoryCalculable {
                     }
                 }
             }
-            selector.addSelectionList(defaultSelectorList);
+            selector.addSelectionList(selectorList);
 
-            List<Variable> groupByList = new ArrayList<>();
-            if (isProcessingOnExternalTime &&
-                    defaultGroupByList.contains(new Variable(AGG_START_TIMESTAMP_COL))) {
-                groupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
-                defaultGroupByList.remove(new Variable(AGG_START_TIMESTAMP_COL));
-                groupByList.addAll(defaultGroupByList);
+            List<Variable> groupByList;
+            if (isQueryGroupByDifferent) {
+                groupByList = groupByListWOTimestamp;
             } else {
                 groupByList = defaultGroupByList;
             }

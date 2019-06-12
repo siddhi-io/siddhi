@@ -344,14 +344,21 @@ public class AggregationParser {
                     aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
 
             List<OutputAttribute> defaultSelectorList = new ArrayList<>();
+            List<OutputAttribute> selectorListWithoutTimestamp = new ArrayList<>();
             List<Variable> defaultGroupByList = new ArrayList<>();
+            List<Variable> groupByListWOTimestamp = new ArrayList<>();
             // TODO Do a check to see if all functions can be passed down, else optimisation is false
             if (isOptimisedLookup) {
                 defaultSelectorList.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
                         isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),
-                        finalBaseExpressions, incomingOutputStreamDefinition));
+                        finalBaseExpressions, incomingOutputStreamDefinition, false));
+                selectorListWithoutTimestamp.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
+                        isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),
+                        finalBaseExpressions, incomingOutputStreamDefinition, true));
                 defaultGroupByList.addAll(constructDefaultGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
-                        groupByVariableList));
+                        groupByVariableList, false));
+                groupByListWOTimestamp.addAll(constructDefaultGroupByVariableList(isProcessingOnExternalTime, isGroupBy,
+                        groupByVariableList, true));
             }
 
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
@@ -392,8 +399,8 @@ public class AggregationParser {
                     isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
                     aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind,
                     shouldUpdateTimestamp, groupByKeyGeneratorMapForReading, isOptimisedLookup, defaultSelectorList,
-                    defaultGroupByList, incrementalDataPurger, incrementalExecutorsInitialiser,
-                    ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
+                    selectorListWithoutTimestamp, defaultGroupByList, groupByListWOTimestamp, incrementalDataPurger,
+                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
                     latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
@@ -410,13 +417,16 @@ public class AggregationParser {
 
     private static List<Variable> constructDefaultGroupByVariableList(boolean isProcessingOnExternalTime,
                                                                       boolean isGroupBy,
-                                                                      List<Variable> groupByVariableList) {
+                                                                      List<Variable> groupByVariableList,
+                                                                      boolean isWithoutTimestamp) {
         List<Variable> defaultGroupByList = new ArrayList<>();
 
-        if (isProcessingOnExternalTime) {
-            defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
-        } else {
-            defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
+        if (!isWithoutTimestamp) {
+            if (isProcessingOnExternalTime) {
+                defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            } else {
+                defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
+            }
         }
 
         if (isGroupBy) {
@@ -431,7 +441,8 @@ public class AggregationParser {
                                                                int baseAggregatorBeginIndex,
                                                                int numGroupByVariables,
                                                                List<Expression> finalBaseExpressions,
-                                                               StreamDefinition incomingOutputStreamDefinition) {
+                                                               StreamDefinition incomingOutputStreamDefinition,
+                                                               boolean isWithoutTimestamp) {
 
         List<OutputAttribute> selectorList = new ArrayList<>();
         List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
@@ -439,9 +450,9 @@ public class AggregationParser {
         int i = 0;
         //Add timestamp selector
         OutputAttribute timestampAttribute;
-        if (isProcessingOnExternalTime) {
+        if (isProcessingOnExternalTime || isWithoutTimestamp) {
             timestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
-                    Expression.function("max", new Variable(AGG_START_TIMESTAMP_COL)));
+                    Expression.function("min", new Variable(AGG_START_TIMESTAMP_COL)));
         } else {
             timestampAttribute = new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL));
         }
@@ -453,7 +464,13 @@ public class AggregationParser {
         }
 
         if (isProcessingOnExternalTime) {
-            OutputAttribute externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            OutputAttribute externalTimestampAttribute;
+            if (isWithoutTimestamp) {
+                externalTimestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("min", new Variable(AGG_EXTERNAL_TIMESTAMP_COL)));
+            } else {
+                externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            }
             selectorList.add(externalTimestampAttribute);
             i++;
         }
