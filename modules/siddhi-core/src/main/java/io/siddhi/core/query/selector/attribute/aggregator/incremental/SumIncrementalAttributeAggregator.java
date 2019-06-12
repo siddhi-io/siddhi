@@ -112,4 +112,9 @@ public class SumIncrementalAttributeAggregator extends IncrementalAttributeAggre
     public Attribute.Type getReturnType() {
         return returnType;
     }
+
+    @Override
+    public boolean isDatabaseOptimisable() {
+        return true;
+    }
 }

@@ -37,4 +37,6 @@ public abstract class IncrementalAttributeAggregator {
     public abstract Expression[] getBaseAggregators();
 
     public abstract Attribute.Type getReturnType();
+
+    public abstract boolean isDatabaseOptimisable();
 }

@@ -340,14 +340,23 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
                     aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
 
-            boolean isOptimisedLookup =
-                    aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+            boolean isOptimisedLookup = true;
+            for (IncrementalAttributeAggregator incrementalAttributeAggregator : incrementalAttributeAggregators) {
+                if (!incrementalAttributeAggregator.isDatabaseOptimisable()) {
+                    isOptimisedLookup = false;
+                    break;
+                }
+            }
+
+            if (isOptimisedLookup) {
+                //DB interface should also be compatible
+                isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+            }
 
             List<OutputAttribute> defaultSelectorList = new ArrayList<>();
             List<OutputAttribute> selectorListWithoutTimestamp = new ArrayList<>();
             List<Variable> defaultGroupByList = new ArrayList<>();
             List<Variable> groupByListWOTimestamp = new ArrayList<>();
-            // TODO Do a check to see if all functions can be passed down, else optimisation is false
             if (isOptimisedLookup) {
                 defaultSelectorList.addAll(constructSelectorList(isProcessingOnExternalTime, isDistributed,
                         isLatestEventColAdded, baseAggregatorBeginIndex, groupByVariableList.size(),

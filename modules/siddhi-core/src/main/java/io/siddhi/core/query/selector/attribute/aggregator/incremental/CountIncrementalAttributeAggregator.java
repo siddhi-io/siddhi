@@ -89,4 +89,9 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
     }
+
+    @Override
+    public boolean isDatabaseOptimisable() {
+        return true;
+    }
 }
