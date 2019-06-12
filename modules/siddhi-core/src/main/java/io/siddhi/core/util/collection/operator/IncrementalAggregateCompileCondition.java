@@ -45,6 +45,7 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
@@ -191,7 +192,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         Table tableForPerDuration = aggregationTableMap.get(perValue);
 
-        StreamEvent withinMatchFromPersistedEvents = null;
+        StreamEvent withinMatchFromPersistedEvents;
         if (isOptimisedLookup) {
             try {
                 withinMatchFromPersistedEvents = ((QueryableProcessor) tableForPerDuration)
@@ -203,7 +204,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                                         .getAttributeList().toArray(new Attribute[0])
                         );
             } catch (ConnectionUnavailableException e) {
-                // Store query does not have retry logi and normal mode is used
+                // Store query does not have retry logic and normal mode is used
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
                             + "as the datasource is unavailable.");
@@ -225,7 +226,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             if (isDistributed) {
-                // TODO: Optimise too ?
                 int perValueIndex = this.incrementalDurations.indexOf(perValue);
                 if (perValueIndex != 0) {
                     Map<TimePeriod.Duration, CompiledCondition> lowerGranularityLookups = new HashMap<>();
@@ -234,14 +234,35 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                         lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
                     }
                     List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
-                            .map((entry) ->
-                                        aggregationTableMap.get(entry.getKey()).find(matchingEvent, entry.getValue()))
+                            .map((entry) -> {
+                                Table table = aggregationTableMap.get(entry.getKey());
+                                try {
+                                    if (isOptimisedLookup) {
+                                        return ((QueryableProcessor) table)
+                                                .query(
+                                                        matchingEvent,
+                                                        entry.getValue(),
+                                                        withinTableCompiledSelection.get(perValue),
+                                                        tableMetaStreamEvent.getLastInputDefinition()
+                                                                .getAttributeList().toArray(new Attribute[0])
+                                                );
+                                    } else {
+                                        return table.find(matchingEvent, entry.getValue());
+                                    }
+                                } catch (ConnectionUnavailableException e) {
+                                    // Store query does not have retry logic and normal mode is used
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Unable to query table '" +
+                                                tableForPerDuration.getTableDefinition().getId() + "',  as the " +
+                                                "datasource is unavailable.");
+                                    }
+                                    return table.find(matchingEvent, entry.getValue());
+
+                                }
+                            })
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toList());
-                    eventChunks.forEach((eventChunk) -> {
-                        if (eventChunk != null) {
-                            complexEventChunkToHoldWithinMatches.add(eventChunk);
-                        }
-                    });
+                    eventChunks.forEach(complexEventChunkToHoldWithinMatches::add);
                 }
             } else {
                 TimePeriod.Duration rootDuration = incrementalDurations.get(0);
