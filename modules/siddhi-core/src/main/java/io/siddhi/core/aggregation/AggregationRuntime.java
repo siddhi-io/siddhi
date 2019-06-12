@@ -52,6 +52,7 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.AttributeFunction;
 import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.BoolConstant;
 
@@ -220,6 +221,7 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     public CompiledCondition compileExpression(Expression expression, Within within, Expression per,
+                                               List<Variable> queryGroupByList,
                                                MatchingMetaInfoHolder matchingMetaInfoHolder,
                                                List<VariableExpressionExecutor> variableExpressionExecutors,
                                                Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {

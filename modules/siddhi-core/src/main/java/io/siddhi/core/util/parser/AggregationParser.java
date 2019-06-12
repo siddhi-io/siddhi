@@ -138,8 +138,8 @@ public class AggregationParser {
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, aggregatorName);
 
             StreamRuntime streamRuntime = InputStreamParser.parse(aggregationDefinition.getBasicSingleInputStream(),
-                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap, tableMap,
-                    windowMap, aggregationMap, incomingVariableExpressionExecutors, false,
+                    null, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap,
+                    tableMap, windowMap, aggregationMap, incomingVariableExpressionExecutors, false,
                     siddhiQueryContext);
 
             // Get original meta for later use.
