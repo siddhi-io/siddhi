@@ -496,8 +496,6 @@ public class AggregationRuntime implements MemoryCalculable {
                     LOG.debug("Aggregation Query optimization failed for aggregation: '" + aggregationName + "'. " +
                             "Creating table lookup query in normal mode. Reason for failure: " + e.getMessage(), e);
                 }
-                LOG.info("Aggregation Query optimization failed for aggregation: '" + aggregationName + "'. " +
-                        "Creating table lookup query in normal mode. Reason for failure: " + e.getMessage(), e);
                 isOptimisedTableLookup = false;
             }
 
