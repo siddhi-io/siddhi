@@ -31,11 +31,27 @@
 
 <#if [EXTENSION_TYPE.FUNCTION, EXTENSION_TYPE.ATTRIBUTE_AGGREGATOR]?seq_index_of(extensionType) != -1>
 ```
+<#if extension.parameterOverloads??>
+    <#list extension.parameterOverloads>
+        <#items as parameterOverload>
+<#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if><#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list parameterOverload.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+        </#items>
+    </#list>
+<#else>
 <#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if><#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list extension.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+</#if>
 ```
 <#elseif [EXTENSION_TYPE.STREAM_PROCESSOR, EXTENSION_TYPE.STREAM_FUNCTION, EXTENSION_TYPE.WINDOW]?seq_index_of(extensionType) != -1>
 ```
+<#if extension.parameterOverloads??>
+    <#list extension.parameterOverloads>
+        <#items as parameterOverload>
+<#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list parameterOverload.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+        </#items>
+    </#list>
+<#else>
 <#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list extension.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+</#if>
 ```
 <#elseif [EXTENSION_TYPE.SOURCE, EXTENSION_TYPE.SINK]?seq_index_of(extensionType) != -1>
 ```

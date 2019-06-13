@@ -25,6 +25,7 @@ import freemarker.template.TemplateExceptionHandler;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
@@ -35,6 +36,7 @@ import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
 import io.siddhi.doc.gen.metadata.NamespaceMetaData;
 import io.siddhi.doc.gen.metadata.ParameterMetaData;
+import io.siddhi.doc.gen.metadata.ParameterOverloadMetaData;
 import io.siddhi.doc.gen.metadata.ReturnAttributeMetaData;
 import io.siddhi.doc.gen.metadata.SystemParameterMetaData;
 import org.apache.commons.io.FileUtils;
@@ -70,6 +72,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -292,15 +295,6 @@ public class DocumentationUtils {
             });
         }
 
-        String latestVersionFile = null;
-        if (apiDirectoryContent.size() > 1) {
-            String first = apiDirectoryContent.get(0);
-            String second = apiDirectoryContent.get(1);
-            if (first.equals(Constants.LATEST_FILE_NAME + Constants.MARKDOWN_FILE_EXTENSION)) {
-                latestVersionFile = second;
-            }
-        }
-
         // Creating yaml parser
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -316,17 +310,17 @@ public class DocumentationUtils {
                 (List<Map<String, Object>>) yamlConfig.get(Constants.MKDOCS_CONFIG_PAGES_KEY);
 
         // Creating the new api pages list
-        List<Map<String, Object>> apiPagesList = new ArrayList<>();
+        LinkedList<Map<String, Object>> apiPagesList = new LinkedList<>();
         for (String apiFile : apiDirectoryContent) {
             String pageName = apiFile.substring(0, apiFile.length() - Constants.MARKDOWN_FILE_EXTENSION.length());
 
             Map<String, Object> newPage = new HashMap<>();
-            if (latestVersionFile != null && pageName.equals(Constants.LATEST_FILE_NAME)) {
-                pageName = "Latest (" + latestVersionFile.substring(0, latestVersionFile.length() -
-                        Constants.MARKDOWN_FILE_EXTENSION.length()) + ")";
-            }
             newPage.put(pageName, Constants.API_SUB_DIRECTORY + Constants.MKDOCS_FILE_SEPARATOR + apiFile);
-            apiPagesList.add(newPage);
+            if (pageName.equals(Constants.LATEST_FILE_NAME)) {
+                apiPagesList.addFirst(newPage);
+            } else {
+                apiPagesList.add(newPage);
+            }
         }
 
         // Setting the new api pages
@@ -667,9 +661,9 @@ public class DocumentationUtils {
 
             // Adding query parameters
             ParameterMetaData[] parameters = new ParameterMetaData[extensionAnnotation.parameters().length];
+            Map<String, ParameterMetaData> parameterMap = new HashMap<>();
             for (int i = 0; i < extensionAnnotation.parameters().length; i++) {
                 Parameter parameterAnnotation = extensionAnnotation.parameters()[i];
-
                 ParameterMetaData parameter = new ParameterMetaData();
                 parameter.setName(parameterAnnotation.name());
                 parameter.setType(Arrays.asList(parameterAnnotation.type()));
@@ -677,10 +671,28 @@ public class DocumentationUtils {
                 parameter.setOptional(parameterAnnotation.optional());
                 parameter.setDynamic(parameterAnnotation.dynamic());
                 parameter.setDefaultValue(parameterAnnotation.defaultValue());
+                parameterMap.put(parameter.getName(), parameter);
                 parameters[i] = parameter;
             }
             extensionMetaData.setParameters(Arrays.asList(parameters));
 
+            // Adding parameter overloads
+            if (extensionAnnotation.parameterOverloads().length > 0) {
+                ParameterOverloadMetaData[] parameterOverloads = new ParameterOverloadMetaData[
+                        extensionAnnotation.parameterOverloads().length];
+                for (int i = 0; i < extensionAnnotation.parameterOverloads().length; i++) {
+                    ParameterOverload parameterOverloadAnnotation = extensionAnnotation.parameterOverloads()[i];
+                    ParameterOverloadMetaData parameterOverload = new ParameterOverloadMetaData();
+                    ParameterMetaData[] overloadParameters = new ParameterMetaData[
+                            parameterOverloadAnnotation.parameterNames().length];
+                    for (int j = 0; j < parameterOverloadAnnotation.parameterNames().length; j++) {
+                        overloadParameters[j] = parameterMap.get(parameterOverloadAnnotation.parameterNames()[j]);
+                    }
+                    parameterOverload.setParameters(Arrays.asList(overloadParameters));
+                    parameterOverloads[i] = parameterOverload;
+                }
+                extensionMetaData.setParameterOverloads(Arrays.asList(parameterOverloads));
+            }
             // Adding system parameters
             SystemParameterMetaData[] systemParameters =
                     new SystemParameterMetaData[extensionAnnotation.systemParameter().length];
