@@ -24,7 +24,6 @@ import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.exception.QueryableRecordTableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -38,7 +37,6 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import io.siddhi.core.util.parser.AggregationParser;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -70,6 +68,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_LAST_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_SHARD_ID_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
@@ -94,8 +94,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap;
     private boolean isOptimisedLookup;
     private List<OutputAttribute> defaultSelectorList;
-    private List<Variable> defaultGroupByList;
-    private List<String> groupByAttributeNamesListWOTimestamp;
+    private List<String> groupByVariablesList;
     private boolean isLatestEventColAdded;
     private int baseAggregatorBeginIndex;
     private List<Expression> finalBaseExpressionsList;
@@ -119,7 +118,7 @@ public class AggregationRuntime implements MemoryCalculable {
                               ExpressionExecutor shouldUpdateTimestamp,
                               Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
                               boolean isOptimisedLookup, List<OutputAttribute> defaultSelectorList,
-                              List<Variable> defaultGroupByList, List<String> groupByAttributeNamesListWOTimestamp,
+                              List<String> groupByVariablesList,
                               boolean isLatestEventColAdded, int baseAggregatorBeginIndex,
                               List<Expression> finalBaseExpressionList, IncrementalDataPurger incrementalDataPurger,
                               IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
@@ -140,8 +139,7 @@ public class AggregationRuntime implements MemoryCalculable {
         this.groupByKeyGeneratorMap = groupByKeyGeneratorMap;
         this.isOptimisedLookup = isOptimisedLookup;
         this.defaultSelectorList = defaultSelectorList;
-        this.defaultGroupByList = defaultGroupByList;
-        this.groupByAttributeNamesListWOTimestamp = groupByAttributeNamesListWOTimestamp;
+        this.groupByVariablesList = groupByVariablesList;
         this.isLatestEventColAdded = isLatestEventColAdded;
         this.baseAggregatorBeginIndex = baseAggregatorBeginIndex;
         this.finalBaseExpressionsList = finalBaseExpressionList;
@@ -415,11 +413,10 @@ public class AggregationRuntime implements MemoryCalculable {
         List<String> queryGroupByNamesList = queryGroupByList.stream()
                 .map(Variable::getAttributeName)
                 .collect(Collectors.toList());
-        queryGroupByNamesList.remove(AGG_START_TIMESTAMP_COL);
+        boolean queryGroupByContainsTimestamp = queryGroupByNamesList.remove(AGG_START_TIMESTAMP_COL);
 
         boolean isQueryGroupBySame = queryGroupByList.isEmpty() ||
-                (queryGroupByList.contains(timestampVariable) &&
-                        queryGroupByNamesList.equals(groupByAttributeNamesListWOTimestamp));
+                (queryGroupByList.contains(timestampVariable) && queryGroupByNamesList.equals(groupByVariablesList));
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
 
@@ -429,16 +426,17 @@ public class AggregationRuntime implements MemoryCalculable {
 
             List<Variable> groupByList = new ArrayList<>();
             if (!isQueryGroupBySame) {
-                if (queryGroupByList.contains(timestampVariable)) {
+                if (queryGroupByContainsTimestamp) {
                     if (isProcessingOnExternalTime) {
                         groupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
                     } else {
-                        groupByList.add(timestampVariable);
+                        groupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
                     }
+                    //Remove timestamp to process the rest
                     queryGroupByList.remove(timestampVariable);
                 }
                 for (Variable queryGroupBy : queryGroupByList) {
-                    if (groupByAttributeNamesListWOTimestamp.contains(queryGroupBy.getAttributeName())) {
+                    if (groupByVariablesList.contains(queryGroupBy.getAttributeName())) {
                         String referenceId = queryGroupBy.getStreamId();
                         if (aggReferenceId == null || aggReferenceId.equalsIgnoreCase(referenceId)) {
                             groupByList.add(queryGroupBy);
@@ -448,11 +446,9 @@ public class AggregationRuntime implements MemoryCalculable {
                 // If query group bys are based on joining stream
                 if (groupByList.isEmpty()) {
                     isQueryGroupBySame = true;
-                    groupByList = defaultGroupByList;
                 }
-            } else {
-                groupByList = defaultGroupByList;
             }
+
             if (aggReferenceId != null) {
                 groupByList.forEach((groupBy) -> groupBy.setStreamId(aggReferenceId));
             }
@@ -460,9 +456,9 @@ public class AggregationRuntime implements MemoryCalculable {
 
             List<OutputAttribute> selectorList;
             if (!isQueryGroupBySame) {
-                selectorList = AggregationParser.constructSelectorList(isProcessingOnExternalTime, isDistributed,
-                        isLatestEventColAdded, baseAggregatorBeginIndex, groupByAttributeNamesListWOTimestamp.size(),
-                        finalBaseExpressionsList, tableDefinition, false, groupByList);
+                selectorList = constructSelectorList(isProcessingOnExternalTime, isDistributed, isLatestEventColAdded,
+                        baseAggregatorBeginIndex, groupByVariablesList.size(), finalBaseExpressionsList,
+                        tableDefinition, groupByList);
             } else {
                 selectorList = defaultSelectorList;
             }
@@ -572,6 +568,99 @@ public class AggregationRuntime implements MemoryCalculable {
                 timestampFilterExecutors, aggregateMetaSteamEvent, matchingMetaInfoHolder,
                 metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups);
 
+    }
+
+    private static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
+                                                              boolean isDistributed,
+                                                              boolean isLatestEventColAdded,
+                                                              int baseAggregatorBeginIndex,
+                                                              int numGroupByVariables,
+                                                              List<Expression> finalBaseExpressions,
+                                                              AbstractDefinition incomingOutputStreamDefinition,
+                                                              List<Variable> newGroupByList) {
+
+        List<OutputAttribute> selectorList = new ArrayList<>();
+        List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
+
+        List<String> queryGroupByNames = newGroupByList.stream()
+                .map(Variable::getAttributeName).collect(Collectors.toList());
+        Variable maxVariable;
+        if (!isProcessingOnExternalTime) {
+            maxVariable = new Variable(AGG_START_TIMESTAMP_COL);
+        } else if (isLatestEventColAdded) {
+            maxVariable = new Variable(AGG_LAST_TIMESTAMP_COL);
+        } else {
+            maxVariable = new Variable(AGG_EXTERNAL_TIMESTAMP_COL);
+        }
+
+        int i = 0;
+        //Add timestamp selector
+        OutputAttribute timestampAttribute;
+        if (!isProcessingOnExternalTime && queryGroupByNames.contains(AGG_START_TIMESTAMP_COL)) {
+            timestampAttribute = new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL));
+        } else {
+            timestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                    Expression.function("max", new Variable(AGG_START_TIMESTAMP_COL)));
+        }
+        selectorList.add(timestampAttribute);
+        i++;
+
+        if (isDistributed) {
+            selectorList.add(new OutputAttribute(AGG_SHARD_ID_COL, Expression.function("max",
+                    new Variable(AGG_SHARD_ID_COL))));
+            i++;
+        }
+
+        if (isProcessingOnExternalTime) {
+            OutputAttribute externalTimestampAttribute;
+            if (queryGroupByNames.contains(AGG_START_TIMESTAMP_COL)) {
+                externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            } else {
+                externalTimestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("max", new Variable(AGG_EXTERNAL_TIMESTAMP_COL)));
+            }
+            selectorList.add(externalTimestampAttribute);
+            i++;
+        }
+
+        for (int j = 0; j < numGroupByVariables; j++) {
+            OutputAttribute groupByAttribute;
+            Variable variable = new Variable(attributeList.get(i).getName());
+            if (queryGroupByNames.contains(variable.getAttributeName())) {
+                groupByAttribute = new OutputAttribute(variable);
+            } else {
+                groupByAttribute = new OutputAttribute(variable.getAttributeName(),
+                        Expression.function("max", new Variable(variable.getAttributeName())));
+            }
+            selectorList.add(groupByAttribute);
+            i++;
+        }
+
+        if (isLatestEventColAdded) {
+            baseAggregatorBeginIndex = baseAggregatorBeginIndex - 1;
+        }
+
+        for (; i < baseAggregatorBeginIndex; i++) {
+            OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                    Expression.function("incrementalAggregator", "last",
+                            new Variable(attributeList.get(i).getName()), maxVariable));
+            selectorList.add(outputAttribute);
+        }
+
+        if (isLatestEventColAdded) {
+            OutputAttribute lastTimestampAttribute = new OutputAttribute(AGG_LAST_TIMESTAMP_COL,
+                    Expression.function("max", new Variable(AGG_LAST_TIMESTAMP_COL)));
+            selectorList.add(lastTimestampAttribute);
+            i++;
+        }
+
+        for (Expression finalBaseExpression : finalBaseExpressions) {
+            OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(), finalBaseExpression);
+            selectorList.add(outputAttribute);
+            i++;
+        }
+
+        return selectorList;
     }
 
     public void startPurging() {
