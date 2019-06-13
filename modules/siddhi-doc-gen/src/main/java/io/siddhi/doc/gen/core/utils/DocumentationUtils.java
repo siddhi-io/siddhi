@@ -72,6 +72,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -294,15 +295,6 @@ public class DocumentationUtils {
             });
         }
 
-        String latestVersionFile = null;
-        if (apiDirectoryContent.size() > 1) {
-            String first = apiDirectoryContent.get(0);
-            String second = apiDirectoryContent.get(1);
-            if (first.equals(Constants.LATEST_FILE_NAME + Constants.MARKDOWN_FILE_EXTENSION)) {
-                latestVersionFile = second;
-            }
-        }
-
         // Creating yaml parser
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -318,17 +310,17 @@ public class DocumentationUtils {
                 (List<Map<String, Object>>) yamlConfig.get(Constants.MKDOCS_CONFIG_PAGES_KEY);
 
         // Creating the new api pages list
-        List<Map<String, Object>> apiPagesList = new ArrayList<>();
+        LinkedList<Map<String, Object>> apiPagesList = new LinkedList<>();
         for (String apiFile : apiDirectoryContent) {
             String pageName = apiFile.substring(0, apiFile.length() - Constants.MARKDOWN_FILE_EXTENSION.length());
 
             Map<String, Object> newPage = new HashMap<>();
-            if (latestVersionFile != null && pageName.equals(Constants.LATEST_FILE_NAME)) {
-                pageName = "Latest (" + latestVersionFile.substring(0, latestVersionFile.length() -
-                        Constants.MARKDOWN_FILE_EXTENSION.length()) + ")";
-            }
             newPage.put(pageName, Constants.API_SUB_DIRECTORY + Constants.MKDOCS_FILE_SEPARATOR + apiFile);
-            apiPagesList.add(newPage);
+            if (pageName.equals(Constants.LATEST_FILE_NAME)) {
+                apiPagesList.addFirst(newPage);
+            } else {
+                apiPagesList.add(newPage);
+            }
         }
 
         // Setting the new api pages

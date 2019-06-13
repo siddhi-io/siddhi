@@ -8,7 +8,7 @@
   [![codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-[Geting Started](documentation/siddhi-5.x/quckstart-5.x/) | [Download](https://siddhi-io.github.io/siddhi/download/) | [User Guide](documentation/siddhi-5.x/user-guide-introduction-5.x/) | [Contribute](https://siddhi-io.github.io/siddhi/contribution/)
+[Geting Started](documentation/siddhi-5.x/quckstart-5.x/) | [Download](download/) | [User Guide](documentation/siddhi-5.x/user-guide-introduction-5.x/) | [Contribute](contribution/)
 
 Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
