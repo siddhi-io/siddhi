@@ -44,44 +44,6 @@ public class StreamEvent implements ComplexEvent {
     private Object[] onAfterWindowData;         //Attributes on and after window execution
     private StreamEvent next;
 
-    public StreamEvent clone() {
-        int beforeDataLength = 0;
-        int afterDataLength = 0;
-        int outputDataLength = 0;
-
-        if (this.beforeWindowData != null) {
-            beforeDataLength = this.beforeWindowData.length;
-        }
-        if (this.onAfterWindowData != null) {
-            afterDataLength = this.onAfterWindowData.length;
-        }
-        if (this.outputData != null) {
-            outputDataLength = this.outputData.length;
-        }
-
-        StreamEvent streamEvent = new StreamEvent(beforeDataLength, afterDataLength, outputDataLength);
-        if (this.beforeWindowData != null) {
-            Object[] beforeWindowDataCopy = new Object[this.beforeWindowData.length];
-            System.arraycopy(this.beforeWindowData, 0, beforeWindowDataCopy, 0, this.beforeWindowData.length);
-            streamEvent.setBeforeWindowData(beforeWindowDataCopy);
-        }
-        if (this.onAfterWindowData != null) {
-            Object[] onAfterWindowDataCopy = new Object[this.onAfterWindowData.length];
-            System.arraycopy(this.onAfterWindowData, 0, onAfterWindowDataCopy, 0, this.onAfterWindowData.length);
-            streamEvent.setOnAfterWindowData(onAfterWindowDataCopy);
-        }
-        if (this.outputData != null) {
-            Object[] outputDataCopy = new Object[this.outputData.length];
-            System.arraycopy(this.outputData, 0, outputDataCopy, 0, this.outputData.length);
-            streamEvent.setOutputData(outputDataCopy);
-        }
-
-        streamEvent.setTimestamp(this.timestamp);
-        streamEvent.setType(this.type);
-        streamEvent.setNext(this.next);
-        return streamEvent;
-    }
-
     public StreamEvent(int beforeWindowDataSize, int onAfterWindowDataSize, int outputDataSize) {
         if (beforeWindowDataSize > 0) {
             beforeWindowData = new Object[beforeWindowDataSize];

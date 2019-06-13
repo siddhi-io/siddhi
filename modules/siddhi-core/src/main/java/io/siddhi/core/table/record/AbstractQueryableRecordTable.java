@@ -223,7 +223,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
 
             if (preLoadedData != null) {
-                ((CacheTable) cacheTable).addStreamEvent(preLoadedData);
+                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(preLoadedData);
             }
             if (cacheExpiryEnabled) {
                 siddhiAppContext.getScheduledExecutorService().scheduleAtFixedRate(
@@ -246,7 +246,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
-                ((CacheTable) cacheTable).addUptoMaxSize(addingEventChunk);
+                ((CacheTable) cacheTable).addAndTrimUptoMaxSize(addingEventChunk);
                 super.add(addingEventChunk);
             } finally {
                 readWriteLock.writeLock().unlock();
@@ -459,8 +459,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext,
-                        cacheExpiryEnabled);
+                cacheMissEntry.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(streamEvent,
+                        siddhiAppContext, cacheExpiryEnabled));
                 cacheTable.add(cacheMissEntry);
                 readWriteLock.readLock().lock();
                 try {
@@ -741,8 +741,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(cacheMissEntry, streamEvent, siddhiAppContext,
-                        cacheExpiryEnabled);
+                cacheMissEntry.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(streamEvent,
+                        siddhiAppContext, cacheExpiryEnabled));
                 cacheTable.add(cacheMissEntry);
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": sending results from cache after loading from store");

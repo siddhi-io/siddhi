@@ -19,6 +19,7 @@ package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
@@ -71,30 +72,43 @@ public abstract class CacheTable extends InMemoryTable {
                 cacheTableStreamEventCloner, configReader, siddhiAppContext, recordTableHandler);
     }
 
-    public void addStreamEvent(StreamEvent streamEvent) {
+    public void addStreamEventUptoMaxSize(StreamEvent streamEvent) {
         int sizeAfterAdding = 0;
         ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
+        StreamEvent streamEventIter;
         while (true) {
-            addEventsLimitCopy.add(streamEvent);
             sizeAfterAdding++;
-            streamEvent = streamEvent.getNext();
-            if (sizeAfterAdding == maxSize || streamEvent.getNext() == null) {
+            streamEventIter = streamEvent.getNext();
+            if (sizeAfterAdding == maxSize || streamEventIter.getNext() == null) {
+                streamEventIter.setNext(null);
                 break;
             }
         }
-        this.add(addEventsLimitCopy);
+        addEventsLimitCopy.add(streamEvent);
+        readWriteLock.writeLock().lock();
+        try {
+            this.add(addEventsLimitCopy);
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
-    public void addUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
+    public void addAndTrimUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
         ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>(true);
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             StreamEvent event = addingEventChunk.next();
-            addRequiredFieldsToDataForCache(addingEventChunkForCache, event, siddhiAppContext, cacheExpiryEnabled);
+            addingEventChunkForCache.add((StreamEvent) generateEventWithRequiredFields(event, siddhiAppContext,
+                    cacheExpiryEnabled));
         }
-        super.add(addingEventChunkForCache);
-        while (this.size() > maxSize) {
-            this.deleteOneEntryUsingCachePolicy();
+        readWriteLock.writeLock().lock();
+        try {
+            super.add(addingEventChunkForCache);
+            while (this.size() > maxSize) {
+                this.deleteOneEntryUsingCachePolicy();
+            }
+        } finally {
+            readWriteLock.writeLock().unlock();
         }
     }
 
@@ -106,8 +120,8 @@ public abstract class CacheTable extends InMemoryTable {
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
             StateEvent event = updateOrAddingEventChunk.next();
-            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext,
-                    cacheExpiryEnabled);
+            updateOrAddingEventChunkForCache.add((StateEvent) generateEventWithRequiredFields(event, siddhiAppContext,
+                    cacheExpiryEnabled));
         }
 
         readWriteLock.writeLock().lock();
@@ -139,20 +153,23 @@ public abstract class CacheTable extends InMemoryTable {
 
     public abstract void deleteOneEntryUsingCachePolicy();
 
-    public void addRequiredFieldsToDataForCache(Object addingEventChunkForCache, Object event,
-                                                SiddhiAppContext siddhiAppContext,
-                                                boolean cacheExpiryEnabled) {
+    public ComplexEvent generateEventWithRequiredFields(Object event,
+                                                        SiddhiAppContext siddhiAppContext,
+                                                        boolean cacheExpiryEnabled) {
         if (event instanceof StreamEvent) {
             StreamEvent eventForCache = checkPolicyAndAddFields(event, siddhiAppContext, cacheExpiryEnabled);
-            ((ComplexEventChunk<StreamEvent>) addingEventChunkForCache).add(eventForCache);
+            return eventForCache;
         } else if (event instanceof StateEvent) {
             StreamEvent eventForCache = checkPolicyAndAddFields(((StateEvent) event).getStreamEvent(0),
                     siddhiAppContext, cacheExpiryEnabled);
             StateEvent stateEvent = new StateEvent(((StateEvent) event).getStreamEvents().length,
                     eventForCache.getOutputData().length);
             stateEvent.addEvent(0, eventForCache);
-            ((ComplexEventChunk<StateEvent>) addingEventChunkForCache).add(stateEvent);
+            return stateEvent;
+        } else {
+            return null;
         }
+
     }
 
     protected abstract StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,

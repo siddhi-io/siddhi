@@ -188,8 +188,8 @@ public class CacheExpiryHandler {
         ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>(true);
 
         while (loadedDataFromStore != null) {
-            ((CacheTable) cacheTable).addRequiredFieldsToDataForCache(addingEventChunkWithTimestamp,
-                    loadedDataFromStore, siddhiAppContext, true);
+            addingEventChunkWithTimestamp.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(
+                    loadedDataFromStore, siddhiAppContext, true));
             if (loadedDataFromStore.getNext() == null) {
                 break;
             }

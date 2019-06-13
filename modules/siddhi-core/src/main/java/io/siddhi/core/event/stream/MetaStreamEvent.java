@@ -40,15 +40,6 @@ public class MetaStreamEvent implements MetaComplexEvent {
     private StreamDefinition outputStreamDefinition;
     private EventType eventType = EventType.DEFAULT;
 
-    private void addOnAfterWindowData(Attribute attribute) {
-        initializeAfterWindowData();
-        onAfterWindowData.add(attribute);
-    }
-
-    private void addBeforeWindowData(Attribute attribute) {
-        beforeWindowData.add(attribute);
-    }
-
     public List<Attribute> getBeforeWindowData() {
         return beforeWindowData;
     }
@@ -161,15 +152,16 @@ public class MetaStreamEvent implements MetaComplexEvent {
 
     public MetaStreamEvent clone() {
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
-        for (Attribute attribute: this.getOutputData()) {
-            metaStreamEvent.addOutputData(attribute);
+        if (outputData != null) {
+            for (Attribute attribute : outputData) {
+                metaStreamEvent.addOutputData(attribute);
+            }
         }
-        for (Attribute attribute: this.getOnAfterWindowData()) {
-            metaStreamEvent.addOnAfterWindowData(attribute);
+        if (this.onAfterWindowData != null) {
+            metaStreamEvent.onAfterWindowData = new ArrayList<>(onAfterWindowData);
         }
-        for (Attribute attribute: this.getBeforeWindowData()) {
-            metaStreamEvent.addBeforeWindowData(attribute);
-        }
+        metaStreamEvent.beforeWindowData = new ArrayList<>(beforeWindowData);
+
         for (AbstractDefinition abstractDefinition: this.getInputDefinitions()) {
             metaStreamEvent.addInputDefinition(abstractDefinition);
         }

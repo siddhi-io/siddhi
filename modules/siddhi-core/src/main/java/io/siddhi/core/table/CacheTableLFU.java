@@ -102,7 +102,9 @@ public class CacheTableLFU extends CacheTable {
         try {
             String primaryKey;
             if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                for (StateEvent matchingEvent: updatingEventChunk.toList()) {
+                updatingEventChunk.reset();
+                while (updatingEventChunk.hasNext()) {
+                    StateEvent matchingEvent = updatingEventChunk.next();
                     IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
@@ -129,15 +131,17 @@ public class CacheTableLFU extends CacheTable {
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
             StateEvent event = updateOrAddingEventChunk.next();
-            addRequiredFieldsToDataForCache(updateOrAddingEventChunkForCache, event, siddhiAppContext,
-                    cacheExpiryEnabled);
+            updateOrAddingEventChunkForCache.add((StateEvent) generateEventWithRequiredFields(event, siddhiAppContext,
+                    cacheExpiryEnabled));
         }
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
             String primaryKey;
             if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                for (StateEvent matchingEvent: updateOrAddingEventChunkForCache.toList()) {
+                updateOrAddingEventChunkForCache.reset();
+                while (updateOrAddingEventChunkForCache.hasNext()) {
+                    StateEvent matchingEvent = updateOrAddingEventChunkForCache.next();
                     IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);

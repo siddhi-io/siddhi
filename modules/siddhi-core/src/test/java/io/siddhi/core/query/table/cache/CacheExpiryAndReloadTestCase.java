@@ -6,6 +6,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.table.util.TestAppender;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
@@ -23,9 +24,9 @@ public class CacheExpiryAndReloadTestCase {
     @Test
     public void expiryAndReloadTest1() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest1");
-
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -86,9 +87,9 @@ public class CacheExpiryAndReloadTestCase {
     @Test
     public void expiryAndReloadTest2() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest2");
-
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -172,9 +173,9 @@ public class CacheExpiryAndReloadTestCase {
     @Test // with primary key => IndexOperator
     public void expiryAndReloadTest3() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest3");
-
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -259,9 +260,9 @@ public class CacheExpiryAndReloadTestCase {
     @Test // with primary key and index
     public void expiryAndReloadTest4() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest4");
-
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +

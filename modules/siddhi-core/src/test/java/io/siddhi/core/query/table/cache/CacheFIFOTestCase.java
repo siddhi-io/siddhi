@@ -24,6 +24,7 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.table.util.TestAppender;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
@@ -52,6 +53,7 @@ public class CacheFIFOTestCase {
     public void cacheMissTestCase3() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -125,6 +127,7 @@ public class CacheFIFOTestCase {
     public void cacheMissTestCase4() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -224,6 +227,7 @@ public class CacheFIFOTestCase {
     public void cacheMissTestCase5() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
