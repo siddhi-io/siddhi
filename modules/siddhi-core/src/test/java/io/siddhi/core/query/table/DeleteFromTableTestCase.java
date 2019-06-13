@@ -45,7 +45,7 @@ public class DeleteFromTableTestCase {
 
     @Test
     public void deleteFromTableTest0() throws InterruptedException {
-        log.info("deleteFromTableTest1");
+        log.info("deleteFromTableTest0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 

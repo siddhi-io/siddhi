@@ -51,8 +51,8 @@ public class CacheMissTestCase {
     }
 
 
-    @Test(description = "cacheMissTestCase1")
-    public void cacheMissTestCase1() throws InterruptedException, SQLException {
+    @Test(description = "cacheMissTestCase0")
+    public void cacheMissTestCase0() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -115,8 +115,8 @@ public class CacheMissTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase2")
-    public void cacheMissTestCase2() throws InterruptedException, SQLException {
+    @Test(description = "cacheMissTestCase1")
+    public void cacheMissTestCase1() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);

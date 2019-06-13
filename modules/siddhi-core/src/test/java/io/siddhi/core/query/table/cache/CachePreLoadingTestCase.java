@@ -49,8 +49,8 @@ public class CachePreLoadingTestCase {
         log.info("== Table with cache INSERT tests completed ==");
     }
 
-    @Test // todo not working
-    public void insertIntoTableWithCacheTest1() throws InterruptedException, SQLException {
+    @Test
+    public void cachePreLoadingTestCase0() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);

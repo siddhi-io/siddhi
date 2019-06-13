@@ -49,8 +49,8 @@ public class CacheLRUTestCase {
         removeEventCount = 0;
     }
 
-    @Test(description = "cacheMissTestCase6") // using query api and 2 primary keys & LRu
-    public void cacheMissTestCase6() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase0") // using query api and 2 primary keys & LRu
+    public void cacheLRUTestCase0() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -118,8 +118,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase7") // using query api and 1 primary key & LRu
-    public void cacheMissTestCase7() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase1") // using query api and 1 primary key & LRu
+    public void cacheLRUTestCase1() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -186,8 +186,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase8") // 1 primary key & LRu & cointains api (in)
-    public void cacheMissTestCase8() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase2") // 1 primary key & LRu & cointains api (in)
+    public void cacheLRUTestCase2() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -247,8 +247,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase9") // 2 primary keys & LRu & cointains api (in)
-    public void cacheMissTestCase9() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase3") // 2 primary keys & LRu & cointains api (in)
+    public void cacheLRUTestCase3() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -341,8 +341,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase10") // 1 primary key & LRu & update func
-    public void cacheMissTestCase10() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase4") // 1 primary key & LRu & update func
+    public void cacheLRUTestCase4() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -429,8 +429,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase11") // 2 primary keys & LRu & update func
-    public void cacheMissTestCase11() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase5") // 2 primary keys & LRu & update func
+    public void cacheLRUTestCase5() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -517,8 +517,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase12") // 1 primary key & LRu & update or add func
-    public void cacheMissTestCase12() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase6") // 1 primary key & LRu & update or add func
+    public void cacheLRUTestCase6() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -572,8 +572,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase13") // 2 primary keys & LRu & update or add func
-    public void cacheMissTestCase13() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase7") // 2 primary keys & LRu & update or add func
+    public void cacheLRUTestCase7() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -627,8 +627,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase14") // 2 primary keys & LRu & update or add func with update
-    public void cacheMissTestCase14() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase8") // 2 primary keys & LRu & update or add func with update
+    public void cacheLRUTestCase8() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -714,8 +714,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
-    public void testTableJoinQuery2() throws InterruptedException, SQLException {
+    @Test(description = "cacheLRUTestCase9")
+    public void cacheLRUTestCase9() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);

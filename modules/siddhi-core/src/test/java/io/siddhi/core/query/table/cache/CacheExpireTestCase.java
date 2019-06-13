@@ -43,8 +43,8 @@ public class CacheExpireTestCase {
     }
 
     @Test
-    public void cacheExpireTestCase1() throws InterruptedException {
-        log.info("cacheExpireTestCase1");
+    public void cacheExpireTestCase0() throws InterruptedException {
+        log.info("cacheExpireTestCase0");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -92,9 +92,9 @@ public class CacheExpireTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(dependsOnMethods = {"cacheExpireTestCase1"})
-    public void cacheExpireTestCase2() throws InterruptedException {
-        log.info("cacheExpireTestCase2");
+    @Test(dependsOnMethods = {"cacheExpireTestCase0"})
+    public void cacheExpireTestCase1() throws InterruptedException {
+        log.info("cacheExpireTestCase1");
         SiddhiManager siddhiManager2 = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream2 (symbol string, price float, volume long); " +
@@ -143,9 +143,9 @@ public class CacheExpireTestCase {
         siddhiAppRuntime2.shutdown();
     }
 
-    @Test(dependsOnMethods = {"cacheExpireTestCase2"})
-    public void cacheExpireTestCase3() throws InterruptedException, SQLException {
-        log.info("cacheExpireTestCase3");
+    @Test(dependsOnMethods = {"cacheExpireTestCase1"})
+    public void cacheExpireTestCase2() throws InterruptedException, SQLException {
+        log.info("cacheExpireTestCase2");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +

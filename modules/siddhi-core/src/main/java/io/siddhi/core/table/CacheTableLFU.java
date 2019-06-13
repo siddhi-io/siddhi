@@ -18,16 +18,19 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
+import org.apache.log4j.Logger;
+
+import java.util.Set;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_COUNT_LFU;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
@@ -38,11 +41,12 @@ import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEven
  * cache table with FIFO entry removal
  */
 public class CacheTableLFU extends CacheTable {
+    private static final Logger log = Logger.getLogger(CacheTableLFU.class);
 
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        TableState state = stateHolder.getState();
         readWriteLock.readLock().lock();
+        TableState state = stateHolder.getState();
         try {
             StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
                     tableStreamEventCloner);
@@ -53,8 +57,8 @@ public class CacheTableLFU extends CacheTable {
                 primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                 StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                 if (usedEvent != null) {
-                    usedEvent.getOutputData()[foundEvent.getOutputData().length - 1] =
-                            (int) usedEvent.getOutputData()[foundEvent.getOutputData().length - 1] + 1;
+                    usedEvent.getOutputData()[policyAttributePosition] =
+                            (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
                 }
             }
             return foundEvent;
@@ -80,8 +84,8 @@ public class CacheTableLFU extends CacheTable {
                     }
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] =
-                                (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+                        usedEvent.getOutputData()[policyAttributePosition] =
+                                (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
                     }
                 }
                 return true;
@@ -109,8 +113,8 @@ public class CacheTableLFU extends CacheTable {
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] =
-                                (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+                        usedEvent.getOutputData()[policyAttributePosition] =
+                                (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
                     }
                 }
             }
@@ -123,10 +127,10 @@ public class CacheTableLFU extends CacheTable {
     }
 
     @Override
-    public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                       CompiledCondition compiledCondition,
-                                       CompiledUpdateSet compiledUpdateSet,
-                                       AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+    public void updateOrAddAndTrimUptoMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                                              CompiledCondition compiledCondition,
+                                              CompiledUpdateSet compiledUpdateSet,
+                                              AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
         ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
@@ -146,10 +150,9 @@ public class CacheTableLFU extends CacheTable {
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        int newUsage = (int) usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] + 1;
+                        int newUsage = (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
 //                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = newUsage;
-                        matchingEvent.getStreamEvent(0).getOutputData()[matchingEvent.getStreamEvent(0).
-                                getOutputData().length - 1] = newUsage;
+                        matchingEvent.getStreamEvent(0).getOutputData()[policyAttributePosition] = newUsage;
                     }
                 }
             }
@@ -158,18 +161,8 @@ public class CacheTableLFU extends CacheTable {
                     state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
-            if (failedEvents != null && failedEvents.getFirst() != null) {
-                int tableSize = this.size();
-                ComplexEventChunk<StreamEvent> failedEventsLimitCopy = new ComplexEventChunk<>();
-                failedEvents.reset();
-                while (true) {
-                    failedEventsLimitCopy.add(failedEvents.next());
-                    tableSize++;
-                    if (tableSize == maxTableSize || !failedEvents.hasNext()) {
-                        break;
-                    }
-                }
-                state.getEventHolder().add(failedEventsLimitCopy);
+            if (failedEvents != null) {
+                this.addAndTrimUptoMaxSize(failedEvents);
             }
             while (this.size() > maxTableSize) {
                 this.deleteOneEntryUsingCachePolicy();
@@ -185,50 +178,52 @@ public class CacheTableLFU extends CacheTable {
         if (cacheExpiryEnabled) {
             cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
             cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
+            expiryAttributePosition = cacheTableDefinition.getAttributeList().size() - 2;
         } else {
             cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
         }
+        policyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
+        numColumns = policyAttributePosition + 1;
     }
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {
-        if (stateHolder.getState().getEventHolder() instanceof IndexedEventHolder) {
+        try {
             IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
-
+            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
             int minCount = Integer.MAX_VALUE;
             Object keyOfMinCount = null;
-
             for (Object key : keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                int count = (int) data[data.length - 1];
+                int count = (int) data[policyAttributePosition];
                 if (count < minCount) {
                     minCount = count;
                     keyOfMinCount = key;
                 }
             }
             indexEventHolder.deleteEvent(keyOfMinCount);
+        } catch (ClassCastException e) {
+            log.error(siddhiAppContext + ": " + e.getMessage());
         }
     }
 
     @Override
-    protected StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
-                                                  boolean cacheExpiryEnabled) {
+    protected StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,
+                                            boolean cacheExpiryEnabled) {
         Object[] outputDataForCache;
-        Object[] outputData = ((StreamEvent) event).getOutputData();
+        Object[] outputData = event.getOutputData();
         if (cacheExpiryEnabled) {
-            outputDataForCache = new Object[outputData.length + 2];
-            outputDataForCache[outputDataForCache.length - 2] =
+            outputDataForCache = new Object[numColumns];
+            outputDataForCache[expiryAttributePosition] =
                     siddhiAppContext.getTimestampGenerator().currentTime();
-            outputDataForCache[outputDataForCache.length - 1] = 1;
+            outputDataForCache[policyAttributePosition] = 1;
         } else {
-            outputDataForCache = new Object[outputData.length + 1];
-            outputDataForCache[outputDataForCache.length - 1] = 1;
+            outputDataForCache = new Object[numColumns];
+            outputDataForCache[policyAttributePosition] = 1;
         }
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
-
         return eventForCache;
     }
 }

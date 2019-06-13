@@ -49,6 +49,9 @@ public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
     boolean cacheExpiryEnabled;
     SiddhiAppContext siddhiAppContext;
+    int policyAttributePosition;
+    int numColumns;
+    int expiryAttributePosition;
 
     public void initCacheTable(TableDefinition cacheTableDefinition, ConfigReader configReader,
                                SiddhiAppContext siddhiAppContext, RecordTableHandler recordTableHandler,
@@ -73,18 +76,14 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public void addStreamEventUptoMaxSize(StreamEvent streamEvent) {
-        int sizeAfterAdding = 0;
+        int sizeAfterAdding = this.size();
         ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
-        StreamEvent streamEventIter;
-        while (true) {
+        do {
             sizeAfterAdding++;
-            streamEventIter = streamEvent.getNext();
-            if (sizeAfterAdding == maxSize || streamEventIter.getNext() == null) {
-                streamEventIter.setNext(null);
-                break;
-            }
-        }
-        addEventsLimitCopy.add(streamEvent);
+            addEventsLimitCopy.add((StreamEvent) generateEventWithRequiredFields(streamEvent, siddhiAppContext,
+                    cacheExpiryEnabled));
+            streamEvent = streamEvent.getNext();
+        } while (sizeAfterAdding != maxSize && streamEvent != null);
         readWriteLock.writeLock().lock();
         try {
             this.add(addEventsLimitCopy);
@@ -112,10 +111,10 @@ public abstract class CacheTable extends InMemoryTable {
         }
     }
 
-    public void updateOrAddWithMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                       CompiledCondition compiledCondition,
-                                       CompiledUpdateSet compiledUpdateSet,
-                                       AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
+    public void updateOrAddAndTrimUptoMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
+                                              CompiledCondition compiledCondition,
+                                              CompiledUpdateSet compiledUpdateSet,
+                                              AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
         ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
@@ -153,14 +152,16 @@ public abstract class CacheTable extends InMemoryTable {
 
     public abstract void deleteOneEntryUsingCachePolicy();
 
-    public ComplexEvent generateEventWithRequiredFields(Object event,
+//    public abstract void deleteEntriesUsingCachePolicy();
+
+    protected ComplexEvent generateEventWithRequiredFields(ComplexEvent event,
                                                         SiddhiAppContext siddhiAppContext,
                                                         boolean cacheExpiryEnabled) {
         if (event instanceof StreamEvent) {
-            StreamEvent eventForCache = checkPolicyAndAddFields(event, siddhiAppContext, cacheExpiryEnabled);
+            StreamEvent eventForCache = addRequiredFields(event, siddhiAppContext, cacheExpiryEnabled);
             return eventForCache;
         } else if (event instanceof StateEvent) {
-            StreamEvent eventForCache = checkPolicyAndAddFields(((StateEvent) event).getStreamEvent(0),
+            StreamEvent eventForCache = addRequiredFields(((StateEvent) event).getStreamEvent(0),
                     siddhiAppContext, cacheExpiryEnabled);
             StateEvent stateEvent = new StateEvent(((StateEvent) event).getStreamEvents().length,
                     eventForCache.getOutputData().length);
@@ -169,11 +170,10 @@ public abstract class CacheTable extends InMemoryTable {
         } else {
             return null;
         }
-
     }
 
-    protected abstract StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
-                                                           boolean cacheExpiryEnabled);
+    protected abstract StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,
+                                                     boolean cacheExpiryEnabled);
 
     public CompiledCondition generateCacheCompileCondition(Expression condition,
                                                             MatchingMetaInfoHolder storeMatchingMetaInfoHolder,

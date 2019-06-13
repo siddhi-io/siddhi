@@ -43,8 +43,8 @@ public class DeleteFromTableWithCacheTestCase {
         log.info("== Table with cache DELETE tests completed ==");
     }
 
-    @Test(description = "deleteFromTableWithCacheTest1")
-    public void deleteFromTableWithCacheTest1() throws InterruptedException, SQLException {
+    @Test(description = "deleteFromTableWithCacheTest0")
+    public void deleteFromTableWithCacheTest0() throws InterruptedException, SQLException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -87,8 +87,8 @@ public class DeleteFromTableWithCacheTestCase {
 
 
     @Test
-    public void deleteFromTableWithCacheTest2() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest2");
+    public void deleteFromTableWithCacheTest1() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -131,8 +131,8 @@ public class DeleteFromTableWithCacheTestCase {
 
 
     @Test
-    public void deleteFromTableWithCacheTest3() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest3");
+    public void deleteFromTableWithCacheTest2() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest2");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -173,8 +173,8 @@ public class DeleteFromTableWithCacheTestCase {
     }
 
     @Test
-    public void deleteFromTableWithCacheTest4() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest4");
+    public void deleteFromTableWithCacheTest3() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest3");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -215,8 +215,8 @@ public class DeleteFromTableWithCacheTestCase {
     }
 
     @Test
-    public void deleteFromTableWithCacheTest5() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest5");
+    public void deleteFromTableWithCacheTest4() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest4");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -255,8 +255,8 @@ public class DeleteFromTableWithCacheTestCase {
     }
 
     @Test
-    public void deleteFromTableWithCacheTest6() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest6");
+    public void deleteFromTableWithCacheTest5() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest5");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -298,8 +298,8 @@ public class DeleteFromTableWithCacheTestCase {
 
 
     @Test
-    public void deleteFromTableWithCacheTest7() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest7");
+    public void deleteFromTableWithCacheTest6() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest6");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -340,8 +340,8 @@ public class DeleteFromTableWithCacheTestCase {
     }
 
     @Test
-    public void deleteFromTableWithCacheTest8() throws InterruptedException, SQLException {
-        log.info("deleteFromTableWithCacheTest8");
+    public void deleteFromTableWithCacheTest7() throws InterruptedException, SQLException {
+        log.info("deleteFromTableWithCacheTest7");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +

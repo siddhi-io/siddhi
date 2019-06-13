@@ -359,7 +359,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             readWriteLock.writeLock().lock();
             try {
-                ((CacheTable) cacheTable).updateOrAddWithMaxSize(updateOrAddingEventChunk,
+                ((CacheTable) cacheTable).updateOrAddAndTrimUptoMaxSize(updateOrAddingEventChunk,
                         compiledConditionWithCache.getCacheCompileCondition(),
                         compiledUpdateSetWithCache.getCacheCompiledUpdateSet(), addingStreamEventExtractor,
                         maxCacheSize);
@@ -448,7 +448,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": cache miss. Loading from store");
                 }
-                ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
                 StreamEvent streamEvent = super.find(recordStoreCompiledCondition, matchingEvent);
                 if (streamEvent == null) {
                     if (log.isDebugEnabled()) {
@@ -460,9 +459,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                cacheMissEntry.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(streamEvent,
-                        siddhiAppContext, cacheExpiryEnabled));
-                cacheTable.add(cacheMissEntry);
+                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
                 readWriteLock.readLock().lock();
                 try {
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
@@ -733,7 +730,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     }
                     return null;
                 }
-                ComplexEventChunk<StreamEvent> cacheMissEntry = new ComplexEventChunk<>(true);
                 Object[] recordSelectAll = recordsFromSelectAll.next();
                 StreamEvent streamEvent = storeEventPool.newInstance();
                 streamEvent.setOutputData(new Object[outputAttributes.length]);
@@ -742,9 +738,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheTable.size() == maxCacheSize) {
                     ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
                 }
-                cacheMissEntry.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(streamEvent,
-                        siddhiAppContext, cacheExpiryEnabled));
-                cacheTable.add(cacheMissEntry);
+                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": sending results from cache after loading from store");
                 }

@@ -49,8 +49,8 @@ public class CacheFIFOTestCase {
         eventArrived = false;
     }
 
-    @Test(description = "cacheMissTestCase3") // using query api
-    public void cacheMissTestCase3() throws InterruptedException, SQLException {
+    @Test(description = "cacheFIFOTestCase0") // using query api
+    public void cacheFIFOTestCase0() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -123,8 +123,8 @@ public class CacheFIFOTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase4") // using find api (join query)
-    public void cacheMissTestCase4() throws InterruptedException, SQLException {
+    @Test(description = "cacheFIFOTestCase1") // using find api (join query)
+    public void cacheFIFOTestCase1() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -223,8 +223,8 @@ public class CacheFIFOTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheMissTestCase5") // using query api and 2 primary keys
-    public void cacheMissTestCase5() throws InterruptedException, SQLException {
+    @Test(description = "cacheFIFOTestCase2") // using query api and 2 primary keys
+    public void cacheFIFOTestCase2() throws InterruptedException, SQLException {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);

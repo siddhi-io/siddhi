@@ -22,8 +22,8 @@ public class CacheExpiryAndReloadTestCase {
     private static final Logger log = Logger.getLogger(CacheExpiryAndReloadTestCase.class);
 
     @Test
-    public void expiryAndReloadTest1() throws InterruptedException, SQLException {
-        log.info("expiryAndReloadTest1");
+    public void expiryAndReloadTest0() throws InterruptedException, SQLException {
+        log.info("expiryAndReloadTest0");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -85,8 +85,8 @@ public class CacheExpiryAndReloadTestCase {
     }
 
     @Test
-    public void expiryAndReloadTest2() throws InterruptedException, SQLException {
-        log.info("expiryAndReloadTest2");
+    public void expiryAndReloadTest1() throws InterruptedException, SQLException {
+        log.info("expiryAndReloadTest1");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -171,8 +171,8 @@ public class CacheExpiryAndReloadTestCase {
     }
 
     @Test // with primary key => IndexOperator
-    public void expiryAndReloadTest3() throws InterruptedException, SQLException {
-        log.info("expiryAndReloadTest3");
+    public void expiryAndReloadTest2() throws InterruptedException, SQLException {
+        log.info("expiryAndReloadTest2");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
@@ -258,8 +258,8 @@ public class CacheExpiryAndReloadTestCase {
     }
 
     @Test // with primary key and index
-    public void expiryAndReloadTest4() throws InterruptedException, SQLException {
-        log.info("expiryAndReloadTest4");
+    public void expiryAndReloadTest3() throws InterruptedException, SQLException {
+        log.info("expiryAndReloadTest3");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);

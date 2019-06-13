@@ -193,21 +193,21 @@ public class CacheExpiryHandler {
     }
 
     private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
-        ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>(true);
+//        ComplexEventChunk<StreamEvent> addingEventChunkWithTimestamp = new ComplexEventChunk<>(true);
 
-        while (loadedDataFromStore != null) {
-            addingEventChunkWithTimestamp.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(
-                    loadedDataFromStore, siddhiAppContext, true));
-            if (loadedDataFromStore.getNext() == null) {
-                break;
-            }
-            loadedDataFromStore = loadedDataFromStore.getNext();
-        }
+//        while (loadedDataFromStore != null) {
+//            addingEventChunkWithTimestamp.add((StreamEvent) ((CacheTable) cacheTable).generateEventWithRequiredFields(
+//                    loadedDataFromStore, siddhiAppContext, true));
+//            if (loadedDataFromStore.getNext() == null) {
+//                break;
+//            }
+//            loadedDataFromStore = loadedDataFromStore.getNext();
+//        }
         readWriteLock.writeLock().lock();
         try {
             ((CacheTable) cacheTable).deleteAll();
             if (loadedDataFromStore != null) {
-                cacheTable.add(addingEventChunkWithTimestamp);
+                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
             }
         } finally {
             readWriteLock.writeLock().unlock();

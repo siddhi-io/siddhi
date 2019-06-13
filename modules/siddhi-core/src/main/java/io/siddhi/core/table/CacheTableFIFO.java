@@ -18,10 +18,14 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
+import org.apache.log4j.Logger;
+
+import java.util.Set;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 
@@ -29,44 +33,64 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
  * cache table with FIFO entry removal
  */
 public class CacheTableFIFO extends CacheTable {
+    private static final Logger log = Logger.getLogger(CacheTableFIFO.class);
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
         cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
+        policyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
+        numColumns = policyAttributePosition + 1;
     }
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {
         try {
             IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Object[] keys = indexEventHolder.getAllPrimaryKeyValues().toArray();
-
+            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
             long minTimestamp = Long.MAX_VALUE;
             Object keyOfMinTimestamp = null;
-
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[data.length - 1];
+                long timestamp = (long) data[policyAttributePosition];
                 if (timestamp < minTimestamp) {
                     minTimestamp = timestamp;
                     keyOfMinTimestamp = key;
                 }
             }
             indexEventHolder.deleteEvent(keyOfMinTimestamp);
-
-        } catch (ClassCastException ignored) {
-
+        } catch (ClassCastException e) {
+            log.error(siddhiAppContext + ": " + e.getMessage());
         }
     }
 
+//    @Override
+//    public void deleteEntriesUsingCachePolicy() {
+//        try {
+//            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+//            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+//            long minTimestamp = Long.MAX_VALUE;
+//            Object keyOfMinTimestamp = null;
+//            for (Object key: keys) {
+//                Object[] data = indexEventHolder.getEvent(key).getOutputData();
+//                long timestamp = (long) data[policyAttributePosition];
+//                if (timestamp < minTimestamp) {
+//                    minTimestamp = timestamp;
+//                    keyOfMinTimestamp = key;
+//                }
+//            }
+//            indexEventHolder.deleteEvent(keyOfMinTimestamp);
+//        } catch (ClassCastException e) {
+//            log.error(siddhiAppContext + ": " + e.getMessage());
+//        }
+//    }
+
     @Override
-    protected StreamEvent checkPolicyAndAddFields(Object event, SiddhiAppContext siddhiAppContext,
-                                                  boolean cacheExpiryEnabled) {
+    protected StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,
+                                            boolean cacheExpiryEnabled) {
         Object[] outputDataForCache;
-        Object[] outputData = ((StreamEvent) event).getOutputData();
-            outputDataForCache = new Object[outputData.length + 1];
-            outputDataForCache[outputDataForCache.length - 1] =
-                    siddhiAppContext.getTimestampGenerator().currentTime();
+        Object[] outputData = event.getOutputData();
+            outputDataForCache = new Object[numColumns];
+            outputDataForCache[policyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
 
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
