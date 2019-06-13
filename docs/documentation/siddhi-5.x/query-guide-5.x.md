@@ -2184,15 +2184,27 @@ The following table contains the cache parameters.
 
 The following is an example of caching with expiry.
 
-**Operators on Table (and Store)**
-
-The following operators can be performed on tables (and stores).
-
 ```sql
 @store(type='store_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN', 
         @cache(size=10, retention.period=5 min, purge.interval=1 min))
 define table TableName (attribute1 Type1, attributeN TypeN);
 ```
+
+The above query will define and create a store table of given type and a cache with a max size of 10. A thread will be 
+created every 1 minute which will check the entire cache table for rows added earlier than 5 minutes and expire them.
+
+**Cache Behaviour**
+
+Cache behaviour changes profoundly based on the size of store table relative to maximum cache size defined. Since 
+memory is a limited resource we don't allow cache to grow more than the user specified maximum size.
+
+Case 1
+When store table is smaller than maximum cache size defined we keep the entire content of store table in memory in 
+cache table. All types of queries are routed to cache and cache results are directly sent out to the user. 
+
+**Operators on Table (and Store)**
+
+The following operators can be performed on tables (and stores).
 
 ### Insert
 
