@@ -147,7 +147,11 @@ public class CacheExpiryHandler {
                     loadedDataFromStore = storeTable.query(stateEventForCaching,
                             storeTable.getCompiledConditionForCaching(),
                             storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-                    clearCacheAndReload(loadedDataFromStore);
+                    if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +
+                            retentionPeriod) {
+                        clearCacheAndReload(loadedDataFromStore);
+                        storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
+                    }
                 } finally {
                     AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
                 }
@@ -172,7 +176,11 @@ public class CacheExpiryHandler {
                     AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
                 }
                 if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                    clearCacheAndReload(loadedDataFromStore);
+                    if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +
+                            retentionPeriod) {
+                        clearCacheAndReload(loadedDataFromStore);
+                        storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
+                    }
                 } else {
                     CompiledCondition cc = cacheExpiryCompiledCondition;
                     cacheTable.delete(generateDeleteEventChunk(), cc);

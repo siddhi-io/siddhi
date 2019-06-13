@@ -127,6 +127,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private String cachePolicy;
     private long storeSizeCheckInterval;
     private long retentionPeriod;
+    private long cacheLastReloadTime;
     public static ThreadLocal<Boolean> queryFromStore = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     @Override
@@ -1151,5 +1152,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
+    public long getCacheLastReloadTime() {
+        return cacheLastReloadTime;
+    }
 
+    public void setCacheLastReloadTime(long cacheLastReloadTime) {
+        this.cacheLastReloadTime = cacheLastReloadTime;
+    }
 }
