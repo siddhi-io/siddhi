@@ -2198,9 +2198,33 @@ created every 1 minute which will check the entire cache table for rows added ea
 Cache behaviour changes profoundly based on the size of store table relative to maximum cache size defined. Since 
 memory is a limited resource we don't allow cache to grow more than the user specified maximum size.
 
-Case 1
+Case 1 \
 When store table is smaller than maximum cache size defined we keep the entire content of store table in memory in 
-cache table. All types of queries are routed to cache and cache results are directly sent out to the user. 
+cache table. All types of queries are routed to cache and cache results are directly sent out to the user. Every time 
+the expiry thread finds that cache events were loaded earlier than retention period entire cache table will be deleted 
+and reloaded from store. In addition, when siddhi app starts, the entire store table, if it exists, will be loaded into 
+cache.
+
+Case 2 \
+When store table is bigger than maximum cache size only the queries satisfying the following 2 conditions are sent to 
+cache.
+1. the query contains all the primary keys of the table
+2. the query contains only == type of comparison. 
+
+Only for the above types of queries we can establish if the cache is hit or missed. Subject to these conditions if the 
+cache is hit the results from cache is sent out. If the cache is missed then store is checked.
+
+If the above conditions are not met by a query it is directly sent to the store table. In addition, please note that 
+if the store table is pre existing when siddhi app is started and it is bigger than max cache size, cache preloading 
+will take only upto max size and put it in cache. For example if store table has 50 entries when the siddhi app is 
+defined with cache size of 10, only the first 10 rows will be cached.
+
+When cache miss occurs we look for the answer in the store table. If there is a result from the store table it is added 
+to cache. One element from cache is removed using the user given cache policy prior to adding.
+
+When it comes to cache expiry, since not all rows are loaded at once in this case there may be some expired rows and 
+some unexpired rows at any time. So for every purge interval a thread will be generated which looks for rows that were 
+loaded earlier than retention period and delete only those rows. No reloading is done.
 
 **Operators on Table (and Store)**
 
