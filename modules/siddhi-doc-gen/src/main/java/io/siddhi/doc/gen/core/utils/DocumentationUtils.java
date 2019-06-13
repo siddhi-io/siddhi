@@ -25,6 +25,7 @@ import freemarker.template.TemplateExceptionHandler;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
@@ -35,6 +36,7 @@ import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
 import io.siddhi.doc.gen.metadata.NamespaceMetaData;
 import io.siddhi.doc.gen.metadata.ParameterMetaData;
+import io.siddhi.doc.gen.metadata.ParameterOverloadMetaData;
 import io.siddhi.doc.gen.metadata.ReturnAttributeMetaData;
 import io.siddhi.doc.gen.metadata.SystemParameterMetaData;
 import org.apache.commons.io.FileUtils;
@@ -667,9 +669,9 @@ public class DocumentationUtils {
 
             // Adding query parameters
             ParameterMetaData[] parameters = new ParameterMetaData[extensionAnnotation.parameters().length];
+            Map<String, ParameterMetaData> parameterMap = new HashMap<>();
             for (int i = 0; i < extensionAnnotation.parameters().length; i++) {
                 Parameter parameterAnnotation = extensionAnnotation.parameters()[i];
-
                 ParameterMetaData parameter = new ParameterMetaData();
                 parameter.setName(parameterAnnotation.name());
                 parameter.setType(Arrays.asList(parameterAnnotation.type()));
@@ -677,10 +679,28 @@ public class DocumentationUtils {
                 parameter.setOptional(parameterAnnotation.optional());
                 parameter.setDynamic(parameterAnnotation.dynamic());
                 parameter.setDefaultValue(parameterAnnotation.defaultValue());
+                parameterMap.put(parameter.getName(), parameter);
                 parameters[i] = parameter;
             }
             extensionMetaData.setParameters(Arrays.asList(parameters));
 
+            // Adding parameter overloads
+            if (extensionAnnotation.parameterOverloads().length > 0) {
+                ParameterOverloadMetaData[] parameterOverloads = new ParameterOverloadMetaData[
+                        extensionAnnotation.parameterOverloads().length];
+                for (int i = 0; i < extensionAnnotation.parameterOverloads().length; i++) {
+                    ParameterOverload parameterOverloadAnnotation = extensionAnnotation.parameterOverloads()[i];
+                    ParameterOverloadMetaData parameterOverload = new ParameterOverloadMetaData();
+                    ParameterMetaData[] overloadParameters = new ParameterMetaData[
+                            parameterOverloadAnnotation.parameterNames().length];
+                    for (int j = 0; j < parameterOverloadAnnotation.parameterNames().length; j++) {
+                        overloadParameters[j] = parameterMap.get(parameterOverloadAnnotation.parameterNames()[j]);
+                    }
+                    parameterOverload.setParameters(Arrays.asList(overloadParameters));
+                    parameterOverloads[i] = parameterOverload;
+                }
+                extensionMetaData.setParameterOverloads(Arrays.asList(parameterOverloads));
+            }
             // Adding system parameters
             SystemParameterMetaData[] systemParameters =
                     new SystemParameterMetaData[extensionAnnotation.systemParameter().length];
