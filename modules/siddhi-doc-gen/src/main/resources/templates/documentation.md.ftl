@@ -26,7 +26,9 @@
 ### ${extension.name} *<@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>*
 
 <p style="word-wrap: break-word">${formatDescription(extension.description)}</p>
-
+<#if extension.originName??>
+<p><i>Origin: ${extension.originName}:${extension.originVersion}</i></p>
+</#if>
 <@utils.renderHeadingFourWithStylesOnly heading="Syntax"/>
 
 <#if [EXTENSION_TYPE.FUNCTION, EXTENSION_TYPE.ATTRIBUTE_AGGREGATOR]?seq_index_of(extensionType) != -1>
