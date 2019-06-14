@@ -25,6 +25,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
@@ -63,26 +64,34 @@ public class CacheTableFIFO extends CacheTable {
         }
     }
 
-//    @Override
-//    public void deleteEntriesUsingCachePolicy() {
-//        try {
-//            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-//            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-//            long minTimestamp = Long.MAX_VALUE;
-//            Object keyOfMinTimestamp = null;
-//            for (Object key: keys) {
-//                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-//                long timestamp = (long) data[policyAttributePosition];
-//                if (timestamp < minTimestamp) {
-//                    minTimestamp = timestamp;
-//                    keyOfMinTimestamp = key;
-//                }
-//            }
-//            indexEventHolder.deleteEvent(keyOfMinTimestamp);
-//        } catch (ClassCastException e) {
-//            log.error(siddhiAppContext + ": " + e.getMessage());
-//        }
-//    }
+    @Override
+    public void deleteEntriesUsingCachePolicy(int numRowsToDelete) {
+        try {
+            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+            long[] minTimestampArray = new long[numRowsToDelete];
+            Arrays.fill(minTimestampArray, Long.MAX_VALUE);
+            Object[] keyOfMinTimestampArray = new Object[numRowsToDelete];
+
+            for (Object key: keys) {
+                Object[] data = indexEventHolder.getEvent(key).getOutputData();
+                long timestamp = (long) data[policyAttributePosition];
+                for (int i = 0; i < numRowsToDelete; i++) {
+                    if (timestamp < minTimestampArray[i]) {
+                        minTimestampArray[i] = timestamp;
+                        keyOfMinTimestampArray[i] = key;
+                    }
+                }
+            }
+            for (Object deleteKey: keyOfMinTimestampArray) {
+                if (deleteKey != null) {
+                    indexEventHolder.deleteEvent(deleteKey);
+                }
+            }
+        } catch (ClassCastException e) {
+            log.error(siddhiAppContext + ": " + e.getMessage());
+        }
+    }
 
     @Override
     protected StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,

@@ -103,9 +103,12 @@ public abstract class CacheTable extends InMemoryTable {
         readWriteLock.writeLock().lock();
         try {
             super.add(addingEventChunkForCache);
-            while (this.size() > maxSize) {
-                this.deleteOneEntryUsingCachePolicy();
+            if (this.size() > maxSize) {
+                this.deleteEntriesUsingCachePolicy(this.size() - maxSize);
             }
+//            while (this.size() > maxSize) {
+//                this.deleteOneEntryUsingCachePolicy();
+//            }
         } finally {
             readWriteLock.writeLock().unlock();
         }
@@ -134,9 +137,12 @@ public abstract class CacheTable extends InMemoryTable {
             if (failedEvents != null && failedEvents.getFirst() != null) {
                 state.getEventHolder().add(failedEvents);
             }
-            while (this.size() > maxSize) {
-                this.deleteOneEntryUsingCachePolicy();
+            if (this.size() > maxSize) {
+                this.deleteEntriesUsingCachePolicy(this.size() - maxSize);
             }
+//            while (this.size() > maxSize) {
+//                this.deleteOneEntryUsingCachePolicy();
+//            }
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
@@ -152,7 +158,7 @@ public abstract class CacheTable extends InMemoryTable {
 
     public abstract void deleteOneEntryUsingCachePolicy();
 
-//    public abstract void deleteEntriesUsingCachePolicy();
+    public abstract void deleteEntriesUsingCachePolicy(int numRowsToDelete);
 
     protected ComplexEvent generateEventWithRequiredFields(ComplexEvent event,
                                                         SiddhiAppContext siddhiAppContext,
