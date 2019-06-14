@@ -34,13 +34,21 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.query.api.annotation.Annotation;
+import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Variable;
+import io.siddhi.query.api.expression.condition.And;
+import io.siddhi.query.api.expression.condition.Compare;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 
 /**
  * common interface for FIFO, LRU, and LFU cache tables
@@ -106,9 +114,6 @@ public abstract class CacheTable extends InMemoryTable {
             if (this.size() > maxSize) {
                 this.deleteEntriesUsingCachePolicy(this.size() - maxSize);
             }
-//            while (this.size() > maxSize) {
-//                this.deleteOneEntryUsingCachePolicy();
-//            }
         } finally {
             readWriteLock.writeLock().unlock();
         }
@@ -140,9 +145,6 @@ public abstract class CacheTable extends InMemoryTable {
             if (this.size() > maxSize) {
                 this.deleteEntriesUsingCachePolicy(this.size() - maxSize);
             }
-//            while (this.size() > maxSize) {
-//                this.deleteOneEntryUsingCachePolicy();
-//            }
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
@@ -160,9 +162,9 @@ public abstract class CacheTable extends InMemoryTable {
 
     public abstract void deleteEntriesUsingCachePolicy(int numRowsToDelete);
 
-    protected ComplexEvent generateEventWithRequiredFields(ComplexEvent event,
-                                                        SiddhiAppContext siddhiAppContext,
-                                                        boolean cacheExpiryEnabled) {
+    ComplexEvent generateEventWithRequiredFields(ComplexEvent event,
+                                                 SiddhiAppContext siddhiAppContext,
+                                                 boolean cacheExpiryEnabled) {
         if (event instanceof StreamEvent) {
             StreamEvent eventForCache = addRequiredFields(event, siddhiAppContext, cacheExpiryEnabled);
             return eventForCache;
@@ -181,11 +183,12 @@ public abstract class CacheTable extends InMemoryTable {
     protected abstract StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,
                                                      boolean cacheExpiryEnabled);
 
-    public CompiledCondition generateCacheCompileCondition(Expression condition,
+    public CacheCompiledConditionWithRouteToCache generateCacheCompileCondition(Expression condition,
                                                             MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
                                                             SiddhiQueryContext siddhiQueryContext,
                                                             List<VariableExpressionExecutor>
                                                                     storeVariableExpressionExecutors) {
+        boolean routeToCache = checkConditionToRouteToCache(condition);
         MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
                 getMetaStreamEvents().length);
         for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
@@ -203,7 +206,62 @@ public abstract class CacheTable extends InMemoryTable {
         Map<String, Table> tableMap = new ConcurrentHashMap<>();
         tableMap.put(this.tableDefinition.getId(), this);
 
-        return super.compileCondition(condition, matchingMetaInfoHolder,
-                storeVariableExpressionExecutors, tableMap, siddhiQueryContext);
+        return new CacheCompiledConditionWithRouteToCache(super.compileCondition(condition, matchingMetaInfoHolder,
+                storeVariableExpressionExecutors, tableMap, siddhiQueryContext), routeToCache);
+    }
+
+    public class CacheCompiledConditionWithRouteToCache {
+        private CompiledCondition cacheCompiledCondition;
+        private boolean routeToCache;
+
+        CacheCompiledConditionWithRouteToCache(CompiledCondition cacheCompiledCondition, boolean routeToCache) {
+            this.cacheCompiledCondition = cacheCompiledCondition;
+            this.routeToCache = routeToCache;
+        }
+
+        public CompiledCondition getCacheCompiledCondition() {
+            return cacheCompiledCondition;
+        }
+
+        public boolean isRouteToCache() {
+            return routeToCache;
+        }
+    }
+
+    private boolean checkConditionToRouteToCache(Expression condition) {
+        List<String> primaryKeysArray = new ArrayList<>();
+        Annotation primaryKeys = getAnnotation("PrimaryKey", tableDefinition.getAnnotations());
+        if (primaryKeys == null) {
+            return false;
+        }
+        List<Element> keys = primaryKeys.getElements();
+        for (Element element: keys) {
+            primaryKeysArray.add(element.getValue());
+        }
+        recursivelyCheckConditionToRouteToCache(condition, primaryKeysArray);
+        return primaryKeysArray.size() == 0;
+    }
+
+    private void recursivelyCheckConditionToRouteToCache(Expression condition, List<String> primaryKeysArray) {
+        if (condition instanceof Compare) {
+            Compare compareCondition = (Compare) condition;
+            if (compareCondition.getOperator().name().equalsIgnoreCase("EQUAL")) {
+                if (compareCondition.getLeftExpression() instanceof Variable) {
+                    Variable variable = (Variable) compareCondition.getLeftExpression();
+                    if (variable.getStreamId().equalsIgnoreCase(tableDefinition.getId())) {
+                        primaryKeysArray.remove(variable.getAttributeName());
+                    }
+                }
+                if (compareCondition.getRightExpression() instanceof Variable) {
+                    Variable variable = (Variable) compareCondition.getRightExpression();
+                    if (variable.getStreamId().equalsIgnoreCase(tableDefinition.getId())) {
+                        primaryKeysArray.remove(variable.getAttributeName());
+                    }
+                }
+            }
+        } else if (condition instanceof And) {
+            recursivelyCheckConditionToRouteToCache(((And) condition).getLeftExpression(), primaryKeysArray);
+            recursivelyCheckConditionToRouteToCache(((And) condition).getRightExpression(), primaryKeysArray);
+        }
     }
 }

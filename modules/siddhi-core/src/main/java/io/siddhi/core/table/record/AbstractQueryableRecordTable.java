@@ -35,8 +35,6 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import io.siddhi.core.executor.condition.AndConditionExpressionExecutor;
-import io.siddhi.core.executor.condition.compare.equal.EqualCompareConditionExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.QuerySelector;
@@ -50,20 +48,14 @@ import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.cache.CacheExpiryHandler;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
-import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
-import io.siddhi.core.util.collection.executor.CollectionExecutor;
-import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
-import io.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.SelectorParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.annotation.Annotation;
-import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.StoreQuery;
@@ -94,7 +86,6 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PER
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
-import static io.siddhi.core.util.SiddhiConstants.COMPOSITE_PRIMARY_KEY_REGEX;
 import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
@@ -427,7 +418,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (log.isDebugEnabled()) {
                 log.debug(siddhiAppContext.getName() + ": store table size is bigger than cache.");
             }
-            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition)) {
+            if (cacheEnabled && compiledConditionWithCache.isRouteToCache()) {
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": cache constraints satisfied. Checking cache");
                 }
@@ -536,80 +527,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    private boolean checkCompileConditionForPKAndEquals(CompiledCondition compiledCondition,
-                                                        TableDefinition tableDefinition) {
-        List<String> primaryKeysArray = new ArrayList<>();
-        Annotation primaryKeys = getAnnotation("PrimaryKey", tableDefinition.getAnnotations());
-        if (primaryKeys == null) {
-            return false;
-        }
-        List<Element> keys = primaryKeys.getElements();
-        for (Element element: keys) {
-            primaryKeysArray.add(element.getValue());
-        }
-        ExpressionExecutor expressionExecutor = null;
-        int storePosition;
-        RecordStoreCompiledCondition rscc = (RecordStoreCompiledCondition) compiledCondition;
-        CompiledConditionWithCache ccwc = (CompiledConditionWithCache) rscc.getCompiledCondition();
-        CompiledCondition cacheCC = ccwc.getCacheCompileCondition();
-        try {
-            SnapshotableEventQueueOperator operator = (SnapshotableEventQueueOperator) cacheCC;
-            expressionExecutor = operator.getExpressionExecutor();
-            storePosition = operator.getStoreEventPosition();
-            recursivelyCheckExecutorsSEQO(primaryKeysArray, expressionExecutor, storePosition);
-        } catch (ClassCastException ignore) {
-            try {
-                OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) cacheCC;
-                CollectionExecutor ce = operator.getCollectionExecutor();
-                checkExecutorsIO(primaryKeysArray, ce);
-            } catch (ClassCastException e) {
-                return false;
-            }
-        }
-        return primaryKeysArray.size() == 0;
-    }
-
-    private void checkExecutorsIO(List<String> primaryKeysArray, CollectionExecutor collectionExecutor) {
-        try {
-            CompareCollectionExecutor comp = (CompareCollectionExecutor) collectionExecutor;
-            primaryKeysArray.remove(comp.getAttribute());
-        } catch (ClassCastException e1) {
-            try {
-                AndMultiPrimaryKeyCollectionExecutor mul = (AndMultiPrimaryKeyCollectionExecutor) collectionExecutor;
-                String[] compositeKeys = mul.getCompositePrimaryKey().split(COMPOSITE_PRIMARY_KEY_REGEX);
-                for (String key: compositeKeys) {
-                    primaryKeysArray.remove(key);
-                }
-            } catch (ClassCastException ignored) {
-
-            }
-        }
-    }
-
-    private void recursivelyCheckExecutorsSEQO(List<String> primaryKeysArray, ExpressionExecutor expressionExecutor,
-                                               int storePosition) {
-        try {
-            VariableExpressionExecutor variableExpressionExecutor = (VariableExpressionExecutor) expressionExecutor;
-            if (variableExpressionExecutor.getPosition()[0] == storePosition) {
-                primaryKeysArray.remove(variableExpressionExecutor.getAttribute().getName());
-            }
-        } catch (ClassCastException e) {
-            try {
-                EqualCompareConditionExpressionExecutor eql =
-                        (EqualCompareConditionExpressionExecutor) expressionExecutor;
-                recursivelyCheckExecutorsSEQO(primaryKeysArray, eql.getLeftExpressionExecutor(), storePosition);
-                recursivelyCheckExecutorsSEQO(primaryKeysArray, eql.getRightExpressionExecutor(), storePosition);
-            } catch (ClassCastException e2) {
-                try {
-                    AndConditionExpressionExecutor and = (AndConditionExpressionExecutor) expressionExecutor;
-                    recursivelyCheckExecutorsSEQO(primaryKeysArray, and.getLeftConditionExecutor(), storePosition);
-                    recursivelyCheckExecutorsSEQO(primaryKeysArray, and.getRightConditionExecutor(), storePosition);
-                } catch (ClassCastException e3) {
-                }
-            }
-        }
-    }
-
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
@@ -690,8 +607,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             if (log.isDebugEnabled() && !queryFromStore.get()) {
                 log.debug(siddhiAppContext.getName() + ": store table size is bigger than cache.");
             }
-            if (cacheEnabled && checkCompileConditionForPKAndEquals(compiledCondition, cacheTableDefinition) &&
-                    !queryFromStore.get()) {
+            if (cacheEnabled && compiledConditionWithCache.isRouteToCache() && !queryFromStore.get()) {
                 if (log.isDebugEnabled()) {
                     log.debug(siddhiAppContext.getName() + ": cache constraints satisfied. Checking cache");
                 }
@@ -1020,10 +936,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return outputAttributesForCaching;
     }
 
-    public String getCachePolicy() {
-        return cachePolicy;
-    }
-
     /**
      * Compile the query selection
      *
@@ -1045,20 +957,26 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      * Class to hold store compile condition and cache compile condition wrapped
      */
     private class CompiledConditionWithCache implements CompiledCondition {
-        CompiledCondition cacheCompileCondition;
-        CompiledCondition storeCompileCondition;
+        private CompiledCondition cacheCompileCondition;
+        private CompiledCondition storeCompileCondition;
+        private boolean routeToCache;
 
-        public CompiledConditionWithCache(CompiledCondition storeCompileCondition,
-                                          CompiledCondition cacheCompileCondition) {
+        CompiledConditionWithCache(CompiledCondition storeCompileCondition,
+                                   CacheTable.CacheCompiledConditionWithRouteToCache cacheCompiledConditionWithRouteToCache) {
             this.storeCompileCondition = storeCompileCondition;
-            this.cacheCompileCondition = cacheCompileCondition;
+            this.cacheCompileCondition = cacheCompiledConditionWithRouteToCache.getCacheCompiledCondition();
+            this.routeToCache = cacheCompiledConditionWithRouteToCache.isRouteToCache();
         }
 
-        public CompiledCondition getStoreCompileCondition() {
+        CompiledCondition getStoreCompileCondition() {
             return storeCompileCondition;
         }
 
-        public CompiledCondition getCacheCompileCondition() {
+        boolean isRouteToCache() {
+            return routeToCache;
+        }
+
+        CompiledCondition getCacheCompileCondition() {
             return cacheCompileCondition;
         }
     }

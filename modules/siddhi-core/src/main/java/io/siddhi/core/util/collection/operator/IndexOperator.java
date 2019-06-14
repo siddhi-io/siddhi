@@ -174,10 +174,12 @@ public class IndexOperator implements Operator {
                     }
                     toUpdateEventChunk.add(streamEvent);
                 }
+//                xxxx(toUpdateEventChunk)
                 storeEvents.add(toUpdateEventChunk);
             } else {
                 while (foundEventChunk.hasNext()) {
                     StreamEvent streamEvent = foundEventChunk.next();
+                    handleCachePolicyAttributeUpdate(streamEvent);
                     streamEvent.setNext(null); // to make the chained state back to normal
                     for (Map.Entry<Integer, ExpressionExecutor> entry :
                             compiledUpdateSet.getExpressionExecutorMap().entrySet()) {
@@ -188,4 +190,7 @@ public class IndexOperator implements Operator {
         }
     }
 
+    private void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
+
+    }
 }

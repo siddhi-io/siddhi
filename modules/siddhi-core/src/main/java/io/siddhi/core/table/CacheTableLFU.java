@@ -45,22 +45,17 @@ public class CacheTableLFU extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableLFU.class);
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {//todo: use index operator to update
         readWriteLock.readLock().lock();
         TableState state = stateHolder.getState();
         try {
             StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
                     tableStreamEventCloner);
-            String primaryKey;
 
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                if (usedEvent != null) {
-                    usedEvent.getOutputData()[policyAttributePosition] =
-                            (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
-                }
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder && foundEvent != null) { //todo: check if CC meets required criteria for cache
+                foundEvent.getOutputData()[policyAttributePosition] =
+                        (int) foundEvent.getOutputData()[policyAttributePosition] + 1;
+                ((IndexEventHolder) stateHolder.getState().getEventHolder()).overwrite(foundEvent);
             }
             return foundEvent;
         } finally {
@@ -78,7 +73,7 @@ public class CacheTableLFU extends CacheTable {
                 String primaryKey;
 
                 if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder(); //todo: use index operator or smthn
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     if (primaryKey == null || primaryKey.equals("")) {
                         primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
@@ -110,7 +105,7 @@ public class CacheTableLFU extends CacheTable {
                 updatingEventChunk.reset();
                 while (updatingEventChunk.hasNext()) {
                     StateEvent matchingEvent = updatingEventChunk.next();
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder(); //todo: use index operator for cache
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
