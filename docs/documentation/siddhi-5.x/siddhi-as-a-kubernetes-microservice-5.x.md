@@ -7,16 +7,17 @@ Here, the Siddhi applications containing stream processing logic can be written 
 
 ## Prerequisites 
 
-* A Kubernetes cluster v1.11.8 or higher.
+* A Kubernetes cluster v1.10.11 or higher. 
 
     1. [Minikube](https://github.com/kubernetes/minikube#installation)
     2. [Google Kubernetes Engine(GKE) Cluster](https://console.cloud.google.com/)
-    3. Or any other Kubernetes cluster
+    3. [Docker for Mac](https://docs.docker.com/docker-for-mac/install/)
+    4. Or any other Kubernetes cluster
    
 * Admin privileges to install Siddhi operator  
 
 !!! Note "Minikube"
-    For Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
+    Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
     <pre>
     minikube addons enable ingress
     </pre>
@@ -28,13 +29,17 @@ Here, the Siddhi applications containing stream processing logic can be written 
             --clusterrole=cluster-admin --user=your-address@email.com
     </pre>  
     
+!!! Note "Docker for Mac"
+    Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Docker for mac following the official [documentation](https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac)
+    or disable Siddhi operator's [automatically ingress creation](#deploy-siddhi-apps-without-ingress-creation).
+    
 ## Install Siddhi Operator
 
 To install the Siddhi Kubernetes operator run the following commands.
 
 ```
-kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/prerequisites.yaml
-kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.0/siddhi-operator.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/prerequisites.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/siddhi-operator.yaml
 ```
 You can verify the installation by making sure the following deployments are running in your Kubernetes cluster. 
 
@@ -46,6 +51,11 @@ siddhi-operator   1         1         1            1           1m
 siddhi-parser     1         1         1            1           1m
 
 ```
+
+!!! Note "Using a custom-built siddhi-runner image"
+    If you need to use a custom-built `siddhi-runner` image for all the `SiddhiProcess` deployments, you have to configure `SIDDHI_RUNNER_IMAGE` and `SIDDHI_RUNNER_IMAGE_TAG` environment variables with the custom-built image name and image tag respectively in the `siddhi-operator.yaml` file. 
+    Refer the documentation on creating custom siddhi-runner images bundling additional JARs [here](config-guide-5.x.md#adding-to-siddhi-docker-microservice).
+    If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as `SIDDHI_RUNNER_IMAGE_SECRET` environment variable in the `siddhi-operator.yaml` file. For more details on using docker images from private registries/repositories refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
 
 ## Deploy and run Siddhi App
 
@@ -97,6 +107,11 @@ siddhi    siddhi    10.0.2.15   80, 443   1m
 
 ```
 
+!!! Note "Using a custom-built siddhi-runner image"
+    If you need to use a custom-built `siddhi-runner` image for a specific `SiddhiProcess` deployment, you have to configure `image` and `imageTag` arguments with the custom-built image name and image tag respectively in the `monitor-app.yaml` file. 
+    Refer the documentation on creating custom siddhi-runner images bundling additional JARs [here](config-guide-5.x.md#adding-to-siddhi-docker-microservice).
+    If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as `imagePullSecret` argument in the `monitor-app.yaml` file. For more details on using docker images from private registries/repositories refer [this documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/). 
+
 **_Invoke Siddhi Applications_**
 
 To invoke the Siddhi App, first obtain the external IP of the ingress load balancer using `kubectl get ingress` command as follows.
@@ -109,6 +124,9 @@ Then, add the host `siddhi` and related external IP (`ADDRESS`) to the `/etc/hos
 
 !!! Note "Minikube"
     For Minikube, you have to use Minikube IP as the external IP. Hence, run `minikube ip` command to get the IP of the Minikube cluster.
+    
+!!! Note "Docker for Mac"
+    For Docker for Mac, you have to use `0.0.0.0` as the external IP.    
 
 Use the following CURL command to send events to `monitor-app` deployed in Kubernetes.
 

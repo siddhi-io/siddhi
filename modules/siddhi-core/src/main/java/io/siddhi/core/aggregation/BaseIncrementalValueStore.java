@@ -40,20 +40,24 @@ import java.util.Map;
 public class BaseIncrementalValueStore {
     private StateHolder<ValueState> valueStateHolder;
     private StateHolder<StoreState> storeStateHolder;
-    private List<ExpressionExecutor> expressionExecutors;
-    private StreamEventFactory streamEventFactory;
-    private ExpressionExecutor shouldUpdateTimestamp;
-    private long initialTimestamp;
 
-    public BaseIncrementalValueStore(List<ExpressionExecutor> expressionExecutors,
-                                     StreamEventFactory streamEventFactory,
-                                     SiddhiQueryContext siddhiQueryContext, String aggregatorName,
-                                     ExpressionExecutor shouldUpdateTimestamp, long initialTimestamp,
-                                     boolean groupBy, boolean local) {
-        this.expressionExecutors = expressionExecutors;
-        this.streamEventFactory = streamEventFactory;
-        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+    private long initialTimestamp;
+    private List<ExpressionExecutor> expressionExecutors;
+    private ExpressionExecutor shouldUpdateTimestamp;
+
+    private StreamEventFactory streamEventFactory;
+
+    public BaseIncrementalValueStore(String aggregatorName, long initialTimestamp,
+                                     List<ExpressionExecutor> expressionExecutors,
+                                     ExpressionExecutor shouldUpdateTimestamp, StreamEventFactory streamEventFactory,
+                                     SiddhiQueryContext siddhiQueryContext, boolean groupBy, boolean local) {
+
         this.initialTimestamp = initialTimestamp;
+        this.expressionExecutors = expressionExecutors;
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+
+        this.streamEventFactory = streamEventFactory;
+
         if (!local) {
             this.valueStateHolder = siddhiQueryContext.generateStateHolder(aggregatorName + "-" +
                     this.getClass().getName() + "-value", groupBy, () -> new ValueState());
@@ -70,15 +74,6 @@ public class BaseIncrementalValueStore {
         setTimestamp(startTimeOfNewAggregates);
         setProcessed(false);
         this.valueStateHolder.cleanGroupByStates();
-    }
-
-    public void setValue(Object value, int position) {
-        ValueState state = this.valueStateHolder.getState();
-        try {
-            state.values[position] = value;
-        } finally {
-            this.valueStateHolder.returnState(state);
-        }
     }
 
     public List<ExpressionExecutor> getExpressionExecutors() {
@@ -147,18 +142,14 @@ public class BaseIncrementalValueStore {
         try {
             boolean shouldUpdate = true;
             if (shouldUpdateTimestamp != null) {
-                shouldUpdate = (boolean) shouldUpdate(
-                        shouldUpdateTimestamp.execute(streamEvent), state);
+                shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), state);
             }
             for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                 if (shouldUpdate) {
-                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                     state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                } else {
-                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                    if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                    }
+                } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                    state.setValue(expressionExecutor.execute(streamEvent), i + 1);
                 }
             }
             setProcessed(true);
@@ -176,18 +167,14 @@ public class BaseIncrementalValueStore {
                 try {
                     boolean shouldUpdate = true;
                     if (shouldUpdateTimestamp != null) {
-                        shouldUpdate = (boolean) shouldUpdate(
-                                shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
+                        shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
                     }
                     for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+                        ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                         if (shouldUpdate) {
-                            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
                             state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
-                        } else {
-                            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                            if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
-                            }
+                        } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                            state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
                         }
                     }
                     setProcessed(true);
@@ -199,28 +186,13 @@ public class BaseIncrementalValueStore {
         }
     }
 
-    private Object shouldUpdate(Object data, ValueState state) {
+    private boolean shouldUpdate(Object data, ValueState state) {
         long timestamp = (long) data;
         if (timestamp >= state.lastTimestamp) {
             state.lastTimestamp = timestamp;
             return true;
         }
         return false;
-    }
-
-    public Object shouldUpdate(Object data) {
-        ValueState state = this.valueStateHolder.getState();
-        try {
-            long timestamp = (long) data;
-            if (timestamp >= state.lastTimestamp) {
-                state.lastTimestamp = timestamp;
-                return true;
-            }
-            return false;
-        } finally {
-            this.valueStateHolder.returnState(state);
-        }
-
     }
 
     class StoreState extends State {

@@ -177,19 +177,21 @@ public class IndexOperator implements Operator {
 //                xxxx(toUpdateEventChunk)
                 storeEvents.add(toUpdateEventChunk);
             } else {
-                while (foundEventChunk.hasNext()) {
-                    StreamEvent streamEvent = foundEventChunk.next();
+                StreamEvent first = foundEventChunk.getFirst();
+                while (first != null) {
+                    StreamEvent streamEvent = first;
                     handleCachePolicyAttributeUpdate(streamEvent);
-                    streamEvent.setNext(null); // to make the chained state back to normal
                     for (Map.Entry<Integer, ExpressionExecutor> entry :
                             compiledUpdateSet.getExpressionExecutorMap().entrySet()) {
                         streamEvent.setOutputData(entry.getValue().execute(overwritingOrAddingEvent), entry.getKey());
                     }
+                    StreamEvent next = first.getNext();
+                    first.setNext(null); // to make the chained state back to normal
+                    first = next;
                 }
             }
         }
     }
-
     private void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
 
     }

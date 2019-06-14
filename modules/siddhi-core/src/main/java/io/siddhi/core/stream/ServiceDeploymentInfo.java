@@ -27,13 +27,12 @@ import java.util.Map;
 public class ServiceDeploymentInfo {
 
     private ServiceProtocol serviceProtocol = ServiceProtocol.TCP;
+    private boolean isPulling = true;
     private boolean secured = false;
     private int port;
     private Map<String, String> deploymentProperties = new HashMap<>();
 
     /**
-     * Service related information to the deployment
-     *
      * @param serviceProtocol the protocol used by the service
      * @param port            the port of the service
      * @param secured         is the service protocol secured
@@ -42,17 +41,22 @@ public class ServiceDeploymentInfo {
         this.serviceProtocol = serviceProtocol;
         this.port = port;
         this.secured = secured;
+        this.isPulling = false;
     }
 
     /**
      * Service related information to the deployment
      *
-     * @param secured is the service protocol secured
-     * @param port    the port of the service
+     * @param port           the port of the service
+     * @param secured        is the service protocol secured
      */
     public ServiceDeploymentInfo(int port, boolean secured) {
         this.port = port;
         this.secured = secured;
+        this.isPulling = false;
+    }
+
+    public ServiceDeploymentInfo() {
     }
 
     public ServiceProtocol getServiceProtocol() {
@@ -77,6 +81,14 @@ public class ServiceDeploymentInfo {
 
     public void setSecured(boolean secured) {
         this.secured = secured;
+    }
+
+    public boolean isPulling() {
+        return isPulling;
+    }
+
+    public void setPulling(boolean pulling) {
+        isPulling = pulling;
     }
 
     public Map<String, String> getDeploymentProperties() {

@@ -20,9 +20,9 @@ package io.siddhi.core.util.parser;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.aggregation.IncrementalAggregationProcessor;
-import io.siddhi.core.aggregation.IncrementalDataPurging;
+import io.siddhi.core.aggregation.IncrementalDataPurger;
 import io.siddhi.core.aggregation.IncrementalExecutor;
-import io.siddhi.core.aggregation.RecreateInMemoryData;
+import io.siddhi.core.aggregation.IncrementalExecutorsInitialiser;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -79,15 +79,17 @@ import java.util.stream.Collectors;
 
 import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_LAST_TIMESTAMP_COL;
+import static io.siddhi.core.util.SiddhiConstants.AGG_SHARD_ID_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
-import static io.siddhi.core.util.SiddhiConstants.SHARD_ID_COL;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_PARTITION_BY_ID;
+import static io.siddhi.core.util.SiddhiConstants.METRIC_INFIX_AGGREGATIONS;
+import static io.siddhi.core.util.SiddhiConstants.METRIC_TYPE_FIND;
+import static io.siddhi.core.util.SiddhiConstants.METRIC_TYPE_INSERT;
 
 /**
  * This is the parser class of incremental aggregation definition.
  */
 public class AggregationParser {
-
-    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(AggregationParser.class);
 
     public static AggregationRuntime parse(AggregationDefinition aggregationDefinition,
                                            SiddhiAppContext siddhiAppContext,
@@ -158,47 +160,54 @@ public class AggregationParser {
             List<ExpressionExecutor> incomingExpressionExecutors = new ArrayList<>();
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators = new ArrayList<>();
             List<Variable> groupByVariableList = aggregationDefinition.getSelector().getGroupByList();
-            boolean isProcessingOnExternalTime = aggregationDefinition.getAggregateAttribute() != null;
             List<Expression> outputExpressions = new ArrayList<>(); //Expressions to get
             // final aggregate outputs. e.g avg = sum/count
-            List<ExpressionExecutor> outputExpressionExecutors = new ArrayList<>(); //Expression executors to get
-            // final aggregate outputs. e.g avg = sum/count
 
-            String shardId = null;
+            boolean isProcessingOnExternalTime = aggregationDefinition.getAggregateAttribute() != null;
+            boolean isGroupBy = aggregationDefinition.getSelector().getGroupByList().size() != 0;
 
-            Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
+
+            final boolean isDistributed;
+            ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
+            final String shardId = configManager.extractProperty("shardId");
+            boolean enablePartitioning = false;
+            Annotation partitionById = AnnotationHelper.getAnnotation(ANNOTATION_PARTITION_BY_ID,
                     aggregationDefinition.getAnnotations());
-            boolean enablePartioning = false;
             if (partitionById != null) {
                 String enableElement = partitionById.getElement("enable");
-                enablePartioning = enableElement == null || Boolean.parseBoolean(enableElement);
+                enablePartitioning = enableElement == null || Boolean.parseBoolean(enableElement);
             }
 
-            ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-            Boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
+            boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
 
-            if (enablePartioning || shouldPartitionById) {
-                shardId = configManager.extractProperty("shardId");
+            if (enablePartitioning || shouldPartitionById) {
                 if (shardId == null) {
                     throw new SiddhiAppCreationException("Configuration 'shardId' not provided for @partitionById " +
                             "annotation");
                 }
-                enablePartioning = true;
+                isDistributed = true;
+            } else {
+                isDistributed = false;
             }
 
-            boolean isLatestEventAdded = populateIncomingAggregatorsAndExecutors(
-                    aggregationDefinition, tableMap,
-                    incomingVariableExpressionExecutors, incomingMetaStreamEvent,
-                    incomingExpressionExecutors, incrementalAttributeAggregators, groupByVariableList,
-                    outputExpressions, isProcessingOnExternalTime, shardId, siddhiQueryContext);
+            populateIncomingAggregatorsAndExecutors(aggregationDefinition, siddhiQueryContext, tableMap,
+                    incomingVariableExpressionExecutors, incomingMetaStreamEvent, incomingExpressionExecutors,
+                    incrementalAttributeAggregators, groupByVariableList, outputExpressions, isProcessingOnExternalTime,
+                    isDistributed, shardId);
+
+            boolean isLatestEventColAdded = incomingMetaStreamEvent.getOutputData()
+                    .get(incomingMetaStreamEvent.getOutputData().size() - 1)
+                    .getName().equals(AGG_LAST_TIMESTAMP_COL);
+
 
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
-            List<Expression> finalBaseAggregators = getFinalBaseAggregators(tableMap,
-                    incomingVariableExpressionExecutors, incomingMetaStreamEvent,
-                    incomingExpressionExecutors, incrementalAttributeAggregators, siddhiQueryContext);
+            List<Expression> finalBaseExpressions = new ArrayList<>();
+            populateFinalBaseAggregators(tableMap, incomingVariableExpressionExecutors, incomingMetaStreamEvent,
+                    incomingExpressionExecutors, incrementalAttributeAggregators, siddhiQueryContext,
+                    finalBaseExpressions);
 
-            StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id("");
+            StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id(aggregatorName + "_intermediate");
             incomingOutputStreamDefinition.setQueryContextStartIndex(aggregationDefinition.getQueryContextStartIndex());
             incomingOutputStreamDefinition.setQueryContextEndIndex(aggregationDefinition.getQueryContextEndIndex());
             MetaStreamEvent processedMetaStreamEvent = new MetaStreamEvent();
@@ -212,64 +221,100 @@ public class AggregationParser {
 
             // Executors of processing meta
             List<VariableExpressionExecutor> processVariableExpressionExecutors = new ArrayList<>();
-            boolean groupBy = aggregationDefinition.getSelector().getGroupByList().size() != 0;
 
-            List<List<ExpressionExecutor>> processExpressionExecutorsList = incrementalDurations.stream()
-                    .map(incrementalDuration -> constructProcessExpressionExecutors(
-                            tableMap, siddhiQueryContext, baseAggregatorBeginIndex,
-                            finalBaseAggregators, incomingOutputStreamDefinition, processedMetaStreamEvent,
-                            processVariableExpressionExecutors, true, isProcessingOnExternalTime,
-                            incrementalDuration))
-                    .collect(Collectors.toList());
+            Map<TimePeriod.Duration, List<ExpressionExecutor>> processExpressionExecutorsMap = new HashMap<>();
+            Map<TimePeriod.Duration, List<ExpressionExecutor>> processExpressionExecutorsMapForFind = new HashMap<>();
 
-            List<List<ExpressionExecutor>> processExpressionExecutorsListForFind = incrementalDurations.stream()
-                    .map(incrementalDuration -> constructProcessExpressionExecutors(
-                            tableMap, siddhiQueryContext, baseAggregatorBeginIndex,
-                            finalBaseAggregators, incomingOutputStreamDefinition, processedMetaStreamEvent,
-                            processVariableExpressionExecutors, true, isProcessingOnExternalTime,
-                            incrementalDuration))
-                    .collect(Collectors.toList());
+            incrementalDurations.forEach(
+                    incrementalDuration -> {
+                        processExpressionExecutorsMap.put(
+                                incrementalDuration,
+                                constructProcessExpressionExecutors(
+                                        siddhiQueryContext, tableMap, baseAggregatorBeginIndex, finalBaseExpressions,
+                                        incomingOutputStreamDefinition, processedMetaStreamEvent,
+                                        processVariableExpressionExecutors, isProcessingOnExternalTime,
+                                        incrementalDuration, isDistributed, shardId, isLatestEventColAdded));
+                        processExpressionExecutorsMapForFind.put(
+                                incrementalDuration,
+                                constructProcessExpressionExecutors(
+                                        siddhiQueryContext, tableMap, baseAggregatorBeginIndex, finalBaseExpressions,
+                                        incomingOutputStreamDefinition, processedMetaStreamEvent,
+                                        processVariableExpressionExecutors, isProcessingOnExternalTime,
+                                        incrementalDuration, isDistributed, shardId, isLatestEventColAdded));
+
+                    });
 
             ExpressionExecutor shouldUpdateTimestamp = null;
-            if (isLatestEventAdded) {
+            if (isLatestEventColAdded) {
                 Expression shouldUpdateTimestampExp = new Variable(AGG_LAST_TIMESTAMP_COL);
                 shouldUpdateTimestamp = ExpressionParser.parseExpression(shouldUpdateTimestampExp,
                         processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors,
-                        false, 0, ProcessingMode.BATCH, false,
-                        siddhiQueryContext);
+                        false, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
             }
 
-            outputExpressionExecutors.addAll(outputExpressions.stream().map(expression -> ExpressionParser.
-                    parseExpression(expression, processedMetaStreamEvent, 0, tableMap,
-                            processVariableExpressionExecutors,
-                            groupBy, 0, ProcessingMode.BATCH, false, siddhiQueryContext))
-                    .collect(Collectors.toList()));
+
+            List<ExpressionExecutor> outputExpressionExecutors = outputExpressions.stream()
+                    .map(expression -> ExpressionParser.parseExpression(expression, processedMetaStreamEvent, 0,
+                            tableMap, processVariableExpressionExecutors, isGroupBy, 0, ProcessingMode.BATCH, false,
+                            siddhiQueryContext))
+                    .collect(Collectors.toList());
 
             // Create group by key generator
-            List<GroupByKeyGenerator> groupByKeyGeneratorList = incrementalDurations.stream()
-                    .map(incrementalDuration -> {
-                                if (isProcessingOnExternalTime || groupBy) {
-
-                                    List<Expression> groupByExpressionList = new ArrayList<>();
-                                    if (isProcessingOnExternalTime) {
-                                        Expression externalTimestampExpression =
-                                                AttributeFunction.function(
-                                                        "incrementalAggregator", "getAggregationStartTime",
-                                                        new Variable(AGG_EXTERNAL_TIMESTAMP_COL),
-                                                        new StringConstant(incrementalDuration.name())
-                                                );
-                                        groupByExpressionList.add(externalTimestampExpression);
-                                    }
-                                    groupByExpressionList.addAll(groupByVariableList.stream()
-                                            .map(groupByVariable -> (Expression) groupByVariable)
-                                            .collect(Collectors.toList()));
-                                    return new GroupByKeyGenerator(groupByExpressionList, processedMetaStreamEvent,
-                                            SiddhiConstants.UNKNOWN_STATE, tableMap, processVariableExpressionExecutors,
-                                            siddhiQueryContext);
-                                }
-                                return null;
+            Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap = new HashMap<>();
+            incrementalDurations.forEach(
+                    incrementalDuration -> {
+                        GroupByKeyGenerator groupByKeyGenerator = null;
+                        if (isProcessingOnExternalTime || isGroupBy) {
+                            List<Expression> groupByExpressionList = new ArrayList<>();
+                            if (isProcessingOnExternalTime) {
+                                Expression externalTimestampExpression =
+                                        AttributeFunction.function(
+                                                "incrementalAggregator", "getAggregationStartTime",
+                                                new Variable(AGG_EXTERNAL_TIMESTAMP_COL),
+                                                new StringConstant(incrementalDuration.name())
+                                        );
+                                groupByExpressionList.add(externalTimestampExpression);
                             }
-                    ).collect(Collectors.toList());
+                            groupByExpressionList.addAll(groupByVariableList.stream()
+                                    .map(groupByVariable -> (Expression) groupByVariable)
+                                    .collect(Collectors.toList()));
+                            groupByKeyGenerator = new GroupByKeyGenerator(groupByExpressionList, processedMetaStreamEvent,
+                                    SiddhiConstants.UNKNOWN_STATE, tableMap, processVariableExpressionExecutors,
+                                    siddhiQueryContext);
+                        }
+                        groupByKeyGeneratorMap.put(incrementalDuration, groupByKeyGenerator);
+                    }
+            );
+
+            // GroupBy for reading
+            Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMapForReading = new HashMap<>();
+            if (isDistributed && !isProcessingOnExternalTime) {
+                incrementalDurations.forEach(
+                        incrementalDuration -> {
+                            List<Expression> groupByExpressionList = new ArrayList<>();
+                            Expression timestampExpression =
+                                    AttributeFunction.function(
+                                            "incrementalAggregator", "getAggregationStartTime",
+                                            new Variable(AGG_START_TIMESTAMP_COL),
+                                            new StringConstant(incrementalDuration.name())
+                                    );
+                            groupByExpressionList.add(timestampExpression);
+                            if (isGroupBy) {
+                                groupByExpressionList.addAll(groupByVariableList.stream()
+                                        .map(groupByVariable -> (Expression) groupByVariable)
+                                        .collect(Collectors.toList()));
+                            }
+                            GroupByKeyGenerator groupByKeyGenerator = new GroupByKeyGenerator(groupByExpressionList,
+                                    processedMetaStreamEvent, SiddhiConstants.UNKNOWN_STATE, tableMap,
+                                    processVariableExpressionExecutors, siddhiQueryContext);
+                            groupByKeyGeneratorMapForReading.put(incrementalDuration, groupByKeyGenerator);
+                        }
+
+                );
+
+            } else {
+                groupByKeyGeneratorMapForReading.putAll(groupByKeyGeneratorMap);
+            }
 
             // Create new scheduler
             EntryValveExecutor entryValveExecutor = new EntryValveExecutor(siddhiAppContext);
@@ -288,29 +333,20 @@ public class AggregationParser {
             Map<TimePeriod.Duration, Table> aggregationTables = initDefaultTables(aggregatorName,
                     incrementalDurations, processedMetaStreamEvent.getOutputStreamDefinition(),
                     siddhiAppRuntimeBuilder, aggregationDefinition.getAnnotations(), groupByVariableList,
-                    isProcessingOnExternalTime, enablePartioning);
+                    isProcessingOnExternalTime, isDistributed);
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
-                    processedMetaStreamEvent, processExpressionExecutorsList, groupByKeyGeneratorList,
-                    incrementalDurations, aggregationTables, siddhiQueryContext, aggregatorName,
-                    shouldUpdateTimestamp);
+                    processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations, aggregationTables,
+                    siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
 
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
-            if (shardId != null) {
-                incrementalExecutorMapForPartitions =
-                        buildIncrementalExecutors(
-                                processedMetaStreamEvent, processExpressionExecutorsList,
-                                groupByKeyGeneratorList, incrementalDurations,
-                                aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
-            }
-            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
-            incrementalDataPurging.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
+            IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
+            incrementalDataPurger.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
                     , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext);
 
             //Recreate in-memory data from tables
-            RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
-                    aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                    windowMap, aggregationMap, shardId, incrementalExecutorMapForPartitions);
+            IncrementalExecutorsInitialiser incrementalExecutorsInitialiser = new IncrementalExecutorsInitialiser(
+                    incrementalDurations, aggregationTables, incrementalExecutorMap, isDistributed, shardId,
+                    siddhiAppContext, processedMetaStreamEvent, tableMap, windowMap, aggregationMap);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -327,28 +363,22 @@ public class AggregationParser {
 
             if (siddhiAppContext.getStatisticsManager() != null) {
                 latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext,
-                        aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_FIND);
+                        aggregationDefinition.getId(), METRIC_INFIX_AGGREGATIONS, METRIC_TYPE_FIND);
                 latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext,
-                        aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        aggregationDefinition.getId(), METRIC_INFIX_AGGREGATIONS, METRIC_TYPE_INSERT);
 
                 throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                        aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_FIND);
+                        aggregationDefinition.getId(), METRIC_INFIX_AGGREGATIONS, METRIC_TYPE_FIND);
                 throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                        aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        aggregationDefinition.getId(), METRIC_INFIX_AGGREGATIONS, METRIC_TYPE_INSERT);
             }
 
             AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
-                    incrementalExecutorMap, aggregationTables, ((SingleStreamRuntime) streamRuntime),
-                    incrementalDurations, processedMetaStreamEvent,
-                    outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
-                    isProcessingOnExternalTime, groupByKeyGeneratorList,
-                    incrementalDataPurging, shardId,
-                    incrementalExecutorMapForPartitions, shouldUpdateTimestamp,
-                    processExpressionExecutorsListForFind);
+                    isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
+                    aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind, shouldUpdateTimestamp,
+                    groupByKeyGeneratorMapForReading, incrementalDataPurger,
+                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
+                    latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -364,12 +394,13 @@ public class AggregationParser {
 
     private static Map<TimePeriod.Duration, IncrementalExecutor> buildIncrementalExecutors(
             MetaStreamEvent processedMetaStreamEvent,
-            List<List<ExpressionExecutor>> processExpressionExecutorsList,
-            List<GroupByKeyGenerator> groupByKeyGeneratorList,
+            Map<TimePeriod.Duration, List<ExpressionExecutor>> processExpressionExecutorsMap,
+            Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorList,
             List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables,
             SiddhiQueryContext siddhiQueryContext,
             String aggregatorName, ExpressionExecutor shouldUpdateTimestamp) {
+
         Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = new HashMap<>();
         // Create incremental executors
         IncrementalExecutor child;
@@ -383,11 +414,11 @@ public class AggregationParser {
             child = root;
             TimePeriod.Duration duration = incrementalDurations.get(i);
 
-            IncrementalExecutor incrementalExecutor = new IncrementalExecutor(duration,
-                    new ArrayList<>(processExpressionExecutorsList.get(i)),
-                    groupByKeyGeneratorList.get(i), processedMetaStreamEvent, child, isRoot,
-                    aggregationTables.get(duration), siddhiQueryContext, aggregatorName,
-                    shouldUpdateTimestamp);
+            IncrementalExecutor incrementalExecutor = new IncrementalExecutor(aggregatorName, duration,
+                    processExpressionExecutorsMap.get(duration), shouldUpdateTimestamp,
+                    groupByKeyGeneratorList.get(duration), isRoot, aggregationTables.get(duration),
+                    child, siddhiQueryContext, processedMetaStreamEvent);
+
             incrementalExecutorMap.put(duration, incrementalExecutor);
             root = incrementalExecutor;
         }
@@ -395,71 +426,86 @@ public class AggregationParser {
     }
 
     private static List<ExpressionExecutor> constructProcessExpressionExecutors(
-            Map<String, Table> tableMap,
-            SiddhiQueryContext siddhiQueryContext, int baseAggregatorBeginIndex,
-            List<Expression> finalBaseAggregators,
-            StreamDefinition incomingOutputStreamDefinition,
+            SiddhiQueryContext siddhiQueryContext, Map<String, Table> tableMap, int baseAggregatorBeginIndex,
+            List<Expression> finalBaseExpressions, StreamDefinition incomingOutputStreamDefinition,
             MetaStreamEvent processedMetaStreamEvent,
-            List<VariableExpressionExecutor> processVariableExpressionExecutors, boolean groupBy,
-            boolean isProcessingOnExternalTime, TimePeriod.Duration duration) {
+            List<VariableExpressionExecutor> processVariableExpressionExecutors, boolean isProcessingOnExternalTime,
+            TimePeriod.Duration duration, boolean isDistributed, String shardId, boolean isLatestEventColAdded) {
+
         List<ExpressionExecutor> processExpressionExecutors = new ArrayList<>();
         List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
-        for (int i = 0; i < baseAggregatorBeginIndex; i++) {
-            if (isProcessingOnExternalTime && i == 1) {
-                Expression externalTimestampExpression =
-                        AttributeFunction.function("incrementalAggregator",
-                                "getAggregationStartTime",
-                                new Variable(AGG_EXTERNAL_TIMESTAMP_COL),
-                                new StringConstant(duration.name())
-                        );
-                ExpressionExecutor externalTimestampExecutor = ExpressionParser.parseExpression(
-                        externalTimestampExpression, processedMetaStreamEvent, 0,
-                        tableMap, processVariableExpressionExecutors, groupBy, 0,
-                        ProcessingMode.BATCH, false, siddhiQueryContext);
-                processExpressionExecutors.add(externalTimestampExecutor);
-            } else if (attributeList.get(i).getName().equals(AGG_LAST_TIMESTAMP_COL)) {
-                Expression lastTimestampExpression =
-                        AttributeFunction.function(
-                                "max",
-                                new Variable(AGG_LAST_TIMESTAMP_COL)
-                        );
-                ExpressionExecutor latestTimestampExecutor = ExpressionParser.parseExpression(
-                        lastTimestampExpression, processedMetaStreamEvent, 0,
-                        tableMap, processVariableExpressionExecutors, groupBy, 0,
-                        ProcessingMode.BATCH, false, siddhiQueryContext);
-                processExpressionExecutors.add(latestTimestampExecutor);
-            } else {
-                Attribute attribute = attributeList.get(i);
-                VariableExpressionExecutor variableExpressionExecutor = (VariableExpressionExecutor) ExpressionParser
-                        .parseExpression(new Variable(attribute.getName()), processedMetaStreamEvent, 0,
-                                tableMap, processVariableExpressionExecutors, groupBy, 0,
-                                ProcessingMode.BATCH, false, siddhiQueryContext);
-                processExpressionExecutors.add(variableExpressionExecutor);
-            }
+
+        int i = 1;
+        //Add timestamp executor
+        Attribute attribute = attributeList.get(0);
+        VariableExpressionExecutor variableExpressionExecutor = (VariableExpressionExecutor) ExpressionParser
+                .parseExpression(new Variable(attribute.getName()), processedMetaStreamEvent, 0, tableMap,
+                        processVariableExpressionExecutors, true, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
+        processExpressionExecutors.add(variableExpressionExecutor);
+
+        if (isDistributed) {
+            Expression shardIdExpression = Expression.value(shardId);
+            ExpressionExecutor shardIdExpressionExecutor = ExpressionParser.parseExpression(shardIdExpression,
+                    processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors, true, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
+            processExpressionExecutors.add(shardIdExpressionExecutor);
+            i++;
         }
 
-        for (Expression expression : finalBaseAggregators) {
+        if (isProcessingOnExternalTime) {
+            Expression externalTimestampExpression =
+                    AttributeFunction.function("incrementalAggregator", "getAggregationStartTime",
+                            new Variable(AGG_EXTERNAL_TIMESTAMP_COL), new StringConstant(duration.name()));
+            ExpressionExecutor externalTimestampExecutor = ExpressionParser.parseExpression(
+                    externalTimestampExpression, processedMetaStreamEvent, 0, tableMap,
+                    processVariableExpressionExecutors, true, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
+            processExpressionExecutors.add(externalTimestampExecutor);
+            i++;
+        }
+
+        if (isLatestEventColAdded) {
+            baseAggregatorBeginIndex = baseAggregatorBeginIndex - 1;
+        }
+
+        for (; i < baseAggregatorBeginIndex; i++) {
+            attribute = attributeList.get(i);
+            variableExpressionExecutor = (VariableExpressionExecutor) ExpressionParser.parseExpression(
+                    new Variable(attribute.getName()), processedMetaStreamEvent, 0, tableMap,
+                    processVariableExpressionExecutors, true, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
+            processExpressionExecutors.add(variableExpressionExecutor);
+        }
+
+        if (isLatestEventColAdded) {
+            Expression lastTimestampExpression =
+                    AttributeFunction.function("max", new Variable(AGG_LAST_TIMESTAMP_COL));
+            ExpressionExecutor latestTimestampExecutor = ExpressionParser.parseExpression(lastTimestampExpression,
+                    processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors, true, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
+            processExpressionExecutors.add(latestTimestampExecutor);
+        }
+
+        for (Expression expression : finalBaseExpressions) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors,
-                    groupBy, 0, ProcessingMode.BATCH,
-                    false, siddhiQueryContext);
+                    true, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
             processExpressionExecutors.add(expressionExecutor);
         }
         return processExpressionExecutors;
     }
 
-    private static List<Expression> getFinalBaseAggregators(
+    private static void populateFinalBaseAggregators(
             Map<String, Table> tableMap, List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
-            SiddhiQueryContext siddhiQueryContext) {
+            SiddhiQueryContext siddhiQueryContext, List<Expression> finalBaseAggregators) {
+
         List<Attribute> finalBaseAttributes = new ArrayList<>();
-        List<Expression> finalBaseAggregators = new ArrayList<>();
 
         for (IncrementalAttributeAggregator incrementalAttributeAggregator : incrementalAttributeAggregators) {
             Attribute[] baseAttributes = incrementalAttributeAggregator.getBaseAttributes();
             Expression[] baseAttributeInitialValues = incrementalAttributeAggregator.getBaseAttributeInitialValues();
             Expression[] baseAggregators = incrementalAttributeAggregator.getBaseAggregators();
+
             for (int i = 0; i < baseAttributes.length; i++) {
                 validateBaseAggregators(incrementalAttributeAggregators,
                         incrementalAttributeAggregator, baseAttributes,
@@ -475,39 +521,43 @@ public class AggregationParser {
                 }
             }
         }
-        return finalBaseAggregators;
     }
 
-    private static boolean populateIncomingAggregatorsAndExecutors(
-            AggregationDefinition aggregationDefinition,
+    private static void populateIncomingAggregatorsAndExecutors(
+            AggregationDefinition aggregationDefinition, SiddhiQueryContext siddhiQueryContext,
             Map<String, Table> tableMap, List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators, List<Variable> groupByVariableList,
-            List<Expression> outputExpressions, boolean isProcessingOnExternalTime, String shardId,
-            SiddhiQueryContext siddhiQueryContext) {
-        boolean addAggLastEvent = false;
-        ExpressionExecutor timestampExecutor = getTimeStampExecutor(tableMap, incomingVariableExpressionExecutors,
-                incomingMetaStreamEvent, siddhiQueryContext);
+            List<Expression> outputExpressions, boolean isProcessingOnExternalTime, boolean isDistributed,
+            String shardId) {
+
+        boolean isLatestEventAdded = false;
+
+        ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiQueryContext, tableMap,
+                incomingVariableExpressionExecutors, incomingMetaStreamEvent);
 
         Attribute timestampAttribute = new Attribute(AGG_START_TIMESTAMP_COL, Attribute.Type.LONG);
         incomingMetaStreamEvent.addOutputData(timestampAttribute);
         incomingExpressionExecutors.add(timestampExecutor);
 
-        Attribute externalTimestampAttribute = new Attribute(AGG_EXTERNAL_TIMESTAMP_COL, Attribute.Type.LONG);
+        if (isDistributed) {
+            ExpressionExecutor nodeIdExpExecutor = new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
+            incomingExpressionExecutors.add(nodeIdExpExecutor);
+            incomingMetaStreamEvent.addOutputData(new Attribute(AGG_SHARD_ID_COL, Attribute.Type.STRING));
+        }
+
         ExpressionExecutor externalTimestampExecutor = null;
         if (isProcessingOnExternalTime) {
             Expression externalTimestampExpression = aggregationDefinition.getAggregateAttribute();
             externalTimestampExecutor = ExpressionParser.parseExpression(externalTimestampExpression,
                     incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
-                    false, 0, ProcessingMode.BATCH, false,
-                    siddhiQueryContext);
+                    false, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
 
             if (externalTimestampExecutor.getReturnType() == Attribute.Type.STRING) {
                 Expression expression = AttributeFunction.function("incrementalAggregator",
                         "timestampInMilliseconds", externalTimestampExpression);
                 externalTimestampExecutor = ExpressionParser.parseExpression(expression, incomingMetaStreamEvent,
-                        0, tableMap, incomingVariableExpressionExecutors, false,
-                        0, ProcessingMode.BATCH, false,
+                        0, tableMap, incomingVariableExpressionExecutors, false, 0, ProcessingMode.BATCH, false,
                         siddhiQueryContext);
             } else if (externalTimestampExecutor.getReturnType() != Attribute.Type.LONG) {
                 throw new SiddhiAppCreationException(
@@ -518,12 +568,15 @@ public class AggregationParser {
                         externalTimestampExpression.getQueryContextStartIndex(),
                         externalTimestampExpression.getQueryContextEndIndex());
             }
+
+            Attribute externalTimestampAttribute = new Attribute(AGG_EXTERNAL_TIMESTAMP_COL, Attribute.Type.LONG);
             incomingMetaStreamEvent.addOutputData(externalTimestampAttribute);
             incomingExpressionExecutors.add(externalTimestampExecutor);
         }
 
         AbstractDefinition incomingLastInputStreamDefinition = incomingMetaStreamEvent.getLastInputDefinition();
         for (Variable groupByVariable : groupByVariableList) {
+
             incomingMetaStreamEvent.addOutputData(incomingLastInputStreamDefinition.getAttributeList()
                     .get(incomingLastInputStreamDefinition.getAttributePosition(
                             groupByVariable.getAttributeName())));
@@ -559,16 +612,10 @@ public class AggregationParser {
                     try {
                         SiddhiClassLoader.loadExtensionImplementation((AttributeFunction) expression,
                                 FunctionExecutorExtensionHolder.getInstance(siddhiQueryContext.getSiddhiAppContext()));
-                        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                                incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
-                                false, 0,
-                                ProcessingMode.BATCH, false, siddhiQueryContext);
-                        incomingExpressionExecutors.add(expressionExecutor);
-                        incomingMetaStreamEvent.addOutputData(
-                                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                        aggregationDefinition.getAttributeList().add(
-                                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                        outputExpressions.add(Expression.variable(outputAttribute.getRename()));
+                        processAggregationSelectors(aggregationDefinition, siddhiQueryContext, tableMap,
+                                incomingVariableExpressionExecutors, incomingMetaStreamEvent,
+                                incomingExpressionExecutors, outputExpressions, outputAttribute, expression);
+
                     } catch (SiddhiAppCreationException e) {
                         throw new SiddhiAppCreationException("'" + ((AttributeFunction) expression).getName() +
                                 "' is neither a incremental attribute aggregator extension or a function" +
@@ -604,38 +651,42 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(groupByAttribute.getName()));
 
                 } else {
-                    if (isProcessingOnExternalTime) {
-                        if (!addAggLastEvent) {
-                            Attribute lastEventTimeStamp = new Attribute(AGG_LAST_TIMESTAMP_COL,
-                                    Attribute.Type.LONG);
-                            incomingMetaStreamEvent.addOutputData(lastEventTimeStamp);
-                            incomingExpressionExecutors.add(externalTimestampExecutor);
-                            addAggLastEvent = true;
-                        }
-                    }
-
-                    ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                            incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
-                            false, 0,
-                            ProcessingMode.BATCH, false, siddhiQueryContext);
-                    incomingExpressionExecutors.add(expressionExecutor);
-                    incomingMetaStreamEvent.addOutputData(
-                            new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                    aggregationDefinition.getAttributeList().add(
-                            new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                    outputExpressions.add(Expression.variable(outputAttribute.getRename()));
+                    isLatestEventAdded = true;
+                    processAggregationSelectors(aggregationDefinition, siddhiQueryContext, tableMap,
+                            incomingVariableExpressionExecutors, incomingMetaStreamEvent,
+                            incomingExpressionExecutors, outputExpressions, outputAttribute, expression);
                 }
+
             }
         }
 
-        if (shardId != null) {
-            ExpressionExecutor nodeIdExpressionExecutor =
-                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
-            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
-            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
+        if (isProcessingOnExternalTime && isLatestEventAdded) {
+            Attribute lastEventTimeStamp = new Attribute(AGG_LAST_TIMESTAMP_COL, Attribute.Type.LONG);
+            incomingMetaStreamEvent.addOutputData(lastEventTimeStamp);
+            incomingExpressionExecutors.add(externalTimestampExecutor);
         }
-        return addAggLastEvent;
+
     }
+
+    private static void processAggregationSelectors(AggregationDefinition aggregationDefinition,
+                                                    SiddhiQueryContext siddhiQueryContext, Map<String, Table> tableMap,
+                                                    List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
+                                                    MetaStreamEvent incomingMetaStreamEvent,
+                                                    List<ExpressionExecutor> incomingExpressionExecutors,
+                                                    List<Expression> outputExpressions, OutputAttribute outputAttribute,
+                                                    Expression expression) {
+
+        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression, incomingMetaStreamEvent,
+                0, tableMap, incomingVariableExpressionExecutors, false, 0, ProcessingMode.BATCH, false,
+                siddhiQueryContext);
+        incomingExpressionExecutors.add(expressionExecutor);
+        incomingMetaStreamEvent.addOutputData(
+                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
+        aggregationDefinition.getAttributeList().add(
+                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
+        outputExpressions.add(Expression.variable(outputAttribute.getRename()));
+    }
+
 
     private static void validateBaseAggregators(List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
                                                 IncrementalAttributeAggregator incrementalAttributeAggregator,
@@ -672,14 +723,15 @@ public class AggregationParser {
         }
     }
 
-    private static void initIncrementalAttributeAggregator(
-            AbstractDefinition lastInputStreamDefinition, AttributeFunction attributeFunction,
-            IncrementalAttributeAggregator incrementalAttributeAggregator) {
+    private static void initIncrementalAttributeAggregator(AbstractDefinition lastInputStreamDefinition,
+                                                           AttributeFunction attributeFunction,
+                                                           IncrementalAttributeAggregator incrementalAttributeAggregator) {
+
         String attributeName = null;
         Attribute.Type attributeType = null;
         if (attributeFunction.getParameters() != null && attributeFunction.getParameters()[0] != null) {
             if (attributeFunction.getParameters().length != 1) {
-                throw new SiddhiAppCreationException("Incremental aggregator requires only on one parameter. "
+                throw new SiddhiAppCreationException("Incremental aggregator requires only one parameter. "
                         + "Found " + attributeFunction.getParameters().length,
                         attributeFunction.getQueryContextStartIndex(), attributeFunction.getQueryContextEndIndex());
             }
@@ -716,19 +768,18 @@ public class AggregationParser {
         }
     }
 
-    private static ExpressionExecutor getTimeStampExecutor(
-            Map<String, Table> tableMap,
-            List<VariableExpressionExecutor> variableExpressionExecutors,
-            MetaStreamEvent metaStreamEvent, SiddhiQueryContext siddhiQueryContext) {
+    private static ExpressionExecutor getTimeStampExecutor(SiddhiQueryContext siddhiQueryContext,
+                                                           Map<String, Table> tableMap,
+                                                           List<VariableExpressionExecutor> variableExpressionExecutors,
+                                                           MetaStreamEvent metaStreamEvent) {
+
         Expression timestampExpression;
         ExpressionExecutor timestampExecutor;
 
         // Execution is based on system time, the GMT time zone would be used.
         timestampExpression = AttributeFunction.function("currentTimeMillis", null);
-        timestampExecutor = ExpressionParser.parseExpression(timestampExpression,
-                metaStreamEvent, 0, tableMap, variableExpressionExecutors,
-                false, 0, ProcessingMode.BATCH,
-                false, siddhiQueryContext);
+        timestampExecutor = ExpressionParser.parseExpression(timestampExpression, metaStreamEvent, 0, tableMap,
+                variableExpressionExecutors, false, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
         return timestampExecutor;
     }
 
@@ -752,17 +803,15 @@ public class AggregationParser {
     private static List<TimePeriod.Duration> sortedDurations(List<TimePeriod.Duration> durations) {
         List<TimePeriod.Duration> copyDurations = new ArrayList<>(durations);
 
-        Comparator periodComparator = new Comparator<TimePeriod.Duration>() {
-            public int compare(TimePeriod.Duration firstDuration, TimePeriod.Duration secondDuration) {
-                int firstOrdinal = firstDuration.ordinal();
-                int secondOrdinal = secondDuration.ordinal();
-                if (firstOrdinal > secondOrdinal) {
-                    return 1;
-                } else if (firstOrdinal < secondOrdinal) {
-                    return -1;
-                }
-                return 0;
+        Comparator periodComparator = (Comparator<TimePeriod.Duration>) (firstDuration, secondDuration) -> {
+            int firstOrdinal = firstDuration.ordinal();
+            int secondOrdinal = secondDuration.ordinal();
+            if (firstOrdinal > secondOrdinal) {
+                return 1;
+            } else if (firstOrdinal < secondOrdinal) {
+                return -1;
             }
+            return 0;
         };
         copyDurations.sort(periodComparator);
         return copyDurations;
@@ -803,7 +852,7 @@ public class AggregationParser {
         primaryKeyAnnotation.element(null, AGG_START_TIMESTAMP_COL);
 
         if (enablePartioning) {
-            primaryKeyAnnotation.element(null, SHARD_ID_COL);
+            primaryKeyAnnotation.element(null, AGG_SHARD_ID_COL);
         }
         if (isProcessingOnExternalTime) {
             primaryKeyAnnotation.element(null, AGG_EXTERNAL_TIMESTAMP_COL);

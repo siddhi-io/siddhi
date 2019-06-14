@@ -49,31 +49,38 @@ import java.util.Set;
 public class IncrementalDataAggregator {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration durationToAggregate;
+
+    private final long oldestEventTimestamp;
     private final List<ExpressionExecutor> baseExecutorsForFind;
+    private ExpressionExecutor shouldUpdateTimestamp;
+
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
-    private final long oldestEventTimestamp;
-    private ExpressionExecutor shouldUpdateTimestamp;
+
     private final StreamEventFactory streamEventFactory;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration durationToAggregate, long oldestEventTimestamp,
                                      List<ExpressionExecutor> baseExecutorsForFind,
-                                     MetaStreamEvent metaStreamEvent,
-                                     ExpressionExecutor shouldUpdateTimestamp,
-                                     boolean groupBy) {
+                                     ExpressionExecutor shouldUpdateTimestamp, boolean groupBy,
+                                     MetaStreamEvent metaStreamEvent) {
+
         this.incrementalDurations = incrementalDurations;
         this.durationToAggregate = durationToAggregate;
+
         this.oldestEventTimestamp = oldestEventTimestamp;
-        this.baseExecutorsForFind = baseExecutorsForFind;
+        this.baseExecutorsForFind = baseExecutorsForFind.subList(1, baseExecutorsForFind.size());
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+
         this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+
         if (groupBy) {
             this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
         } else {
             this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
-        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+
     }
 
     public ComplexEventChunk<StreamEvent> aggregateInMemoryData(
@@ -97,21 +104,17 @@ public class IncrementalDataAggregator {
                     try {
                         boolean shouldUpdate = true;
                         if (shouldUpdateTimestamp != null) {
-                            shouldUpdate = (boolean) shouldUpdate(
-                                    shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
+                            shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
                         } else {
                             state.lastTimestamp = oldestEventTimestamp;
                         }
                         // keeping timestamp value location as null
                         for (int i = 0; i < baseExecutorsForFind.size(); i++) {
+                            ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
                             if (shouldUpdate) {
-                                ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
                                 state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
-                            } else {
-                                ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
-                                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                            } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
                                     state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
-                                }
                             }
                         }
                     } finally {
@@ -156,7 +159,7 @@ public class IncrementalDataAggregator {
     }
 
 
-    private Object shouldUpdate(Object data, ValueState state) {
+    private boolean shouldUpdate(Object data, ValueState state) {
         long timestamp = (long) data;
         if (timestamp >= state.lastTimestamp) {
             state.lastTimestamp = timestamp;

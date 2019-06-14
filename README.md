@@ -12,17 +12,17 @@
 
 Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
-Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/), and as a micro service on [bare metal, VM](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service), [Docker](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service) and natively in [Kubernetes](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service). It also has a [graphical and text editor](#siddhi-development-environment) for building Streaming Data Integration and Streaming Analytics applications.
+Siddhi can run as an embedded [Java library](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/), and as a micro service on [bare metal, VM](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-local-microservice-5.x/), [Docker](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-docker-microservice-5.x/) and natively in [Kubernetes](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/). It also has a [graphical and text editor](#siddhi-development-environment) for building Streaming Data Integration and Streaming Analytics applications.
 
 ## Distributions
 
-<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-kubernetes-micro-service" rel="nofollow">
+<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/" rel="nofollow">
  <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/kubernetes.png?raw=true" alt="Kubernetes" width="19%">
 </a>
-<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-docker-micro-service" rel="nofollow">
+<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-docker-microservice-5.x/" rel="nofollow">
  <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/docker.png?raw=true" alt="Docker" width="19%">
 </a>
-<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/#using-siddhi-as-local-micro-service" rel="nofollow">
+<a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-local-microservice-5.x/" rel="nofollow">
  <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/binary.png?raw=true" alt="Binary" width="19%">
 </a>
 <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/" rel="nofollow">
@@ -161,6 +161,10 @@ Find the detail information on asking questions, providing feedback, reporting i
 - [ ] Support Prometheus for metrics collection
 - [ ] Support high available Siddhi deployment with NATS via Kubernetes CRD
 - [ ] Support distributed Siddhi deployment with NATS via Kubernetes CRD
+
+## Events
+
+[![Siddhi talk and workshop at BigData Days, Moscow (8-10 October 2019)](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/events/big-data-days-2019-siddhi-banner.png?raw=true "Big Data Days")](https://bigdatadays.ru/en/sriskandarajah-suhothayan/)
 
 ## Support 
 [WSO2](https://wso2.com/) provides production, and query support for Siddhi and its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>. For more details contact via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>

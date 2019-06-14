@@ -115,17 +115,20 @@ public class Scheduler implements ExternalReferencedHolder {
         try {
             // Insert the time into the queue
             state.toNotifyQueue.put(time);
-            schedule(time, state);     // Let the subclasses to schedule the scheduler
+            schedule(time, state, false);     // Let the subclasses to schedule the scheduler
         } catch (InterruptedException e) {
-            log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
+            // InterruptedException ignored if scheduledExecutorService has already been shutdown
+            if (!scheduledExecutorService.isShutdown()) {
+                log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
+            }
         } finally {
             stateHolder.returnState(state);
         }
     }
 
-    public void schedule(long time, SchedulerState state) {
+    private void schedule(long time, SchedulerState state, boolean force) {
         if (!siddhiQueryContext.getSiddhiAppContext().isPlayback()) {
-            if (!state.running && state.toNotifyQueue.size() == 1) {
+            if (!state.running && (state.toNotifyQueue.size() == 1 || force)) {
                 try {
                     mutex.acquire();
                     if (!state.running) {
@@ -165,7 +168,7 @@ public class Scheduler implements ExternalReferencedHolder {
      *
      * @param state current state
      */
-    protected void sendTimerEvents(SchedulerState state) {
+    private void sendTimerEvents(SchedulerState state) {
         Long toNotifyTime = state.toNotifyQueue.peek();
         long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
         while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
@@ -218,7 +221,7 @@ public class Scheduler implements ExternalReferencedHolder {
                         SiddhiAppContext.startPartitionFlow(allStatesEntry.getKey());
                         SiddhiAppContext.startGroupByFlow(stateEntry.getKey());
                         try {
-                            schedule(toNotifyTime, stateEntry.getValue());
+                            schedule(toNotifyTime, stateEntry.getValue(), true);
                         } finally {
                             SiddhiAppContext.stopGroupByFlow();
                             SiddhiAppContext.stopPartitionFlow();

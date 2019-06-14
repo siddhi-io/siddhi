@@ -8,7 +8,7 @@
   [![codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-[Geting Started](documentation/siddhi-5.x/quckstart-5.x/) | [Download](https://siddhi-io.github.io/siddhi/download/) | [User Guide](documentation/siddhi-5.x/user-guide-introduction-5.x/) | [Contribute](https://siddhi-io.github.io/siddhi/contribution/)
+[Geting Started](documentation/siddhi-5.x/quckstart-5.x/) | [Download](download/) | [User Guide](documentation/siddhi-5.x/user-guide-introduction-5.x/) | [Contribute](contribution/)
 
 Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
@@ -161,6 +161,10 @@ Find the detail information on asking questions, providing feedback, reporting i
 - [ ] Support Prometheus for metrics collection
 - [ ] Support high available Siddhi deployment with NATS via Kubernetes CRD
 - [ ] Support distributed Siddhi deployment with NATS via Kubernetes CRD
+
+## Events
+
+[![Siddhi talk and workshop at BigData Days, Moscow (8-10 October 2019)](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/events/big-data-days-2019-siddhi-banner.png?raw=true "Big Data Days")](https://bigdatadays.ru/en/sriskandarajah-suhothayan/)
 
 ## Support 
 [WSO2](https://wso2.com/) provides production, and query support for Siddhi and its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>. For more details contact via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>

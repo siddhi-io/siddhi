@@ -40,71 +40,66 @@ import io.siddhi.query.api.expression.condition.Compare;
 import java.util.List;
 import java.util.Map;
 
+import static io.siddhi.core.util.SiddhiConstants.AGG_SHARD_ID_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
-import static io.siddhi.core.util.SiddhiConstants.SHARD_ID_COL;
 
 /**
  * This class is used to recreate in-memory data from the tables (Such as RDBMS) in incremental aggregation.
  * This ensures that the aggregation calculations are done correctly in case of server restart
  */
-public class RecreateInMemoryData {
+public class IncrementalExecutorsInitialiser {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
-    private final SiddhiAppContext siddhiAppContext;
+
+    private final boolean isDistributed;
+    private final String shardId;
+
     private final StreamEventFactory streamEventFactory;
+
+    private final SiddhiAppContext siddhiAppContext;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
-    private final String shardId;
 
-    public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
-                                Map<TimePeriod.Duration, Table> aggregationTables,
-                                Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
-                                SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent, Map<String,
-            Table> tableMap, Map<String, Window> windowMap,
-                                Map<String, AggregationRuntime> aggregationMap, String shardId,
-                                Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+    private boolean isInitialised;
+
+    public IncrementalExecutorsInitialiser(List<TimePeriod.Duration> incrementalDurations,
+                                           Map<TimePeriod.Duration, Table> aggregationTables,
+                                           Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
+                                           boolean isDistributed, String shardId, SiddhiAppContext siddhiAppContext,
+                                           MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap,
+                                           Map<String, Window> windowMap,
+                                           Map<String, AggregationRuntime> aggregationMap) {
+
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
-        this.siddhiAppContext = siddhiAppContext;
+
+        this.isDistributed = isDistributed;
+        this.shardId = shardId;
+
         this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+
+        this.siddhiAppContext = siddhiAppContext;
         this.tableMap = tableMap;
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
-        this.shardId = shardId;
-        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
+
+        this.isInitialised = false;
     }
 
-    public void recreateInMemoryData(boolean isFirstEventArrived, boolean refreshReadingExecutors) {
-        if (!refreshReadingExecutors && isFirstEventArrived) {
+    public synchronized void initialiseExecutors() {
+        if (this.isInitialised) {
             // Only cleared when executors change from reading to processing state in one node deployment
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
-                    this.incrementalExecutorMap.entrySet()) {
-                IncrementalExecutor incrementalExecutor = durationIncrementalExecutorEntry.getValue();
-                incrementalExecutor.setProcessingExecutor(true);
-                incrementalExecutor.setValuesForInMemoryRecreateFromTable(-1);
-            }
+            return;
         }
-
-        // Clear all executors before recreating
-        Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
-        if (refreshReadingExecutors) {
-            incrementalExecutorMap = this.incrementalExecutorMapForPartitions;
-        } else {
-            incrementalExecutorMap = this.incrementalExecutorMap;
-        }
-        incrementalExecutorMap.forEach(((duration, incrementalExecutor) -> incrementalExecutor.clearExecutor()));
-
         Event[] events;
         Long endOFLatestEventTimestamp = null;
 
         // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, refreshReadingExecutors,
-                endOFLatestEventTimestamp);
+        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
@@ -127,7 +122,7 @@ public class RecreateInMemoryData {
             // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            storeQuery = getStoreQuery(recreateFromTable, false, refreshReadingExecutors, endOFLatestEventTimestamp);
+            storeQuery = getStoreQuery(recreateFromTable, false, endOFLatestEventTimestamp);
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -152,15 +147,15 @@ public class RecreateInMemoryData {
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             referenceToNextLatestEvent, rootDuration, null);
 
-                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
+                    rootIncrementalExecutor.setEmitTime(emitTimeOfLatestEventInTable);
 
                 }
             }
         }
+        this.isInitialised = true;
     }
 
-    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, boolean refreshReadingExecutors,
-                                     Long endOFLatestEventTimestamp) {
+    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
         Selector selector = Selector.selector();
         if (isLargestGranularity) {
             selector = selector
@@ -172,7 +167,7 @@ public class RecreateInMemoryData {
         }
 
         InputStore inputStore;
-        if (shardId == null || refreshReadingExecutors) {
+        if (!this.isDistributed) {
             if (endOFLatestEventTimestamp == null) {
                 inputStore = InputStore.store(table.getTableDefinition().getId());
             } else {
@@ -186,13 +181,13 @@ public class RecreateInMemoryData {
         } else {
             if (endOFLatestEventTimestamp == null) {
                 inputStore = InputStore.store(table.getTableDefinition().getId()).on(
-                        Expression.compare(Expression.variable(SHARD_ID_COL), Compare.Operator.EQUAL,
+                        Expression.compare(Expression.variable(AGG_SHARD_ID_COL), Compare.Operator.EQUAL,
                                 Expression.value(shardId)));
             } else {
                 inputStore = InputStore.store(table.getTableDefinition().getId()).on(
                         Expression.and(
                                 Expression.compare(
-                                        Expression.variable(SHARD_ID_COL),
+                                        Expression.variable(AGG_SHARD_ID_COL),
                                         Compare.Operator.EQUAL,
                                         Expression.value(shardId)),
                                 Expression.compare(

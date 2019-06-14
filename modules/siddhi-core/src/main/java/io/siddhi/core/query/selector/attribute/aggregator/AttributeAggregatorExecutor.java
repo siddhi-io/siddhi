@@ -23,6 +23,7 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.extension.validator.InputParameterValidator;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -45,6 +46,7 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
         try {
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             this.attributeSize = attributeExpressionExecutors.length;
+            InputParameterValidator.validateExpressionExecutors(this, attributeExpressionExecutors);
             StateFactory<S> stateFactory = init(attributeExpressionExecutors, processingMode,
                     outputExpectsExpiredEvents, configReader, siddhiQueryContext);
             stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(),

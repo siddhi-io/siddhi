@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -60,11 +61,20 @@ import java.util.List;
                         defaultValue = "INFO", optional = true),
                 @Parameter(name = "log.message",
                         description = "This message will be logged.",
+                        defaultValue = "<siddhi app name> :", optional = true,
                         type = {DataType.STRING}),
                 @Parameter(name = "is.event.logged",
                         description = "To log the processed event.",
                         type = {DataType.BOOL},
                         defaultValue = "true", optional = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"log.message"}),
+                @ParameterOverload(parameterNames = {"is.event.logged"}),
+                @ParameterOverload(parameterNames = {"log.message", "is.event.logged"}),
+                @ParameterOverload(parameterNames = {"priority", "log.message"}),
+                @ParameterOverload(parameterNames = {"priority", "log.message", "is.event.logged"})
         },
         examples = {
                 @Example(
@@ -87,6 +97,12 @@ import java.util.List;
                 ),
                 @Example(
                         syntax = "from fooStream#log(true)\n" +
+                                "select *\n" +
+                                "insert into barStream;",
+                        description = "This will only log fooStream:events."
+                ),
+                @Example(
+                        syntax = "from fooStream#log()\n" +
                                 "select *\n" +
                                 "insert into barStream;",
                         description = "This will only log fooStream:events."

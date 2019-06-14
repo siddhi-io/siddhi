@@ -18,7 +18,6 @@
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -42,29 +41,32 @@ import java.util.Set;
  * This class implements logic to process aggregates(after retrieval from tables) that were aggregated
  * using external timestamp.
  */
-public class IncrementalExternalTimestampDataAggregator {
+public class OutOfOrderEventsDataAggregator {
 
     private final GroupByKeyGenerator groupByKeyGenerator;
-    private final List<ExpressionExecutor> baseExecutors;
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
     private StreamEventFactory streamEventFactory;
+
+    private final List<ExpressionExecutor> baseExecutors;
     private final ExpressionExecutor shouldUpdateTimestamp;
 
-    public IncrementalExternalTimestampDataAggregator(List<ExpressionExecutor> baseExecutors,
-                                                      GroupByKeyGenerator groupByKeyGenerator,
-                                                      MetaStreamEvent metaStreamEvent,
-                                                      SiddhiQueryContext siddhiQueryContext,
-                                                      ExpressionExecutor shouldUpdateTimestamp) {
+    public OutOfOrderEventsDataAggregator(List<ExpressionExecutor> baseExecutors,
+                                          ExpressionExecutor shouldUpdateTimestamp,
+                                          GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent) {
+
         this.baseExecutors = baseExecutors.subList(1, baseExecutors.size());
-        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+
         this.groupByKeyGenerator = groupByKeyGenerator;
         if (groupByKeyGenerator != null) {
             this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
         } else {
             this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
+
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
     }
 
@@ -80,17 +82,14 @@ public class IncrementalExternalTimestampDataAggregator {
             try {
                 boolean shouldUpdate = true;
                 if (shouldUpdateTimestamp != null) {
-                    shouldUpdate = (boolean) shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), state);
+                    shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), state);
                 }
                 for (int i = 0; i < baseExecutors.size(); i++) { // keeping timestamp value location as null
+                    ExpressionExecutor expressionExecutor = baseExecutors.get(i);
                     if (shouldUpdate) {
-                        ExpressionExecutor expressionExecutor = baseExecutors.get(i);
                         state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                    } else {
-                        ExpressionExecutor expressionExecutor = baseExecutors.get(i);
-                        if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                            state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                        }
+                    } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
                     }
                 }
             } finally {
@@ -113,7 +112,7 @@ public class IncrementalExternalTimestampDataAggregator {
         return createEventChunkFromAggregatedData();
     }
 
-    private Object shouldUpdate(Object data, ValueState state) {
+    private boolean shouldUpdate(Object data, ValueState state) {
         long timestamp = (long) data;
         if (timestamp >= state.lastTimestamp) {
             state.lastTimestamp = timestamp;

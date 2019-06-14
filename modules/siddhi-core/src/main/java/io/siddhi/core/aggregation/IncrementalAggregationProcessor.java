@@ -32,7 +32,6 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
-import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -46,8 +45,8 @@ public class IncrementalAggregationProcessor implements Processor {
     private final ThroughputTracker throughputTrackerInsert;
     private SiddhiAppContext siddhiAppContext;
     private AggregationRuntime aggregationRuntime;
+
     private boolean isFirstEventArrived;
-    private static final Logger log = Logger.getLogger(IncrementalAggregationProcessor.class);
 
     public IncrementalAggregationProcessor(AggregationRuntime aggregationRuntime,
                                            List<ExpressionExecutor> incomingExpressionExecutors,
@@ -76,7 +75,7 @@ public class IncrementalAggregationProcessor implements Processor {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();
                 if (!isFirstEventArrived) {
-                    aggregationRuntime.recreateInMemoryDataFirstEventArrived();
+                    aggregationRuntime.initialiseExecutors(true);
                     isFirstEventArrived = true;
                 }
                 StreamEvent newEvent = streamEventFactory.newInstance();
