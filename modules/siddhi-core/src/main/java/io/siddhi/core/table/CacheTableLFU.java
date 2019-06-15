@@ -64,36 +64,36 @@ public class CacheTableLFU extends CacheTable {
         }
     }
 
-    @Override
-    public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        readWriteLock.readLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            if (((Operator) compiledCondition).contains(matchingEvent, state.getEventHolder())) {
-                String primaryKey;
-
-                if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                    //todo: use index operator or smthn
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    if (primaryKey == null || primaryKey.equals("")) {
-                        primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
-                    }
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[cachePolicyAttributePosition] =
-                                (int) usedEvent.getOutputData()[cachePolicyAttributePosition] + 1;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.readLock().unlock();
-        }
-    }
+//    @Override
+//    public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
+//        readWriteLock.readLock().lock();
+//        TableState state = stateHolder.getState();
+//        try {
+//            if (((Operator) compiledCondition).contains(matchingEvent, state.getEventHolder())) {
+//                String primaryKey;
+//
+//                if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
+//                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+//                    //todo: use index operator or smthn
+//                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+//                    if (primaryKey == null || primaryKey.equals("")) {
+//                        primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
+//                    }
+//                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+//                    if (usedEvent != null) {
+//                        usedEvent.getOutputData()[cachePolicyAttributePosition] =
+//                                (int) usedEvent.getOutputData()[cachePolicyAttributePosition] + 1;
+//                    }
+//                }
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        } finally {
+//            stateHolder.returnState(state);
+//            readWriteLock.readLock().unlock();
+//        }
+//    }
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {

@@ -130,10 +130,12 @@ public class OperatorParser {
                                     ((CompareCollectionExpression) collectionExpression)
                                             .getAttributeCollectionExpression()).getAttribute())) {
 
-                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
+                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
+                        cacheTable);
             } else if (collectionExpression instanceof AndMultiPrimaryKeyCollectionExpression &&
                     collectionExpression.getCollectionScope() == PRIMARY_KEY_RESULT_SET) {
-                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
+                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
+                        cacheTable);
             } else {
                 return new IndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(), cacheTable);
             }

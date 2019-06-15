@@ -21,15 +21,19 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
+import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.table.CacheTable;
 import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Exgtension of IndexEventHolder that implements hook handleCachePolicyAttributeUpdate for cache usage
  */
-public class IndexEventHolderForCache extends IndexEventHolder {
+public class IndexEventHolderForCache extends IndexEventHolder implements IndexedEventHolder {
     private CacheTable cacheTable;
 
     public IndexEventHolderForCache(StreamEventFactory tableStreamEventFactory, StreamEventConverter eventConverter,
@@ -47,5 +51,80 @@ public class IndexEventHolderForCache extends IndexEventHolder {
 
     public void setCacheTable(CacheTable cacheTable) {
         this.cacheTable = cacheTable;
+    }
+
+    @Override
+    public boolean containsEventSet(String attribute, Compare.Operator operator, Object value) {
+        if (primaryKeyData != null && attribute.equals(primaryKeyAttributes)) {
+            StreamEvent foundEvent;
+            switch (operator) {
+                case LESS_THAN:
+                    foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
+                            lowerKey(value);
+                    if(foundEvent != null) {
+                        handleCachePolicyAttributeUpdate(foundEvent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case GREATER_THAN:
+                    foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
+                            higherKey(value);
+                    if(foundEvent != null) {
+                        handleCachePolicyAttributeUpdate(foundEvent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case LESS_THAN_EQUAL:
+                    foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
+                            ceilingKey(value);
+                    if(foundEvent != null) {
+                        handleCachePolicyAttributeUpdate(foundEvent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case GREATER_THAN_EQUAL:
+                    foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
+                            floorKey(value);
+                    if(foundEvent != null) {
+                        handleCachePolicyAttributeUpdate(foundEvent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case EQUAL:
+                    foundEvent = primaryKeyData.get(value);
+                    if(foundEvent != null) {
+                        handleCachePolicyAttributeUpdate(foundEvent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case NOT_EQUAL:
+                    return primaryKeyData.size() > 1;
+            }
+        } else {
+            TreeMap<Object, Set<StreamEvent>> currentIndexedData = indexData.get(attribute);
+
+            switch (operator) {
+
+                case LESS_THAN:
+                    return currentIndexedData.lowerKey(value) != null;
+                case GREATER_THAN:
+                    return currentIndexedData.higherKey(value) != null;
+                case LESS_THAN_EQUAL:
+                    return currentIndexedData.ceilingKey(value) != null;
+                case GREATER_THAN_EQUAL:
+                    return currentIndexedData.floorKey(value) != null;
+                case EQUAL:
+                    return currentIndexedData.get(value) != null;
+                case NOT_EQUAL:
+                    return currentIndexedData.size() > 1;
+            }
+        }
+        throw new OperationNotSupportedException(operator + " not supported for '" + value + "' by " + getClass()
+                .getName());
     }
 }
