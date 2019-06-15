@@ -26,7 +26,6 @@ import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecu
 import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
-import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperatorForCache;
 
 import java.util.List;
 
@@ -57,30 +56,6 @@ public class CacheUtils {
 
         if (compiledCondition instanceof OverwriteTableIndexOperator) {
             OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
-                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-                        getCollectionExecutor();
-                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
-                for (ExpressionExecutor ee : lis) {
-                    if (ee instanceof VariableExpressionExecutor) {
-                        VariableExpressionExecutor vee = (VariableExpressionExecutor) ee;
-                        primaryKey.append(data[vee.getPosition()[3]]);
-                        primaryKey.append(":-:");
-                    }
-                }
-            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
-                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
-                if (executor.getValueExpressionExecutor() instanceof ConstantExpressionExecutor) {
-                    primaryKey.append(((ConstantExpressionExecutor) executor.getValueExpressionExecutor()).getValue());
-                } else if (executor.getValueExpressionExecutor() instanceof VariableExpressionExecutor) {
-                    VariableExpressionExecutor vee = (VariableExpressionExecutor) executor.getValueExpressionExecutor();
-                    primaryKey.append(data[vee.getPosition()[3]]);
-                } else {
-                    return null;
-                }
-            }
-        } else if (compiledCondition instanceof OverwriteTableIndexOperatorForCache) {
-            OverwriteTableIndexOperatorForCache operator = (OverwriteTableIndexOperatorForCache) compiledCondition;
             if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
                 AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
                         getCollectionExecutor();

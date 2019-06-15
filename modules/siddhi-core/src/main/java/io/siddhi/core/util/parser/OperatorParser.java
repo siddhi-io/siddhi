@@ -129,12 +129,11 @@ public class OperatorParser {
                             equals(((AttributeCollectionExpression)
                                     ((CompareCollectionExpression) collectionExpression)
                                             .getAttributeCollectionExpression()).getAttribute())) {
-                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
-                        cacheTable);
+
+                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
             } else if (collectionExpression instanceof AndMultiPrimaryKeyCollectionExpression &&
                     collectionExpression.getCollectionScope() == PRIMARY_KEY_RESULT_SET) {
-                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
-                        cacheTable);
+                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
             } else {
                 return new IndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(), cacheTable);
             }

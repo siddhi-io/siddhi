@@ -39,8 +39,8 @@ public class CacheTableFIFO extends CacheTable {
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
         cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
-        policyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
-        numColumns = policyAttributePosition + 1;
+        cachePolicyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
+        numColumns = cachePolicyAttributePosition + 1;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class CacheTableFIFO extends CacheTable {
             Object keyOfMinTimestamp = null;
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[policyAttributePosition];
+                long timestamp = (long) data[cachePolicyAttributePosition];
                 if (timestamp < minTimestamp) {
                     minTimestamp = timestamp;
                     keyOfMinTimestamp = key;
@@ -75,7 +75,7 @@ public class CacheTableFIFO extends CacheTable {
 
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[policyAttributePosition];
+                long timestamp = (long) data[cachePolicyAttributePosition];
                 for (int i = 0; i < numRowsToDelete; i++) {
                     if (timestamp < minTimestampArray[i]) {
                         minTimestampArray[i] = timestamp;
@@ -99,12 +99,17 @@ public class CacheTableFIFO extends CacheTable {
         Object[] outputDataForCache;
         Object[] outputData = event.getOutputData();
             outputDataForCache = new Object[numColumns];
-            outputDataForCache[policyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
+            outputDataForCache[cachePolicyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
 
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
 
         return eventForCache;
+    }
+
+    @Override
+    public void updateCachePolicyAttribute(StreamEvent streamEvent) {
+
     }
 }

@@ -224,6 +224,10 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
+    protected void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
+
+    }
+
     @Override
     public void overwrite(StreamEvent streamEvent) {
         if (isOperationLogEnabled) {
@@ -240,6 +244,9 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         if (primaryKeyData != null) {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
             deletedEvent = primaryKeyData.put(primaryKey, streamEvent);
+            if (deletedEvent != null) {
+                handleCachePolicyAttributeUpdate(streamEvent);
+            }
         }
 
         if (indexData != null) {

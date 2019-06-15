@@ -66,7 +66,7 @@ public class InMemoryTable extends Table {
                      RecordTableHandler recordTableHandler) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
-        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext);
+        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext, false);
 
         stateHolder = siddhiAppContext.generateStateHolder(tableDefinition.getId(),
                 () -> new TableState(eventHolder));

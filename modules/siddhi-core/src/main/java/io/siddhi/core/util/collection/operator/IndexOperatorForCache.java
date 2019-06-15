@@ -21,6 +21,9 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
 
+/**
+ * Extension of IndexOperator that implements handleCachePolicyAttributeUpdate for cache usage
+ */
 public class IndexOperatorForCache extends IndexOperator {
     private CacheTable cacheTable;
 
@@ -31,6 +34,6 @@ public class IndexOperatorForCache extends IndexOperator {
 
     @Override
     protected void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
-
+        cacheTable.updateCachePolicyAttribute(streamEvent);
     }
 }

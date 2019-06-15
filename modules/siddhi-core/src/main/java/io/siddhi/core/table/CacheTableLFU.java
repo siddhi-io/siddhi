@@ -19,11 +19,9 @@ package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.query.api.definition.Attribute;
@@ -45,16 +43,18 @@ public class CacheTableLFU extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableLFU.class);
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {//todo: use index operator to update
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+        //todo: use index operator to update
         readWriteLock.readLock().lock();
         TableState state = stateHolder.getState();
         try {
             StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
                     tableStreamEventCloner);
 
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder && foundEvent != null) { //todo: check if CC meets required criteria for cache
-                foundEvent.getOutputData()[policyAttributePosition] =
-                        (int) foundEvent.getOutputData()[policyAttributePosition] + 1;
+            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder && foundEvent != null) {
+                //todo: check if CC meets required criteria for cache
+                foundEvent.getOutputData()[cachePolicyAttributePosition] =
+                        (int) foundEvent.getOutputData()[cachePolicyAttributePosition] + 1;
                 ((IndexEventHolder) stateHolder.getState().getEventHolder()).overwrite(foundEvent);
             }
             return foundEvent;
@@ -73,15 +73,16 @@ public class CacheTableLFU extends CacheTable {
                 String primaryKey;
 
                 if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder(); //todo: use index operator or smthn
+                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+                    //todo: use index operator or smthn
                     primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                     if (primaryKey == null || primaryKey.equals("")) {
                         primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
                     }
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        usedEvent.getOutputData()[policyAttributePosition] =
-                                (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
+                        usedEvent.getOutputData()[cachePolicyAttributePosition] =
+                                (int) usedEvent.getOutputData()[cachePolicyAttributePosition] + 1;
                     }
                 }
                 return true;
@@ -95,81 +96,6 @@ public class CacheTableLFU extends CacheTable {
     }
 
     @Override
-    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) {
-        readWriteLock.writeLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            String primaryKey;
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                updatingEventChunk.reset();
-                while (updatingEventChunk.hasNext()) {
-                    StateEvent matchingEvent = updatingEventChunk.next();
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder(); //todo: use index operator for cache
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[policyAttributePosition] =
-                                (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
-                    }
-                }
-            }
-            ((Operator) compiledCondition).update(updatingEventChunk, state.getEventHolder(),
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    public void updateOrAddAndTrimUptoMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                              CompiledCondition compiledCondition,
-                                              CompiledUpdateSet compiledUpdateSet,
-                                              AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
-        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
-        updateOrAddingEventChunk.reset();
-        while (updateOrAddingEventChunk.hasNext()) {
-            StateEvent event = updateOrAddingEventChunk.next();
-            updateOrAddingEventChunkForCache.add((StateEvent) generateEventWithRequiredFields(event, siddhiAppContext,
-                    cacheExpiryEnabled));
-        }
-        readWriteLock.writeLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            String primaryKey;
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                updateOrAddingEventChunkForCache.reset();
-                while (updateOrAddingEventChunkForCache.hasNext()) {
-                    StateEvent matchingEvent = updateOrAddingEventChunkForCache.next();
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        int newUsage = (int) usedEvent.getOutputData()[policyAttributePosition] + 1;
-//                        usedEvent.getOutputData()[usedEvent.getOutputData().length - 1] = newUsage;
-                        matchingEvent.getStreamEvent(0).getOutputData()[policyAttributePosition] = newUsage;
-                    }
-                }
-            }
-            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
-                    updateOrAddingEventChunkForCache,
-                    state.getEventHolder(),
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
-                    addingStreamEventExtractor);
-            if (failedEvents != null) {
-                this.addAndTrimUptoMaxSize(failedEvents);
-            }
-            while (this.size() > maxTableSize) {
-                this.deleteOneEntryUsingCachePolicy();
-            }
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-    @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
         if (cacheExpiryEnabled) {
             cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_ADDED, Attribute.Type.LONG);
@@ -178,8 +104,8 @@ public class CacheTableLFU extends CacheTable {
         } else {
             cacheTableDefinition.attribute(CACHE_TABLE_COUNT_LFU, Attribute.Type.INT);
         }
-        policyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
-        numColumns = policyAttributePosition + 1;
+        cachePolicyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
+        numColumns = cachePolicyAttributePosition + 1;
     }
 
     @Override
@@ -191,7 +117,7 @@ public class CacheTableLFU extends CacheTable {
             Object keyOfMinCount = null;
             for (Object key : keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                int count = (int) data[policyAttributePosition];
+                int count = (int) data[cachePolicyAttributePosition];
                 if (count < minCount) {
                     minCount = count;
                     keyOfMinCount = key;
@@ -214,7 +140,7 @@ public class CacheTableLFU extends CacheTable {
 
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                int count = (int) data[policyAttributePosition];
+                int count = (int) data[cachePolicyAttributePosition];
                 for (int i = 0; i < numRowsToDelete; i++) {
                     if (count < minCountArray[i]) {
                         minCountArray[i] = count;
@@ -241,14 +167,20 @@ public class CacheTableLFU extends CacheTable {
             outputDataForCache = new Object[numColumns];
             outputDataForCache[expiryAttributePosition] =
                     siddhiAppContext.getTimestampGenerator().currentTime();
-            outputDataForCache[policyAttributePosition] = 1;
+            outputDataForCache[cachePolicyAttributePosition] = 1;
         } else {
             outputDataForCache = new Object[numColumns];
-            outputDataForCache[policyAttributePosition] = 1;
+            outputDataForCache[cachePolicyAttributePosition] = 1;
         }
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
         return eventForCache;
+    }
+
+    @Override
+    public void updateCachePolicyAttribute(StreamEvent streamEvent) {
+        streamEvent.getOutputData()[cachePolicyAttributePosition] =
+                (int) streamEvent.getOutputData()[cachePolicyAttributePosition] + 1;
     }
 }

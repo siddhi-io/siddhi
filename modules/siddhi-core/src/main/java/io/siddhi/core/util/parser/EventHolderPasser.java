@@ -26,10 +26,7 @@ import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.table.holder.EventHolder;
-import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.table.holder.ListEventHolder;
-import io.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
+import io.siddhi.core.table.holder.*;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
@@ -51,7 +48,7 @@ public class EventHolderPasser {
     private static final Logger log = Logger.getLogger(EventHolderPasser.class);
 
     public static EventHolder parse(AbstractDefinition tableDefinition, StreamEventFactory tableStreamEventFactory,
-                                    SiddhiAppContext siddhiAppContext) {
+                                    SiddhiAppContext siddhiAppContext, boolean isCacheTable) {
         ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
 
         PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders = null;
@@ -115,8 +112,13 @@ public class EventHolderPasser {
                 }
 
             }
-            return new IndexEventHolder(tableStreamEventFactory, eventConverter, primaryKeyReferenceHolders, isNumeric,
-                    indexMetaData, tableDefinition, siddhiAppContext);
+            if (isCacheTable) {
+                return new IndexEventHolderForCache(tableStreamEventFactory, eventConverter, primaryKeyReferenceHolders, isNumeric,
+                        indexMetaData, tableDefinition, siddhiAppContext);
+            } else {
+                return new IndexEventHolder(tableStreamEventFactory, eventConverter, primaryKeyReferenceHolders, isNumeric,
+                        indexMetaData, tableDefinition, siddhiAppContext);
+            }
         } else {
             MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
             for (Attribute attribute : tableDefinition.getAttributeList()) {

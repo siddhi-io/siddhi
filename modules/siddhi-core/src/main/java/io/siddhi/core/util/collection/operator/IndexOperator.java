@@ -174,7 +174,6 @@ public class IndexOperator implements Operator {
                     }
                     toUpdateEventChunk.add(streamEvent);
                 }
-//                xxxx(toUpdateEventChunk)
                 storeEvents.add(toUpdateEventChunk);
             } else {
                 StreamEvent first = foundEventChunk.getFirst();

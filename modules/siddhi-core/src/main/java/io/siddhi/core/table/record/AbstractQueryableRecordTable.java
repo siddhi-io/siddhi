@@ -962,7 +962,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         private boolean routeToCache;
 
         CompiledConditionWithCache(CompiledCondition storeCompileCondition,
-                                   CacheTable.CacheCompiledConditionWithRouteToCache cacheCompiledConditionWithRouteToCache) {
+                                   CacheTable.CacheCompiledConditionWithRouteToCache
+                                           cacheCompiledConditionWithRouteToCache) {
             this.storeCompileCondition = storeCompileCondition;
             this.cacheCompileCondition = cacheCompiledConditionWithRouteToCache.getCacheCompiledCondition();
             this.routeToCache = cacheCompiledConditionWithRouteToCache.isRouteToCache();

@@ -58,7 +58,7 @@ public class CacheTableLRU extends CacheTable {
                 primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
                 StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                 if (usedEvent != null) {
-                    usedEvent.getOutputData()[policyAttributePosition] = System.currentTimeMillis();
+                    usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
                 }
             }
             return foundEvent;
@@ -84,7 +84,7 @@ public class CacheTableLRU extends CacheTable {
                     }
                     StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
                     if (usedEvent != null) {
-                        usedEvent.getOutputData()[policyAttributePosition] = System.currentTimeMillis();
+                        usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
                     }
                 }
                 return true;
@@ -103,19 +103,19 @@ public class CacheTableLRU extends CacheTable {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
-            String primaryKey;
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                updatingEventChunk.reset();
-                while (updatingEventChunk.hasNext()) {
-                    StateEvent matchingEvent = updatingEventChunk.next();
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[policyAttributePosition] = System.currentTimeMillis();
-                    }
-                }
-            }
+//            String primaryKey;
+//            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
+//                updatingEventChunk.reset();
+//                while (updatingEventChunk.hasNext()) {
+//                    StateEvent matchingEvent = updatingEventChunk.next();
+//                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+//                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
+//                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
+//                    if (usedEvent != null) {
+//                        usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
+//                    }
+//                }
+//            }
             ((Operator) compiledCondition).update(updatingEventChunk, state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet);
         } finally {
@@ -166,8 +166,8 @@ public class CacheTableLRU extends CacheTable {
         } else {
             cacheTableDefinition.attribute(CACHE_TABLE_TIMESTAMP_LRU, Attribute.Type.LONG);
         }
-        policyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
-        numColumns = policyAttributePosition + 1;
+        cachePolicyAttributePosition = cacheTableDefinition.getAttributeList().size() - 1;
+        numColumns = cachePolicyAttributePosition + 1;
     }
 
     @Override
@@ -179,7 +179,7 @@ public class CacheTableLRU extends CacheTable {
             Object keyOfMinTimestamp = null;
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[policyAttributePosition];
+                long timestamp = (long) data[cachePolicyAttributePosition];
                 if (timestamp < minTimestamp) {
                     minTimestamp = timestamp;
                     keyOfMinTimestamp = key;
@@ -202,7 +202,7 @@ public class CacheTableLRU extends CacheTable {
 
             for (Object key: keys) {
                 Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[policyAttributePosition];
+                long timestamp = (long) data[cachePolicyAttributePosition];
                 for (int i = 0; i < numRowsToDelete; i++) {
                     if (timestamp < minTimestampArray[i]) {
                         minTimestampArray[i] = timestamp;
@@ -227,16 +227,22 @@ public class CacheTableLRU extends CacheTable {
         Object[] outputData = event.getOutputData();
         if (cacheExpiryEnabled) {
             outputDataForCache = new Object[numColumns];
-            outputDataForCache[expiryAttributePosition] = outputDataForCache[policyAttributePosition] =
+            outputDataForCache[expiryAttributePosition] = outputDataForCache[cachePolicyAttributePosition] =
                             siddhiAppContext.getTimestampGenerator().currentTime();
         } else {
             outputDataForCache = new Object[numColumns];
-            outputDataForCache[policyAttributePosition] =
+            outputDataForCache[cachePolicyAttributePosition] =
                     siddhiAppContext.getTimestampGenerator().currentTime();
         }
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
         return eventForCache;
+    }
+
+    @Override
+    public void updateCachePolicyAttribute(StreamEvent streamEvent) {
+        streamEvent.getOutputData()[cachePolicyAttributePosition] =
+                siddhiAppContext.getTimestampGenerator().currentTime();
     }
 }

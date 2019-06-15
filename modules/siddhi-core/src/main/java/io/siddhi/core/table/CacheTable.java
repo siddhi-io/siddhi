@@ -28,12 +28,15 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.table.holder.EventHolder;
+import io.siddhi.core.table.holder.IndexEventHolderForCache;
 import io.siddhi.core.table.record.RecordTableHandler;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.parser.EventHolderPasser;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
@@ -58,9 +61,25 @@ public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
     boolean cacheExpiryEnabled;
     SiddhiAppContext siddhiAppContext;
-    int policyAttributePosition;
+    int cachePolicyAttributePosition;
     int numColumns;
     int expiryAttributePosition;
+
+    @Override
+    public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
+                     StreamEventCloner storeEventCloner, ConfigReader configReader, SiddhiAppContext siddhiAppContext,
+                     RecordTableHandler recordTableHandler) {
+        this.tableDefinition = tableDefinition;
+        this.tableStreamEventCloner = storeEventCloner;
+        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext, true);
+
+        if (eventHolder instanceof IndexEventHolderForCache) {
+            ((IndexEventHolderForCache) eventHolder).setCacheTable(this);
+        }
+
+        stateHolder = siddhiAppContext.generateStateHolder(tableDefinition.getId(),
+                () -> new TableState(eventHolder));
+    }
 
     public void initCacheTable(TableDefinition cacheTableDefinition, ConfigReader configReader,
                                SiddhiAppContext siddhiAppContext, RecordTableHandler recordTableHandler,
@@ -211,6 +230,9 @@ public abstract class CacheTable extends InMemoryTable {
                 storeVariableExpressionExecutors, tableMap, siddhiQueryContext, routeToCache), routeToCache);
     }
 
+    /**
+     * wrapper to send routeToCache bool with cache compiled condition
+     */
     public class CacheCompiledConditionWithRouteToCache {
         private CompiledCondition cacheCompiledCondition;
         private boolean routeToCache;
@@ -278,4 +300,6 @@ public abstract class CacheTable extends InMemoryTable {
             stateHolder.returnState(state);
         }
     }
+
+    public abstract void updateCachePolicyAttribute(StreamEvent streamEvent);
 }
