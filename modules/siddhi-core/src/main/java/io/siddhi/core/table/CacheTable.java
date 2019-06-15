@@ -34,6 +34,7 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.Attribute;
@@ -206,8 +207,8 @@ public abstract class CacheTable extends InMemoryTable {
         Map<String, Table> tableMap = new ConcurrentHashMap<>();
         tableMap.put(this.tableDefinition.getId(), this);
 
-        return new CacheCompiledConditionWithRouteToCache(super.compileCondition(condition, matchingMetaInfoHolder,
-                storeVariableExpressionExecutors, tableMap, siddhiQueryContext), routeToCache);
+        return new CacheCompiledConditionWithRouteToCache(compileCondition(condition, matchingMetaInfoHolder,
+                storeVariableExpressionExecutors, tableMap, siddhiQueryContext, routeToCache), routeToCache);
     }
 
     public class CacheCompiledConditionWithRouteToCache {
@@ -262,6 +263,19 @@ public abstract class CacheTable extends InMemoryTable {
         } else if (condition instanceof And) {
             recursivelyCheckConditionToRouteToCache(((And) condition).getLeftExpression(), primaryKeysArray);
             recursivelyCheckConditionToRouteToCache(((And) condition).getRightExpression(), primaryKeysArray);
+        }
+    }
+
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext,
+                                              boolean updateCachePolicyAttribute) {
+        TableState state = stateHolder.getState();
+        try {
+            return OperatorParser.constructOperatorForCache(state.getEventHolder(), condition, matchingMetaInfoHolder,
+                    variableExpressionExecutors, tableMap, siddhiQueryContext, updateCachePolicyAttribute, this);
+        } finally {
+            stateHolder.returnState(state);
         }
     }
 }

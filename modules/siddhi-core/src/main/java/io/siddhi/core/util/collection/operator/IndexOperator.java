@@ -192,7 +192,8 @@ public class IndexOperator implements Operator {
             }
         }
     }
-    private void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
+
+    protected void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
 
     }
 }
