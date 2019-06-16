@@ -19,11 +19,8 @@ package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.util.collection.operator.CompiledCondition;
-import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
@@ -33,67 +30,12 @@ import java.util.Set;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_COUNT_LFU;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
-import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
-import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
 /**
  * cache table with FIFO entry removal
  */
 public class CacheTableLFU extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableLFU.class);
-
-    @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        //todo: use index operator to update
-        readWriteLock.readLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
-                    tableStreamEventCloner);
-
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder && foundEvent != null) {
-                //todo: check if CC meets required criteria for cache
-                foundEvent.getOutputData()[cachePolicyAttributePosition] =
-                        (int) foundEvent.getOutputData()[cachePolicyAttributePosition] + 1;
-                ((IndexEventHolder) stateHolder.getState().getEventHolder()).overwrite(foundEvent);
-            }
-            return foundEvent;
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.readLock().unlock();
-        }
-    }
-
-//    @Override
-//    public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-//        readWriteLock.readLock().lock();
-//        TableState state = stateHolder.getState();
-//        try {
-//            if (((Operator) compiledCondition).contains(matchingEvent, state.getEventHolder())) {
-//                String primaryKey;
-//
-//                if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-//                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-//                    //todo: use index operator or smthn
-//                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-//                    if (primaryKey == null || primaryKey.equals("")) {
-//                        primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
-//                    }
-//                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-//                    if (usedEvent != null) {
-//                        usedEvent.getOutputData()[cachePolicyAttributePosition] =
-//                                (int) usedEvent.getOutputData()[cachePolicyAttributePosition] + 1;
-//                    }
-//                }
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        } finally {
-//            stateHolder.returnState(state);
-//            readWriteLock.readLock().unlock();
-//        }
-//    }
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
