@@ -19,13 +19,8 @@ package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.util.collection.AddingStreamEventExtractor;
-import io.siddhi.core.util.collection.operator.CompiledCondition;
-import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
@@ -35,127 +30,12 @@ import java.util.Set;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_LRU;
-import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKey;
-import static io.siddhi.core.util.cache.CacheUtils.getPrimaryKeyFromMatchingEvent;
 
 /**
  * cache table with LRU entry removal
  */
 public class CacheTableLRU extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableLRU.class);
-
-    @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        readWriteLock.readLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            StreamEvent foundEvent = ((Operator) compiledCondition).find(matchingEvent, state.getEventHolder(),
-                    tableStreamEventCloner);
-            String primaryKey;
-
-            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                if (usedEvent != null) {
-                    usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
-                }
-            }
-            return foundEvent;
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        readWriteLock.readLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            if (((Operator) compiledCondition).contains(matchingEvent, state.getEventHolder())) {
-                String primaryKey;
-
-                if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-                    if (primaryKey == null || primaryKey.equals("")) {
-                        primaryKey = getPrimaryKeyFromMatchingEvent(matchingEvent);
-                    }
-                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-                    if (usedEvent != null) {
-                        usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) {
-        readWriteLock.writeLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-//            String primaryKey;
-//            if (stateHolder.getState().getEventHolder() instanceof IndexEventHolder) {
-//                updatingEventChunk.reset();
-//                while (updatingEventChunk.hasNext()) {
-//                    StateEvent matchingEvent = updatingEventChunk.next();
-//                    IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-//                    primaryKey = getPrimaryKey(compiledCondition, matchingEvent);
-//                    StreamEvent usedEvent = indexEventHolder.getEvent(primaryKey);
-//                    if (usedEvent != null) {
-//                        usedEvent.getOutputData()[cachePolicyAttributePosition] = System.currentTimeMillis();
-//                    }
-//                }
-//            }
-            ((Operator) compiledCondition).update(updatingEventChunk, state.getEventHolder(),
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    public void updateOrAddAndTrimUptoMaxSize(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                              CompiledCondition compiledCondition,
-                                              CompiledUpdateSet compiledUpdateSet,
-                                              AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
-        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
-        updateOrAddingEventChunk.reset();
-        while (updateOrAddingEventChunk.hasNext()) {
-            StateEvent event = updateOrAddingEventChunk.next();
-            updateOrAddingEventChunkForCache.add((StateEvent) generateEventWithRequiredFields(event, siddhiAppContext,
-                    cacheExpiryEnabled));
-        }
-        readWriteLock.writeLock().lock();
-        TableState state = stateHolder.getState();
-        try {
-            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
-                    updateOrAddingEventChunkForCache,
-                    state.getEventHolder(),
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
-                    addingStreamEventExtractor);
-            if (failedEvents != null) {
-                this.addAndTrimUptoMaxSize(failedEvents);
-            }
-            while (this.size() > maxTableSize) {
-                this.deleteOneEntryUsingCachePolicy();
-            }
-        } finally {
-            stateHolder.returnState(state);
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
