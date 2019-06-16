@@ -28,6 +28,9 @@ import io.siddhi.core.table.holder.IndexedEventHolder;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * extension of AndMultiPrimaryKeyCollectionExecutor that calls updateCachePolicyAttribute for cache
+ */
 public class AndMultiPrimaryKeyCollectionExecutorForCache extends AndMultiPrimaryKeyCollectionExecutor {
     private CacheTable cacheTable;
 

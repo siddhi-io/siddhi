@@ -26,6 +26,9 @@ import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
 
+/**
+ * Extension of IndexOperatorForCache with overwrite for update or add
+ */
 public class OverwriteTableIndexOperatorForCache extends IndexOperatorForCache {
 
     public OverwriteTableIndexOperatorForCache(CollectionExecutor collectionExecutor, String queryName, CacheTable

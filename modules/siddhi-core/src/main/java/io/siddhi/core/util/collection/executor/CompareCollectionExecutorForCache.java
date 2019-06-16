@@ -28,10 +28,15 @@ import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Collection;
 
+/**
+ * extension of CompareCollectionExecutor that calls updateCachePolicyAttribute for cache
+ */
 public class CompareCollectionExecutorForCache extends CompareCollectionExecutor {
     private CacheTable cacheTable;
 
-    public CompareCollectionExecutorForCache(ExpressionExecutor expressionExecutor, int storeEventIndex, String attribute, Compare.Operator operator, ExpressionExecutor valueExpressionExecutor) {
+    public CompareCollectionExecutorForCache(ExpressionExecutor expressionExecutor, int storeEventIndex,
+                                             String attribute, Compare.Operator operator,
+                                             ExpressionExecutor valueExpressionExecutor) {
         super(expressionExecutor, storeEventIndex, attribute, operator, valueExpressionExecutor);
     }
 

@@ -26,7 +26,9 @@ import io.siddhi.core.table.CacheTable;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Exgtension of IndexEventHolder that implements hook handleCachePolicyAttributeUpdate for cache usage
@@ -59,7 +61,7 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
                 case LESS_THAN:
                     foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
                             lowerKey(value);
-                    if(foundEvent != null) {
+                    if (foundEvent != null) {
                         handleCachePolicyAttributeUpdate(foundEvent);
                         return true;
                     } else {
@@ -68,7 +70,7 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
                 case GREATER_THAN:
                     foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
                             higherKey(value);
-                    if(foundEvent != null) {
+                    if (foundEvent != null) {
                         handleCachePolicyAttributeUpdate(foundEvent);
                         return true;
                     } else {
@@ -77,7 +79,7 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
                 case LESS_THAN_EQUAL:
                     foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
                             ceilingKey(value);
-                    if(foundEvent != null) {
+                    if (foundEvent != null) {
                         handleCachePolicyAttributeUpdate(foundEvent);
                         return true;
                     } else {
@@ -86,7 +88,7 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
                 case GREATER_THAN_EQUAL:
                     foundEvent = (StreamEvent) ((TreeMap<Object, StreamEvent>) primaryKeyData).
                             floorKey(value);
-                    if(foundEvent != null) {
+                    if (foundEvent != null) {
                         handleCachePolicyAttributeUpdate(foundEvent);
                         return true;
                     } else {
@@ -94,7 +96,7 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
                     }
                 case EQUAL:
                     foundEvent = primaryKeyData.get(value);
-                    if(foundEvent != null) {
+                    if (foundEvent != null) {
                         handleCachePolicyAttributeUpdate(foundEvent);
                         return true;
                     } else {
@@ -125,92 +127,4 @@ public class IndexEventHolderForCache extends IndexEventHolder implements Indexe
         throw new OperationNotSupportedException(operator + " not supported for '" + value + "' by " + getClass()
                 .getName());
     }
-
-//    @Override //todo: no use as I have to iterate here myself
-//    public Collection<StreamEvent> findEvents(String attribute, Compare.Operator operator, Object value) {
-//
-//        if (primaryKeyData != null && attribute.equals(primaryKeyAttributes)) {
-//            StreamEvent resultEvent;
-//            HashSet<StreamEvent> resultEventSet;
-//
-//            switch (operator) {
-//                case LESS_THAN:
-//                    return ((TreeMap<Object, StreamEvent>) primaryKeyData).headMap(value, false).values();
-//                case GREATER_THAN:
-//                    return ((TreeMap<Object, StreamEvent>) primaryKeyData).tailMap(value, false).values();
-//                case LESS_THAN_EQUAL:
-//                    return ((TreeMap<Object, StreamEvent>) primaryKeyData).headMap(value, true).values();
-//                case GREATER_THAN_EQUAL:
-//                    return ((TreeMap<Object, StreamEvent>) primaryKeyData).tailMap(value, true).values();
-//                case EQUAL:
-//                    resultEventSet = new HashSet<StreamEvent>();
-//                    resultEvent = primaryKeyData.get(value);
-//                    if (resultEvent != null) {
-//                        resultEventSet.add(resultEvent);
-//                    }
-//                    return resultEventSet;
-//                case NOT_EQUAL:
-//                    if (primaryKeyData.size() > 0) {
-//                        resultEventSet = new HashSet<StreamEvent>(primaryKeyData.values());
-//                    } else {
-//                        return new HashSet<StreamEvent>();
-//                    }
-//                    resultEvent = primaryKeyData.get(value);
-//                    if (resultEvent != null) {
-//                        resultEventSet.remove(resultEvent);
-//                    }
-//                    return resultEventSet;
-//            }
-//        } else {
-//            HashSet<StreamEvent> resultEventSet = new HashSet<StreamEvent>();
-//            TreeMap<Object, Set<StreamEvent>> currentIndexedData = indexData.get(attribute);
-//
-//            Set<StreamEvent> resultEvents;
-//            switch (operator) {
-//                case LESS_THAN:
-//                    for (Set<StreamEvent> eventSet : currentIndexedData.headMap(value, false).values()) {
-//                        resultEventSet.addAll(eventSet);
-//                    }
-//                    return resultEventSet;
-//                case GREATER_THAN:
-//                    for (Set<StreamEvent> eventSet : currentIndexedData.tailMap(value, false).values()) {
-//                        resultEventSet.addAll(eventSet);
-//                    }
-//                    return resultEventSet;
-//                case LESS_THAN_EQUAL:
-//                    for (Set<StreamEvent> eventSet : currentIndexedData.headMap(value, true).values()) {
-//                        resultEventSet.addAll(eventSet);
-//                    }
-//                    return resultEventSet;
-//                case GREATER_THAN_EQUAL:
-//                    for (Set<StreamEvent> eventSet : currentIndexedData.tailMap(value, true).values()) {
-//                        resultEventSet.addAll(eventSet);
-//                    }
-//                    return resultEventSet;
-//                case EQUAL:
-//                    resultEvents = currentIndexedData.get(value);
-//                    if (resultEvents != null) {
-//                        resultEventSet.addAll(resultEvents);
-//                    }
-//                    return resultEventSet;
-//                case NOT_EQUAL:
-//                    if (currentIndexedData.size() > 0) {
-//                        resultEventSet = new HashSet<StreamEvent>();
-//                        for (Set<StreamEvent> eventSet : currentIndexedData.values()) {
-//                            resultEventSet.addAll(eventSet);
-//                        }
-//                    } else {
-//                        resultEventSet = new HashSet<StreamEvent>();
-//                    }
-//
-//                    resultEvents = currentIndexedData.get(value);
-//                    if (resultEvents != null) {
-//                        resultEventSet.removeAll(resultEvents);
-//                    }
-//                    return resultEventSet;
-//            }
-//        }
-//        throw new OperationNotSupportedException(operator + " not supported for '" + value + "' by " + getClass()
-//                .getName());
-//    }
 }
