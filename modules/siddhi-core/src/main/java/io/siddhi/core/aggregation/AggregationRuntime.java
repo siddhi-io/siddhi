@@ -631,7 +631,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 groupByAttribute = new OutputAttribute(variable);
             } else {
                 groupByAttribute = new OutputAttribute(variable.getAttributeName(),
-                        Expression.function("max", new Variable(variable.getAttributeName())));
+                        Expression.function("incrementalAggregator", "last",
+                                new Variable(attributeList.get(i).getName()), maxVariable));
             }
             selectorList.add(groupByAttribute);
             i++;
