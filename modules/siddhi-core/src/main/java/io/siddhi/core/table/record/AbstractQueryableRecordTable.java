@@ -106,7 +106,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private CompiledCondition compiledConditionForCaching;
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
-    private TableDefinition cacheTableDefinition;
     protected SiddhiAppContext siddhiAppContext;
     protected StateEvent findMatchingEvent;
     protected Selector selectorForTestStoreQuery;
@@ -115,7 +114,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     protected StateEvent containsMatchingEvent;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
-    private String cachePolicy;
     private long storeSizeCheckInterval;
     private long retentionPeriod;
     private long cacheLastReloadTime;
@@ -130,7 +128,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheTableAnnotation != null) {
             cacheEnabled = true;
             maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
-            cacheTableDefinition = TableDefinition.id(tableDefinition.getId());
+            TableDefinition cacheTableDefinition = TableDefinition.id(tableDefinition.getId());
             for (Attribute attribute: tableDefinition.getAttributeList()) {
                 cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
             }
@@ -140,7 +138,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
             }
 
-            cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
+            String cachePolicy = cacheTableAnnotation.getElement(ANNOTATION_CACHE_POLICY);
 
             if (cachePolicy == null || cachePolicy.equalsIgnoreCase("FIFO")) {
                 cachePolicy = "FIFO";
