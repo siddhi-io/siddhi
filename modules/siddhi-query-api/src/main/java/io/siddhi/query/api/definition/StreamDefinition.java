@@ -42,6 +42,7 @@ public class StreamDefinition extends AbstractDefinition {
     public StreamDefinition attribute(String attributeName, Attribute.Type type) {
         checkAttribute(attributeName);
         this.attributeList.add(new Attribute(attributeName, type));
+        this.hasDefinitionChanged = true;
         return this;
     }
     
