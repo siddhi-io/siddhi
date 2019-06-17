@@ -437,11 +437,13 @@ public class AggregationRuntime implements MemoryCalculable {
                     queryGroupByList.remove(timestampVariable);
                 }
                 for (Variable queryGroupBy : queryGroupByList) {
-                    if (groupByVariablesList.contains(queryGroupBy.getAttributeName())) {
-                        String referenceId = queryGroupBy.getStreamId();
-                        if (aggReferenceId == null || aggReferenceId.equalsIgnoreCase(referenceId)) {
+                    String referenceId = queryGroupBy.getStreamId();
+                    if (aggReferenceId == null) {
+                        if (tableAttributesNameList.contains(queryGroupBy.getAttributeName())) {
                             groupByList.add(queryGroupBy);
                         }
+                    } else if (aggReferenceId.equalsIgnoreCase(referenceId)) {
+                        groupByList.add(queryGroupBy);
                     }
                 }
                 // If query group bys are based on joining stream
@@ -572,13 +574,13 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     private static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
-                                                              boolean isDistributed,
-                                                              boolean isLatestEventColAdded,
-                                                              int baseAggregatorBeginIndex,
-                                                              int numGroupByVariables,
-                                                              List<Expression> finalBaseExpressions,
-                                                              AbstractDefinition incomingOutputStreamDefinition,
-                                                              List<Variable> newGroupByList) {
+                                                               boolean isDistributed,
+                                                               boolean isLatestEventColAdded,
+                                                               int baseAggregatorBeginIndex,
+                                                               int numGroupByVariables,
+                                                               List<Expression> finalBaseExpressions,
+                                                               AbstractDefinition incomingOutputStreamDefinition,
+                                                               List<Variable> newGroupByList) {
 
         List<OutputAttribute> selectorList = new ArrayList<>();
         List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
@@ -643,9 +645,15 @@ public class AggregationRuntime implements MemoryCalculable {
         }
 
         for (; i < baseAggregatorBeginIndex; i++) {
-            OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
-                    Expression.function("incrementalAggregator", "last",
-                            new Variable(attributeList.get(i).getName()), maxVariable));
+            OutputAttribute outputAttribute;
+            Variable variable = new Variable(attributeList.get(i).getName());
+            if (queryGroupByNames.contains(variable.getAttributeName())) {
+                outputAttribute = new OutputAttribute(variable);
+            } else {
+                outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("incrementalAggregator", "last",
+                                new Variable(attributeList.get(i).getName()), maxVariable));
+            }
             selectorList.add(outputAttribute);
         }
 
