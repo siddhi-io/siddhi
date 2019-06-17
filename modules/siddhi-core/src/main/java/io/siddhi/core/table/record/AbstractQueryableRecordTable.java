@@ -865,12 +865,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         if (cacheEnabled) {
             CompiledSelectionWithCache compiledSelectionWithCache;
-            MetaStateEvent metaStateEventForCacheSelection = new MetaStateEvent(matchingMetaInfoHolder.
-                    getMetaStateEvent().getStreamEventCount());
-            for (MetaStreamEvent metaStreamEvent: matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
-                metaStateEventForCacheSelection.addEvent(metaStreamEvent);
-            }
-
+            MetaStateEvent metaStateEventForCacheSelection = matchingMetaInfoHolder.getMetaStateEvent().clone();
             ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
             int metaPosition = SiddhiConstants.UNKNOWN_STATE;
             List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
