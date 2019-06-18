@@ -93,6 +93,13 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
     @Parameter(property = "readme.file")
     private File readmeFile;
 
+    /**
+     * Add origin info to the docs
+     * Optional
+     */
+    @Parameter(property = "doc.gen.base.directory")
+    private boolean includeOrigin;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Finding the root maven project
@@ -151,8 +158,8 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
             namespaceMetaDataList = DocumentationUtils.getExtensionMetaData(
                     moduleTargetPath,
                     mavenProject.getRuntimeClasspathElements(),
-                    getLog()
-            );
+                    getLog(),
+                    includeOrigin);
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoFailureException("Unable to resolve dependencies of the project", e);
         }

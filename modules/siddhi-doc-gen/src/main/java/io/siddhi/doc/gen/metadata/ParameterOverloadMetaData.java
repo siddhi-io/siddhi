@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,22 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package io.siddhi.doc.gen.metadata;
 
-.md-header-nav__button.md-logo img {
-    width: 140px;
-    height: 33px;
-    margin-right: 0;
-}
+import java.util.List;
 
-.md-content__icon,
-.md-footer-nav__button,
-.md-header-nav__button,
-.md-nav__button,
-.md-nav__title::before,
-.md-search-result__article--document::before {
-    margin: 0.3rem;
-    padding: 0;
-}
-.md-typeset h4 {
-    font-size: .9rem;
+/**
+ * POJO for holding extension parameter meta data
+ */
+public class ParameterOverloadMetaData {
+    private List<ParameterMetaData> parameters;
+
+    public List<ParameterMetaData> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<ParameterMetaData> parameters) {
+        this.parameters = parameters;
+    }
 }
