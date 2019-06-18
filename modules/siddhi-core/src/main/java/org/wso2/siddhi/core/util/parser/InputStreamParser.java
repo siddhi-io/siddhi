@@ -34,6 +34,7 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
+import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,7 @@ public class InputStreamParser {
      * @return StreamRuntime
      */
     public static StreamRuntime parse(InputStream inputStream, SiddhiAppContext siddhiAppContext,
+                                      List<Variable> queryGroupByList,
                                       Map<String, AbstractDefinition> streamDefinitionMap,
                                       Map<String, AbstractDefinition> tableDefinitionMap,
                                       Map<String, AbstractDefinition> windowDefinitionMap,
@@ -87,8 +89,8 @@ public class InputStreamParser {
                     new MetaStreamEvent(), processStreamReceiver,
                     true, outputExpectsExpiredEvents, queryName);
         } else if (inputStream instanceof JoinInputStream) {
-            return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), siddhiAppContext,
-                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+            return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), queryGroupByList,
+                    siddhiAppContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap,
                     executors, latencyTracker, outputExpectsExpiredEvents,
                     queryName);

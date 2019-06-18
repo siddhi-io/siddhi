@@ -34,6 +34,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator;
 import org.wso2.siddhi.core.table.Table;
@@ -154,7 +155,7 @@ public class AggregationParser {
             String aggregatorName = aggregationDefinition.getId();
 
             StreamRuntime streamRuntime = InputStreamParser.parse(aggregationDefinition.getBasicSingleInputStream(),
-                    siddhiAppContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    siddhiAppContext, null, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, incomingVariableExpressionExecutors,
                     null, false, aggregatorName);
 
@@ -213,10 +214,10 @@ public class AggregationParser {
                     .getName().equals(AGG_LAST_TIMESTAMP_COL);
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
-            List<Expression> finalBaseAggregators = new ArrayList<>();
+            List<Expression> finalBaseExpressions = new ArrayList<>();
             processFinalBaseAggregators(siddhiAppContext, tableMap, incomingVariableExpressionExecutors, aggregatorName,
                     incomingMetaStreamEvent, incomingExpressionExecutors, incrementalAttributeAggregators,
-                    finalBaseAggregators);
+                    finalBaseExpressions);
 
             StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id(aggregatorName + "_intermediate");
             incomingOutputStreamDefinition.setQueryContextStartIndex(aggregationDefinition.getQueryContextStartIndex());
@@ -240,7 +241,7 @@ public class AggregationParser {
                                     incrementalDuration,
                                     constructProcessExpressionExecutors(
                                             siddhiAppContext, tableMap, aggregatorName, baseAggregatorBeginIndex,
-                                            finalBaseAggregators, incomingOutputStreamDefinition, processedMetaStreamEvent,
+                                            finalBaseExpressions, incomingOutputStreamDefinition, processedMetaStreamEvent,
                                             processVariableExpressionExecutors, isGroupBy, isProcessingOnExternalTime,
                                             incrementalDuration, isDistributed, shardId, isLatestEventColAdded)));
 
@@ -339,6 +340,30 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap,
                     incrementalDurations, aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateTimestamp);
 
+            boolean isOptimisedLookup = true;
+            for (IncrementalAttributeAggregator incrementalAttributeAggregator : incrementalAttributeAggregators) {
+                if (!incrementalAttributeAggregator.isDatabaseOptimisable()) {
+                    isOptimisedLookup = false;
+                    break;
+                }
+            }
+
+            if (isOptimisedLookup) {
+                //DB interface should also be compatible
+                isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+            }
+
+            List<String> groupByVariablesList = groupByVariableList.stream()
+                    .map(Variable::getAttributeName)
+                    .collect(Collectors.toList());
+
+            List<OutputAttribute> defaultSelectorList = new ArrayList<>();
+            if (isOptimisedLookup) {
+                defaultSelectorList = incomingOutputStreamDefinition.getAttributeList().stream()
+                        .map((attribute) -> new OutputAttribute(new Variable(attribute.getName())))
+                        .collect(Collectors.toList());
+            }
+
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
             incrementalDataPurger.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
                     , aggregationTables, isProcessingOnExternalTime, siddhiAppContext);
@@ -377,9 +402,10 @@ public class AggregationParser {
             AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
                     isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
                     aggregationTables, outputExpressionExecutors, processExpressionExecutorsMap, shouldUpdateTimestamp,
-                    groupByKeyGeneratorMapForReading, incrementalDataPurger, incrementalExecutorsInitialiser,
-                    ((SingleStreamRuntime) streamRuntime), siddhiAppContext, processedMetaStreamEvent,
-                    latencyTrackerFind, throughputTrackerFind);
+                    groupByKeyGeneratorMapForReading, isOptimisedLookup, defaultSelectorList, groupByVariablesList,
+                    isLatestEventColAdded, baseAggregatorBeginIndex, finalBaseExpressions, incrementalDataPurger,
+                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), siddhiAppContext,
+                    processedMetaStreamEvent, latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -426,7 +452,7 @@ public class AggregationParser {
 
     private static List<ExpressionExecutor> constructProcessExpressionExecutors(
             SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap, String aggregatorName,
-            int baseAggregatorBeginIndex, List<Expression> finalBaseAggregators,
+            int baseAggregatorBeginIndex, List<Expression> finalBaseExpressions,
             StreamDefinition incomingOutputStreamDefinition, MetaStreamEvent processedMetaStreamEvent,
             List<VariableExpressionExecutor> processVariableExpressionExecutors, boolean groupBy,
             boolean isProcessingOnExternalTime, TimePeriod.Duration duration, boolean isDistributed, String shardId,
@@ -490,7 +516,7 @@ public class AggregationParser {
             processExpressionExecutors.add(latestTimestampExecutor);
         }
 
-        for (Expression expression : finalBaseAggregators) {
+        for (Expression expression : finalBaseExpressions) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors, siddhiAppContext,
                     groupBy, 0, aggregatorName);
@@ -504,7 +530,7 @@ public class AggregationParser {
             List<VariableExpressionExecutor> incomingVariableExpressionExecutors, String aggregatorName,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
-            List<Expression> finalBaseAggregators) {
+            List<Expression> finalBaseExpressions) {
 
         List<Attribute> finalBaseAttributes = new ArrayList<>();
 
@@ -519,7 +545,7 @@ public class AggregationParser {
 
                 if (!finalBaseAttributes.contains(baseAttributes[i])) {
                     finalBaseAttributes.add(baseAttributes[i]);
-                    finalBaseAggregators.add(baseAggregators[i]);
+                    finalBaseExpressions.add(baseAggregators[i]);
                     incomingMetaStreamEvent.addOutputData(baseAttributes[i]);
                     incomingExpressionExecutors.add(ExpressionParser.parseExpression(baseAttributeInitialValues[i],
                             incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,

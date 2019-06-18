@@ -109,9 +109,9 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    siddhiAppContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors, latencyTracker,
-                    outputExpectsExpiredEvents, queryName);
+                    siddhiAppContext, query.getSelector().getGroupByList(), streamDefinitionMap, tableDefinitionMap,
+                    windowDefinitionMap, aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
+                    latencyTracker, outputExpectsExpiredEvents, queryName);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
                     SiddhiConstants.UNKNOWN_STATE);

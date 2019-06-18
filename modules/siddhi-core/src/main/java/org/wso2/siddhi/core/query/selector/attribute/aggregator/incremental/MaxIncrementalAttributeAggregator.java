@@ -101,4 +101,10 @@ public class MaxIncrementalAttributeAggregator extends IncrementalAttributeAggre
     public Attribute.Type getReturnType() {
         return this.returnType;
     }
+
+    @Override
+    public boolean isDatabaseOptimisable() {
+        return true;
+    }
+
 }

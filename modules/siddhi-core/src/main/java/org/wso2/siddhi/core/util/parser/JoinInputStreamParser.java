@@ -54,6 +54,7 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 import java.util.List;
@@ -68,6 +69,7 @@ public class JoinInputStreamParser {
 
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream,
+                                                 List<Variable> queryGroupByList,
                                                  SiddhiAppContext siddhiAppContext,
                                                  Map<String, AbstractDefinition> streamDefinitionMap,
                                                  Map<String, AbstractDefinition> tableDefinitionMap,
@@ -170,11 +172,11 @@ public class JoinInputStreamParser {
 
             setStreamRuntimeProcessorChain(leftMetaStreamEvent, leftStreamRuntime, leftInputStreamId, tableMap,
                     windowMap, aggregationMap, executors, outputExpectsExpiredEvents, queryName,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiAppContext,
+                    joinInputStream.getWithin(), joinInputStream.getPer(), queryGroupByList, siddhiAppContext,
                     joinInputStream.getLeftInputStream());
             setStreamRuntimeProcessorChain(rightMetaStreamEvent, rightStreamRuntime, rightInputStreamId, tableMap,
                     windowMap, aggregationMap, executors, outputExpectsExpiredEvents, queryName,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiAppContext,
+                    joinInputStream.getWithin(), joinInputStream.getPer(), queryGroupByList, siddhiAppContext,
                     joinInputStream.getRightInputStream());
 
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
@@ -283,8 +285,8 @@ public class JoinInputStreamParser {
             String inputStreamId, Map<String, Table> tableMap, Map<String, Window> windowMap,
             Map<String, AggregationRuntime> aggregationMap,
             List<VariableExpressionExecutor> variableExpressionExecutors, boolean outputExpectsExpiredEvents,
-            String queryName, Within within, Expression per, SiddhiAppContext siddhiAppContext,
-            InputStream inputStream) {
+            String queryName, Within within, Expression per, List<Variable> queryGroupByList,
+            SiddhiAppContext siddhiAppContext, InputStream inputStream) {
         switch (metaStreamEvent.getEventType()) {
 
             case TABLE:
@@ -306,7 +308,7 @@ public class JoinInputStreamParser {
 
                 AggregationRuntime aggregationRuntime = aggregationMap.get(inputStreamId);
                 AggregateWindowProcessor aggregateWindowProcessor = new AggregateWindowProcessor(
-                        aggregationRuntime, within, per);
+                        aggregationRuntime, within, per, queryGroupByList);
                 aggregateWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
                         siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);

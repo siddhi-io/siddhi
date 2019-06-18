@@ -100,5 +100,11 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
     }
+
+    @Override
+    public boolean isDatabaseOptimisable() {
+        return false;
+    }
+
 }
 

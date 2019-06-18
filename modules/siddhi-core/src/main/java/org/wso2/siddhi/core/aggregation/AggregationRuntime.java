@@ -18,20 +18,24 @@
 
 package org.wso2.siddhi.core.aggregation;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.exception.QueryableRecordTableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
@@ -49,8 +53,11 @@ import org.wso2.siddhi.query.api.definition.AggregationDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
+import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.AttributeFunction;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 import org.wso2.siddhi.query.api.expression.constant.BoolConstant;
 
@@ -60,7 +67,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.wso2.siddhi.core.util.ExpressionExecutorClonerUtil.getExpressionExecutorClones;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_LAST_TIMESTAMP_COL;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_SHARD_ID_COL;
+import static org.wso2.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
@@ -68,6 +78,8 @@ import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDura
  * Aggregation runtime managing aggregation operations for aggregation definition.
  */
 public class AggregationRuntime implements MemoryCalculable {
+    private static final Logger LOG = Logger.getLogger(AggregationRuntime.class);
+
     private AggregationDefinition aggregationDefinition;
     private boolean isProcessingOnExternalTime;
     private boolean isDistributed;
@@ -80,6 +92,12 @@ public class AggregationRuntime implements MemoryCalculable {
     private Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap;
     private ExpressionExecutor shouldUpdateTimestampExpressionExecutor;
     private Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorList;
+    private boolean isOptimisedLookup;
+    private List<OutputAttribute> defaultSelectorList;
+    private List<String> groupByVariablesList;
+    private boolean isLatestEventColAdded;
+    private int baseAggregatorBeginIndex;
+    private List<Expression> finalBaseExpressionsList;
 
     private IncrementalDataPurger incrementalDataPurger;
     private IncrementalExecutorsInitialiser incrementalExecutorsInitialiser;
@@ -100,7 +118,10 @@ public class AggregationRuntime implements MemoryCalculable {
                               Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
                               ExpressionExecutor shouldUpdateTimestampExpressionExecutor,
                               Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorList,
-                              IncrementalDataPurger incrementalDataPurger,
+                              boolean isOptimisedLookup, List<OutputAttribute> defaultSelectorList,
+                              List<String> groupByVariablesList,
+                              boolean isLatestEventColAdded, int baseAggregatorBeginIndex,
+                              List<Expression> finalBaseExpressionList, IncrementalDataPurger incrementalDataPurger,
                               IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
                               SingleStreamRuntime singleStreamRuntime, SiddhiAppContext siddhiAppContext,
                               MetaStreamEvent tableMetaStreamEvent, LatencyTracker latencyTrackerFind,
@@ -118,6 +139,12 @@ public class AggregationRuntime implements MemoryCalculable {
         this.aggregateProcessingExecutorsMap = aggregateProcessingExecutorsMap;
         this.shouldUpdateTimestampExpressionExecutor = shouldUpdateTimestampExpressionExecutor;
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
+        this.isOptimisedLookup = isOptimisedLookup;
+        this.defaultSelectorList = defaultSelectorList;
+        this.groupByVariablesList = groupByVariablesList;
+        this.isLatestEventColAdded = isLatestEventColAdded;
+        this.baseAggregatorBeginIndex = baseAggregatorBeginIndex;
+        this.finalBaseExpressionsList = finalBaseExpressionList;
 
         this.incrementalDataPurger = incrementalDataPurger;
         this.incrementalExecutorsInitialiser = incrementalExecutorInitialiser;
@@ -217,10 +244,14 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     public CompiledCondition compileExpression(Expression expression, Within within, Expression per,
+                                               List<Variable> queryGroupByList,
                                                MatchingMetaInfoHolder matchingMetaInfoHolder,
                                                List<VariableExpressionExecutor> variableExpressionExecutors,
                                                Map<String, Table> tableMap, String queryName,
                                                SiddhiAppContext siddhiAppContext) {
+
+        String aggregationName = aggregationDefinition.getId();
+        boolean isOptimisedTableLookup = isOptimisedLookup;
 
         Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions = new HashMap<>();
         CompiledCondition withinInMemoryCompileCondition;
@@ -263,8 +294,8 @@ public class AggregationRuntime implements MemoryCalculable {
                     matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(0), additionalAttributes);
         }
 
-        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition,
-                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId());
+        String aggReferenceId = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId();
+        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition, aggReferenceId);
 
         // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
         MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
@@ -375,10 +406,102 @@ public class AggregationRuntime implements MemoryCalculable {
             withinExpressionTable = withinExpression;
         }
 
-        List<VariableExpressionExecutor> startEndExpressionExecutorList = new ArrayList<>();
+        Variable timestampVariable = new Variable(AGG_START_TIMESTAMP_COL);
+        List<String> queryGroupByNamesList = queryGroupByList.stream()
+                .map(Variable::getAttributeName)
+                .collect(Collectors.toList());
+        boolean queryGroupByContainsTimestamp = queryGroupByNamesList.remove(AGG_START_TIMESTAMP_COL);
+
+        boolean isQueryGroupBySame = queryGroupByList.isEmpty() ||
+                (queryGroupByList.contains(timestampVariable) && queryGroupByNamesList.equals(groupByVariablesList));
+
+        List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
+
+        Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection = new HashMap<>();
+        if (isOptimisedTableLookup) {
+            Selector selector = Selector.selector();
+
+            List<Variable> groupByList = new ArrayList<>();
+            if (!isQueryGroupBySame) {
+                if (queryGroupByContainsTimestamp) {
+                    if (isProcessingOnExternalTime) {
+                        groupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+                    } else {
+                        groupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
+                    }
+                    //Remove timestamp to process the rest
+                    queryGroupByList.remove(timestampVariable);
+                }
+                for (Variable queryGroupBy : queryGroupByList) {
+                    String referenceId = queryGroupBy.getStreamId();
+                    if (aggReferenceId == null) {
+                        if (tableAttributesNameList.contains(queryGroupBy.getAttributeName())) {
+                            groupByList.add(queryGroupBy);
+                        }
+                    } else if (aggReferenceId.equalsIgnoreCase(referenceId)) {
+                        groupByList.add(queryGroupBy);
+                    }
+                }
+                // If query group bys are based on joining stream
+                if (groupByList.isEmpty()) {
+                    isQueryGroupBySame = true;
+                }
+            }
+
+            if (aggReferenceId != null) {
+                groupByList.forEach((groupBy) -> groupBy.setStreamId(aggReferenceId));
+            }
+            selector.addGroupByList(groupByList);
+
+            List<OutputAttribute> selectorList;
+            if (!isQueryGroupBySame) {
+                selectorList = constructSelectorList(isProcessingOnExternalTime, isDistributed, isLatestEventColAdded,
+                        baseAggregatorBeginIndex, groupByVariablesList.size(), finalBaseExpressionsList,
+                        tableDefinition, groupByList);
+            } else {
+                selectorList = defaultSelectorList;
+            }
+            if (aggReferenceId != null) {
+                for (OutputAttribute outputAttribute : selectorList) {
+                    if (outputAttribute.getExpression() instanceof Variable) {
+                        ((Variable) outputAttribute.getExpression()).setStreamId(aggReferenceId);
+                    } else {
+                        for (Expression parameter :
+                                ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
+                            ((Variable) parameter).setStreamId(aggReferenceId);
+                        }
+                    }
+                }
+            }
+            selector.addSelectionList(selectorList);
+
+            try {
+                aggregationTables.entrySet().forEach(
+                        (durationTableEntry -> {
+                            CompiledSelection compiledSelection = ((QueryableProcessor) durationTableEntry.getValue())
+                                    .compileSelection(
+                                            selector, tableDefinition.getAttributeList(), metaInfoHolderForTableLookups,
+                                            siddhiAppContext, variableExpExecutorsForTableLookups, tableMap,
+                                            aggregationName
+                                    );
+                            withinTableCompiledSelection.put(durationTableEntry.getKey(), compiledSelection);
+                        })
+                );
+            } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Aggregation Query optimization failed for aggregation: '" + aggregationName + "'. " +
+                            "Creating table lookup query in normal mode. Reason for failure: " + e.getMessage(), e);
+                }
+                LOG.info("Aggregation Query optimization failed for aggregation: '" + aggregationName + "'. " +
+                        "Creating table lookup query in normal mode. Reason for failure: " + e.getMessage(), e);
+                isOptimisedTableLookup = false;
+            }
+
+        }
+
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpressionTable,
-                    metaInfoHolderForTableLookups, siddhiAppContext, startEndExpressionExecutorList, tableMap,
+                    metaInfoHolderForTableLookups, siddhiAppContext, variableExpExecutorsForTableLookups, tableMap,
                     queryName);
             withinTableCompiledConditions.put(entry.getKey(), withinTableCompileCondition);
         }
@@ -388,19 +511,18 @@ public class AggregationRuntime implements MemoryCalculable {
         // are within given duration
         withinInMemoryCompileCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true),
                 withinExpression, metaInfoHolderForTableLookups, siddhiAppContext,
-                startEndExpressionExecutorList, tableMap, queryName);
+                variableExpExecutorsForTableLookups, tableMap, queryName);
 
         // Create compile condition for in-memory data, in case of distributed
         // Look at the lower level granularities
         Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition = new HashMap<>();
-        String aggregationName = aggregationDefinition.getId();
         Expression lowerGranularity;
         if (isDistributed) {
             for (int i = 0; i < lowerGranularitySize; i++) {
                 if (isProcessingOnExternalTime) {
                     lowerGranularity = Expression.and(
                             Expression.compare(
-                                    Expression.variable("AGG_TIMESTAMP"),
+                                    Expression.variable(AGG_START_TIMESTAMP_COL),
                                     Compare.Operator.GREATER_THAN_EQUAL,
                                     Expression.variable(lowerGranularityAttributes.get(i))),
                             withinExpressionTable
@@ -409,7 +531,7 @@ public class AggregationRuntime implements MemoryCalculable {
                     if (shouldApplyReducedCondition) {
                         lowerGranularity = Expression.and(
                                 Expression.compare(
-                                        Expression.variable("AGG_TIMESTAMP"),
+                                        Expression.variable(AGG_START_TIMESTAMP_COL),
                                         Compare.Operator.GREATER_THAN_EQUAL,
                                         Expression.variable(lowerGranularityAttributes.get(i))),
                                 reducedExpression
@@ -417,7 +539,7 @@ public class AggregationRuntime implements MemoryCalculable {
                     } else {
                         lowerGranularity =
                                 Expression.compare(
-                                        Expression.variable("AGG_TIMESTAMP"),
+                                        Expression.variable(AGG_START_TIMESTAMP_COL),
                                         Compare.Operator.GREATER_THAN_EQUAL,
                                         Expression.variable(lowerGranularityAttributes.get(i)));
                     }
@@ -427,7 +549,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 String tableName = aggregationName + "_" + duration.toString();
                 CompiledCondition compiledCondition = tableMap.get(tableName)
                         .compileCondition(lowerGranularity, metaInfoHolderForTableLookups, siddhiAppContext,
-                                startEndExpressionExecutorList, tableMap, queryName);
+                                variableExpExecutorsForTableLookups, tableMap, queryName);
                 withinTableLowerGranularityCompileCondition.put(duration, compiledCondition);
             }
         }
@@ -441,14 +563,116 @@ public class AggregationRuntime implements MemoryCalculable {
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
                 matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
 
-        return new IncrementalAggregateCompileCondition(aggregationName, isProcessingOnExternalTime, isDistributed,
-                incrementalDurations, aggregationTables, getExpressionExecutorClones(outputExpressionExecutors),
-                withinTableCompiledConditions, withinInMemoryCompileCondition,
-                withinTableLowerGranularityCompileCondition, onCompiledCondition, additionalAttributes,
-                perExpressionExecutor, startTimeEndTimeExpressionExecutor, timestampFilterExecutors,
-                aggregateMetaSteamEvent, matchingMetaInfoHolder, metaInfoHolderForTableLookups,
-                startEndExpressionExecutorList);
+        return new IncrementalAggregateCompileCondition(isStoreQuery, aggregationName, isProcessingOnExternalTime,
+                isDistributed, incrementalDurations, aggregationTables, outputExpressionExecutors,
+                isOptimisedTableLookup, withinTableCompiledSelection, withinTableCompiledConditions,
+                withinInMemoryCompileCondition, withinTableLowerGranularityCompileCondition, onCompiledCondition,
+                additionalAttributes, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
+                timestampFilterExecutors, aggregateMetaSteamEvent, matchingMetaInfoHolder,
+                metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups);
+
     }
+
+    private static List<OutputAttribute> constructSelectorList(boolean isProcessingOnExternalTime,
+                                                               boolean isDistributed,
+                                                               boolean isLatestEventColAdded,
+                                                               int baseAggregatorBeginIndex,
+                                                               int numGroupByVariables,
+                                                               List<Expression> finalBaseExpressions,
+                                                               AbstractDefinition incomingOutputStreamDefinition,
+                                                               List<Variable> newGroupByList) {
+
+        List<OutputAttribute> selectorList = new ArrayList<>();
+        List<Attribute> attributeList = incomingOutputStreamDefinition.getAttributeList();
+
+        List<String> queryGroupByNames = newGroupByList.stream()
+                .map(Variable::getAttributeName).collect(Collectors.toList());
+        Variable maxVariable;
+        if (!isProcessingOnExternalTime) {
+            maxVariable = new Variable(AGG_START_TIMESTAMP_COL);
+        } else if (isLatestEventColAdded) {
+            maxVariable = new Variable(AGG_LAST_TIMESTAMP_COL);
+        } else {
+            maxVariable = new Variable(AGG_EXTERNAL_TIMESTAMP_COL);
+        }
+
+        int i = 0;
+        //Add timestamp selector
+        OutputAttribute timestampAttribute;
+        if (!isProcessingOnExternalTime && queryGroupByNames.contains(AGG_START_TIMESTAMP_COL)) {
+            timestampAttribute = new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL));
+        } else {
+            timestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                    Expression.function("max", new Variable(AGG_START_TIMESTAMP_COL)));
+        }
+        selectorList.add(timestampAttribute);
+        i++;
+
+        if (isDistributed) {
+            selectorList.add(new OutputAttribute(AGG_SHARD_ID_COL, Expression.function("max",
+                    new Variable(AGG_SHARD_ID_COL))));
+            i++;
+        }
+
+        if (isProcessingOnExternalTime) {
+            OutputAttribute externalTimestampAttribute;
+            if (queryGroupByNames.contains(AGG_START_TIMESTAMP_COL)) {
+                externalTimestampAttribute = new OutputAttribute(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
+            } else {
+                externalTimestampAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("max", new Variable(AGG_EXTERNAL_TIMESTAMP_COL)));
+            }
+            selectorList.add(externalTimestampAttribute);
+            i++;
+        }
+
+        for (int j = 0; j < numGroupByVariables; j++) {
+            OutputAttribute groupByAttribute;
+            Variable variable = new Variable(attributeList.get(i).getName());
+            if (queryGroupByNames.contains(variable.getAttributeName())) {
+                groupByAttribute = new OutputAttribute(variable);
+            } else {
+                groupByAttribute = new OutputAttribute(variable.getAttributeName(),
+                        Expression.function("incrementalAggregator", "last",
+                                new Variable(attributeList.get(i).getName()), maxVariable));
+            }
+            selectorList.add(groupByAttribute);
+            i++;
+        }
+
+        if (isLatestEventColAdded) {
+            baseAggregatorBeginIndex = baseAggregatorBeginIndex - 1;
+        }
+
+        for (; i < baseAggregatorBeginIndex; i++) {
+            OutputAttribute outputAttribute;
+            Variable variable = new Variable(attributeList.get(i).getName());
+            if (queryGroupByNames.contains(variable.getAttributeName())) {
+                outputAttribute = new OutputAttribute(variable);
+            } else {
+                outputAttribute = new OutputAttribute(attributeList.get(i).getName(),
+                        Expression.function("incrementalAggregator", "last",
+                                new Variable(attributeList.get(i).getName()), maxVariable));
+            }
+            selectorList.add(outputAttribute);
+        }
+
+        if (isLatestEventColAdded) {
+            OutputAttribute lastTimestampAttribute = new OutputAttribute(AGG_LAST_TIMESTAMP_COL,
+                    Expression.function("max", new Variable(AGG_LAST_TIMESTAMP_COL)));
+            selectorList.add(lastTimestampAttribute);
+            i++;
+        }
+
+        for (Expression finalBaseExpression : finalBaseExpressions) {
+            OutputAttribute outputAttribute = new OutputAttribute(attributeList.get(i).getName(), finalBaseExpression);
+            selectorList.add(outputAttribute);
+            i++;
+        }
+
+        return selectorList;
+    }
+
 
     public void startPurging() {
         incrementalDataPurger.executeIncrementalDataPurging();

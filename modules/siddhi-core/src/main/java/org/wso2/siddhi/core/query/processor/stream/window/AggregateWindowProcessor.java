@@ -32,6 +32,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.aggregation.Within;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.List;
 import java.util.Map;
@@ -46,15 +47,18 @@ import java.util.Map;
 public class AggregateWindowProcessor extends WindowProcessor implements FindableProcessor {
     private final Within within;
     private final Expression per;
+    private List<Variable> queryGroupByList;
     private AggregationRuntime aggregationRuntime;
     private ConfigReader configReader;
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
 
-    public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per) {
+    public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per,
+                                    List<Variable> queryGroupByList) {
         this.aggregationRuntime = aggregationRuntime;
         this.within = within;
         this.per = per;
+        this.queryGroupByList = queryGroupByList;
     }
 
     @Override
@@ -83,7 +87,7 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
                                                SiddhiAppContext siddhiAppContext,
                                                List<VariableExpressionExecutor> variableExpressionExecutors,
                                                Map<String, Table> tableMap, String queryName) {
-        return aggregationRuntime.compileExpression(condition, within, per, matchingMetaInfoHolder,
+        return aggregationRuntime.compileExpression(condition, within, per, queryGroupByList, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, queryName, siddhiAppContext);
     }
 
@@ -100,7 +104,8 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
     @Override
     public Processor cloneProcessor(String key) {
         try {
-            AggregateWindowProcessor streamProcessor = new AggregateWindowProcessor(aggregationRuntime, within, per);
+            AggregateWindowProcessor streamProcessor = new AggregateWindowProcessor(aggregationRuntime, within, per,
+                    queryGroupByList);
             streamProcessor.inputDefinition = inputDefinition;
             ExpressionExecutor[] innerExpressionExecutors = new ExpressionExecutor[attributeExpressionLength];
             ExpressionExecutor[] attributeExpressionExecutors1 = this.attributeExpressionExecutors;
