@@ -1,4 +1,4 @@
-**Siddhi** - Cloud native stream processing 
+**Siddhi** - Cloud Native Stream Processor
 ===========================================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
