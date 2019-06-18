@@ -419,23 +419,6 @@ public class AggregationParser {
         }
     }
 
-    private static List<Variable> constructGroupByVariableList(boolean isProcessingOnExternalTime,
-                                                               boolean isGroupBy,
-                                                               List<Variable> groupByVariableList) {
-        List<Variable> defaultGroupByList = new ArrayList<>();
-
-        if (isProcessingOnExternalTime) {
-            defaultGroupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
-        } else {
-            defaultGroupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
-        }
-
-        if (isGroupBy) {
-            defaultGroupByList.addAll(groupByVariableList);
-        }
-        return defaultGroupByList;
-    }
-
     private static Map<TimePeriod.Duration, IncrementalExecutor> buildIncrementalExecutors(
             MetaStreamEvent processedMetaStreamEvent,
             Map<TimePeriod.Duration, List<ExpressionExecutor>> processExpressionExecutorsMap,
