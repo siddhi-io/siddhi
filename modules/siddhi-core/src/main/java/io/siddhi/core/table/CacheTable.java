@@ -106,12 +106,12 @@ public abstract class CacheTable extends InMemoryTable {
     public void addStreamEventUptoMaxSize(StreamEvent streamEvent) {
         int sizeAfterAdding = this.size();
         ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
-        do {
+        while (sizeAfterAdding < maxSize && streamEvent != null) {
             sizeAfterAdding++;
             addEventsLimitCopy.add((StreamEvent) generateEventWithRequiredFields(streamEvent, siddhiAppContext,
                     cacheExpiryEnabled));
             streamEvent = streamEvent.getNext();
-        } while (sizeAfterAdding != maxSize && streamEvent != null);
+        }
         readWriteLock.writeLock().lock();
         try {
             this.add(addEventsLimitCopy);
@@ -172,7 +172,12 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public void deleteAll() {
-        stateHolder.getState().getEventHolder().deleteAll();
+        readWriteLock.writeLock().lock();
+        try {
+            stateHolder.getState().getEventHolder().deleteAll();
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     abstract void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition,
