@@ -563,8 +563,8 @@ public class AggregationRuntime implements MemoryCalculable {
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
-        return new IncrementalAggregateCompileCondition(aggregationName, isProcessingOnExternalTime, isDistributed,
-                incrementalDurations, aggregationTables, outputExpressionExecutors,
+        return new IncrementalAggregateCompileCondition(isStoreQuery, aggregationName, isProcessingOnExternalTime,
+                isDistributed, incrementalDurations, aggregationTables, outputExpressionExecutors,
                 isOptimisedTableLookup, withinTableCompiledSelection, withinTableCompiledConditions,
                 withinInMemoryCompileCondition, withinTableLowerGranularityCompileCondition, onCompiledCondition,
                 additionalAttributes, perExpressionExecutor, startTimeEndTimeExpressionExecutor,

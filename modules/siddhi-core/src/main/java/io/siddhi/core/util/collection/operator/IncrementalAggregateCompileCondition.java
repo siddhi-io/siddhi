@@ -57,6 +57,8 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private static final Logger LOG = Logger.getLogger(IncrementalAggregateCompileCondition.class);
 
+    private final boolean isStoreQuery;
+
     private final String aggregationName;
     private final boolean isProcessingOnExternalTime;
     private final boolean isDistributed;
@@ -87,7 +89,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private MatchingMetaInfoHolder matchingHolderInfoForTableLookups;
     private List<VariableExpressionExecutor> variableExpExecutorsForTableLookups;
 
-    public IncrementalAggregateCompileCondition(
+    public IncrementalAggregateCompileCondition(boolean isStoreQuery,
             String aggregationName, boolean isProcessingOnExternalTime, boolean isDistributed,
             List<TimePeriod.Duration> incrementalDurations, Map<TimePeriod.Duration, Table> aggregationTableMap,
             List<ExpressionExecutor> outputExpressionExecutors, boolean isOptimisedLookup,
@@ -102,6 +104,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             MatchingMetaInfoHolder matchingHolderInfoForTableLookups,
             List<VariableExpressionExecutor> variableExpExecutorsForTableLookups) {
 
+        this.isStoreQuery = isStoreQuery;
         this.aggregationName = aggregationName;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.isDistributed = isDistributed;
@@ -194,24 +197,9 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         StreamEvent withinMatchFromPersistedEvents;
         if (isOptimisedLookup) {
-            try {
-                withinMatchFromPersistedEvents = ((QueryableProcessor) tableForPerDuration)
-                        .query(
-                                matchingEvent,
-                                withinTableCompiledConditions.get(perValue),
-                                withinTableCompiledSelection.get(perValue),
-                                tableMetaStreamEvent.getLastInputDefinition()
-                                        .getAttributeList().toArray(new Attribute[0])
-                        );
-            } catch (ConnectionUnavailableException e) {
-                // Store query does not have retry logic and normal mode is used
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
-                            + "as the datasource is unavailable.");
-                }
-                withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
-                                                                        withinTableCompiledConditions.get(perValue));
-            }
+            withinMatchFromPersistedEvents = query(tableForPerDuration, matchingEvent,
+                    withinTableCompiledConditions.get(perValue), withinTableCompiledSelection.get(perValue),
+                    tableMetaStreamEvent.getLastInputDefinition().getAttributeList().toArray(new Attribute[0]));
         } else {
             withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
                                                                         withinTableCompiledConditions.get(perValue));
@@ -304,6 +292,29 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         // Execute the on compile condition
         return ((Operator) onCompiledCondition).find(matchingEvent, aggregateSelectionComplexEventChunk,
                 aggregateEventCloner);
+    }
+
+    private StreamEvent query(Table tableForPerDuration, StateEvent matchingEvent, CompiledCondition compiledCondition,
+                              CompiledSelection compiledSelection, Attribute[] outputAttributes) {
+
+        try {
+            return ((QueryableProcessor) tableForPerDuration)
+                    .query(matchingEvent, compiledCondition, compiledSelection, outputAttributes);
+        } catch (ConnectionUnavailableException e) {
+            // Store query does not have retry logic and retry called manually
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
+                        + "as the datasource is unavailable.");
+            }
+
+            if (!isStoreQuery) {
+                tableForPerDuration.setIsTryingToConnectToFalse();
+                tableForPerDuration.connectWithRetry();
+                return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
+                                                                                                    outputAttributes);
+            }
+            throw new SiddhiAppRuntimeException(e.getMessage(), e);
+        }
     }
 
     private ComplexEventChunk<StreamEvent> createAggregateSelectionEventChunk(
