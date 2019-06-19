@@ -224,28 +224,13 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                     List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
                             .map((entry) -> {
                                 Table table = aggregationTableMap.get(entry.getKey());
-                                try {
-                                    if (isOptimisedLookup) {
-                                        return ((QueryableProcessor) table)
-                                                .query(
-                                                        matchingEvent,
-                                                        entry.getValue(),
-                                                        withinTableCompiledSelection.get(entry.getKey()),
-                                                        tableMetaStreamEvent.getLastInputDefinition()
-                                                                .getAttributeList().toArray(new Attribute[0])
-                                                );
-                                    } else {
-                                        return table.find(matchingEvent, entry.getValue());
-                                    }
-                                } catch (ConnectionUnavailableException e) {
-                                    // Store query does not have retry logic and normal mode is used
-                                    if (LOG.isDebugEnabled()) {
-                                        LOG.debug("Unable to query table '" +
-                                                tableForPerDuration.getTableDefinition().getId() + "',  as the " +
-                                                "datasource is unavailable.");
-                                    }
+                                if (isOptimisedLookup) {
+                                    return query(table, matchingEvent, entry.getValue(),
+                                            withinTableCompiledSelection.get(entry.getKey()),
+                                            tableMetaStreamEvent.getLastInputDefinition()
+                                                    .getAttributeList().toArray(new Attribute[0]));
+                                } else {
                                     return table.find(matchingEvent, entry.getValue());
-
                                 }
                             })
                             .filter(Objects::nonNull)
