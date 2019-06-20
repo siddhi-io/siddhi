@@ -3,7 +3,7 @@ package io.siddhi.core.query.table.cache;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.query.table.util.TestAppender;
+import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Level;
@@ -24,7 +24,7 @@ public class CacheExpiryAndReloadTestCase {
     @Test
     public void expiryAndReloadTest0() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest0");
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -87,7 +87,7 @@ public class CacheExpiryAndReloadTestCase {
     @Test
     public void expiryAndReloadTest1() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest1");
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -173,7 +173,7 @@ public class CacheExpiryAndReloadTestCase {
     @Test // with primary key => IndexOperator
     public void expiryAndReloadTest2() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest2");
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -260,7 +260,7 @@ public class CacheExpiryAndReloadTestCase {
     @Test // with primary key and index
     public void expiryAndReloadTest3() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest3");
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);

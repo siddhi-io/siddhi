@@ -46,7 +46,7 @@ import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.cache.CacheExpiryHandler;
+import io.siddhi.core.util.cache.CacheExpirer;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
@@ -222,8 +222,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
             if (cacheExpiryEnabled) {
                 siddhiAppContext.getScheduledExecutorService().scheduleAtFixedRate(
-                        new CacheExpiryHandler(retentionPeriod, cacheTable, tableMap, this, siddhiAppContext).
-                                checkAndExpireCache(), 0, purgeInterval, TimeUnit.MILLISECONDS);
+                        new CacheExpirer(retentionPeriod, cacheTable, tableMap, this, siddhiAppContext).
+                                generateCacheExpirer(), 0, purgeInterval, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -592,7 +592,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheResults == null) {
                     return null;
                 }
-                return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk, compiledSelectionWithCache,
+                return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk,
+                        compiledSelectionWithCache,
                         cacheResults);
             } finally {
                 readWriteLock.readLock().unlock();

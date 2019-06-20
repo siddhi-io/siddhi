@@ -35,8 +35,8 @@ public class CompareCollectionExecutor implements CollectionExecutor {
     private final String attribute;
     private final Compare.Operator operator;
     private final ExpressionExecutor valueExpressionExecutor;
-    ExpressionExecutor expressionExecutor;
-    int storeEventIndex;
+    protected ExpressionExecutor expressionExecutor;
+    protected int storeEventIndex;
 
     public CompareCollectionExecutor(ExpressionExecutor expressionExecutor, int storeEventIndex, String attribute,
                                      Compare.Operator operator, ExpressionExecutor valueExpressionExecutor) {

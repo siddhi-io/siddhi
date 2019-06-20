@@ -58,8 +58,8 @@ import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
  * this class has a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
  * expiry
  */
-public class CacheExpiryHandler {
-    private static final Logger log = Logger.getLogger(CacheExpiryHandler.class);
+public class CacheExpirer {
+    private static final Logger log = Logger.getLogger(CacheExpirer.class);
     private InMemoryTable cacheTable;
     private StreamEventFactory streamEventFactory;
     private Map<String, Table> tableMap;
@@ -69,8 +69,8 @@ public class CacheExpiryHandler {
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private CompiledCondition cacheExpiryCompiledCondition;
 
-    public CacheExpiryHandler(long retentionPeriod, InMemoryTable cacheTable, Map<String, Table> tableMap,
-                              AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
+    public CacheExpirer(long retentionPeriod, InMemoryTable cacheTable, Map<String, Table> tableMap,
+                        AbstractQueryableRecordTable storeTable, SiddhiAppContext siddhiAppContext) {
         this.cacheTable = cacheTable;
         this.tableMap = tableMap;
         this.storeTable = storeTable;
@@ -131,7 +131,7 @@ public class CacheExpiryHandler {
     }
 
     private void handleCacheExpiry() {
-        log.debug(siddhiAppContext.getName() + ": CacheExpiryHandler started");
+        log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore;
 
@@ -144,11 +144,12 @@ public class CacheExpiryHandler {
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                 AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
                 try {
-                    loadedDataFromStore = storeTable.query(stateEventForCaching,
-                            storeTable.getCompiledConditionForCaching(),
-                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
                     if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +
                             retentionPeriod) {
+                        loadedDataFromStore = storeTable.query(stateEventForCaching,
+                                storeTable.getCompiledConditionForCaching(),
+                                storeTable.getCompiledSelectionForCaching(), storeTable.
+                                        getOutputAttributesForCaching());
                         clearCacheAndReload(loadedDataFromStore);
                         storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
                     }
@@ -156,9 +157,7 @@ public class CacheExpiryHandler {
                     AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
                 }
             } else {
-                CompiledCondition cc = cacheExpiryCompiledCondition;
-                cacheTable.delete(generateDeleteEventChunk(),
-                        cc);
+                cacheTable.delete(generateDeleteEventChunk(), cacheExpiryCompiledCondition);
             }
             } catch (ConnectionUnavailableException e) {
                 throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
@@ -182,14 +181,13 @@ public class CacheExpiryHandler {
                         storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
                     }
                 } else {
-                    CompiledCondition cc = cacheExpiryCompiledCondition;
-                    cacheTable.delete(generateDeleteEventChunk(), cc);
+                    cacheTable.delete(generateDeleteEventChunk(), cacheExpiryCompiledCondition);
                 }
             } catch (Exception e) {
                 throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
             }
         }
-        log.debug(siddhiAppContext.getName() + ": CacheExpiryHandler ended");
+        log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
     }
 
     private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
@@ -205,9 +203,9 @@ public class CacheExpiryHandler {
     }
 
 
-    public Runnable checkAndExpireCache() {
+    public Runnable generateCacheExpirer() {
         class CheckAndExpireCache implements Runnable {
-
+            
             public CheckAndExpireCache() {
             }
 

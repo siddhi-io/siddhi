@@ -21,7 +21,7 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
-import io.siddhi.core.query.table.util.TestAppender;
+import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Level;
@@ -51,7 +51,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase0") // using query api and 2 primary keys & LRu
     public void cacheLRUTestCase0() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -120,7 +120,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase1") // using query api and 1 primary key & LRu
     public void cacheLRUTestCase1() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -188,7 +188,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase2") // 1 primary key & LRu & cointains api (in)
     public void cacheLRUTestCase2() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -249,7 +249,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase3") // 2 primary keys & LRu & cointains api (in)
     public void cacheLRUTestCase3() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -343,7 +343,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase4") // 1 primary key & LRu & update func
     public void cacheLRUTestCase4() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -431,7 +431,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase5") // 2 primary keys & LRu & update func
     public void cacheLRUTestCase5() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -519,7 +519,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase6") // 1 primary key & LRu & update or add func
     public void cacheLRUTestCase6() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -574,7 +574,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase7") // 2 primary keys & LRu & update or add func
     public void cacheLRUTestCase7() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -629,7 +629,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase8") // 2 primary keys & LRu & update or add func with update
     public void cacheLRUTestCase8() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -716,7 +716,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase9")
     public void cacheLRUTestCase9() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -814,7 +814,7 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase10")
     public void cacheLRUTestCase10() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);

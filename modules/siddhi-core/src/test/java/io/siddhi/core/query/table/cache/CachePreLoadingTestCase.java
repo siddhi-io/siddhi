@@ -20,7 +20,7 @@ package io.siddhi.core.query.table.cache;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.query.table.util.TestAppender;
+import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -51,7 +51,7 @@ public class CachePreLoadingTestCase {
 
     @Test
     public void cachePreLoadingTestCase0() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);

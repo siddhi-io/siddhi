@@ -21,7 +21,7 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
-import io.siddhi.core.query.table.util.TestAppender;
+import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Level;
@@ -51,7 +51,7 @@ public class CacheFIFOTestCase {
 
     @Test(description = "cacheFIFOTestCase0") // using query api
     public void cacheFIFOTestCase0() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -125,7 +125,7 @@ public class CacheFIFOTestCase {
 
     @Test(description = "cacheFIFOTestCase1") // using find api (join query)
     public void cacheFIFOTestCase1() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -225,7 +225,7 @@ public class CacheFIFOTestCase {
 
     @Test(description = "cacheFIFOTestCase2") // using query api and 2 primary keys
     public void cacheFIFOTestCase2() throws InterruptedException, SQLException {
-        final TestAppender appender = new TestAppender();
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);

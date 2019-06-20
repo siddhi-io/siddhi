@@ -17,17 +17,7 @@
  */
 package io.siddhi.core.util.cache;
 
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.executor.ConstantExpressionExecutor;
-import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.executor.VariableExpressionExecutor;
-import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutor;
-import io.siddhi.core.util.collection.executor.CompareCollectionExecutor;
-import io.siddhi.core.util.collection.operator.CompiledCondition;
-import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
-
-import java.util.List;
 
 /**
  * class containing utils related to store table cache
@@ -44,56 +34,5 @@ public class CacheUtils {
             streamEventCopy = streamEventCopy.getNext();
         }
         return chunkSize;
-    }
-
-    public static String getPrimaryKey(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        StringBuilder primaryKey = new StringBuilder();
-        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
-        Object[] data = null;
-        if (streamEvent != null) {
-            data = streamEvent.getOutputData();
-        }
-
-        if (compiledCondition instanceof OverwriteTableIndexOperator) {
-            OverwriteTableIndexOperator operator = (OverwriteTableIndexOperator) compiledCondition;
-            if (operator.getCollectionExecutor() instanceof AndMultiPrimaryKeyCollectionExecutor) {
-                AndMultiPrimaryKeyCollectionExecutor executor = (AndMultiPrimaryKeyCollectionExecutor) operator.
-                        getCollectionExecutor();
-                List<ExpressionExecutor> lis = executor.getMultiPrimaryKeyExpressionExecutors();
-                for (ExpressionExecutor ee : lis) {
-                    if (ee instanceof VariableExpressionExecutor) {
-                        VariableExpressionExecutor vee = (VariableExpressionExecutor) ee;
-                        primaryKey.append(data[vee.getPosition()[3]]);
-                        primaryKey.append(":-:");
-                    }
-                }
-            } else if (operator.getCollectionExecutor() instanceof CompareCollectionExecutor) {
-                CompareCollectionExecutor executor = (CompareCollectionExecutor) operator.getCollectionExecutor();
-                if (executor.getValueExpressionExecutor() instanceof ConstantExpressionExecutor) {
-                    primaryKey.append(((ConstantExpressionExecutor) executor.getValueExpressionExecutor()).getValue());
-                } else if (executor.getValueExpressionExecutor() instanceof VariableExpressionExecutor) {
-                    VariableExpressionExecutor vee = (VariableExpressionExecutor) executor.getValueExpressionExecutor();
-                    primaryKey.append(data[vee.getPosition()[3]]);
-                } else {
-                    return null;
-                }
-            }
-        }
-        return primaryKey.toString();
-    }
-
-    public static String getPrimaryKeyFromMatchingEvent(StateEvent matchingEvent) {
-        StringBuilder primaryKey = new StringBuilder();
-        StreamEvent streamEvent = matchingEvent.getStreamEvent(0);
-        Object[] data = streamEvent.getOutputData();
-        if (data.length == 1) {
-            primaryKey.append(data[0]);
-        } else {
-            for (Object object : data) {
-                primaryKey.append(object);
-                primaryKey.append(":-:");
-            }
-        }
-        return primaryKey.toString();
     }
 }

@@ -63,7 +63,6 @@ public class InTestStoreTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckInStockStream (symbol string); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
         String query1 = "" +

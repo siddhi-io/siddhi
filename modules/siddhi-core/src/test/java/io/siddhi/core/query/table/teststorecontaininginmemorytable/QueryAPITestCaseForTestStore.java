@@ -55,8 +55,6 @@ public class QueryAPITestCaseForTestStore {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
-//                "@PrimaryKey(\"symbol\")" +
-//                "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

@@ -51,7 +51,6 @@ public class InsertIntoTestStoreTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, volume long); ";
 
         String query1 = "" +
@@ -84,7 +83,6 @@ public class InsertIntoTestStoreTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
                 "@PrimaryKey(\"symbol\", \"price\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         String query = "" +
@@ -121,11 +119,9 @@ public class InsertIntoTestStoreTestCase {
         String table = "" +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" + // , @Cache(size="10")
                 "@PrimaryKey(\"symbol\", \"price\")" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long);\n" +
                 "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
                 "@PrimaryKey(\"symbol\", \"price\")" +
-                //"@Index(\"volume\")" +
                 "define table MyTable (symbol string, price float);\n";
 
         String query = "" +
