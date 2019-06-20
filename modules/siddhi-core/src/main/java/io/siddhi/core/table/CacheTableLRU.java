@@ -36,6 +36,9 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_LRU;
  */
 public class CacheTableLRU extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableLRU.class);
+    private int cachePolicyAttributePosition;
+    private int numColumns;
+    private int expiryAttributePosition;
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
@@ -67,7 +70,7 @@ public class CacheTableLRU extends CacheTable {
             }
             indexEventHolder.deleteEvent(keyOfMinTimestamp);
         } catch (ClassCastException e) {
-            log.error(siddhiAppContext + ": " + e.getMessage());
+            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 
@@ -96,7 +99,7 @@ public class CacheTableLRU extends CacheTable {
                 }
             }
         } catch (ClassCastException e) {
-            log.error(siddhiAppContext + ": " + e.getMessage());
+            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 

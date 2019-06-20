@@ -19,6 +19,7 @@ package io.siddhi.core.query.table.util;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
@@ -76,7 +77,7 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
     private InMemoryTable inMemoryTable;
 
     @Override
-    protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
+    protected void init(TableDefinition tableDefinition, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         inMemoryTable = new InMemoryTable();
 
         MetaStreamEvent cacheTableMetaStreamEvent = new MetaStreamEvent();
@@ -98,7 +99,7 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
         }
 
         inMemoryTable.init(testStoreContainingIMTableDefinition, storeEventPool, testTableStreamEventCloner,
-                configReader, super.getSiddhiAppContext(), recordTableHandler);
+                configReader, siddhiAppContext, recordTableHandler);
     }
 
     @Override

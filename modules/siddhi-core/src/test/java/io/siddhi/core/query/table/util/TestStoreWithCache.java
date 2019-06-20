@@ -19,6 +19,7 @@ package io.siddhi.core.query.table.util;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
@@ -71,7 +72,7 @@ public class TestStoreWithCache extends AbstractQueryableRecordTable {
     }
 
     @Override
-    protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
+    protected void init(TableDefinition tableDefinition, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
 
     }
 

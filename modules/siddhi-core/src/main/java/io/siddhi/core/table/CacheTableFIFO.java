@@ -35,6 +35,8 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
  */
 public class CacheTableFIFO extends CacheTable {
     private static final Logger log = Logger.getLogger(CacheTableFIFO.class);
+    private int cachePolicyAttributePosition;
+    private int numColumns;
 
     @Override
     void addRequiredFieldsToCacheTableDefinition(TableDefinition cacheTableDefinition, boolean cacheExpiryEnabled) {
@@ -60,7 +62,7 @@ public class CacheTableFIFO extends CacheTable {
             }
             indexEventHolder.deleteEvent(keyOfMinTimestamp);
         } catch (ClassCastException e) {
-            log.error(siddhiAppContext + ": " + e.getMessage());
+            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 
@@ -89,7 +91,7 @@ public class CacheTableFIFO extends CacheTable {
                 }
             }
         } catch (ClassCastException e) {
-            log.error(siddhiAppContext + ": " + e.getMessage());
+            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 
@@ -100,16 +102,13 @@ public class CacheTableFIFO extends CacheTable {
         Object[] outputData = event.getOutputData();
             outputDataForCache = new Object[numColumns];
             outputDataForCache[cachePolicyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
-
         System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
-
         return eventForCache;
     }
 
     @Override
     public void updateCachePolicyAttribute(StreamEvent streamEvent) {
-
     }
 }

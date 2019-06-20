@@ -220,6 +220,7 @@ public class InMemoryTable extends Table {
         public TableState(EventHolder eventHolder) {
             this.eventHolder = eventHolder;
         }
+        
         public EventHolder getEventHolder() {
             return eventHolder;
         }

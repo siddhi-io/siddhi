@@ -142,7 +142,7 @@ public class CacheExpiryHandler {
             }
             try {
             if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                AbstractQueryableRecordTable.queryFromStore.set(Boolean.TRUE);
+                AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
                 try {
                     loadedDataFromStore = storeTable.query(stateEventForCaching,
                             storeTable.getCompiledConditionForCaching(),
@@ -153,7 +153,7 @@ public class CacheExpiryHandler {
                         storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
                     }
                 } finally {
-                    AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
+                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
                 }
             } else {
                 CompiledCondition cc = cacheExpiryCompiledCondition;
@@ -165,7 +165,7 @@ public class CacheExpiryHandler {
             }
         } else {
             try {
-                AbstractQueryableRecordTable.queryFromStore.set(Boolean.TRUE);
+                AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
                 try {
                     loadedDataFromStore = storeTable.query(stateEventForCaching,
                             storeTable.getCompiledConditionForCaching(),
@@ -173,7 +173,7 @@ public class CacheExpiryHandler {
                     storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
                     storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
                 } finally {
-                    AbstractQueryableRecordTable.queryFromStore.set(Boolean.FALSE);
+                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
                 }
                 if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
                     if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +

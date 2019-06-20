@@ -127,10 +127,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                  StreamEventCloner storeEventCloner, ConfigReader configReader,
                                  SiddhiAppContext siddhiAppContext, RecordTableHandler recordTableHandler);
 
-    public SiddhiAppContext getSiddhiAppContext() {
-        return siddhiAppContext;
-    }
-
     public TableDefinition getTableDefinition() {
         return tableDefinition;
     }

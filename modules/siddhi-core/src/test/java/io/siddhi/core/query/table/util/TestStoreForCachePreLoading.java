@@ -19,6 +19,7 @@ package io.siddhi.core.query.table.util;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
@@ -44,6 +45,7 @@ import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.SelectorParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -76,7 +78,7 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
     private InMemoryTable inMemoryTable;
 
     @Override
-    protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
+    protected void init(TableDefinition tableDefinition, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         inMemoryTable = new InMemoryTable();
 
         MetaStreamEvent cacheTableMetaStreamEvent = new MetaStreamEvent();
@@ -98,7 +100,7 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
         }
 
         inMemoryTable.init(testStoreContainingIMTableDefinition, storeEventPool, testTableStreamEventCloner,
-                configReader, super.getSiddhiAppContext(), recordTableHandler);
+                configReader, siddhiAppContext, recordTableHandler);
         ComplexEventChunk<StreamEvent> originalData = new ComplexEventChunk<>();
         StreamEvent data1 = new StreamEvent(0, 0, 3);
         data1.setOutputData(new Object[]{"WSO2", 55.6f, 100L});

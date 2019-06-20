@@ -60,10 +60,7 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
     private boolean cacheExpiryEnabled;
-    SiddhiAppContext siddhiAppContext;
-    int cachePolicyAttributePosition;
-    int numColumns;
-    int expiryAttributePosition;
+    protected SiddhiAppContext siddhiAppContext;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
@@ -273,10 +270,11 @@ public abstract class CacheTable extends InMemoryTable {
     private void recursivelyCheckConditionToRouteToCache(Expression condition, List<String> primaryKeysArray) {
         if (condition instanceof Compare) {
             Compare compareCondition = (Compare) condition;
-            if (compareCondition.getOperator().name().equalsIgnoreCase("EQUAL")) {
+            if (compareCondition.getOperator() == Compare.Operator.EQUAL) {
                 if (compareCondition.getLeftExpression() instanceof Variable) {
                     Variable variable = (Variable) compareCondition.getLeftExpression();
-                    if (variable.getStreamId().equalsIgnoreCase(tableDefinition.getId())) {
+                    if (variable.getStreamId() != null && variable.getStreamId().equalsIgnoreCase(
+                            tableDefinition.getId())) {
                         primaryKeysArray.remove(variable.getAttributeName());
                     }
                 }

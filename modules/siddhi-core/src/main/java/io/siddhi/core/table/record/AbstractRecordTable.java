@@ -67,7 +67,7 @@ public abstract class AbstractRecordTable extends Table {
         }
         this.recordTableHandler = recordTableHandler;
         this.storeEventPool = storeEventPool;
-        init(tableDefinition, configReader);
+        init(tableDefinition, configReader, siddhiAppContext);
         initCache(tableDefinition, siddhiAppContext, storeEventCloner, configReader);
     }
 
@@ -80,7 +80,8 @@ public abstract class AbstractRecordTable extends Table {
      * @param tableDefinition definition of the table with annotations if any
      * @param configReader    this hold the {@link AbstractRecordTable} configuration reader.
      */
-    protected abstract void init(TableDefinition tableDefinition, ConfigReader configReader);
+    protected abstract void init(TableDefinition tableDefinition, ConfigReader configReader,
+                                 SiddhiAppContext siddhiAppContext);
 
     @Override
     public TableDefinition getTableDefinition() {

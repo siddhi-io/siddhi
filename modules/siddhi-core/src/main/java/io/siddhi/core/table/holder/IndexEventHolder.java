@@ -61,12 +61,12 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private static final Logger log = Logger.getLogger(IndexEventHolder.class);
     private static final long serialVersionUID = 1272291743721603253L;
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
-    final Map<Object, StreamEvent> primaryKeyData;
-    final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
+    protected final Map<Object, StreamEvent> primaryKeyData;
+    protected final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
     private final PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders;
     private final String tableName;
     private final String siddhiAppName;
-    String primaryKeyAttributes = null;
+    protected String primaryKeyAttributes = null;
     private StreamEventFactory tableStreamEventFactory;
     private StreamEventConverter eventConverter;
     private Map<String, Integer> indexMetaData;
@@ -126,10 +126,6 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     public void replace(Object key, StreamEvent streamEvent) {
         primaryKeyData.replace(key, streamEvent);
     }
-
-//    public String getPrimaryKey(StreamEvent streamEvent) {
-//        primaryKeyData.
-//    }
 
     @Override
     public Set<Object> getAllPrimaryKeyValues() {
