@@ -102,9 +102,4 @@ public class MinIncrementalAttributeAggregator extends IncrementalAttributeAggre
         return this.returnType;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return true;
-    }
-
 }

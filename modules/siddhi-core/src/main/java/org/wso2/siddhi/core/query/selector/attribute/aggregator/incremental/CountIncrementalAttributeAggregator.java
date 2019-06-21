@@ -90,9 +90,4 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return true;
-    }
-
 }
