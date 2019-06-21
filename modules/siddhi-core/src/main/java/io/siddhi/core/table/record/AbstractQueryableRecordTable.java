@@ -261,7 +261,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledConditionWithCache = (CompiledConditionWithCache)
                     (compiledConditionTemp.getCompiledCondition());
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
 
             readWriteLock.writeLock().lock();
             try {
@@ -289,7 +290,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
             compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
@@ -319,7 +321,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
 
             readWriteLock.readLock().lock();
             try {
@@ -346,7 +349,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     compiledConditionTemp.getCompiledCondition();
             RecordStoreCompiledCondition recordStoreCompiledCondition = new RecordStoreCompiledCondition(
                     compiledConditionTemp.variableExpressionExecutorMap,
-                    compiledConditionWithCache.getStoreCompileCondition());
+                    compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
             CompiledUpdateSetWithCache compiledUpdateSetWithCache = (CompiledUpdateSetWithCache) compiledUpdateSet;
             RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet)
                     compiledUpdateSetWithCache.storeCompiledUpdateSet;
@@ -383,7 +387,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             compiledConditionWithCache = (CompiledConditionWithCache)
                     compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(compiledConditionTemp.
-                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition());
+                    variableExpressionExecutorMap, compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
         } else {
             recordStoreCompiledCondition =
                     ((RecordStoreCompiledCondition) compiledCondition);
@@ -393,7 +398,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         // when table is smaller than max cache send results from cache
         if (cacheEnabled & storeTableSize <= maxCacheSize) {
             if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + ": store table size is smaller than max cache. " +
+                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                        getName() + ": store table size is smaller than max cache. " +
                         "Sending results from cache");
             }
             readWriteLock.readLock().lock();
@@ -406,11 +412,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + ": store table size is bigger than cache.");
+                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                        getName() + ": store table size is bigger than cache.");
             }
             if (cacheEnabled && compiledConditionWithCache.isRouteToCache()) {
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": cache constraints satisfied. Checking cache");
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": cache constraints satisfied. Checking cache");
                 }
                 readWriteLock.readLock().lock();
                 try {
@@ -418,7 +426,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             matchingEvent);
                     if (cacheResults != null) {
                         if (log.isDebugEnabled()) {
-                            log.debug(siddhiAppContext.getName() + ": cache hit. Sending results from cache");
+                            log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                    getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
                         }
                         return cacheResults;
                     }
@@ -427,12 +436,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 // cache miss
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": cache miss. Loading from store");
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": cache miss. Loading from store");
                 }
                 StreamEvent streamEvent = super.find(recordStoreCompiledCondition, matchingEvent);
                 if (streamEvent == null) {
                     if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + ": store also miss. sending null");
+                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                getSiddhiQueryContext().getName() + ": store also miss. sending null");
                     }
                     return null;
                 }
@@ -446,7 +457,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
                     if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + ": sending results from cache after loading from store");
+                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                getSiddhiQueryContext().getName() + ": sending results from cache after loading from " +
+                                "store");
                     }
                     return cacheResults;
                 } finally {
@@ -456,7 +469,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         // when cache is not enabled or cache query conditions are not satisfied
         if (log.isDebugEnabled()) {
-            log.debug(siddhiAppContext.getName() + ": sending results from store");
+            log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().getName()
+                    + ": sending results from store");
         }
         return super.find(recordStoreCompiledCondition, matchingEvent);
     }
@@ -510,10 +524,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (cacheEnabled) {
             CompiledCondition compiledConditionWithCache = new CompiledConditionWithCache(compileCondition,
                     ((CacheTable) cacheTable).generateCacheCompileCondition(condition, matchingMetaInfoHolder,
-                            siddhiQueryContext, variableExpressionExecutors));
-            return new RecordStoreCompiledCondition(expressionExecutorMap, compiledConditionWithCache);
+                            siddhiQueryContext, variableExpressionExecutors), siddhiQueryContext);
+            return new RecordStoreCompiledCondition(expressionExecutorMap, compiledConditionWithCache,
+                    siddhiQueryContext);
         } else {
-            return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
+            return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition, siddhiQueryContext);
         }
     }
 
@@ -557,7 +572,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     compiledConditionTemp.getCompiledCondition();
             recordStoreCompiledCondition = new RecordStoreCompiledCondition(
                     compiledConditionTemp.variableExpressionExecutorMap,
-                    compiledConditionWithCache.getStoreCompileCondition());
+                    compiledConditionWithCache.getStoreCompileCondition(),
+                    compiledConditionTemp.getSiddhiQueryContext());
 
             compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             recordStoreCompiledSelection = compiledSelectionWithCache.recordStoreCompiledSelection;
@@ -586,7 +602,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                         matchingEvent);
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": store table size is smaller than max cache. " +
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": store table size is smaller than max cache. " +
                             "Sending results from cache");
                 }
                 if (cacheResults == null) {
@@ -600,11 +617,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             }
         } else { // when store is bigger than max cache size
             if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
-                log.debug(siddhiAppContext.getName() + ": store table size is bigger than cache.");
+                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                        getName() + ": store table size is bigger than cache.");
             }
             if (cacheEnabled && compiledConditionWithCache.isRouteToCache() && !queryStoreWithoutCheckingCache.get()) {
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": cache constraints satisfied. Checking cache");
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": cache constraints satisfied. Checking cache");
                 }
                 // if query conrains all primary keys and has == only for them
                 readWriteLock.readLock().lock();
@@ -613,7 +632,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             matchingEvent);
                     if (cacheResults != null) {
                         if (log.isDebugEnabled()) {
-                            log.debug(siddhiAppContext.getName() + ": cache hit. Sending results from cache");
+                            log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                    getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
                         }
                         return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk,
                                 compiledSelectionWithCache, cacheResults);
@@ -623,7 +643,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
 
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": cache miss. Loading from store");
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": cache miss. Loading from store");
                 }
                 // read all fields of missed entry from store
 
@@ -638,7 +659,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 if (recordsFromSelectAll == null || !recordsFromSelectAll.hasNext()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + ": store also miss. sending null");
+                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                getSiddhiQueryContext().getName() + ": store also miss. sending null");
                     }
                     return null;
                 }
@@ -653,7 +675,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
                 ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
                 if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": sending results from cache after loading from store");
+                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                            getName() + ": sending results from cache after loading from store");
                 }
                 try {
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
@@ -665,7 +688,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 }
             }
             if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
-                log.debug(siddhiAppContext.getName() + ": sending results from store");
+                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                        getName() + ": sending results from store");
             }
             // query conditions are not satisfied check from store/ cache not enabled
             if (recordTableHandler != null) {
@@ -951,13 +975,16 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         private CompiledCondition cacheCompileCondition;
         private CompiledCondition storeCompileCondition;
         private boolean routeToCache;
+        private SiddhiQueryContext siddhiQueryContext;
 
         CompiledConditionWithCache(CompiledCondition storeCompileCondition,
                                    CacheTable.CacheCompiledConditionWithRouteToCache
-                                           cacheCompiledConditionWithRouteToCache) {
+                                           cacheCompiledConditionWithRouteToCache,
+                                   SiddhiQueryContext siddhiQueryContext) {
             this.storeCompileCondition = storeCompileCondition;
             this.cacheCompileCondition = cacheCompiledConditionWithRouteToCache.getCacheCompiledCondition();
             this.routeToCache = cacheCompiledConditionWithRouteToCache.isRouteToCache();
+            this.siddhiQueryContext = siddhiQueryContext;
         }
 
         CompiledCondition getStoreCompileCondition() {
@@ -970,6 +997,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         CompiledCondition getCacheCompileCondition() {
             return cacheCompileCondition;
+        }
+
+        public SiddhiQueryContext getSiddhiQueryContext() {
+            return siddhiQueryContext;
         }
     }
 

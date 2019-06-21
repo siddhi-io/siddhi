@@ -47,51 +47,43 @@ public class CacheTableFIFO extends CacheTable {
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {
-        try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-            long minTimestamp = Long.MAX_VALUE;
-            Object keyOfMinTimestamp = null;
-            for (Object key: keys) {
-                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[cachePolicyAttributePosition];
-                if (timestamp < minTimestamp) {
-                    minTimestamp = timestamp;
-                    keyOfMinTimestamp = key;
-                }
+        IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+        long minTimestamp = Long.MAX_VALUE;
+        Object keyOfMinTimestamp = null;
+        for (Object key: keys) {
+            Object[] data = indexEventHolder.getEvent(key).getOutputData();
+            long timestamp = (long) data[cachePolicyAttributePosition];
+            if (timestamp < minTimestamp) {
+                minTimestamp = timestamp;
+                keyOfMinTimestamp = key;
             }
-            indexEventHolder.deleteEvent(keyOfMinTimestamp);
-        } catch (ClassCastException e) {
-            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
+        indexEventHolder.deleteEvent(keyOfMinTimestamp);
     }
 
     @Override
     public void deleteEntriesUsingCachePolicy(int numRowsToDelete) {
-        try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-            long[] minTimestampArray = new long[numRowsToDelete];
-            Arrays.fill(minTimestampArray, Long.MAX_VALUE);
-            Object[] keyOfMinTimestampArray = new Object[numRowsToDelete];
+        IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+        long[] minTimestampArray = new long[numRowsToDelete]; //todo: implement tree?
+        Arrays.fill(minTimestampArray, Long.MAX_VALUE);
+        Object[] keyOfMinTimestampArray = new Object[numRowsToDelete];
 
-            for (Object key: keys) {
-                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                long timestamp = (long) data[cachePolicyAttributePosition];
-                for (int i = 0; i < numRowsToDelete; i++) {
-                    if (timestamp < minTimestampArray[i]) {
-                        minTimestampArray[i] = timestamp;
-                        keyOfMinTimestampArray[i] = key;
-                    }
+        for (Object key: keys) {
+            Object[] data = indexEventHolder.getEvent(key).getOutputData();
+            long timestamp = (long) data[cachePolicyAttributePosition];
+            for (int i = 0; i < numRowsToDelete; i++) {
+                if (timestamp < minTimestampArray[i]) {
+                    minTimestampArray[i] = timestamp;
+                    keyOfMinTimestampArray[i] = key;
                 }
             }
-            for (Object deleteKey: keyOfMinTimestampArray) {
-                if (deleteKey != null) {
-                    indexEventHolder.deleteEvent(deleteKey);
-                }
+        }
+        for (Object deleteKey: keyOfMinTimestampArray) {
+            if (deleteKey != null) {
+                indexEventHolder.deleteEvent(deleteKey);
             }
-        } catch (ClassCastException e) {
-            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 

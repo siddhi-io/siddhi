@@ -55,51 +55,43 @@ public class CacheTableLFU extends CacheTable {
 
     @Override
     public void deleteOneEntryUsingCachePolicy() {
-        try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-            int minCount = Integer.MAX_VALUE;
-            Object keyOfMinCount = null;
-            for (Object key : keys) {
-                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                int count = (int) data[cachePolicyAttributePosition];
-                if (count < minCount) {
-                    minCount = count;
-                    keyOfMinCount = key;
-                }
+        IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+        int minCount = Integer.MAX_VALUE;
+        Object keyOfMinCount = null;
+        for (Object key : keys) {
+            Object[] data = indexEventHolder.getEvent(key).getOutputData();
+            int count = (int) data[cachePolicyAttributePosition];
+            if (count < minCount) {
+                minCount = count;
+                keyOfMinCount = key;
             }
-            indexEventHolder.deleteEvent(keyOfMinCount);
-        } catch (ClassCastException e) {
-            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
+        indexEventHolder.deleteEvent(keyOfMinCount);
     }
 
     @Override
     public void deleteEntriesUsingCachePolicy(int numRowsToDelete) {
-        try {
-            IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-            int[] minCountArray = new int[numRowsToDelete];
-            Arrays.fill(minCountArray, Integer.MAX_VALUE);
-            Object[] keyOfMinCountArray = new Object[numRowsToDelete];
+        IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
+        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+        int[] minCountArray = new int[numRowsToDelete];
+        Arrays.fill(minCountArray, Integer.MAX_VALUE);
+        Object[] keyOfMinCountArray = new Object[numRowsToDelete];
 
-            for (Object key: keys) {
-                Object[] data = indexEventHolder.getEvent(key).getOutputData();
-                int count = (int) data[cachePolicyAttributePosition];
-                for (int i = 0; i < numRowsToDelete; i++) {
-                    if (count < minCountArray[i]) {
-                        minCountArray[i] = count;
-                        keyOfMinCountArray[i] = key;
-                    }
+        for (Object key: keys) {
+            Object[] data = indexEventHolder.getEvent(key).getOutputData();
+            int count = (int) data[cachePolicyAttributePosition];
+            for (int i = 0; i < numRowsToDelete; i++) {
+                if (count < minCountArray[i]) {
+                    minCountArray[i] = count;
+                    keyOfMinCountArray[i] = key;
                 }
             }
-            for (Object deleteKey: keyOfMinCountArray) {
-                if (deleteKey != null) {
-                    indexEventHolder.deleteEvent(deleteKey);
-                }
+        }
+        for (Object deleteKey: keyOfMinCountArray) {
+            if (deleteKey != null) {
+                indexEventHolder.deleteEvent(deleteKey);
             }
-        } catch (ClassCastException e) {
-            log.error(siddhiAppContext.getName() + ": " + e.getMessage());
         }
     }
 
