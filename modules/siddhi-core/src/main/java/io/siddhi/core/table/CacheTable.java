@@ -210,7 +210,7 @@ public abstract class CacheTable extends InMemoryTable {
                                                             SiddhiQueryContext siddhiQueryContext,
                                                             List<VariableExpressionExecutor>
                                                                     storeVariableExpressionExecutors) {
-        boolean routeToCache = checkConditionToRouteToCache(condition);
+        boolean routeToCache = checkConditionToRouteToCache(condition, storeMatchingMetaInfoHolder);
         MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
                 getMetaStreamEvents().length);
         for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
@@ -253,7 +253,7 @@ public abstract class CacheTable extends InMemoryTable {
         }
     }
 
-    private boolean checkConditionToRouteToCache(Expression condition) {
+    private boolean checkConditionToRouteToCache(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder) {
         List<String> primaryKeysArray = new ArrayList<>();
         Annotation primaryKeys = getAnnotation("PrimaryKey", tableDefinition.getAnnotations());
         if (primaryKeys == null) {
@@ -263,32 +263,53 @@ public abstract class CacheTable extends InMemoryTable {
         for (Element element: keys) {
             primaryKeysArray.add(element.getValue());
         }
-        recursivelyCheckConditionToRouteToCache(condition, primaryKeysArray);
+        recursivelyCheckConditionToRouteToCache(condition, primaryKeysArray, matchingMetaInfoHolder);
         return primaryKeysArray.size() == 0;
     }
 
-    private void recursivelyCheckConditionToRouteToCache(Expression condition, List<String> primaryKeysArray) {
+    private void recursivelyCheckConditionToRouteToCache(Expression condition, List<String> primaryKeysArray,
+                                                         MatchingMetaInfoHolder matchingMetaInfoHolder) {
         if (condition instanceof Compare) {
             Compare compareCondition = (Compare) condition;
             if (compareCondition.getOperator() == Compare.Operator.EQUAL) {
                 if (compareCondition.getLeftExpression() instanceof Variable) {
                     Variable variable = (Variable) compareCondition.getLeftExpression();
-                    if (variable.getStreamId() != null && variable.getStreamId().equalsIgnoreCase(
-                            tableDefinition.getId())) {
+                    if (checkIfVariableMatchesTable(variable, matchingMetaInfoHolder)) {
                         primaryKeysArray.remove(variable.getAttributeName());
                     }
                 }
                 if (compareCondition.getRightExpression() instanceof Variable) {
                     Variable variable = (Variable) compareCondition.getRightExpression();
-                    if (variable.getStreamId().equalsIgnoreCase(tableDefinition.getId())) {
+                    if (checkIfVariableMatchesTable(variable, matchingMetaInfoHolder)) {
                         primaryKeysArray.remove(variable.getAttributeName());
                     }
                 }
             }
         } else if (condition instanceof And) {
-            recursivelyCheckConditionToRouteToCache(((And) condition).getLeftExpression(), primaryKeysArray);
-            recursivelyCheckConditionToRouteToCache(((And) condition).getRightExpression(), primaryKeysArray);
+            recursivelyCheckConditionToRouteToCache(((And) condition).getLeftExpression(), primaryKeysArray,
+                    matchingMetaInfoHolder);
+            recursivelyCheckConditionToRouteToCache(((And) condition).getRightExpression(), primaryKeysArray,
+                    matchingMetaInfoHolder);
         }
+    }
+
+    private boolean checkIfVariableMatchesTable(Variable variable, MatchingMetaInfoHolder matchingMetaInfoHolder) {
+        if (variable.getStreamId() == null) {
+            return false;
+        }
+        if (variable.getStreamId().equalsIgnoreCase(tableDefinition.getId())) {
+            return true;
+        }
+
+        for (MetaStreamEvent streamEvent: matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
+            if (streamEvent.getInputReferenceId() != null &&
+                    streamEvent.getInputReferenceId().equalsIgnoreCase(variable.getStreamId())) {
+                if (streamEvent.getInputDefinitions().get(0).getId().equalsIgnoreCase(tableDefinition.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,

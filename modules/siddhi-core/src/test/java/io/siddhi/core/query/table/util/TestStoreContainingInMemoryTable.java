@@ -147,7 +147,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
                                                  Long offset) {
         CompiledSelectionWithCache compiledSelectionWithCache;
-        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent();
+        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent().clone();
 
         ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
         int metaPosition = SiddhiConstants.UNKNOWN_STATE;
@@ -158,6 +158,12 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
             for (Attribute outputAttribute: metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
                 metaStateEvent.getMetaStreamEvents()[0].addOutputData(outputAttribute);
             }
+        }
+
+        if (metaStateEvent.getOutputDataAttributes().size() > 0) {
+                while (metaStateEvent.getMetaStreamEvent(0).getOutputData().size() > 0) {
+                    metaStateEvent.getMetaStreamEvent(0).getOutputData().remove(0);
+                }
         }
 
         QuerySelector querySelector = SelectorParser.parse(selectorForTestStoreQuery,
