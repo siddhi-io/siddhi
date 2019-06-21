@@ -25,7 +25,9 @@ import io.siddhi.query.api.annotation.Annotation;
 public class StreamDefinition extends AbstractDefinition {
 
     private static final long serialVersionUID = 1L;
-
+    protected String[] attributeNameArray;
+    protected boolean hasDefinitionChanged = false;
+    
     public StreamDefinition() {
     }
 
@@ -40,7 +42,25 @@ public class StreamDefinition extends AbstractDefinition {
     public StreamDefinition attribute(String attributeName, Attribute.Type type) {
         checkAttribute(attributeName);
         this.attributeList.add(new Attribute(attributeName, type));
+        this.hasDefinitionChanged = true;
         return this;
+    }
+    
+    // overriding the base implementation to remove hotspot on this method call
+    // iterating the attribute list only if there is a change
+    @Override
+    public String[] getAttributeNameArray() {
+        if (hasDefinitionChanged) {
+            int attributeListSize = attributeList.size();
+            this.attributeNameArray = new String[attributeListSize];
+            for (int i = 0; i < attributeListSize; i++) {
+                this.attributeNameArray[i] = attributeList.get(i).getName();
+            }
+
+            hasDefinitionChanged = false;
+        }
+
+        return this.attributeNameArray;
     }
 
     public StreamDefinition annotation(Annotation annotation) {
