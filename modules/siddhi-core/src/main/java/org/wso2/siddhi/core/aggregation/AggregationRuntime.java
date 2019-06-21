@@ -412,7 +412,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 .collect(Collectors.toList());
         boolean queryGroupByContainsTimestamp = queryGroupByNamesList.remove(AGG_START_TIMESTAMP_COL);
 
-        boolean isQueryGroupBySame = queryGroupByList.isEmpty() ||
+        boolean isQueryGroupBySameAsAggGroupBy = queryGroupByList.isEmpty() ||
                 (queryGroupByList.contains(timestampVariable) && queryGroupByNamesList.equals(groupByVariablesList));
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
@@ -422,7 +422,7 @@ public class AggregationRuntime implements MemoryCalculable {
             Selector selector = Selector.selector();
 
             List<Variable> groupByList = new ArrayList<>();
-            if (!isQueryGroupBySame) {
+            if (!isQueryGroupBySameAsAggGroupBy) {
                 if (queryGroupByContainsTimestamp) {
                     if (isProcessingOnExternalTime) {
                         groupByList.add(new Variable(AGG_EXTERNAL_TIMESTAMP_COL));
@@ -444,7 +444,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
                 // If query group bys are based on joining stream
                 if (groupByList.isEmpty()) {
-                    isQueryGroupBySame = true;
+                    isQueryGroupBySameAsAggGroupBy = true;
                 }
             }
 
@@ -454,7 +454,7 @@ public class AggregationRuntime implements MemoryCalculable {
             selector.addGroupByList(groupByList);
 
             List<OutputAttribute> selectorList;
-            if (!isQueryGroupBySame) {
+            if (!isQueryGroupBySameAsAggGroupBy) {
                 selectorList = constructSelectorList(isProcessingOnExternalTime, isDistributed, isLatestEventColAdded,
                         baseAggregatorBeginIndex, groupByVariablesList.size(), finalBaseExpressionsList,
                         tableDefinition, groupByList);
