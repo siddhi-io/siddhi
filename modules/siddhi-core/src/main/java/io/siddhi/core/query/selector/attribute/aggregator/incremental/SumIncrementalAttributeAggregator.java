@@ -113,8 +113,4 @@ public class SumIncrementalAttributeAggregator extends IncrementalAttributeAggre
         return returnType;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return true;
-    }
 }

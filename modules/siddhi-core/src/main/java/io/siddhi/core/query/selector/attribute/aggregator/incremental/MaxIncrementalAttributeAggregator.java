@@ -102,8 +102,4 @@ public class MaxIncrementalAttributeAggregator extends IncrementalAttributeAggre
         return this.returnType;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return true;
-    }
 }

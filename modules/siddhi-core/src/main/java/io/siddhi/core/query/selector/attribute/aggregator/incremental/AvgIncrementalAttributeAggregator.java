@@ -115,8 +115,4 @@ public class AvgIncrementalAttributeAggregator extends IncrementalAttributeAggre
         return Attribute.Type.DOUBLE;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return true;
-    }
 }

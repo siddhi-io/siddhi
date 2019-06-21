@@ -101,9 +101,5 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public boolean isDatabaseOptimisable() {
-        return false;
-    }
 }
 

@@ -340,18 +340,7 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
                     aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
 
-            boolean isOptimisedLookup = true;
-            for (IncrementalAttributeAggregator incrementalAttributeAggregator : incrementalAttributeAggregators) {
-                if (!incrementalAttributeAggregator.isDatabaseOptimisable()) {
-                    isOptimisedLookup = false;
-                    break;
-                }
-            }
-
-            if (isOptimisedLookup) {
-                //DB interface should also be compatible
-                isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
-            }
+            boolean isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
 
             List<String> groupByVariablesList = groupByVariableList.stream()
                     .map(Variable::getAttributeName)
