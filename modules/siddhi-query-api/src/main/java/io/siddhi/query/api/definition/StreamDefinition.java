@@ -50,17 +50,16 @@ public class StreamDefinition extends AbstractDefinition {
     // iterating the attribute list only if there is a change
     @Override
     public String[] getAttributeNameArray() {
-    	
-    	if (hasDefinitionChanged) {
-    		int attributeListSize = attributeList.size();
+        if (hasDefinitionChanged) {
+            int attributeListSize = attributeList.size();
             this.attributeNameArray = new String[attributeListSize];
             for (int i = 0; i < attributeListSize; i++) {
                 this.attributeNameArray[i] = attributeList.get(i).getName();
             }
-            
+
             hasDefinitionChanged = false;
-    	}
-        
+        }
+
         return this.attributeNameArray;
     }
 
