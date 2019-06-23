@@ -37,6 +37,25 @@ public class StoreQueryRuntimeUtil {
     public static Event[] executeSelector(StreamEvent streamEvents, QuerySelector selector,
                                           StateEventFactory stateEventFactory,
                                           MetaStreamEvent.EventType eventType) {
+        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(streamEvents, selector,
+                stateEventFactory, eventType);
+        if (outputComplexEventChunk != null) {
+            List<Event> events = new ArrayList<>();
+            outputComplexEventChunk.reset();
+            while (outputComplexEventChunk.hasNext()) {
+                ComplexEvent complexEvent = outputComplexEventChunk.next();
+                events.add(new Event(complexEvent.getTimestamp(), complexEvent.getOutputData()));
+            }
+            return events.toArray(new Event[0]);
+        } else {
+            return null;
+        }
+
+    }
+
+    private static ComplexEventChunk executeSelectorAndReturnChunk(StreamEvent streamEvents, QuerySelector selector,
+                                                                   StateEventFactory stateEventFactory,
+                                                                   MetaStreamEvent.EventType eventType) {
         ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
         while (streamEvents != null) {
 
@@ -52,18 +71,14 @@ public class StoreQueryRuntimeUtil {
             }
             complexEventChunk.add(stateEvent);
         }
-        ComplexEventChunk outputComplexEventChunk = selector.execute(complexEventChunk);
-        if (outputComplexEventChunk != null) {
-            List<Event> events = new ArrayList<>();
-            outputComplexEventChunk.reset();
-            while (outputComplexEventChunk.hasNext()) {
-                ComplexEvent complexEvent = outputComplexEventChunk.next();
-                events.add(new Event(complexEvent.getTimestamp(), complexEvent.getOutputData()));
-            }
-            return events.toArray(new Event[0]);
-        } else {
-            return null;
-        }
+        return selector.execute(complexEventChunk);
+    }
 
+    public static StreamEvent executeSelectorAndReturnStreamEvent(StreamEvent streamEvents, QuerySelector selector,
+                                                                  StateEventFactory stateEventFactory,
+                                                                  MetaStreamEvent.EventType eventType) {
+        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(streamEvents, selector,
+                stateEventFactory, eventType);
+        return ((StateEvent) outputComplexEventChunk.getFirst()).getStreamEvent(0);
     }
 }

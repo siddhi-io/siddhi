@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.TreeMap;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_COUNT_LFU;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
@@ -73,24 +74,27 @@ public class CacheTableLFU extends CacheTable {
     @Override
     public void deleteEntriesUsingCachePolicy(int numRowsToDelete) {
         IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-        int[] minCountArray = new int[numRowsToDelete];
-        Arrays.fill(minCountArray, Integer.MAX_VALUE);
-        Object[] keyOfMinCountArray = new Object[numRowsToDelete];
-
-        for (Object key: keys) {
-            Object[] data = indexEventHolder.getEvent(key).getOutputData();
-            int count = (int) data[cachePolicyAttributePosition];
-            for (int i = 0; i < numRowsToDelete; i++) {
-                if (count < minCountArray[i]) {
-                    minCountArray[i] = count;
-                    keyOfMinCountArray[i] = key;
+        if (numRowsToDelete >= indexEventHolder.size()) {
+            indexEventHolder.deleteAll();
+        } else {
+            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+            TreeMap<Integer, Object> toDelete = new TreeMap<>();
+            for (Object key : keys) {
+                if (toDelete.size() < numRowsToDelete) {
+                    toDelete.put((Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition], key);
+                } else {
+                    Integer count = (Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition];
+                    Integer firstKey = toDelete.firstKey();
+                    if (count < firstKey) {
+                        toDelete.remove(firstKey);
+                        toDelete.put(count, key);
+                    }
                 }
             }
-        }
-        for (Object deleteKey: keyOfMinCountArray) {
-            if (deleteKey != null) {
-                indexEventHolder.deleteEvent(deleteKey);
+            for (Object deleteKey: toDelete.values()) {
+                if (deleteKey != null) {
+                    indexEventHolder.deleteEvent(deleteKey);
+                }
             }
         }
     }

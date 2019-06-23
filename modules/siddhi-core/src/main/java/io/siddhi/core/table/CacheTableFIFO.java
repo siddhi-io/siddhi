@@ -25,8 +25,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 
@@ -65,24 +64,27 @@ public class CacheTableFIFO extends CacheTable {
     @Override
     public void deleteEntriesUsingCachePolicy(int numRowsToDelete) {
         IndexEventHolder indexEventHolder = (IndexEventHolder) stateHolder.getState().getEventHolder();
-        Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-        long[] minTimestampArray = new long[numRowsToDelete]; //todo: implement tree?
-        Arrays.fill(minTimestampArray, Long.MAX_VALUE);
-        Object[] keyOfMinTimestampArray = new Object[numRowsToDelete];
-
-        for (Object key: keys) {
-            Object[] data = indexEventHolder.getEvent(key).getOutputData();
-            long timestamp = (long) data[cachePolicyAttributePosition];
-            for (int i = 0; i < numRowsToDelete; i++) {
-                if (timestamp < minTimestampArray[i]) {
-                    minTimestampArray[i] = timestamp;
-                    keyOfMinTimestampArray[i] = key;
+        if (numRowsToDelete >= indexEventHolder.size()) {
+            indexEventHolder.deleteAll();
+        } else {
+            Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
+            TreeMap<Long, Object> toDelete = new TreeMap<>();
+            for (Object key : keys) {
+                if (toDelete.size() < numRowsToDelete) {
+                    toDelete.put((Long) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition], key);
+                } else {
+                    Long timestamp = (Long) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition];
+                    Long firstKey = toDelete.firstKey();
+                    if (timestamp < firstKey) {
+                        toDelete.remove(firstKey);
+                        toDelete.put(timestamp, key);
+                    }
                 }
             }
-        }
-        for (Object deleteKey: keyOfMinTimestampArray) {
-            if (deleteKey != null) {
-                indexEventHolder.deleteEvent(deleteKey);
+            for (Object deleteKey: toDelete.values()) {
+                if (deleteKey != null) {
+                    indexEventHolder.deleteEvent(deleteKey);
+                }
             }
         }
     }

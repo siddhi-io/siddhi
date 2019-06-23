@@ -117,9 +117,13 @@ public class CacheCornerCasesTest {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
         stockStream.send(new Object[]{"IBM", 75.6f, 2L});
+        Thread.sleep(100);
         stockStream.send(new Object[]{"WSO3", 55.6f, 3L});
+        Thread.sleep(100);
         stockStream.send(new Object[]{"IB4", 75.6f, 4L});
+        Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO3"});
         Thread.sleep(1000);
 

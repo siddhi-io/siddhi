@@ -21,7 +21,6 @@ package io.siddhi.core.table.record;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.MetaStateEventAttribute;
 import io.siddhi.core.event.state.StateEvent;
@@ -86,7 +85,7 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PER
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
-import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelectorAndReturnStreamEvent;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
 import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
@@ -375,9 +374,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
-        if (cacheEnabled) {
-            updateStoreTableSize();
-        }
+        updateStoreTableSize();
         // handle compile condition type conv
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache = null;
@@ -533,18 +530,20 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     private void updateStoreTableSize() throws ConnectionUnavailableException {
-        // check if we need to check the size of store
-        if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
-                getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
-            StateEvent stateEventForCaching = new StateEvent(1, 0);
-            queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-            try {
-                StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
-                        compiledSelectionForCaching, outputAttributesForCaching);
-                storeTableSize = findEventChunkSize(preLoadedData);
-                storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
-            } finally {
-                queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+        if (cacheEnabled && !queryStoreWithoutCheckingCache.get()) {
+            // check if we need to check the size of store
+            if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
+                    getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
+                StateEvent stateEventForCaching = new StateEvent(1, 0);
+                queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                try {
+                    StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                            compiledSelectionForCaching, outputAttributesForCaching);
+                    storeTableSize = findEventChunkSize(preLoadedData);
+                    storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                } finally {
+                    queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                }
             }
         }
     }
@@ -554,9 +553,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
         findMatchingEvent = matchingEvent;
-        if (cacheEnabled && !queryStoreWithoutCheckingCache.get()) {
-            updateStoreTableSize();
-        }
+        updateStoreTableSize();
 
         // handle condition type convs
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
@@ -609,8 +606,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 if (cacheResults == null) {
                     return null;
                 }
-                return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk,
-                        compiledSelectionWithCache,
+                return executeSelectorOnCacheResults(compiledSelectionWithCache,
                         cacheResults);
             } finally {
                 readWriteLock.readLock().unlock();
@@ -635,8 +631,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                             log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
                                     getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
                         }
-                        return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk,
-                                compiledSelectionWithCache, cacheResults);
+                        return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
                     }
                 } finally {
                     readWriteLock.readLock().unlock();
@@ -681,8 +676,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 try {
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
-                    return executeSelectorOnCacheResults(outputAttributes, streamEventComplexEventChunk,
-                            compiledSelectionWithCache, cacheResults);
+                    return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
                 } finally {
                     readWriteLock.readLock().unlock();
                 }
@@ -745,28 +739,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    private StreamEvent executeSelectorOnCacheResults(Attribute[] outputAttributes,
-                                                      ComplexEventChunk<StreamEvent> streamEventComplexEventChunk,
-                                                      CompiledSelectionWithCache compiledSelectionWithCache,
+    private StreamEvent executeSelectorOnCacheResults(CompiledSelectionWithCache compiledSelectionWithCache,
                                                       StreamEvent cacheResults) {
         StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
                 metaStateEvent);
-        Event[] cacheResultsAfterSelection = executeSelector(cacheResults,
-                compiledSelectionWithCache.querySelector,
+        return executeSelectorAndReturnStreamEvent(cacheResults, compiledSelectionWithCache.querySelector,
                 stateEventFactory, MetaStreamEvent.EventType.TABLE);
-        for (Event event : cacheResultsAfterSelection) {
-            Object[] record = event.getData();
-            StreamEvent streamEvent = storeEventPool.newInstance();
-            streamEvent.setOutputData(new Object[outputAttributes.length]);
-            System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-            streamEventComplexEventChunk.add(streamEvent);
-        }
-        return streamEventComplexEventChunk.getFirst();
     }
 
     /**
      * Query records matching the compiled condition and selection
-     *
+     *x
      * @param parameterMap      map of matching StreamVariable Ids and their values
      *                          corresponding to the compiled condition and selection
      * @param compiledCondition the compiledCondition against which records should be matched
