@@ -23,6 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.query.api.expression.condition.Compare;
 
@@ -37,15 +38,18 @@ public class CompareCollectionExecutor implements CollectionExecutor {
     private final ExpressionExecutor valueExpressionExecutor;
     protected ExpressionExecutor expressionExecutor;
     protected int storeEventIndex;
+    private CacheTable cacheTable;
 
     public CompareCollectionExecutor(ExpressionExecutor expressionExecutor, int storeEventIndex, String attribute,
-                                     Compare.Operator operator, ExpressionExecutor valueExpressionExecutor) {
+                                     Compare.Operator operator, ExpressionExecutor valueExpressionExecutor,
+                                     CacheTable cacheTable) {
         this.expressionExecutor = expressionExecutor;
         this.storeEventIndex = storeEventIndex;
 
         this.attribute = attribute;
         this.operator = operator;
         this.valueExpressionExecutor = valueExpressionExecutor;
+        this.cacheTable = cacheTable;
     }
 
     public StreamEvent find(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder, StreamEventCloner

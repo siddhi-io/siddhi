@@ -29,9 +29,7 @@ import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.table.holder.IndexedEventHolder;
-import io.siddhi.core.util.collection.executor.AndMultiPrimaryKeyCollectionExecutorForCache;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
-import io.siddhi.core.util.collection.executor.CompareCollectionExecutorForCache;
 import io.siddhi.core.util.collection.expression.AndMultiPrimaryKeyCollectionExpression;
 import io.siddhi.core.util.collection.expression.AttributeCollectionExpression;
 import io.siddhi.core.util.collection.expression.CollectionExpression;
@@ -63,7 +61,7 @@ public class OperatorParser {
                     expression, matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
             CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor(
                     collectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    true, ProcessingMode.BATCH, false, siddhiQueryContext, false);
+                    true, ProcessingMode.BATCH, false, siddhiQueryContext, false, null);
             if (collectionExpression instanceof CompareCollectionExpression &&
                     ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
                     (collectionExpression.getCollectionScope() == INDEXED_RESULT_SET ||
@@ -120,12 +118,7 @@ public class OperatorParser {
                     expression, matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
             CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor(
                     collectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    true, ProcessingMode.BATCH, false, siddhiQueryContext, true);
-            if (collectionExecutor instanceof AndMultiPrimaryKeyCollectionExecutorForCache) {
-                ((AndMultiPrimaryKeyCollectionExecutorForCache) collectionExecutor).setCacheTable(cacheTable);
-            } else if (collectionExecutor instanceof CompareCollectionExecutorForCache) {
-                ((CompareCollectionExecutorForCache) collectionExecutor).setCacheTable(cacheTable);
-            }
+                    true, ProcessingMode.BATCH, false, siddhiQueryContext, true, cacheTable);
             if (collectionExpression instanceof CompareCollectionExpression &&
                     ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
                     (collectionExpression.getCollectionScope() == INDEXED_RESULT_SET ||
