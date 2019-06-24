@@ -24,7 +24,9 @@ import io.siddhi.query.api.annotation.Annotation;
  */
 public class TableDefinition extends AbstractDefinition {
     private static final long serialVersionUID = 1L;
-
+    protected String[] attributeNameArray;
+    protected boolean hasDefinitionChanged = false;
+    
     protected TableDefinition(String id) {
         super(id);
     }
@@ -36,12 +38,28 @@ public class TableDefinition extends AbstractDefinition {
     public TableDefinition attribute(String attributeName, Attribute.Type type) {
         checkAttribute(attributeName);
         this.attributeList.add(new Attribute(attributeName, type));
+        this.hasDefinitionChanged = true;
         return this;
     }
 
     public TableDefinition annotation(Annotation annotation) {
         annotations.add(annotation);
         return this;
+    }
+
+    @Override
+    public String[] getAttributeNameArray() {
+        if (hasDefinitionChanged) {
+            int attributeListSize = attributeList.size();
+            this.attributeNameArray = new String[attributeListSize];
+            for (int i = 0; i < attributeListSize; i++) {
+                this.attributeNameArray[i] = attributeList.get(i).getName();
+            }
+
+            hasDefinitionChanged = false;
+        }
+
+        return this.attributeNameArray;
     }
 
     @Override
