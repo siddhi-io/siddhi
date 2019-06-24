@@ -75,7 +75,9 @@ public class CompareCollectionExecutor implements CollectionExecutor {
             return returnEventChunk.getFirst();
         } else {
             for (StreamEvent storeEvent : storeEventSet) {
-                cacheTable.updateCachePolicyAttribute(storeEvent);
+                if (cacheTable != null) {
+                    cacheTable.updateCachePolicyAttribute(storeEvent);
+                }
                 if (storeEventCloner != null) {
                     returnEventChunk.add(storeEventCloner.copyStreamEvent(storeEvent));
                 } else {

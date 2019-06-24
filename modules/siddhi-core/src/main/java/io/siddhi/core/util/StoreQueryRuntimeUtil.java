@@ -81,10 +81,14 @@ public class StoreQueryRuntimeUtil {
                 stateEventFactory, eventType);
         if (outputComplexEventChunk != null) {
             outputComplexEventChunk.reset();
-            StreamEvent firstEvent = ((StateEvent) outputComplexEventChunk.next()).getStreamEvent(0);
+            ComplexEvent firstComplexEvent = outputComplexEventChunk.next();
+            StreamEvent firstEvent = new StreamEvent(0, 0, firstComplexEvent.getOutputData().length);
+            firstEvent.setOutputData(firstComplexEvent.getOutputData());
             StreamEvent eventPointer = firstEvent;
             while (outputComplexEventChunk.hasNext()) {
-                StreamEvent streamEvent = ((StateEvent) outputComplexEventChunk.next()).getStreamEvent(0);
+                ComplexEvent complexEvent = outputComplexEventChunk.next();
+                StreamEvent streamEvent = new StreamEvent(0, 0, complexEvent.getOutputData().length);
+                streamEvent.setOutputData(complexEvent.getOutputData());
                 eventPointer.setNext(streamEvent);
                 eventPointer = streamEvent;
             }
