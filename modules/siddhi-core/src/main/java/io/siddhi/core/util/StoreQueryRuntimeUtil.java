@@ -79,6 +79,18 @@ public class StoreQueryRuntimeUtil {
                                                                   MetaStreamEvent.EventType eventType) {
         ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(streamEvents, selector,
                 stateEventFactory, eventType);
-        return ((StateEvent) outputComplexEventChunk.getFirst()).getStreamEvent(0);
+        if (outputComplexEventChunk != null) {
+            outputComplexEventChunk.reset();
+            StreamEvent firstEvent = ((StateEvent) outputComplexEventChunk.next()).getStreamEvent(0);
+            StreamEvent eventPointer = firstEvent;
+            while (outputComplexEventChunk.hasNext()) {
+                StreamEvent streamEvent = ((StateEvent) outputComplexEventChunk.next()).getStreamEvent(0);
+                eventPointer.setNext(streamEvent);
+                eventPointer = streamEvent;
+            }
+            return firstEvent;
+        } else {
+            return null;
+        }
     }
 }

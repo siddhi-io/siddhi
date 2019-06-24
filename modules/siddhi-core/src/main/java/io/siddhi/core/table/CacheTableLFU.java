@@ -25,7 +25,6 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -81,9 +80,11 @@ public class CacheTableLFU extends CacheTable {
             TreeMap<Integer, Object> toDelete = new TreeMap<>();
             for (Object key : keys) {
                 if (toDelete.size() < numRowsToDelete) {
-                    toDelete.put((Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition], key);
+                    toDelete.put((Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition],
+                            key);
                 } else {
-                    Integer count = (Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition];
+                    Integer count = (Integer) indexEventHolder.getEvent(key).
+                            getOutputData()[cachePolicyAttributePosition];
                     Integer firstKey = toDelete.firstKey();
                     if (count < firstKey) {
                         toDelete.remove(firstKey);

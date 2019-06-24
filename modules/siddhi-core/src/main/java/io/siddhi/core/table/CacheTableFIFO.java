@@ -25,7 +25,8 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.Set;
+import java.util.TreeMap;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
 
@@ -71,9 +72,11 @@ public class CacheTableFIFO extends CacheTable {
             TreeMap<Long, Object> toDelete = new TreeMap<>();
             for (Object key : keys) {
                 if (toDelete.size() < numRowsToDelete) {
-                    toDelete.put((Long) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition], key);
+                    toDelete.put((Long) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition],
+                            key);
                 } else {
-                    Long timestamp = (Long) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition];
+                    Long timestamp = (Long) indexEventHolder.getEvent(key).
+                            getOutputData()[cachePolicyAttributePosition];
                     Long firstKey = toDelete.firstKey();
                     if (timestamp < firstKey) {
                         toDelete.remove(firstKey);

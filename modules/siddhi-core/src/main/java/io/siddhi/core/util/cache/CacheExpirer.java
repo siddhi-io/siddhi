@@ -163,6 +163,7 @@ public class CacheExpirer {
                 throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
             }
         } else {
+            readWriteLock.writeLock().lock();
             try {
                 AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
                 try {
@@ -185,6 +186,8 @@ public class CacheExpirer {
                 }
             } catch (Exception e) {
                 throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
         }
         log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
