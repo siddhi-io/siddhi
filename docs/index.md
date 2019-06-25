@@ -1,5 +1,5 @@
-**Siddhi** - Cloud native stream processing 
-===========================================
+**Siddhi** - Cloud native stream processing engine
+===================================================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
   [![GitHub (pre-)release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
@@ -14,27 +14,9 @@ Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engi
 
 Siddhi can run as an embedded [Java library](documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/), and as a microservice on [bare metal, VM](documentation/siddhi-5.x/siddhi-as-a-local-microservice-5.x/), [Docker](documentation/siddhi-5.x/siddhi-as-a-docker-microservice-5.x/) and natively in [Kubernetes](documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/). It also has a [graphical and text editor](#siddhi-development-environment) for building Streaming Data Integration and Streaming Analytics applications.
 
-## Distributions
+!!! Info "For more details on Siddhi Cloud Native Stream Processor, please refer [this](https://siddhi.io/)"
 
-<a href="documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/" rel="nofollow">
- <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/kubernetes.png?raw=true" alt="Kubernetes" width="19%">
-</a>
-<a href="documentation/siddhi-5.x/siddhi-as-a-docker-microservice-5.x/" rel="nofollow">
- <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/docker.png?raw=true" alt="Docker" width="19%">
-</a>
-<a href="documentation/siddhi-5.x/siddhi-as-a-local-microservice-5.x/" rel="nofollow">
- <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/binary.png?raw=true" alt="Binary" width="19%">
-</a>
-<a href="documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/" rel="nofollow">
- <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/java.png?raw=true" alt="Java" width="19%">
-</a>
-<a href="contribution/#obtaining-the-source-code-and-building-the-project" rel="nofollow">
- <img src="https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/distributions/source.png?raw=true" alt="Source" width="19%">
-</a>
-
-And more [installation options](https://siddhi-io.github.io/siddhi/download/) 
-
-## Overview 
+## Overview
 
 ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
@@ -92,26 +74,6 @@ If you are a Siddhi user, we would love to hear more on how you use Siddhi? Plea
 
 Get started with Siddhi in a few minutes by following the <a target="_blank" href="documentation/siddhi-5.x/quckstart-5.x/">Siddhi Quick Start Guide</a>
 
-## Siddhi Development Environment 
-
-**Siddhi Tooling**
-
-Siddhi provides siddhi-tooling that supports following features to develop and test stream processing applications: 
-
-* **Text Query Editor** with syntax highlighting and advanced auto completion support.
-* **Event Simulator and Debugger** to test Siddhi Applications.
-    ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/editor/source-editor.png "Source Editor")
-
-* **Graphical Query Editor** with drag and drop query building support.
-    ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/editor/graphical-editor.png "Graphical Query Editor")
-
-**IntelliJ IDEA Plugin** 
-
-Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
-
-* **Siddhi Query Editor** with syntax highlighting and with basic auto completion
-* **Siddhi Runner and Debugger** support to test Siddhi Application
-
 ## Siddhi Versions
 
  <a target="_blank" href=""></a> 
@@ -150,23 +112,7 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/a
 ## How to Contribute
 Find the detail information on asking questions, providing feedback, reporting issues, building and contributing code on [How to contribute?](https://siddhi-io.github.io/siddhi/contribution/) section.
 
-## Roadmap 
-
-- [x] Support Kafka
-- [x] Support NATS
-- [x] Siddhi Runner Distribution 
-- [x] Siddhi Tooling (Editor)
-- [x] Siddhi Kubernetes CRD
-- [x] Periodic incremental state persistence  
-- [ ] Support Prometheus for metrics collection
-- [ ] Support high available Siddhi deployment with NATS via Kubernetes CRD
-- [ ] Support distributed Siddhi deployment with NATS via Kubernetes CRD
-
-## Events
-
-[![Siddhi talk and workshop at BigData Days, Moscow (8-10 October 2019)](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/events/big-data-days-2019-siddhi-banner.png?raw=true "Big Data Days")](https://bigdatadays.ru/en/sriskandarajah-suhothayan/)
-
-## Support 
+## Support
 [WSO2](https://wso2.com/) provides production, and query support for Siddhi and its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>. For more details contact via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>
 
 
