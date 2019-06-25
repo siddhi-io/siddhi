@@ -6,96 +6,6 @@
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>http://siddhi.io/features/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/quckstart-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/download/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/quckstart-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/user-guide-introduction-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/siddhi-as-a-java-library-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/siddhi-as-a-local-microservice-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/siddhi-as-a-docker-microservice-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/config-guide-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-5.x/architecture-5.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-4.x/quckstart-4.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-4.x/user-guide-4.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-4.x/query-guide-4.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/documentation/siddhi-4.x/architecture-4.x/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/contribution/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/extensions/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
      <loc>http://siddhi.io/api/latest/</loc>
      <lastmod>2019-06-25</lastmod>
      <changefreq>daily</changefreq>
@@ -187,16 +97,6 @@
     </url>
     <url>
      <loc>http://siddhi.io/api/4.0.0/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/license/</loc>
-     <lastmod>2019-06-25</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>http://siddhi.io/season-of-docs-2019/</loc>
      <lastmod>2019-06-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
