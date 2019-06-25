@@ -31,3 +31,6 @@
     margin: 0.3rem;
     padding: 0;
 }
+.md-typeset h4 {
+    font-size: .9rem;
+}

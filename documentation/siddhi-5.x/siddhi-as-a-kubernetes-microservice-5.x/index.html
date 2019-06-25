@@ -1,0 +1,509 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Cloud Native Stream Processor"><link rel="canonical" href="http://siddhi.io/documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/"><meta name="author" content="WSO2"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.0"><title>Siddhi Kubernetes Microservice - Siddhi</title><link rel="stylesheet" href="../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content="#009688"><script src="../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../stylesheets/extra.css"><script>window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  }
+  ga.l = +new Date
+  /* Setup integration and send page view */
+  ga("create", "UA-103065-28", "auto")
+  ga("set", "anonymizeIp", true)
+  ga("send", "pageview")
+  /* Register handler to log search on blur */
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.forms.search) {
+      var query = document.forms.search.query
+      query.addEventListener("blur", function() {
+        if (this.value) {
+          var path = document.location.pathname;
+          ga("send", "pageview", path + "?q=" + this.value)
+        }
+      })
+    }
+  })</script><script async src="https://www.google-analytics.com/analytics.js"></script></head><body dir="ltr" data-md-color-primary="teal" data-md-color-accent="teal"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#siddhi-5x-as-a-kubernetes-microservice" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="http://siddhi.io" title="Siddhi" class="md-header-nav__button md-logo"><img src="../../../images/siddhi-logo-w.svg" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Siddhi</span><span class="md-header-nav__topic">Siddhi Kubernetes Microservice</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/siddhi-io/siddhi/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">Siddhi</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="http://siddhi.io" title="Siddhi" class="md-nav__button md-logo"><img src="../../../images/siddhi-logo-w.svg" width="48" height="48"></a>Siddhi</label><div class="md-nav__source"><a href="https://github.com/siddhi-io/siddhi/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">Siddhi</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../.." title="Welcome to Siddhi" class="md-nav__link">Welcome to Siddhi</a></li><li class="md-nav__item"><a href="../../../features/" title="Features" class="md-nav__link">Features</a></li><li class="md-nav__item"><a href="../quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item"><a href="../../../download/" title="Download" class="md-nav__link">Download</a></li><li class="md-nav__item md-nav__item--active md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked><label class="md-nav__link" for="nav-5">Documentation</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-5">Documentation</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item md-nav__item--active md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-1" type="checkbox" id="nav-5-1" checked><label class="md-nav__link" for="nav-5-1">Siddhi 5.x</label><nav class="md-nav" data-md-component="collapsible" data-md-level="2"><label class="md-nav__title" for="nav-5-1">Siddhi 5.x</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item md-nav__item--active md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-1-2" type="checkbox" id="nav-5-1-2" checked><label class="md-nav__link" for="nav-5-1-2">User Guide</label><nav class="md-nav" data-md-component="collapsible" data-md-level="3"><label class="md-nav__title" for="nav-5-1-2">User Guide</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../user-guide-introduction-5.x/" title="Introduction" class="md-nav__link">Introduction</a></li><li class="md-nav__item"><a href="../siddhi-as-a-java-library-5.x/" title="Siddhi Java library" class="md-nav__link">Siddhi Java library</a></li><li class="md-nav__item"><a href="../siddhi-as-a-local-microservice-5.x/" title="Siddhi Local Microservice" class="md-nav__link">Siddhi Local Microservice</a></li><li class="md-nav__item"><a href="../siddhi-as-a-docker-microservice-5.x/" title="Siddhi Docker Microservice" class="md-nav__link">Siddhi Docker Microservice</a></li><li class="md-nav__item md-nav__item--active"><input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc"><label class="md-nav__link md-nav__link--active" for="__toc">Siddhi Kubernetes Microservice</label><a href="./" title="Siddhi Kubernetes Microservice" class="md-nav__link md-nav__link--active">Siddhi Kubernetes Microservice</a><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#prerequisites" title="Prerequisites" class="md-nav__link">Prerequisites</a></li><li class="md-nav__item"><a href="#install-siddhi-operator" title="Install Siddhi Operator" class="md-nav__link">Install Siddhi Operator</a></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app" title="Deploy and run Siddhi App" class="md-nav__link">Deploy and run Siddhi App</a></li><li class="md-nav__item"><a href="#get-siddhi-process-status" title="Get Siddhi process status" class="md-nav__link">Get Siddhi process status</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#list-siddhi-processes" title="List Siddhi processes" class="md-nav__link">List Siddhi processes</a></li><li class="md-nav__item"><a href="#view-siddhi-process-configs" title="View Siddhi process configs" class="md-nav__link">View Siddhi process configs</a></li><li class="md-nav__item"><a href="#view-siddhi-process-logs" title="View Siddhi process logs" class="md-nav__link">View Siddhi process logs</a></li></ul></nav></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app-using-configmaps" title="Deploy and run Siddhi App using configmaps" class="md-nav__link">Deploy and run Siddhi App using configmaps</a></li><li class="md-nav__item"><a href="#deploy-siddhi-apps-without-ingress-creation" title="Deploy Siddhi Apps without Ingress creation" class="md-nav__link">Deploy Siddhi Apps without Ingress creation</a></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app-with-https" title="Deploy and run Siddhi App with HTTPS" class="md-nav__link">Deploy and run Siddhi App with HTTPS</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="../config-guide-5.x/" title="Config Guide" class="md-nav__link">Config Guide</a></li><li class="md-nav__item"><a href="../query-guide-5.x/" title="Query Guide" class="md-nav__link">Query Guide</a></li><li class="md-nav__item"><a href="../architecture-5.x/" title="Siddhi Architecture" class="md-nav__link">Siddhi Architecture</a></li></ul></nav></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-2" type="checkbox" id="nav-5-2"><label class="md-nav__link" for="nav-5-2">Siddhi 4.x</label><nav class="md-nav" data-md-component="collapsible" data-md-level="2"><label class="md-nav__title" for="nav-5-2">Siddhi 4.x</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../siddhi-4.x/quckstart-4.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item"><a href="../../siddhi-4.x/user-guide-4.x/" title="User Guide" class="md-nav__link">User Guide</a></li><li class="md-nav__item"><a href="../../siddhi-4.x/query-guide-4.x/" title="Query Guide" class="md-nav__link">Query Guide</a></li><li class="md-nav__item"><a href="../../siddhi-4.x/architecture-4.x/" title="Siddhi Architecture" class="md-nav__link">Siddhi Architecture</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="../../../contribution/" title="Contribute" class="md-nav__link">Contribute</a></li><li class="md-nav__item"><a href="../../../extensions/" title="Extensions" class="md-nav__link">Extensions</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8"><label class="md-nav__link" for="nav-8">API Docs</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-8">API Docs</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../api/latest/" title="latest" class="md-nav__link">latest</a></li><li class="md-nav__item"><a href="../../../api/5.0.0/" title="5.0.0" class="md-nav__link">5.0.0</a></li><li class="md-nav__item"><a href="../../../api/4.5.11/" title="4.5.11" class="md-nav__link">4.5.11</a></li><li class="md-nav__item"><a href="../../../api/4.5.10/" title="4.5.10" class="md-nav__link">4.5.10</a></li><li class="md-nav__item"><a href="../../../api/4.5.9/" title="4.5.9" class="md-nav__link">4.5.9</a></li><li class="md-nav__item"><a href="../../../api/4.5.0/" title="4.5.0" class="md-nav__link">4.5.0</a></li><li class="md-nav__item"><a href="../../../api/4.4.8/" title="4.4.8" class="md-nav__link">4.4.8</a></li><li class="md-nav__item"><a href="../../../api/4.4.0/" title="4.4.0" class="md-nav__link">4.4.0</a></li><li class="md-nav__item"><a href="../../../api/4.3.19/" title="4.3.19" class="md-nav__link">4.3.19</a></li><li class="md-nav__item"><a href="../../../api/4.3.0/" title="4.3.0" class="md-nav__link">4.3.0</a></li><li class="md-nav__item"><a href="../../../api/4.2.40/" title="4.2.40" class="md-nav__link">4.2.40</a></li><li class="md-nav__item"><a href="../../../api/4.2.20/" title="4.2.20" class="md-nav__link">4.2.20</a></li><li class="md-nav__item"><a href="../../../api/4.2.0/" title="4.2.0" class="md-nav__link">4.2.0</a></li><li class="md-nav__item"><a href="../../../api/4.1.64/" title="4.1.64" class="md-nav__link">4.1.64</a></li><li class="md-nav__item"><a href="../../../api/4.1.46/" title="4.1.46" class="md-nav__link">4.1.46</a></li><li class="md-nav__item"><a href="../../../api/4.1.7/" title="4.1.7" class="md-nav__link">4.1.7</a></li><li class="md-nav__item"><a href="../../../api/4.1.0/" title="4.1.0" class="md-nav__link">4.1.0</a></li><li class="md-nav__item"><a href="../../../api/4.0.9/" title="4.0.9" class="md-nav__link">4.0.9</a></li><li class="md-nav__item"><a href="../../../api/4.0.0/" title="4.0.0" class="md-nav__link">4.0.0</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../license/" title="License" class="md-nav__link">License</a></li><li class="md-nav__item"><a href="../../../season-of-docs-2019/" title="Google Season of Docs 2019" class="md-nav__link">Google Season of Docs 2019</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#prerequisites" title="Prerequisites" class="md-nav__link">Prerequisites</a></li><li class="md-nav__item"><a href="#install-siddhi-operator" title="Install Siddhi Operator" class="md-nav__link">Install Siddhi Operator</a></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app" title="Deploy and run Siddhi App" class="md-nav__link">Deploy and run Siddhi App</a></li><li class="md-nav__item"><a href="#get-siddhi-process-status" title="Get Siddhi process status" class="md-nav__link">Get Siddhi process status</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#list-siddhi-processes" title="List Siddhi processes" class="md-nav__link">List Siddhi processes</a></li><li class="md-nav__item"><a href="#view-siddhi-process-configs" title="View Siddhi process configs" class="md-nav__link">View Siddhi process configs</a></li><li class="md-nav__item"><a href="#view-siddhi-process-logs" title="View Siddhi process logs" class="md-nav__link">View Siddhi process logs</a></li></ul></nav></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app-using-configmaps" title="Deploy and run Siddhi App using configmaps" class="md-nav__link">Deploy and run Siddhi App using configmaps</a></li><li class="md-nav__item"><a href="#deploy-siddhi-apps-without-ingress-creation" title="Deploy Siddhi Apps without Ingress creation" class="md-nav__link">Deploy Siddhi Apps without Ingress creation</a></li><li class="md-nav__item"><a href="#deploy-and-run-siddhi-app-with-https" title="Deploy and run Siddhi App with HTTPS" class="md-nav__link">Deploy and run Siddhi App with HTTPS</a></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/siddhi-io/siddhi/edit/master/docs/documentation/siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><h1 id="siddhi-5x-as-a-kubernetes-microservice">Siddhi 5.x as a Kubernetes Microservice<a class="headerlink" href="#siddhi-5x-as-a-kubernetes-microservice" title="Permanent link">&para;</a></h1>
+<p>This section provides information on running <a href="../user-guide-introduction-5.x/#siddhi-application">Siddhi Apps</a> natively in Kubernetes via Siddhi Kubernetes Operator. </p>
+<p>Siddhi can be configured in <code>SiddhiProcess</code> kind and passed to the CRD for deployment.
+Here, the Siddhi applications containing stream processing logic can be written inline in <code>SiddhiProcess</code> yaml or passed as <code>.siddhi</code> files via configmaps. <code>SiddhiProcess</code> yaml can also be configured with the necessary system configurations. </p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>A Kubernetes cluster v1.10.11 or higher. </p>
+<ol>
+<li><a href="https://github.com/kubernetes/minikube#installation">Minikube</a></li>
+<li><a href="https://console.cloud.google.com/">Google Kubernetes Engine(GKE) Cluster</a></li>
+<li><a href="https://docs.docker.com/docker-for-mac/install/">Docker for Mac</a></li>
+<li>Or any other Kubernetes cluster</li>
+</ol>
+</li>
+<li>
+<p>Admin privileges to install Siddhi operator  </p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Minikube</p>
+<p>Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Minikube using the following command.
+<pre>
+minikube addons enable ingress
+</pre>
+or disable Siddhi operator's <a href="#deploy-siddhi-apps-without-ingress-creation">automatically ingress creation</a>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Google Kubernetes Engine (GKE) Cluster</p>
+<p>To install Siddhi operator, you have to give cluster admin permission to your account. In order to do that execute the following command (by replacing "your-address@email.com" with your account email address). 
+<pre>kubectl create clusterrolebinding user-cluster-admin-binding \ 
+        --clusterrole=cluster-admin --user=your-address@email.com
+</pre>  </p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Docker for Mac</p>
+<p>Siddhi operator automatically creates NGINX ingress. Therefore it to work we can either enable ingress on Docker for mac following the official <a href="https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac">documentation</a>
+or disable Siddhi operator's <a href="#deploy-siddhi-apps-without-ingress-creation">automatically ingress creation</a>.</p>
+</div>
+<h2 id="install-siddhi-operator">Install Siddhi Operator<a class="headerlink" href="#install-siddhi-operator" title="Permanent link">&para;</a></h2>
+<p>To install the Siddhi Kubernetes operator run the following commands.</p>
+<div class="codehilite"><pre><span></span>kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/prerequisites.yaml
+kubectl apply -f https://github.com/siddhi-io/siddhi-operator/releases/download/v0.1.1/siddhi-operator.yaml
+</pre></div>
+
+
+<p>You can verify the installation by making sure the following deployments are running in your Kubernetes cluster. </p>
+<div class="codehilite"><pre><span></span>$ kubectl get deployment
+
+NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+siddhi-operator   1         1         1            1           1m
+siddhi-parser     1         1         1            1           1m
+</pre></div>
+
+
+<div class="admonition note">
+<p class="admonition-title">Using a custom-built siddhi-runner image</p>
+<p>If you need to use a custom-built <code>siddhi-runner</code> image for all the <code>SiddhiProcess</code> deployments, you have to configure <code>SIDDHI_RUNNER_IMAGE</code> and <code>SIDDHI_RUNNER_IMAGE_TAG</code> environment variables with the custom-built image name and image tag respectively in the <code>siddhi-operator.yaml</code> file. 
+Refer the documentation on creating custom siddhi-runner images bundling additional JARs <a href="../config-guide-5.x/#adding-to-siddhi-docker-microservice">here</a>.
+If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as <code>SIDDHI_RUNNER_IMAGE_SECRET</code> environment variable in the <code>siddhi-operator.yaml</code> file. For more details on using docker images from private registries/repositories refer <a href="https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/">this documentation</a>. </p>
+</div>
+<h2 id="deploy-and-run-siddhi-app">Deploy and run Siddhi App<a class="headerlink" href="#deploy-and-run-siddhi-app" title="Permanent link">&para;</a></h2>
+<p>Siddhi applications can be deployed on Kubernetes using the Siddhi operator. </p>
+<p>Here we will creating a very simple Siddhi stream processing application that consumes events via HTTP, filers the input events on the type 'monitored' and logs the output on the console.
+This can be created using a SiddhiProcess YAML file as given below.</p>
+<script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
+
+<div class="admonition tip">
+<p class="admonition-title">Siddhi Tooling</p>
+<p>You can also use the powerful <a href="../quckstart-5.x/#3-using-siddhi-for-the-first-time">Siddhi Editor</a> to implement and test steam processing applications. </p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Configuring Siddhi</p>
+<p>To configure databases, extensions, authentication, periodic state persistence, and statistics for Siddhi as Kubernetes Microservice refer <a href="../config-guide-5.x/">Siddhi Config Guide</a>. </p>
+</div>
+<p>To deploy the above Siddhi app in your Kubernetes cluster, copy to a YAML file with name <code>monitor-app.yaml</code> and execute the following command.</p>
+<div class="codehilite"><pre><span></span>kubectl create -f &lt;absolute-yaml-file-path&gt;/monitor-app.yaml
+</pre></div>
+
+
+<div class="admonition note">
+<p class="admonition-title">tls secret</p>
+<p>Within the SiddhiProcess, a tls secret named <code>siddhi-tls</code> is configured. If a Kubernetes secret with the same name does not exist in the Kubernetes cluster, the NGINX will ignore it and use a self-generated certificate. Configuring a secret will be necessary for calling HTTPS endpoints, refer <a href="#deploy-and-run-siddhi-app-with-https">deploy and run Siddhi apps with HTTPS</a> section for more details. </p>
+</div>
+<p>If the <code>monitor-app</code> is deployed successfully, the created SiddhiProcess, deployment, service, and ingress can be viewed as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get SiddhiProcesses
+NAME          AGE
+monitor-app   2m
+
+$ kubectl get deployment
+NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+monitor-app       1         1         1            1           1m
+siddhi-operator   1         1         1            1           1m
+siddhi-parser     1         1         1            1           1m
+
+$ kubectl get service
+NAME              TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes        ClusterIP      10.96.0.1        &lt;none&gt;        443/TCP          10d
+monitor-app       ClusterIP      10.101.242.132   &lt;none&gt;        8280/TCP         1m
+siddhi-operator   ClusterIP      10.111.138.250   &lt;none&gt;        8383/TCP         1m
+siddhi-parser     LoadBalancer   10.102.172.142   &lt;pending&gt;     9090:31830/TCP   1m
+
+$ kubectl get ingress
+NAME      HOSTS     ADDRESS     PORTS     AGE
+siddhi    siddhi    10.0.2.15   80, 443   1m
+</pre></div>
+
+
+<div class="admonition note">
+<p class="admonition-title">Using a custom-built siddhi-runner image</p>
+<p>If you need to use a custom-built <code>siddhi-runner</code> image for a specific <code>SiddhiProcess</code> deployment, you have to configure <code>image</code> and <code>imageTag</code> arguments with the custom-built image name and image tag respectively in the <code>monitor-app.yaml</code> file. 
+Refer the documentation on creating custom siddhi-runner images bundling additional JARs <a href="../config-guide-5.x/#adding-to-siddhi-docker-microservice">here</a>.
+If you are pulling the custom-built image from a private Docker registry/repository, specify the corresponding kubernetes secret as <code>imagePullSecret</code> argument in the <code>monitor-app.yaml</code> file. For more details on using docker images from private registries/repositories refer <a href="https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/">this documentation</a>. </p>
+</div>
+<p><strong><em>Invoke Siddhi Applications</em></strong></p>
+<p>To invoke the Siddhi App, first obtain the external IP of the ingress load balancer using <code>kubectl get ingress</code> command as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get ingress
+NAME      HOSTS     ADDRESS     PORTS     AGE
+siddhi    siddhi    10.0.2.15   80, 443   1m
+</pre></div>
+
+
+<p>Then, add the host <code>siddhi</code> and related external IP (<code>ADDRESS</code>) to the <code>/etc/hosts</code> file in your machine.</p>
+<div class="admonition note">
+<p class="admonition-title">Minikube</p>
+<p>For Minikube, you have to use Minikube IP as the external IP. Hence, run <code>minikube ip</code> command to get the IP of the Minikube cluster.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Docker for Mac</p>
+<p>For Docker for Mac, you have to use <code>0.0.0.0</code> as the external IP.    </p>
+</div>
+<p>Use the following CURL command to send events to <code>monitor-app</code> deployed in Kubernetes.</p>
+<div class="codehilite"><pre><span></span>curl -X POST \
+  https://siddhi/monitor-app/8280/example \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+    &quot;type&quot;: &quot;monitored&quot;,
+    &quot;deviceID&quot;: &quot;001&quot;,
+    &quot;power&quot;: 341
+  }&#39; -k
+</pre></div>
+
+
+<p><em>Note: Here <code>-k</code> option is used to turn off curl's verification of the certificate.</em> </p>
+<p><strong><em>View Siddhi Process Logs</em></strong></p>
+<p>Since the output of <code>monitor-app</code> is logged, you can see the output by monitoring the associated pod's logs. </p>
+<p>To find the <code>monitor-app</code> pod use the <code>kubectl get pods</code> command. This will list down all the deployed pods. </p>
+<div class="codehilite"><pre><span></span>$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
+</pre></div>
+
+
+<p>Here, the pod starting with the SiddhiProcess name (in this case <code>monitor-app-</code>) is the pod we need to monitor.</p>
+<p>To view the logs, run the <code>kubectl logs &lt;pod name&gt;</code> command. 
+This will show all the Siddhi process logs, along with the filtered output events as given below.</p>
+<div class="codehilite"><pre><span></span>$ kubectl logs monitor-app-7f8584875f-krz6t
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
+</pre></div>
+
+
+<h2 id="get-siddhi-process-status">Get Siddhi process status<a class="headerlink" href="#get-siddhi-process-status" title="Permanent link">&para;</a></h2>
+<h3 id="list-siddhi-processes">List Siddhi processes<a class="headerlink" href="#list-siddhi-processes" title="Permanent link">&para;</a></h3>
+<p>List the Siddhi process using the <code>kubectl get sps</code> or <code>kubectl get SiddhiProcesses</code> commands as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get sps
+NAME          AGE
+monitor-app   2m
+
+$ kubectl get SiddhiProcesses
+NAME          AGE
+monitor-app   2m
+</pre></div>
+
+
+<h3 id="view-siddhi-process-configs">View Siddhi process configs<a class="headerlink" href="#view-siddhi-process-configs" title="Permanent link">&para;</a></h3>
+<p>Get the Siddhi process configuration details using <code>kubectl describe sp</code> command as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl describe sp monitor-app
+
+Name:         monitor-app
+Namespace:    default
+Labels:       &lt;none&gt;
+Annotations:  &lt;none&gt;
+API Version:  siddhi.io/v1alpha1
+Kind:         SiddhiProcess
+Metadata:
+  Creation Timestamp:  2019-04-18T18:05:39Z
+  Generation:          1
+  Resource Version:    497702
+  Self Link:           /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/monitor-app
+  UID:                 92b2293b-6204-11e9-996c-0800279e6dba
+Spec:
+  Env:
+    Name:   RECEIVER_URL
+    Value:  http://0.0.0.0:8280/example
+    Name:   BASIC_AUTH_ENABLED
+    Value:  false
+  Pod:
+    Image:      siddhiio/siddhi-runner-alpine
+    Image Tag:  0.1.0
+  Query:        @App:name(&quot;MonitorApp&quot;)
+@App:description(&quot;Description of the plan&quot;) 
+
+@sink(type=&#39;log&#39;, prefix=&#39;LOGGER&#39;)
+@source(type=&#39;http&#39;, receiver.url=&#39;${RECEIVER_URL}&#39;, basic.auth.enabled=&#39;${BASIC_AUTH_ENABLED}&#39;, @map(type=&#39;json&#39;))
+define stream DevicePowerStream (type string, deviceID string, power int);
+
+
+define stream MonitorDevicesPowerStream(deviceID string, power int);
+
+@info(name=&#39;monitored-filter&#39;)
+from DevicePowerStream[type == &#39;monitored&#39;]
+select deviceID, power
+insert into MonitorDevicesPowerStream;
+
+  Siddhi . Runner . Configs:  state.persistence:
+  enabled: true
+  intervalInMin: 5
+  revisionsToKeep: 2
+  persistenceStore: io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+  config:
+    location: siddhi-app-persistence
+
+Status:
+  Nodes:   &lt;nil&gt;
+  Status:  Running
+Events:    &lt;none&gt;
+</pre></div>
+
+
+<p>Get the Siddhi process YAML using <code>kubectl get sp</code> command as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get sp monitor-app -o yaml
+
+apiVersion: siddhi.io/v1alpha1
+kind: SiddhiProcess
+metadata:
+  creationTimestamp: 2019-04-18T18:05:39Z
+  generation: 1
+  name: monitor-app
+  namespace: default
+  resourceVersion: &quot;497702&quot;
+  selfLink: /apis/siddhi.io/v1alpha1/namespaces/default/siddhiprocesses/monitor-app
+  uid: 92b2293b-6204-11e9-996c-0800279e6dba
+spec:
+  env:
+  - name: RECEIVER_URL
+    value: http://0.0.0.0:8280/example
+  - name: BASIC_AUTH_ENABLED
+    value: &quot;false&quot;
+  pod:
+    image: siddhiio/siddhi-runner-alpine
+    imageTag: 0.1.0
+  query: &quot;@App:name(\&quot;MonitorApp\&quot;)\n@App:description(\&quot;Description of the plan\&quot;)
+    \n\n@sink(type=&#39;log&#39;, prefix=&#39;LOGGER&#39;)\n@source(type=&#39;http&#39;, receiver.url=&#39;${RECEIVER_URL}&#39;,
+    basic.auth.enabled=&#39;${BASIC_AUTH_ENABLED}&#39;, @map(type=&#39;json&#39;))\ndefine stream
+    DevicePowerStream (type string, deviceID string, power int);\n\n\ndefine stream
+    MonitorDevicesPowerStream(deviceID string, power int);\n\n@info(name=&#39;monitored-filter&#39;)\nfrom
+    DevicePowerStream[type == &#39;monitored&#39;]\nselect deviceID, power\ninsert into MonitorDevicesPowerStream;\n&quot;
+  siddhi.runner.configs: |
+    state.persistence:
+      enabled: true
+      intervalInMin: 5
+      revisionsToKeep: 2
+      persistenceStore: io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+      config:
+        location: siddhi-app-persistence
+status:
+  nodes: null
+  status: Running
+</pre></div>
+
+
+<h3 id="view-siddhi-process-logs">View Siddhi process logs<a class="headerlink" href="#view-siddhi-process-logs" title="Permanent link">&para;</a></h3>
+<p>To view the Siddhi process logs, first get the Siddhi process pods using the <code>kubectl get pods</code> command as follows.  </p>
+<div class="codehilite"><pre><span></span>$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
+</pre></div>
+
+
+<p>Then to retrieve the Siddhi process logs, run <code>kubectl logs &lt;pod name&gt;</code> command. Here <code>&lt;pod name&gt;</code> should be replaced with the name of the pod that starts with the relevant SiddhiProcess's name. 
+A sample output logs is of this command is as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl logs monitor-app-7f8584875f-krz6t
+JAVA_HOME environment variable is set to /opt/java/openjdk
+CARBON_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0
+RUNTIME_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0/wso2/runner
+Picked up JAVA_TOOL_OPTIONS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+[2019-04-20 3:58:57,734]  INFO {org.wso2.carbon.launcher.extensions.OSGiLibBundleDeployerUtils updateOSGiLib} - Successfully updated the OSGi bundle information of Carbon Runtime: runner  
+osgi&gt; [2019-04-20 03:59:00,208]  INFO {org.wso2.carbon.config.reader.ConfigFileReader} - Default deployment configuration updated with provided custom configuration file monitor-app-deployment.yaml
+[2019-04-20 03:59:01,551]  INFO {org.wso2.msf4j.internal.websocket.WebSocketServerSC} - All required capabilities are available of WebSocket service component is available.
+[2019-04-20 03:59:01,584]  INFO {org.wso2.carbon.metrics.core.config.model.JmxReporterConfig} - Creating JMX reporter for Metrics with domain &#39;org.wso2.carbon.metrics&#39;
+[2019-04-20 03:59:01,609]  INFO {org.wso2.msf4j.analytics.metrics.MetricsComponent} - Metrics Component is activated
+[2019-04-20 03:59:01,614]  INFO {org.wso2.carbon.databridge.agent.internal.DataAgentDS} - Successfully deployed Agent Server 
+[2019-04-20 03:59:02,219]  INFO {io.siddhi.distribution.core.internal.ServiceComponent} - Periodic state persistence started with an interval of 5 using io.siddhi.distribution.core.persistence.FileSystemPersistenceStore
+[2019-04-20 03:59:02,229]  INFO {io.siddhi.distribution.event.simulator.core.service.CSVFileDeployer} - CSV file deployer initiated.
+[2019-04-20 03:59:02,233]  INFO {io.siddhi.distribution.event.simulator.core.service.SimulationConfigDeployer} - Simulation config deployer initiated.
+[2019-04-20 03:59:02,279]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiverServiceComponent} - org.wso2.carbon.databridge.receiver.binary.internal.Service Component is activated
+[2019-04-20 03:59:02,312]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary SSL Transport on port : 9712
+[2019-04-20 03:59:02,321]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary TCP Transport on port : 9612
+[2019-04-20 03:59:02,322]  INFO {org.wso2.carbon.databridge.receiver.thrift.internal.ThriftDataReceiverDS} - Service Component is activated
+[2019-04-20 03:59:02,344]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift Server started at 0.0.0.0
+[2019-04-20 03:59:02,356]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift SSL port : 7711
+[2019-04-20 03:59:02,363]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift port : 7611
+[2019-04-20 03:59:02,449]  INFO {org.wso2.msf4j.internal.MicroservicesServerSC} - All microservices are available
+[2019-04-20 03:59:02,516]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9090
+[2019-04-20 03:59:02,520]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9443
+[2019-04-20 03:59:03,068]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Periodic State persistence enabled. Restoring last persisted state of MonitorApp
+[2019-04-20 03:59:03,075]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 8280
+[2019-04-20 03:59:03,077]  INFO {org.wso2.extension.siddhi.io.http.source.HttpConnectorPortBindingListener} - HTTP source 0.0.0.0:8280 has been started
+[2019-04-20 03:59:03,084]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Siddhi App MonitorApp deployed successfully
+[2019-04-20 03:59:03,093]  INFO {org.wso2.carbon.kernel.internal.CarbonStartupHandler} - Siddhi Runner Distribution started in 5.941 sec
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
+</pre></div>
+
+
+<h2 id="deploy-and-run-siddhi-app-using-configmaps">Deploy and run Siddhi App using configmaps<a class="headerlink" href="#deploy-and-run-siddhi-app-using-configmaps" title="Permanent link">&para;</a></h2>
+<p>Siddhi operator allows you to deploy Siddhi app configurations via configmaps instead of just adding them inline. Through this you can also run multiple Siddhi Apps in a single SiddhiProcess. </p>
+<p>This can be done by passing the configmaps containing Siddhi app files to the SiddhiProcess's apps configuration as follows. </p>
+<div class="codehilite"><pre><span></span>apps:
+  - config-map-name1
+  - config-map-name2
+</pre></div>
+
+
+<p><strong>Sample on deploying and running Siddhi Apps via configmaps</strong></p>
+<p>Here we will creating a very simple Siddhi application as follows, that consumes events via HTTP, filers the input events on type 'monitored' and logs the output on the console.</p>
+<script src="https://gist.github.com/BuddhiWathsala/8687a2b73bb003a8ae7bcf3d3f63b78e.js"></script>
+
+<div class="admonition tip">
+<p class="admonition-title">Siddhi Tooling</p>
+<p>You can also use the powerful <a href="../quckstart-5.x/#3-using-siddhi-for-the-first-time">Siddhi Editor</a> to implement and test steam processing applications. </p>
+</div>
+<p>Save the above Siddhi App file as <code>MonitorApp.siddhi</code>, and use this file to create a Kubernetes config map with the name <code>monitor-app-cm</code>.
+This can be achieved by running the following command. </p>
+<div class="codehilite"><pre><span></span>kubectl create configmap monitor-app-cm --from-file=&lt;absolute-file-path&gt;/MonitorApp.siddhi
+</pre></div>
+
+
+<p>The created config map can be added to SiddhiProcess YAML under the <code>apps</code> entry as follows. </p>
+<script src="https://gist.github.com/BuddhiWathsala/45019cf093226e4858c931e62e04233f.js"></script>
+
+<p>Save the YAML file as <code>monitor-app.yaml</code>, and use the following command to deploy the SiddhiProcess.</p>
+<div class="codehilite"><pre><span></span>kubectl create -f &lt;absolute-yaml-file-path&gt;/monitor-app.yaml
+</pre></div>
+
+
+<div class="admonition note">
+<p class="admonition-title">Using a config, created from a directory containing multiple Siddhi files</p>
+<p>SiddhiProcess's <code>apps</code> configuration also supports a config map that is created from a directory containing multiple Siddhi files.
+Use <code>kubectl create configmap siddhi-apps --from-file=&lt;DIRECTORY_PATH&gt;</code> command to create a config map from a directory.</p>
+</div>
+<p><strong><em>Invoke Siddhi Applications</em></strong></p>
+<p>To invoke the Siddhi Apps, first obtain the external IP of the ingress load balancer using <code>kubectl get ingress</code> command as follows.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get ingress
+NAME      HOSTS     ADDRESS     PORTS     AGE
+siddhi    siddhi    10.0.2.15   80, 443   1m
+</pre></div>
+
+
+<p>Then, add the host <code>siddhi</code> and related external IP (<code>ADDRESS</code>) to the <code>/etc/hosts</code> file in your machine.</p>
+<div class="admonition note">
+<p class="admonition-title">Minikube</p>
+<p>For Minikube, you have to use Minikube IP as the external IP. Hence, run <code>minikube ip</code> command to get the IP of the Minikube cluster.</p>
+</div>
+<p>Use the following CURL command to send events to <code>monitor-app</code> deployed in Kubernetes.</p>
+<div class="codehilite"><pre><span></span>curl -X POST \
+  https://siddhi/monitor-app/8280/example \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+    &quot;type&quot;: &quot;monitored&quot;,
+    &quot;deviceID&quot;: &quot;001&quot;,
+    &quot;power&quot;: 341
+    }&#39; -k
+</pre></div>
+
+
+<p><em>Note: Here <code>-k</code> option is used to turn off curl's verification of the certificate.</em> </p>
+<p><strong><em>View Siddhi Process Logs</em></strong></p>
+<p>Since the output of <code>monitor-app</code> is logged, you can see the output by monitoring the associated pod's logs. </p>
+<p>To find the <code>monitor-app</code> pod use the <code>kubectl get pods</code> command. This will list down all the deployed pods. </p>
+<div class="codehilite"><pre><span></span>$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-7f8584875f-krz6t       1/1       Running   0          2m
+siddhi-operator-8589c4fc69-6xbtx   1/1       Running   0          2m
+siddhi-parser-64d4cd86ff-pfq2s     1/1       Running   0          2m
+</pre></div>
+
+
+<p>Here, the pod starting with the SiddhiProcess name (in this case <code>monitor-app-</code>) is the pod we need to monitor.</p>
+<p>To view the logs, run the <code>kubectl logs &lt;pod name&gt;</code> command. 
+This will show all the Siddhi process logs, along with the filtered output events as given below.</p>
+<div class="codehilite"><pre><span></span>$ kubectl logs monitor-app-7f8584875f-krz6t
+[2019-04-20 04:04:02,216]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has paused for http://0.0.0.0:8280/example
+[2019-04-20 04:04:02,235]  INFO {org.wso2.extension.siddhi.io.http.source.HttpSourceListener} - Event input has resume for http://0.0.0.0:8280/example
+[2019-04-20 04:05:29,741]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1555733129736, data=[monitored, 001, 341], isExpired=false}
+</pre></div>
+
+
+<h2 id="deploy-siddhi-apps-without-ingress-creation">Deploy Siddhi Apps without Ingress creation<a class="headerlink" href="#deploy-siddhi-apps-without-ingress-creation" title="Permanent link">&para;</a></h2>
+<p>By default, Siddhi operator creates an NGINX ingress and exposes your HTTP/HTTPS through that ingress. If you need to disable automatic ingress creation, you have to change the <code>AUTO_INGRESS_CREATION</code> value in the Siddhi <code>operator.yaml</code> file to <code>false</code> or <code>null</code> as below.</p>
+<script src="https://gist.github.com/BuddhiWathsala/c1cadcf9828cfaf46bb909f30497e4ab.js"></script>
+
+<h2 id="deploy-and-run-siddhi-app-with-https">Deploy and run Siddhi App with HTTPS<a class="headerlink" href="#deploy-and-run-siddhi-app-with-https" title="Permanent link">&para;</a></h2>
+<p>Configuring tls will allow Siddhi ingress NGINX to expose HTTPS endpoints of your Siddhi Apps. To do so, created a Kubernetes secret and add that to the SiddhiProcess's <code>tls</code> configuration as following. </p>
+<div class="codehilite"><pre><span></span>tls:
+  ingressSecret: siddhi-tls
+</pre></div>
+
+
+<p><strong>Sample on deploying and running Siddhi App with HTTPS</strong></p>
+<p>First, you need to create a certificate using the following commands. For more details about the certificate creation refers <a href="https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/tls.md#tls-secrets">this</a>.</p>
+<div class="codehilite"><pre><span></span>openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout siddhi.key -out siddhi.crt -subj &quot;/CN=siddhi/O=siddhi&quot;
+</pre></div>
+
+
+<p>After that, create a kubernetes secret called <code>siddhi-tls</code>, which we intended to add to the TLS configurations using the following command.</p>
+<div class="codehilite"><pre><span></span>kubectl create secret tls siddhi-tls --key siddhi.key --cert siddhi.crt
+</pre></div>
+
+
+<p>The created secret then need to be added to the created SiddhiProcess's <code>tls</code> configuration as following. </p>
+<script src="https://gist.github.com/BuddhiWathsala/f029d671f4f6d7719dce59500b970815.js"></script>
+
+<p>When this is done Siddhi operator will now enable TLS support via the NGINX ingress, and you will be able to access all the HTTPS endpoints.</p>
+<p><strong><em>Invoke Siddhi Applications</em></strong></p>
+<p>You can use now send the events to following HTTPS endpoint.</p>
+<div class="codehilite"><pre><span></span>https://siddhi/monitor-app/8280/example 
+</pre></div>
+
+
+<p>Further, you can use the following CURL command to send a request to the deployed siddhi applications via HTTPS.</p>
+<div class="codehilite"><pre><span></span>curl --cacert siddhi.crt -X POST \
+  https://siddhi/monitor-app/8280/example \
+  -H &#39;Content-Type: application/json&#39; \
+  -d &#39;{
+    &quot;type&quot;: &quot;monitored&quot;,
+    &quot;deviceID&quot;: &quot;001&quot;,
+    &quot;power&quot;: 341
+    }&#39;
+</pre></div>
+
+
+<p><strong><em>View Siddhi Process Logs</em></strong></p>
+<p>The output logs show the event that you sent using the previous CURL command.</p>
+<div class="codehilite"><pre><span></span>$ kubectl get pods
+
+NAME                               READY     STATUS    RESTARTS   AGE
+monitor-app-667c97c898-rrtfs       1/1       Running   0          2m
+siddhi-operator-79dcc45959-fkk4d   1/1       Running   0          3m
+siddhi-parser-64d4cd86ff-k8b87     1/1       Running   0          3m
+
+$ kubectl logs monitor-app-667c97c898-rrtfs
+
+JAVA_HOME environment variable is set to /opt/java/openjdk
+CARBON_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0
+RUNTIME_HOME environment variable is set to /home/siddhi_user/siddhi-runner-0.1.0/wso2/runner
+Picked up JAVA_TOOL_OPTIONS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+[2019-05-06 5:36:54,894]  INFO {org.wso2.carbon.launcher.extensions.OSGiLibBundleDeployerUtils updateOSGiLib} - Successfully updated the OSGi bundle information of Carbon Runtime: runner  
+osgi&gt; [2019-05-06 05:36:57,692]  INFO {org.wso2.msf4j.internal.websocket.WebSocketServerSC} - All required capabilities are available of WebSocket service component is available.
+[2019-05-06 05:36:57,749]  INFO {org.wso2.carbon.metrics.core.config.model.JmxReporterConfig} - Creating JMX reporter for Metrics with domain &#39;org.wso2.carbon.metrics&#39;
+[2019-05-06 05:36:57,779]  INFO {org.wso2.msf4j.analytics.metrics.MetricsComponent} - Metrics Component is activated
+[2019-05-06 05:36:57,784]  INFO {org.wso2.carbon.databridge.agent.internal.DataAgentDS} - Successfully deployed Agent Server 
+[2019-05-06 05:36:58,292]  INFO {io.siddhi.distribution.event.simulator.core.service.CSVFileDeployer} - CSV file deployer initiated.
+[2019-05-06 05:36:58,295]  INFO {io.siddhi.distribution.event.simulator.core.service.SimulationConfigDeployer} - Simulation config deployer initiated.
+[2019-05-06 05:36:58,331]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiverServiceComponent} - org.wso2.carbon.databridge.receiver.binary.internal.Service Component is activated
+[2019-05-06 05:36:58,342]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary SSL Transport on port : 9712
+[2019-05-06 05:36:58,343]  INFO {org.wso2.carbon.databridge.receiver.binary.internal.BinaryDataReceiver} - Started Binary TCP Transport on port : 9612
+[2019-05-06 05:36:58,343]  INFO {org.wso2.carbon.databridge.receiver.thrift.internal.ThriftDataReceiverDS} - Service Component is activated
+[2019-05-06 05:36:58,360]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift Server started at 0.0.0.0
+[2019-05-06 05:36:58,369]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift SSL port : 7711
+[2019-05-06 05:36:58,371]  INFO {org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver} - Thrift port : 7611
+[2019-05-06 05:36:58,466]  INFO {org.wso2.msf4j.internal.MicroservicesServerSC} - All microservices are available
+[2019-05-06 05:36:58,567]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9090
+[2019-05-06 05:36:58,574]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 9443
+[2019-05-06 05:36:59,091]  INFO {org.wso2.transport.http.netty.contractimpl.listener.ServerConnectorBootstrap$HttpServerConnector} - HTTP(S) Interface starting on host 0.0.0.0 and port 8280
+[2019-05-06 05:36:59,092]  INFO {org.wso2.extension.siddhi.io.http.source.HttpConnectorPortBindingListener} - HTTP source 0.0.0.0:8280 has been started
+[2019-05-06 05:36:59,093]  INFO {io.siddhi.distribution.core.internal.StreamProcessorService} - Siddhi App MonitorApp deployed successfully
+[2019-05-06 05:36:59,100]  INFO {org.wso2.carbon.kernel.internal.CarbonStartupHandler} - Siddhi Runner Distribution started in 4.710 sec
+[2019-05-06 05:39:33,804]  INFO {io.siddhi.core.stream.output.sink.LogSink} - LOGGER : Event{timestamp=1557121173802, data=[monitored, 001, 341], isExpired=false}
+</pre></div></article></div></div></main><footer class="md-footer"><div class="md-footer-nav"><nav class="md-footer-nav__inner md-grid"><a href="../siddhi-as-a-docker-microservice-5.x/" title="Siddhi Docker Microservice" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev"><div class="md-flex__cell md-flex__cell--shrink"><i class="md-icon md-icon--arrow-back md-footer-nav__button"></i></div><div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span class="md-flex__ellipsis"><span class="md-footer-nav__direction">Previous</span>Siddhi Docker Microservice</span></div></a><a href="../config-guide-5.x/" title="Config Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next"><div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span class="md-flex__ellipsis"><span class="md-footer-nav__direction">Next</span>Config Guide</span></div><div class="md-flex__cell md-flex__cell--shrink"><i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i></div></a></nav></div><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright"><div class="md-footer-copyright__highlight">Copyright &copy; 2011 - 2019 WSO2</div>powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../assets/fonts/font-awesome.css"> <a href="https://github.com/siddhi-io/siddhi" class="md-footer-social__link fa fa-github"></a>  <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a> </div></div></div></footer></div><script src="../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../.."}})</script></body></html>

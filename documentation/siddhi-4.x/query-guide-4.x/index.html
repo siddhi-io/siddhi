@@ -1,1742 +1,23 @@
-
-
-
-
-<!DOCTYPE html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <meta http-equiv="x-ua-compatible" content="ie=edge">
-      
-        <meta name="description" content="Stream Processing and Complex Event Processing Engine">
-      
-      
-        <link rel="canonical" href="http://siddhi.io/documentation/siddhi-4.x/query-guide-4.x/">
-      
-      
-        <meta name="author" content="WSO2">
-      
-      
-        <meta name="lang:clipboard.copy" content="Copy to clipboard">
-      
-        <meta name="lang:clipboard.copied" content="Copied to clipboard">
-      
-        <meta name="lang:search.language" content="en">
-      
-        <meta name="lang:search.pipeline.stopwords" content="True">
-      
-        <meta name="lang:search.pipeline.trimmer" content="True">
-      
-        <meta name="lang:search.result.none" content="No matching documents">
-      
-        <meta name="lang:search.result.one" content="1 matching document">
-      
-        <meta name="lang:search.result.other" content="# matching documents">
-      
-        <meta name="lang:search.tokenizer" content="[\s\-]+">
-      
-      <link rel="shortcut icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.3">
-    
-    
-      
-        <title>Siddhi Query Guide - Siddhi</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../../assets/stylesheets/application.8d40d89b.css">
-      
-        <link rel="stylesheet" href="../../../assets/stylesheets/application-palette.6079476c.css">
-      
-    
-    
-      <script src="../../../assets/javascripts/modernizr.1aa3b519.js"></script>
-    
-    
-      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-      
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
-        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
-      
-      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    
-    
-      <link rel="stylesheet" href="../../../stylesheets/extra.css">
-    
-    
-  </head>
-  
-    
-    
-    <body dir="ltr" data-md-color-primary="teal" data-md-color-accent="teal">
-  
-    <svg class="md-svg">
-      <defs>
-        
-        
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
-    viewBox="0 0 416 448" id="github">
-  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
-        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
-        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
-        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
-        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
-        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
-        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
-        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
-        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
-        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
-        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
-        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
-        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
-        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
-        99.5z" />
-</svg>
-        
-      </defs>
-    </svg>
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
-    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
-    
-      <a href="#siddhi-4x-streaming-sql-guide" tabindex="1" class="md-skip">
-        Skip to content
-      </a>
-    
-    
-      <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="http://siddhi.io" title="Siddhi" class="md-header-nav__button md-logo">
-          
-            <img src="../../../images/siddhi-logo-w.svg" width="24" height="24">
-          
-        </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          
-            
-              <span class="md-header-nav__topic">
-                Siddhi
-              </span>
-              <span class="md-header-nav__topic">
-                Siddhi Query Guide
-              </span>
-            
-          
-        </div>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        
-          
-            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
-            
-<div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
-      </button>
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
-          <div class="md-search-result__meta">
-            Type to start searching
-          </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-          
-        
-      </div>
-      
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
-            
-
-
-  
-
-
-  <a href="https://github.com/wso2/siddhi/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      Siddhi
-    </div>
-  </a>
-
-          </div>
-        </div>
-      
-    </div>
-  </nav>
-</header>
-    
-    <div class="md-container">
-      
-        
-      
-      
-      <main class="md-main">
-        <div class="md-main__inner md-grid" data-md-component="container">
-          
-            
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="drawer">
-    <span class="md-nav__button md-logo">
-      
-        <img src="../../../images/siddhi-logo-w.svg" width="48" height="48">
-      
-    </span>
-    Siddhi
-  </label>
-  
-    <div class="md-nav__source">
-      
-
-
-  
-
-
-  <a href="https://github.com/wso2/siddhi/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      Siddhi
-    </div>
-  </a>
-
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../.." title="Welcome to Siddhi" class="md-nav__link">
-      Welcome to Siddhi
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../../features/" title="Features" class="md-nav__link">
-      Features
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../siddhi-5.x/quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">
-      Quick Start Guide
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
-    
-    <label class="md-nav__link" for="nav-4">
-      Documentation
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
-        Documentation
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1">
-    
-    <label class="md-nav__link" for="nav-4-1">
-      Siddhi 5.x
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
-      <label class="md-nav__title" for="nav-4-1">
-        Siddhi 5.x
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../siddhi-5.x/quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">
-      Quick Start Guide
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../siddhi-5.x/user-guide-5.x/" title="User Guide" class="md-nav__link">
-      User Guide
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../siddhi-5.x/query-guide-5.x/" title="Siddhi Query Guide" class="md-nav__link">
-      Siddhi Query Guide
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../siddhi-5.x/architecture-5.x/" title="Siddhi Architecture" class="md-nav__link">
-      Siddhi Architecture
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-        
-          
-          
-          
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-2" type="checkbox" id="nav-4-2" checked>
-    
-    <label class="md-nav__link" for="nav-4-2">
-      Siddhi 4.x
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
-      <label class="md-nav__title" for="nav-4-2">
-        Siddhi 4.x
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../quckstart-4.x/" title="Quick Start Guide" class="md-nav__link">
-      Quick Start Guide
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../user-guide-4.x/" title="User Guide" class="md-nav__link">
-      User Guide
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        Siddhi Query Guide
-      </label>
-    
-    <a href="./" title="Siddhi Query Guide" class="md-nav__link md-nav__link--active">
-      Siddhi Query Guide
-    </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#introduction" title="Introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#siddhi-application" title="Siddhi Application" class="md-nav__link">
-    Siddhi Application
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stream" title="Stream" class="md-nav__link">
-    Stream
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#source" title="Source" class="md-nav__link">
-    Source
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#source-mapper" title="Source Mapper" class="md-nav__link">
-    Source Mapper
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sink" title="Sink" class="md-nav__link">
-    Sink
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#distributed-sink" title="Distributed Sink" class="md-nav__link">
-    Distributed Sink
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sink-mapper" title="Sink Mapper" class="md-nav__link">
-    Sink Mapper
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query" title="Query" class="md-nav__link">
-    Query
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#query-projection" title="Query Projection" class="md-nav__link">
-    Query Projection
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#function" title="Function" class="md-nav__link">
-    Function
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#filter" title="Filter" class="md-nav__link">
-    Filter
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#window" title="Window" class="md-nav__link">
-    Window
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aggregate-function" title="Aggregate function" class="md-nav__link">
-    Aggregate function
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#group-by" title="Group By" class="md-nav__link">
-    Group By
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#having" title="Having" class="md-nav__link">
-    Having
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#order-by" title="Order By" class="md-nav__link">
-    Order By
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#limit-offset" title="Limit &amp; Offset" class="md-nav__link">
-    Limit &amp; Offset
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-stream" title="Join (Stream)" class="md-nav__link">
-    Join (Stream)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pattern" title="Pattern" class="md-nav__link">
-    Pattern
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#counting-pattern" title="Counting Pattern" class="md-nav__link">
-    Counting Pattern
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">
-    Logical Patterns
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#detecting-non-occurring-events" title="Detecting Non-occurring Events" class="md-nav__link">
-    Detecting Non-occurring Events
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sequence" title="Sequence" class="md-nav__link">
-    Sequence
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">
-    Output rate limiting
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#partition" title="Partition" class="md-nav__link">
-    Partition
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#inner-stream" title="Inner Stream" class="md-nav__link">
-    Inner Stream
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#table" title="Table" class="md-nav__link">
-    Table
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#store" title="Store" class="md-nav__link">
-    Store
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#insert" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-table" title="Join (Table)" class="md-nav__link">
-    Join (Table)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete" title="Delete" class="md-nav__link">
-    Delete
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update" title="Update" class="md-nav__link">
-    Update
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-or-insert" title="Update or Insert" class="md-nav__link">
-    Update or Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#in" title="In" class="md-nav__link">
-    In
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#incremental-aggregation" title="Incremental Aggregation" class="md-nav__link">
-    Incremental Aggregation
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#distributed-aggregation" title="Distributed Aggregation" class="md-nav__link">
-    Distributed Aggregation
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-aggregation" title="Join (Aggregation)" class="md-nav__link">
-    Join (Aggregation)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#defined-window" title="(Defined) Window" class="md-nav__link">
-    (Defined) Window
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#insert_1" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-window" title="Join (Window)" class="md-nav__link">
-    Join (Window)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#from" title="From" class="md-nav__link">
-    From
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trigger" title="Trigger" class="md-nav__link">
-    Trigger
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#script" title="Script" class="md-nav__link">
-    Script
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#store-query" title="Store Query" class="md-nav__link">
-    Store Query
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#tablewindow-select" title="(Table/Window) Select" class="md-nav__link">
-    (Table/Window) Select
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aggregation-select" title="(Aggregation) Select" class="md-nav__link">
-    (Aggregation) Select
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#insert_2" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete_1" title="Delete" class="md-nav__link">
-    Delete
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update_1" title="Update" class="md-nav__link">
-    Update
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-or-insert_1" title="Update or Insert" class="md-nav__link">
-    Update or Insert
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extensions" title="Extensions" class="md-nav__link">
-    Extensions
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#writing-custom-extensions" title="Writing Custom Extensions" class="md-nav__link">
-    Writing Custom Extensions
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-and-monitoring-siddhi-applications" title="Configuring and Monitoring Siddhi Applications" class="md-nav__link">
-    Configuring and Monitoring Siddhi Applications
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#threading-and-asynchronous" title="Threading and Asynchronous" class="md-nav__link">
-    Threading and Asynchronous
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fault-streams" title="Fault Streams" class="md-nav__link">
-    Fault Streams
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#statistics" title="Statistics" class="md-nav__link">
-    Statistics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#event-playback" title="Event Playback" class="md-nav__link">
-    Event Playback
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../architecture-4.x/" title="Siddhi Architecture" class="md-nav__link">
-      Siddhi Architecture
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../../contribution/" title="Contribute" class="md-nav__link">
-      Contribute
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../../extensions/" title="Extensions" class="md-nav__link">
-      Extensions
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
-    
-    <label class="md-nav__link" for="nav-7">
-      API Docs
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
-        API Docs
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/5.0.0/" title="5.0.0" class="md-nav__link">
-      5.0.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.4.8/" title="4.4.8" class="md-nav__link">
-      4.4.8
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.4.0/" title="4.4.0" class="md-nav__link">
-      4.4.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.3.19/" title="4.3.19" class="md-nav__link">
-      4.3.19
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.3.0/" title="4.3.0" class="md-nav__link">
-      4.3.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.2.40/" title="4.2.40" class="md-nav__link">
-      4.2.40
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.2.20/" title="4.2.20" class="md-nav__link">
-      4.2.20
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.2.0/" title="4.2.0" class="md-nav__link">
-      4.2.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.1.64/" title="4.1.64" class="md-nav__link">
-      4.1.64
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.1.46/" title="4.1.46" class="md-nav__link">
-      4.1.46
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.1.7/" title="4.1.7" class="md-nav__link">
-      4.1.7
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.1.0/" title="4.1.0" class="md-nav__link">
-      4.1.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.0.9/" title="4.0.9" class="md-nav__link">
-      4.0.9
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/4.0.0/" title="4.0.0" class="md-nav__link">
-      4.0.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../../api/latest/" title="latest" class="md-nav__link">
-      latest
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../../license/" title="License" class="md-nav__link">
-      License
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../../season-of-docs-2019/" title="Google Season of Code 2019" class="md-nav__link">
-      Google Season of Code 2019
-    </a>
-  </li>
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#introduction" title="Introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#siddhi-application" title="Siddhi Application" class="md-nav__link">
-    Siddhi Application
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stream" title="Stream" class="md-nav__link">
-    Stream
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#source" title="Source" class="md-nav__link">
-    Source
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#source-mapper" title="Source Mapper" class="md-nav__link">
-    Source Mapper
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sink" title="Sink" class="md-nav__link">
-    Sink
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#distributed-sink" title="Distributed Sink" class="md-nav__link">
-    Distributed Sink
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sink-mapper" title="Sink Mapper" class="md-nav__link">
-    Sink Mapper
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query" title="Query" class="md-nav__link">
-    Query
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#query-projection" title="Query Projection" class="md-nav__link">
-    Query Projection
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#function" title="Function" class="md-nav__link">
-    Function
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#filter" title="Filter" class="md-nav__link">
-    Filter
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#window" title="Window" class="md-nav__link">
-    Window
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aggregate-function" title="Aggregate function" class="md-nav__link">
-    Aggregate function
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#group-by" title="Group By" class="md-nav__link">
-    Group By
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#having" title="Having" class="md-nav__link">
-    Having
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#order-by" title="Order By" class="md-nav__link">
-    Order By
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#limit-offset" title="Limit &amp; Offset" class="md-nav__link">
-    Limit &amp; Offset
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-stream" title="Join (Stream)" class="md-nav__link">
-    Join (Stream)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pattern" title="Pattern" class="md-nav__link">
-    Pattern
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#counting-pattern" title="Counting Pattern" class="md-nav__link">
-    Counting Pattern
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">
-    Logical Patterns
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#detecting-non-occurring-events" title="Detecting Non-occurring Events" class="md-nav__link">
-    Detecting Non-occurring Events
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sequence" title="Sequence" class="md-nav__link">
-    Sequence
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">
-    Output rate limiting
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#partition" title="Partition" class="md-nav__link">
-    Partition
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#inner-stream" title="Inner Stream" class="md-nav__link">
-    Inner Stream
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#table" title="Table" class="md-nav__link">
-    Table
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#store" title="Store" class="md-nav__link">
-    Store
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#insert" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-table" title="Join (Table)" class="md-nav__link">
-    Join (Table)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete" title="Delete" class="md-nav__link">
-    Delete
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update" title="Update" class="md-nav__link">
-    Update
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-or-insert" title="Update or Insert" class="md-nav__link">
-    Update or Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#in" title="In" class="md-nav__link">
-    In
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#incremental-aggregation" title="Incremental Aggregation" class="md-nav__link">
-    Incremental Aggregation
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#distributed-aggregation" title="Distributed Aggregation" class="md-nav__link">
-    Distributed Aggregation
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-aggregation" title="Join (Aggregation)" class="md-nav__link">
-    Join (Aggregation)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#defined-window" title="(Defined) Window" class="md-nav__link">
-    (Defined) Window
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#insert_1" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#join-window" title="Join (Window)" class="md-nav__link">
-    Join (Window)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#from" title="From" class="md-nav__link">
-    From
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trigger" title="Trigger" class="md-nav__link">
-    Trigger
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#script" title="Script" class="md-nav__link">
-    Script
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#store-query" title="Store Query" class="md-nav__link">
-    Store Query
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#tablewindow-select" title="(Table/Window) Select" class="md-nav__link">
-    (Table/Window) Select
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aggregation-select" title="(Aggregation) Select" class="md-nav__link">
-    (Aggregation) Select
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#insert_2" title="Insert" class="md-nav__link">
-    Insert
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete_1" title="Delete" class="md-nav__link">
-    Delete
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update_1" title="Update" class="md-nav__link">
-    Update
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-or-insert_1" title="Update or Insert" class="md-nav__link">
-    Update or Insert
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extensions" title="Extensions" class="md-nav__link">
-    Extensions
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#writing-custom-extensions" title="Writing Custom Extensions" class="md-nav__link">
-    Writing Custom Extensions
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-and-monitoring-siddhi-applications" title="Configuring and Monitoring Siddhi Applications" class="md-nav__link">
-    Configuring and Monitoring Siddhi Applications
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#threading-and-asynchronous" title="Threading and Asynchronous" class="md-nav__link">
-    Threading and Asynchronous
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fault-streams" title="Fault Streams" class="md-nav__link">
-    Fault Streams
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#statistics" title="Statistics" class="md-nav__link">
-    Statistics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#event-playback" title="Event Playback" class="md-nav__link">
-    Event Playback
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          <div class="md-content">
-            <article class="md-content__inner md-typeset">
-              
-                
-                  <a href="https://github.com/wso2/siddhi/edit/master/docs/documentation/siddhi-4.x/query-guide-4.x.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
-                
-                
-                <h1 id="siddhi-4x-streaming-sql-guide">Siddhi 4.x Streaming SQL Guide<a class="headerlink" href="#siddhi-4x-streaming-sql-guide" title="Permanent link">&para;</a></h1>
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Cloud Native Stream Processor"><link rel="canonical" href="http://siddhi.io/documentation/siddhi-4.x/query-guide-4.x/"><meta name="author" content="WSO2"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.0"><title>Query Guide - Siddhi</title><link rel="stylesheet" href="../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content="#009688"><script src="../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../stylesheets/extra.css"><script>window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  }
+  ga.l = +new Date
+  /* Setup integration and send page view */
+  ga("create", "UA-103065-28", "auto")
+  ga("set", "anonymizeIp", true)
+  ga("send", "pageview")
+  /* Register handler to log search on blur */
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.forms.search) {
+      var query = document.forms.search.query
+      query.addEventListener("blur", function() {
+        if (this.value) {
+          var path = document.location.pathname;
+          ga("send", "pageview", path + "?q=" + this.value)
+        }
+      })
+    }
+  })</script><script async src="https://www.google-analytics.com/analytics.js"></script></head><body dir="ltr" data-md-color-primary="teal" data-md-color-accent="teal"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#siddhi-4x-streaming-sql-guide" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="http://siddhi.io" title="Siddhi" class="md-header-nav__button md-logo"><img src="../../../images/siddhi-logo-w.svg" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Siddhi</span><span class="md-header-nav__topic">Query Guide</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/siddhi-io/siddhi/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">Siddhi</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="http://siddhi.io" title="Siddhi" class="md-nav__button md-logo"><img src="../../../images/siddhi-logo-w.svg" width="48" height="48"></a>Siddhi</label><div class="md-nav__source"><a href="https://github.com/siddhi-io/siddhi/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">Siddhi</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../.." title="Welcome to Siddhi" class="md-nav__link">Welcome to Siddhi</a></li><li class="md-nav__item"><a href="../../../features/" title="Features" class="md-nav__link">Features</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item"><a href="../../../download/" title="Download" class="md-nav__link">Download</a></li><li class="md-nav__item md-nav__item--active md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked><label class="md-nav__link" for="nav-5">Documentation</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-5">Documentation</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-1" type="checkbox" id="nav-5-1"><label class="md-nav__link" for="nav-5-1">Siddhi 5.x</label><nav class="md-nav" data-md-component="collapsible" data-md-level="2"><label class="md-nav__title" for="nav-5-1">Siddhi 5.x</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../siddhi-5.x/quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-1-2" type="checkbox" id="nav-5-1-2"><label class="md-nav__link" for="nav-5-1-2">User Guide</label><nav class="md-nav" data-md-component="collapsible" data-md-level="3"><label class="md-nav__title" for="nav-5-1-2">User Guide</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../siddhi-5.x/user-guide-introduction-5.x/" title="Introduction" class="md-nav__link">Introduction</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/siddhi-as-a-java-library-5.x/" title="Siddhi Java library" class="md-nav__link">Siddhi Java library</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/siddhi-as-a-local-microservice-5.x/" title="Siddhi Local Microservice" class="md-nav__link">Siddhi Local Microservice</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/siddhi-as-a-docker-microservice-5.x/" title="Siddhi Docker Microservice" class="md-nav__link">Siddhi Docker Microservice</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/siddhi-as-a-kubernetes-microservice-5.x/" title="Siddhi Kubernetes Microservice" class="md-nav__link">Siddhi Kubernetes Microservice</a></li></ul></nav></li><li class="md-nav__item"><a href="../../siddhi-5.x/config-guide-5.x/" title="Config Guide" class="md-nav__link">Config Guide</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/query-guide-5.x/" title="Query Guide" class="md-nav__link">Query Guide</a></li><li class="md-nav__item"><a href="../../siddhi-5.x/architecture-5.x/" title="Siddhi Architecture" class="md-nav__link">Siddhi Architecture</a></li></ul></nav></li><li class="md-nav__item md-nav__item--active md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-5-2" type="checkbox" id="nav-5-2" checked><label class="md-nav__link" for="nav-5-2">Siddhi 4.x</label><nav class="md-nav" data-md-component="collapsible" data-md-level="2"><label class="md-nav__title" for="nav-5-2">Siddhi 4.x</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../quckstart-4.x/" title="Quick Start Guide" class="md-nav__link">Quick Start Guide</a></li><li class="md-nav__item"><a href="../user-guide-4.x/" title="User Guide" class="md-nav__link">User Guide</a></li><li class="md-nav__item md-nav__item--active"><input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc"><label class="md-nav__link md-nav__link--active" for="__toc">Query Guide</label><a href="./" title="Query Guide" class="md-nav__link md-nav__link--active">Query Guide</a><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#introduction" title="Introduction" class="md-nav__link">Introduction</a></li><li class="md-nav__item"><a href="#siddhi-application" title="Siddhi Application" class="md-nav__link">Siddhi Application</a></li><li class="md-nav__item"><a href="#stream" title="Stream" class="md-nav__link">Stream</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#source" title="Source" class="md-nav__link">Source</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#source-mapper" title="Source Mapper" class="md-nav__link">Source Mapper</a></li></ul></nav></li><li class="md-nav__item"><a href="#sink" title="Sink" class="md-nav__link">Sink</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#distributed-sink" title="Distributed Sink" class="md-nav__link">Distributed Sink</a></li><li class="md-nav__item"><a href="#sink-mapper" title="Sink Mapper" class="md-nav__link">Sink Mapper</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="#query" title="Query" class="md-nav__link">Query</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#query-projection" title="Query Projection" class="md-nav__link">Query Projection</a></li><li class="md-nav__item"><a href="#function" title="Function" class="md-nav__link">Function</a></li><li class="md-nav__item"><a href="#filter" title="Filter" class="md-nav__link">Filter</a></li><li class="md-nav__item"><a href="#window" title="Window" class="md-nav__link">Window</a></li><li class="md-nav__item"><a href="#aggregate-function" title="Aggregate function" class="md-nav__link">Aggregate function</a></li><li class="md-nav__item"><a href="#group-by" title="Group By" class="md-nav__link">Group By</a></li><li class="md-nav__item"><a href="#having" title="Having" class="md-nav__link">Having</a></li><li class="md-nav__item"><a href="#order-by" title="Order By" class="md-nav__link">Order By</a></li><li class="md-nav__item"><a href="#limit-offset" title="Limit &amp; Offset" class="md-nav__link">Limit &amp; Offset</a></li><li class="md-nav__item"><a href="#join-stream" title="Join (Stream)" class="md-nav__link">Join (Stream)</a></li><li class="md-nav__item"><a href="#pattern" title="Pattern" class="md-nav__link">Pattern</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#counting-pattern" title="Counting Pattern" class="md-nav__link">Counting Pattern</a></li><li class="md-nav__item"><a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">Logical Patterns</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#detecting-non-occurring-events" title="Detecting Non-occurring Events" class="md-nav__link">Detecting Non-occurring Events</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="#sequence" title="Sequence" class="md-nav__link">Sequence</a></li><li class="md-nav__item"><a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">Output rate limiting</a></li></ul></nav></li><li class="md-nav__item"><a href="#partition" title="Partition" class="md-nav__link">Partition</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#inner-stream" title="Inner Stream" class="md-nav__link">Inner Stream</a></li></ul></nav></li><li class="md-nav__item"><a href="#table" title="Table" class="md-nav__link">Table</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#store" title="Store" class="md-nav__link">Store</a></li><li class="md-nav__item"><a href="#insert" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#join-table" title="Join (Table)" class="md-nav__link">Join (Table)</a></li><li class="md-nav__item"><a href="#delete" title="Delete" class="md-nav__link">Delete</a></li><li class="md-nav__item"><a href="#update" title="Update" class="md-nav__link">Update</a></li><li class="md-nav__item"><a href="#update-or-insert" title="Update or Insert" class="md-nav__link">Update or Insert</a></li><li class="md-nav__item"><a href="#in" title="In" class="md-nav__link">In</a></li></ul></nav></li><li class="md-nav__item"><a href="#incremental-aggregation" title="Incremental Aggregation" class="md-nav__link">Incremental Aggregation</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#distributed-aggregation" title="Distributed Aggregation" class="md-nav__link">Distributed Aggregation</a></li><li class="md-nav__item"><a href="#join-aggregation" title="Join (Aggregation)" class="md-nav__link">Join (Aggregation)</a></li></ul></nav></li><li class="md-nav__item"><a href="#defined-window" title="(Defined) Window" class="md-nav__link">(Defined) Window</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#insert_1" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#join-window" title="Join (Window)" class="md-nav__link">Join (Window)</a></li><li class="md-nav__item"><a href="#from" title="From" class="md-nav__link">From</a></li></ul></nav></li><li class="md-nav__item"><a href="#trigger" title="Trigger" class="md-nav__link">Trigger</a></li><li class="md-nav__item"><a href="#script" title="Script" class="md-nav__link">Script</a></li><li class="md-nav__item"><a href="#store-query" title="Store Query" class="md-nav__link">Store Query</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#tablewindow-select" title="(Table/Window) Select" class="md-nav__link">(Table/Window) Select</a></li><li class="md-nav__item"><a href="#aggregation-select" title="(Aggregation) Select" class="md-nav__link">(Aggregation) Select</a></li><li class="md-nav__item"><a href="#insert_2" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#delete_1" title="Delete" class="md-nav__link">Delete</a></li><li class="md-nav__item"><a href="#update_1" title="Update" class="md-nav__link">Update</a></li><li class="md-nav__item"><a href="#update-or-insert_1" title="Update or Insert" class="md-nav__link">Update or Insert</a></li></ul></nav></li><li class="md-nav__item"><a href="#extensions" title="Extensions" class="md-nav__link">Extensions</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#writing-custom-extensions" title="Writing Custom Extensions" class="md-nav__link">Writing Custom Extensions</a></li></ul></nav></li><li class="md-nav__item"><a href="#configuring-and-monitoring-siddhi-applications" title="Configuring and Monitoring Siddhi Applications" class="md-nav__link">Configuring and Monitoring Siddhi Applications</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#threading-and-asynchronous" title="Threading and Asynchronous" class="md-nav__link">Threading and Asynchronous</a></li><li class="md-nav__item"><a href="#fault-streams" title="Fault Streams" class="md-nav__link">Fault Streams</a></li><li class="md-nav__item"><a href="#statistics" title="Statistics" class="md-nav__link">Statistics</a></li><li class="md-nav__item"><a href="#event-playback" title="Event Playback" class="md-nav__link">Event Playback</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="../architecture-4.x/" title="Siddhi Architecture" class="md-nav__link">Siddhi Architecture</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="../../../contribution/" title="Contribute" class="md-nav__link">Contribute</a></li><li class="md-nav__item"><a href="../../../extensions/" title="Extensions" class="md-nav__link">Extensions</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8"><label class="md-nav__link" for="nav-8">API Docs</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-8">API Docs</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../api/latest/" title="latest" class="md-nav__link">latest</a></li><li class="md-nav__item"><a href="../../../api/5.0.0/" title="5.0.0" class="md-nav__link">5.0.0</a></li><li class="md-nav__item"><a href="../../../api/4.5.11/" title="4.5.11" class="md-nav__link">4.5.11</a></li><li class="md-nav__item"><a href="../../../api/4.5.10/" title="4.5.10" class="md-nav__link">4.5.10</a></li><li class="md-nav__item"><a href="../../../api/4.5.9/" title="4.5.9" class="md-nav__link">4.5.9</a></li><li class="md-nav__item"><a href="../../../api/4.5.0/" title="4.5.0" class="md-nav__link">4.5.0</a></li><li class="md-nav__item"><a href="../../../api/4.4.8/" title="4.4.8" class="md-nav__link">4.4.8</a></li><li class="md-nav__item"><a href="../../../api/4.4.0/" title="4.4.0" class="md-nav__link">4.4.0</a></li><li class="md-nav__item"><a href="../../../api/4.3.19/" title="4.3.19" class="md-nav__link">4.3.19</a></li><li class="md-nav__item"><a href="../../../api/4.3.0/" title="4.3.0" class="md-nav__link">4.3.0</a></li><li class="md-nav__item"><a href="../../../api/4.2.40/" title="4.2.40" class="md-nav__link">4.2.40</a></li><li class="md-nav__item"><a href="../../../api/4.2.20/" title="4.2.20" class="md-nav__link">4.2.20</a></li><li class="md-nav__item"><a href="../../../api/4.2.0/" title="4.2.0" class="md-nav__link">4.2.0</a></li><li class="md-nav__item"><a href="../../../api/4.1.64/" title="4.1.64" class="md-nav__link">4.1.64</a></li><li class="md-nav__item"><a href="../../../api/4.1.46/" title="4.1.46" class="md-nav__link">4.1.46</a></li><li class="md-nav__item"><a href="../../../api/4.1.7/" title="4.1.7" class="md-nav__link">4.1.7</a></li><li class="md-nav__item"><a href="../../../api/4.1.0/" title="4.1.0" class="md-nav__link">4.1.0</a></li><li class="md-nav__item"><a href="../../../api/4.0.9/" title="4.0.9" class="md-nav__link">4.0.9</a></li><li class="md-nav__item"><a href="../../../api/4.0.0/" title="4.0.0" class="md-nav__link">4.0.0</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../license/" title="License" class="md-nav__link">License</a></li><li class="md-nav__item"><a href="../../../season-of-docs-2019/" title="Google Season of Docs 2019" class="md-nav__link">Google Season of Docs 2019</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#introduction" title="Introduction" class="md-nav__link">Introduction</a></li><li class="md-nav__item"><a href="#siddhi-application" title="Siddhi Application" class="md-nav__link">Siddhi Application</a></li><li class="md-nav__item"><a href="#stream" title="Stream" class="md-nav__link">Stream</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#source" title="Source" class="md-nav__link">Source</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#source-mapper" title="Source Mapper" class="md-nav__link">Source Mapper</a></li></ul></nav></li><li class="md-nav__item"><a href="#sink" title="Sink" class="md-nav__link">Sink</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#distributed-sink" title="Distributed Sink" class="md-nav__link">Distributed Sink</a></li><li class="md-nav__item"><a href="#sink-mapper" title="Sink Mapper" class="md-nav__link">Sink Mapper</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="#query" title="Query" class="md-nav__link">Query</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#query-projection" title="Query Projection" class="md-nav__link">Query Projection</a></li><li class="md-nav__item"><a href="#function" title="Function" class="md-nav__link">Function</a></li><li class="md-nav__item"><a href="#filter" title="Filter" class="md-nav__link">Filter</a></li><li class="md-nav__item"><a href="#window" title="Window" class="md-nav__link">Window</a></li><li class="md-nav__item"><a href="#aggregate-function" title="Aggregate function" class="md-nav__link">Aggregate function</a></li><li class="md-nav__item"><a href="#group-by" title="Group By" class="md-nav__link">Group By</a></li><li class="md-nav__item"><a href="#having" title="Having" class="md-nav__link">Having</a></li><li class="md-nav__item"><a href="#order-by" title="Order By" class="md-nav__link">Order By</a></li><li class="md-nav__item"><a href="#limit-offset" title="Limit &amp; Offset" class="md-nav__link">Limit &amp; Offset</a></li><li class="md-nav__item"><a href="#join-stream" title="Join (Stream)" class="md-nav__link">Join (Stream)</a></li><li class="md-nav__item"><a href="#pattern" title="Pattern" class="md-nav__link">Pattern</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#counting-pattern" title="Counting Pattern" class="md-nav__link">Counting Pattern</a></li><li class="md-nav__item"><a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">Logical Patterns</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#detecting-non-occurring-events" title="Detecting Non-occurring Events" class="md-nav__link">Detecting Non-occurring Events</a></li></ul></nav></li></ul></nav></li><li class="md-nav__item"><a href="#sequence" title="Sequence" class="md-nav__link">Sequence</a></li><li class="md-nav__item"><a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">Output rate limiting</a></li></ul></nav></li><li class="md-nav__item"><a href="#partition" title="Partition" class="md-nav__link">Partition</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#inner-stream" title="Inner Stream" class="md-nav__link">Inner Stream</a></li></ul></nav></li><li class="md-nav__item"><a href="#table" title="Table" class="md-nav__link">Table</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#store" title="Store" class="md-nav__link">Store</a></li><li class="md-nav__item"><a href="#insert" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#join-table" title="Join (Table)" class="md-nav__link">Join (Table)</a></li><li class="md-nav__item"><a href="#delete" title="Delete" class="md-nav__link">Delete</a></li><li class="md-nav__item"><a href="#update" title="Update" class="md-nav__link">Update</a></li><li class="md-nav__item"><a href="#update-or-insert" title="Update or Insert" class="md-nav__link">Update or Insert</a></li><li class="md-nav__item"><a href="#in" title="In" class="md-nav__link">In</a></li></ul></nav></li><li class="md-nav__item"><a href="#incremental-aggregation" title="Incremental Aggregation" class="md-nav__link">Incremental Aggregation</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#distributed-aggregation" title="Distributed Aggregation" class="md-nav__link">Distributed Aggregation</a></li><li class="md-nav__item"><a href="#join-aggregation" title="Join (Aggregation)" class="md-nav__link">Join (Aggregation)</a></li></ul></nav></li><li class="md-nav__item"><a href="#defined-window" title="(Defined) Window" class="md-nav__link">(Defined) Window</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#insert_1" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#join-window" title="Join (Window)" class="md-nav__link">Join (Window)</a></li><li class="md-nav__item"><a href="#from" title="From" class="md-nav__link">From</a></li></ul></nav></li><li class="md-nav__item"><a href="#trigger" title="Trigger" class="md-nav__link">Trigger</a></li><li class="md-nav__item"><a href="#script" title="Script" class="md-nav__link">Script</a></li><li class="md-nav__item"><a href="#store-query" title="Store Query" class="md-nav__link">Store Query</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#tablewindow-select" title="(Table/Window) Select" class="md-nav__link">(Table/Window) Select</a></li><li class="md-nav__item"><a href="#aggregation-select" title="(Aggregation) Select" class="md-nav__link">(Aggregation) Select</a></li><li class="md-nav__item"><a href="#insert_2" title="Insert" class="md-nav__link">Insert</a></li><li class="md-nav__item"><a href="#delete_1" title="Delete" class="md-nav__link">Delete</a></li><li class="md-nav__item"><a href="#update_1" title="Update" class="md-nav__link">Update</a></li><li class="md-nav__item"><a href="#update-or-insert_1" title="Update or Insert" class="md-nav__link">Update or Insert</a></li></ul></nav></li><li class="md-nav__item"><a href="#extensions" title="Extensions" class="md-nav__link">Extensions</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#writing-custom-extensions" title="Writing Custom Extensions" class="md-nav__link">Writing Custom Extensions</a></li></ul></nav></li><li class="md-nav__item"><a href="#configuring-and-monitoring-siddhi-applications" title="Configuring and Monitoring Siddhi Applications" class="md-nav__link">Configuring and Monitoring Siddhi Applications</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#threading-and-asynchronous" title="Threading and Asynchronous" class="md-nav__link">Threading and Asynchronous</a></li><li class="md-nav__item"><a href="#fault-streams" title="Fault Streams" class="md-nav__link">Fault Streams</a></li><li class="md-nav__item"><a href="#statistics" title="Statistics" class="md-nav__link">Statistics</a></li><li class="md-nav__item"><a href="#event-playback" title="Event Playback" class="md-nav__link">Event Playback</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/siddhi-io/siddhi/edit/master/docs/documentation/siddhi-4.x/query-guide-4.x.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><h1 id="siddhi-4x-streaming-sql-guide">Siddhi 4.x Streaming SQL Guide<a class="headerlink" href="#siddhi-4x-streaming-sql-guide" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
 <p>Please find the latest Siddhi Streaming SQL Guide <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/query-guide-5.x/">here</a></p>
@@ -1866,7 +147,7 @@ All the events that are selected to be received into a specific stream have the 
 </table>
 <p>To use and refer stream and attribute names that do not follow <code>[a-zA-Z_][a-zA-Z_0-9]*</code> format enclose them in <code>`. E.g. ```</code>$test(0)` ```.</p>
 <p>To make the stream process events in asynchronous and multi-threading manner use the <code>@Async</code> annotation as shown in 
-<a href="http://siddhi.io/documentation/siddhi-4.0/siddhi-4.x.md#threading-and-asynchronous">Threading and Asynchronous</a> configuration section.</p>
+<a href="#threading-and-asynchronous">Threading and Asynchronous</a> configuration section.</p>
 <p><strong>Example</strong></p>
 <div class="codehilite"><pre><span></span><span class="n">define</span> <span class="n">stream</span> <span class="n">TempStream</span> <span class="p">(</span><span class="n">deviceID</span> <span class="n">long</span><span class="p">,</span> <span class="n">roomNo</span> <span class="nb">int</span><span class="p">,</span> <span class="n">temp</span> <span class="n">double</span><span class="p">);</span>
 </pre></div>
@@ -3258,8 +1539,8 @@ The syntax for a logical sequence is as follows:</p>
 </table>
 <p>Here the <code>&lt;output event&gt;</code> specifies the event(s) that should be returned as the output of the query. 
 The possible values are as follows:
-<em> <code>first</code> : Only the first event processed by the query during the specified time interval/sliding window is emitted.
-</em> <code>last</code> : Only the last event processed by the query during the specified time interval/sliding window is emitted.
+* <code>first</code> : Only the first event processed by the query during the specified time interval/sliding window is emitted.
+* <code>last</code> : Only the last event processed by the query during the specified time interval/sliding window is emitted.
 * <code>all</code> : All the events processed by the query during the specified time interval/sliding window are emitted. <strong>When no <code>&lt;output event&gt;</code> is defined, <code>all</code> is used by default.</strong></p>
 <p><strong>Examples</strong></p>
 <ul>
@@ -3638,7 +1919,7 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
 <p>When the attribute to the right is a table attribute, the operations supported differ based on the database type.</p>
 </div>
 <p>To execute update upon specific output event types use the <code>current events</code>, <code>expired events</code> or the <code>all events</code> keyword with <code>for</code> as shown
-in the syntax. To understand more see <a href="http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types">output event type</a>.</p>
+in the syntax. To understand more see <a href="#output-event-types">output event type</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Table attributes should be always referred to with the table name as <code>&lt;table name&gt;.&lt;attibute name&gt;</code>.</p>
@@ -4187,7 +2468,7 @@ some periodic executions. </p>
 </tr>
 <tr>
 <td><code>'&lt;cron expression&gt;'</code></td>
-<td>An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.</td>
+<td>An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.1.7/tutorials/tutorial-lesson-06.html">quartz-scheduler</a>.</td>
 </tr>
 </tbody>
 </table>
@@ -4616,7 +2897,7 @@ extension type.</p>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When using the generated archetype please make sure you uncomment @Extension annotation and complete the
+<p>When using the generated archetype please make sure you complete the @Extension
 annotation with proper values. This annotation will be used to identify and document the extension, hence your
 extension will not work without @Extension annotation.</p>
 </div>
@@ -4635,21 +2916,83 @@ extension will not work without @Extension annotation.</p>
 <ol>
 <li>
 <p>Issue the following command from your CLI.</p>
-<div class="codehilite"><pre><span></span>        mvn archetype:generate
-            -DarchetypeGroupId=io.siddhi.extension.archetype
-            -DarchetypeArtifactId=siddhi-archetype-execution
-            -DgroupId=io.extension.siddhi.execution
-            -Dversion=1.0.0-SNAPSHOT
+<div class="codehilite"><pre><span></span>mvn archetype:generate
+    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+    -DarchetypeArtifactId=siddhi-archetype-execution
+    -DgroupId=org.wso2.extension.siddhi.execution
+    -Dversion=1.0.0-SNAPSHOT
 </pre></div>
 
 
 </li>
 <li>
-<p>Enter the required execution name in the message that pops up as shown in the example below.</p>
-<div class="codehilite"><pre><span></span>    Define value for property &#39;executionType&#39;: ML
-</pre></div>
-
-
+<p>Enter the mandatory properties prompted, please see the description for all properties below.</p>
+<table>
+<thead>
+<tr>
+<th>Properties</th>
+<th>Description</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_nameOfFunction</td>
+<td>Name of the custom function to be created</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>_nameSpaceOfFunction</td>
+<td>Namespace of the function, used to grouped similar custom functions</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>groupIdPostfix</td>
+<td>Namespace of the function is added as postfix to the groupId as a convention</td>
+<td>N</td>
+<td _nameSpaceOfFunction="_nameSpaceOfFunction"></td>
+</tr>
+<tr>
+<td>artifactId</td>
+<td>Artifact Id of the project</td>
+<td>N</td>
+<td _nameSpaceOfFunction="_nameSpaceOfFunction">siddhi-execution-</td>
+</tr>
+<tr>
+<td>classNameOfAggregateFunction</td>
+<td>Class name of the Aggregate Function</td>
+<td>N</td>
+<td _nameOfFunction="_nameOfFunction">$</td>
+</tr>
+<tr>
+<td>classNameOfFunction</td>
+<td>Class name of the Function</td>
+<td>N</td>
+<td _nameOfFunction="_nameOfFunction">$</td>
+</tr>
+<tr>
+<td>classNameOfStreamFunction</td>
+<td>Class name of the Stream Function</td>
+<td>N</td>
+<td _nameOfFunction="_nameOfFunction">$</td>
+</tr>
+<tr>
+<td>classNameOfStreamProcessor</td>
+<td>Class name of the Stream Processor</td>
+<td>N</td>
+<td _nameOfFunction="_nameOfFunction">$</td>
+</tr>
+<tr>
+<td>classNameOfWindow</td>
+<td>Class name of the Window</td>
+<td>N</td>
+<td _nameOfFunction="_nameOfFunction">$</td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</p>
@@ -4669,21 +3012,59 @@ extension will not work without @Extension annotation.</p>
 <ol>
 <li>
 <p>Issue the following command from your CLI.</p>
-<div class="codehilite"><pre><span></span>       mvn archetype:generate
-           -DarchetypeGroupId=io.siddhi.extension.archetype
-           -DarchetypeArtifactId=siddhi-archetype-io
-           -DgroupId=io.extension.siddhi.io
-           -Dversion=1.0.0-SNAPSHOT
+<div class="codehilite"><pre><span></span>mvn archetype:generate
+    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+    -DarchetypeArtifactId=siddhi-archetype-io
+    -DgroupId=org.wso2.extension.siddhi.io
+    -Dversion=1.0.0-SNAPSHOT
 </pre></div>
 
 
 </li>
 <li>
-<p>Enter the required execution name (the transport type in this scenario) in the message that pops up as shown in the example below.</p>
-<div class="codehilite"><pre><span></span> Define value for property &#39;typeOf_IO&#39;: http
-</pre></div>
-
-
+<p>Enter the mandatory properties prompted, please see the description for all properties below.</p>
+<table>
+<thead>
+<tr>
+<th>Properties</th>
+<th>Description</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_IOType</td>
+<td>Type of IO for which Siddhi-io extension is written</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>groupIdPostfix</td>
+<td>Type of the IO is added as postfix to the groupId as a convention</td>
+<td>N</td>
+<td _IOType="_IOType"></td>
+</tr>
+<tr>
+<td>artifactId</td>
+<td>Artifact Id of the project</td>
+<td>N</td>
+<td _IOType="_IOType">siddhi-io-</td>
+</tr>
+<tr>
+<td>classNameOfSink</td>
+<td>Class name of the Sink</td>
+<td>N</td>
+<td _IOType="_IOType"></td>
+</tr>
+<tr>
+<td>classNameOfSource</td>
+<td>Class name of the Source</td>
+<td>N</td>
+<td _IOType="_IOType"></td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</p>
@@ -4705,24 +3086,65 @@ extension will not work without @Extension annotation.</p>
 <ol>
 <li>
 <p>Issue the following command from your CLI.                </p>
-<div class="codehilite"><pre><span></span>        mvn archetype:generate
-            -DarchetypeGroupId=io.siddhi.extension.archetype
-            -DarchetypeArtifactId=siddhi-archetype-map
-            -DgroupId=io.extension.siddhi.map
-            -Dversion=1.0.0-SNAPSHOT
+<div class="codehilite"><pre><span></span>mvn archetype:generate
+    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+    -DarchetypeArtifactId=siddhi-archetype-map
+    -DgroupId=org.wso2.extension.siddhi.map
+    -Dversion=1.0.0-SNAPSHOT
 </pre></div>
 
 
 </li>
 <li>
-<p>Enter the required execution name (the map type in this scenario) in the message that pops up as shown in the example below.</p>
-<div class="codehilite"><pre><span></span>    Define value for property &#39;mapType&#39;:CSV
-</pre></div>
-
-
-</li>
-<li>
-<p>To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</p>
+<p>Enter the mandatory properties prompted, please see the description for all properties below.</p>
+<table>
+<thead>
+<tr>
+<th>Properties</th>
+<th>Description</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_mapType</td>
+<td>Type of Mapper for which Siddhi-map extension is written</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>groupIdPostfix</td>
+<td>Type of the Map is added as postfix to the groupId as a convention</td>
+<td>N</td>
+<td _mapType="_mapType"></td>
+</tr>
+<tr>
+<td>artifactId</td>
+<td>Artifact Id of the project</td>
+<td>N</td>
+<td _mapType="_mapType">siddhi-map-</td>
+</tr>
+<tr>
+<td>classNameOfSinkMapper</td>
+<td>Class name of the Sink Mapper</td>
+<td>N</td>
+<td _mapType="_mapType"></td>
+</tr>
+<tr>
+<td>classNameOfSourceMapper</td>
+<td>Class name of the Source Mapper</td>
+<td>N</td>
+<td _mapType="_mapType"></td>
+</tr>
+<tr>
+<td>3. To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </li>
 </ol>
 <p><strong>siddhi-script</strong></p>
@@ -4733,21 +3155,50 @@ extension will not work without @Extension annotation.</p>
 <ol>
 <li>
 <p>Issue the following command from your CLI.                   </p>
-<div class="codehilite"><pre><span></span>       mvn archetype:generate
-           -DarchetypeGroupId=io.siddhi.extension.archetype
-           -DarchetypeArtifactId=siddhi-archetype-script
-           -DgroupId=io.extension.siddhi.script
-           -Dversion=1.0.0-SNAPSHOT
-</pre></div>
-
-
+<p>mvn archetype:generate
+       -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+       -DarchetypeArtifactId=siddhi-archetype-script
+       -DgroupId=org.wso2.extension.siddhi.script
+       -Dversion=1.0.0-SNAPSHOT</p>
 </li>
 <li>
-<p>Enter the required execution name in the message that pops up as shown in the example below.</p>
-<div class="codehilite"><pre><span></span> Define value for property &#39;typeOfScript&#39;:
-</pre></div>
-
-
+<p>Enter the mandatory properties prompted, please see the description for all properties below.</p>
+<table>
+<thead>
+<tr>
+<th>Properties</th>
+<th>Description</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_nameOfScript</td>
+<td>Name of Custom Script for which Siddhi-script extension is written</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>groupIdPostfix</td>
+<td>Name of the Script is added as postfix to the groupId as a convention</td>
+<td>N</td>
+<td _nameOfScript="_nameOfScript"></td>
+</tr>
+<tr>
+<td>artifactId</td>
+<td>Artifact Id of the project</td>
+<td>N</td>
+<td _nameOfScript="_nameOfScript">siddhi-script-</td>
+</tr>
+<tr>
+<td>classNameOfScript</td>
+<td>Class name of the Script</td>
+<td>N</td>
+<td _nameOfScript="_nameOfScript">Eval</td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</p>
@@ -4761,21 +3212,50 @@ extension will not work without @Extension annotation.</p>
 <ol>
 <li>
 <p>Issue the following command from your CLI.                      </p>
-<div class="codehilite"><pre><span></span>       mvn archetype:generate
-          -DarchetypeGroupId=io.siddhi.extension.archetype
-          -DarchetypeArtifactId=siddhi-archetype-store
-          -DgroupId=io.extension.siddhi.store
-          -Dversion=1.0.0-SNAPSHOT
-</pre></div>
-
-
+<p>mvn archetype:generate
+      -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+      -DarchetypeArtifactId=siddhi-archetype-store
+      -DgroupId=org.wso2.extension.siddhi.store
+      -Dversion=1.0.0-SNAPSHOT</p>
 </li>
 <li>
-<p>Enter the required execution name in the message that pops up as shown in the example below.</p>
-<div class="codehilite"><pre><span></span>  Define value for property &#39;storeType&#39;: RDBMS
-</pre></div>
-
-
+<p>Enter the mandatory properties prompted, please see the description for all properties below.</p>
+<table>
+<thead>
+<tr>
+<th>Properties</th>
+<th>Description</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_storeType</td>
+<td>Type of Store for which Siddhi-store extension is written</td>
+<td>Y</td>
+<td>-</td>
+</tr>
+<tr>
+<td>groupIdPostfix</td>
+<td>Type of the Store is added as postfix to the groupId as a convention</td>
+<td>N</td>
+<td _storeType="_storeType"></td>
+</tr>
+<tr>
+<td>artifactId</td>
+<td>Artifact Id of the project</td>
+<td>N</td>
+<td _storeType="_storeType">siddhi-store-</td>
+</tr>
+<tr>
+<td>className</td>
+<td>Class name of the Store</td>
+<td>N</td>
+<td _storeType="_storeType"></td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>To confirm that all property values are correct, type <code>Y</code> in the console. If not, press <code>N</code>.</p>
@@ -4956,15 +3436,17 @@ The events are inserted into the fault stream during a failure. The error identi
 
 
 <p>Statistics are reported for this Siddhi application as shown in the extract below.</p>
-<p><details>
+<details>
   <summary>Click to view the extract</summary>
-11/26/17 8:01:20 PM ============================================================</p>
-<p>-- Gauges ----------------------------------------------------------------------
+11/26/17 8:01:20 PM ============================================================
+
+ -- Gauges ----------------------------------------------------------------------
  io.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.memory
               value = 5760
  io.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.size
-              value = 0</p>
-<p>-- Meters ----------------------------------------------------------------------
+              value = 0
+
+ -- Meters ----------------------------------------------------------------------
  io.siddhi.SiddhiApps.TestMetrics.Siddhi.Sources.TestStream.http.throughput
               count = 0
           mean rate = 0.00 events/second
@@ -4982,8 +3464,9 @@ The events are inserted into the fault stream during a failure. The error identi
           mean rate = 0.04 events/second
       1-minute rate = 0.03 events/second
       5-minute rate = 0.01 events/second
-     15-minute rate = 0.00 events/second</p>
-<p>-- Timers ----------------------------------------------------------------------
+     15-minute rate = 0.00 events/second
+
+ -- Timers ----------------------------------------------------------------------
  io.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
               count = 2
           mean rate = 0.11 calls/second
@@ -4995,12 +3478,15 @@ The events are inserted into the fault stream during a failure. The error identi
                mean = 0.84 milliseconds
              stddev = 0.23 milliseconds
              median = 0.61 milliseconds
-               75% &lt;= 1.08 milliseconds
-               95% &lt;= 1.08 milliseconds
-               98% &lt;= 1.08 milliseconds
-               99% &lt;= 1.08 milliseconds
-             99.9% &lt;= 1.08 milliseconds</p>
-<p></details></p>
+               75% <= 1.08 milliseconds
+               95% <= 1.08 milliseconds
+               98% <= 1.08 milliseconds
+               99% <= 1.08 milliseconds
+             99.9% <= 1.08 milliseconds
+
+
+</details>
+
 <h3 id="event-playback">Event Playback<a class="headerlink" href="#event-playback" title="Permanent link">&para;</a></h3>
 <p>When <code>@app:playback</code> annotation is added to the app, the timestamp of the event (specified via an attribute) is treated as the current time. This results in events being processed faster.
 The following elements are configured with this annotation.</p>
@@ -5023,101 +3509,4 @@ The following elements are configured with this annotation.</p>
 </tbody>
 </table>
 <p>e.g., In the following example, the Siddhi system time is incremented by two seconds if no events arrive for a time interval of 100 milliseconds.</p>
-<p><code>@app:playback(idle.time = '100 millisecond', increment = '2 sec')</code></p>
-                
-                  
-                
-              
-              
-                
-
-
-              
-            </article>
-          </div>
-        </div>
-      </main>
-      
-        
-<footer class="md-footer">
-  
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
-        
-          <a href="../user-guide-4.x/" title="User Guide" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
-            </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                User Guide
-              </span>
-            </div>
-          </a>
-        
-        
-          <a href="../architecture-4.x/" title="Siddhi Architecture" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Siddhi Architecture
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2011 - 2019 WSO2
-          </div>
-        
-        powered by
-        <a href="http://www.mkdocs.org">MkDocs</a>
-        and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
-          Material for MkDocs</a>
-      </div>
-      
-        
-  <div class="md-footer-social">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
-      <a href="https://github.com/wso2/siddhi" class="md-footer-social__link fa fa-github"></a>
-    
-      <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a>
-    
-  </div>
-
-      
-    </div>
-  </div>
-</footer>
-      
-    </div>
-    
-      <script src="../../../assets/javascripts/application.b438e6c5.js"></script>
-      
-      <script>app.initialize({version:"0.17.3",url:{base:"../../.."}})</script>
-      
-    
-    
-      
-        <script>!function(e,a,t,n,o,c,i){e.GoogleAnalyticsObject=o,e.ga=e.ga||function(){(e.ga.q=e.ga.q||[]).push(arguments)},e.ga.l=1*new Date,c=a.createElement(t),i=a.getElementsByTagName(t)[0],c.async=1,c.src="https://www.google-analytics.com/analytics.js",i.parentNode.insertBefore(c,i)}(window,document,"script",0,"ga"),ga("create","UA-103065-28","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");if(Array.prototype.map.call(links,function(e){e.host!=document.location.host&&e.addEventListener("click",function(){var a=e.getAttribute("data-md-action")||"follow";ga("send","event","outbound",a,e.href)})}),document.forms.search){var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}</script>
-      
-    
-  </body>
-</html>
+<p><code>@app:playback(idle.time = '100 millisecond', increment = '2 sec')</code></p></article></div></div></main><footer class="md-footer"><div class="md-footer-nav"><nav class="md-footer-nav__inner md-grid"><a href="../user-guide-4.x/" title="User Guide" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev"><div class="md-flex__cell md-flex__cell--shrink"><i class="md-icon md-icon--arrow-back md-footer-nav__button"></i></div><div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span class="md-flex__ellipsis"><span class="md-footer-nav__direction">Previous</span>User Guide</span></div></a><a href="../architecture-4.x/" title="Siddhi Architecture" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next"><div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span class="md-flex__ellipsis"><span class="md-footer-nav__direction">Next</span>Siddhi Architecture</span></div><div class="md-flex__cell md-flex__cell--shrink"><i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i></div></a></nav></div><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright"><div class="md-footer-copyright__highlight">Copyright &copy; 2011 - 2019 WSO2</div>powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../assets/fonts/font-awesome.css"> <a href="https://github.com/siddhi-io/siddhi" class="md-footer-social__link fa fa-github"></a>  <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a> </div></div></div></footer></div><script src="../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../.."}})</script></body></html>
