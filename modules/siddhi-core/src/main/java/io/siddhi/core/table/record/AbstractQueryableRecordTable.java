@@ -105,7 +105,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private CompiledCondition compiledConditionForCaching;
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
-    protected SiddhiAppContext siddhiAppContext;
     protected StateEvent findMatchingEvent;
     protected Selector selectorForTestStoreQuery;
     protected SiddhiQueryContext siddhiQueryContextForTestStoreQuery;
@@ -122,7 +121,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
                      StreamEventCloner storeEventCloner, ConfigReader configReader) {
-        this.siddhiAppContext = siddhiAppContext;
         String[] annotationNames = {ANNOTATION_STORE, ANNOTATION_CACHE};
         Annotation cacheTableAnnotation = getAnnotation(annotationNames, tableDefinition.getAnnotations());
         if (cacheTableAnnotation != null) {
@@ -704,6 +702,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         for (Attribute attribute: tableDefinition.getAttributeList()) {
             metaStreamEventForSelectAll.addOutputData(attribute);
         }
+        metaStreamEventForSelectAll.addInputDefinition(tableDefinition);
         MetaStateEvent metaStateEventForSelectAll = new MetaStateEvent(1);
         metaStateEventForSelectAll.addEvent(metaStreamEventForSelectAll);
         MatchingMetaInfoHolder matchingMetaInfoHolderForSlectAll = new

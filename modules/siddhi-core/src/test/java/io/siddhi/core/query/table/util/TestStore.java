@@ -69,7 +69,7 @@ public class TestStore extends AbstractRecordTable {
     }
 
     @Override
-    protected void init(TableDefinition tableDefinition, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
         systemConfigs = new HashMap<>();
         systemConfigs = AnnotationHelper.getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations())
                 .getElements().stream().collect(Collectors.toMap(

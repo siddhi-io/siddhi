@@ -60,7 +60,6 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 public abstract class CacheTable extends InMemoryTable {
     private int maxSize;
     private boolean cacheExpiryEnabled;
-    protected SiddhiAppContext siddhiAppContext;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
