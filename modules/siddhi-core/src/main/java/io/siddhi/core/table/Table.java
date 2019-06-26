@@ -434,6 +434,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         }
     }
 
+    public void setIsTryingToConnectToFalse() {
+        this.isTryingToConnect.set(false);
+    }
+
     /**
      * Busy wait the threads which bind to this object and control the execution flow
      * until table connection recovered.

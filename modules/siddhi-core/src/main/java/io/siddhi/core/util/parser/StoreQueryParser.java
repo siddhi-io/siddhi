@@ -272,7 +272,8 @@ public class StoreQueryParser {
         MatchingMetaInfoHolder metaStreamInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent,
                 aggregation.getAggregationDefinition());
         CompiledCondition compiledCondition = aggregation.compileExpression(onCondition, within, per,
-                metaStreamInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
+                storeQuery.getSelector().getGroupByList(), metaStreamInfoHolder, variableExpressionExecutors,
+                tableMap, siddhiQueryContext);
         ((IncrementalAggregateCompileCondition) compiledCondition).init();
         metaStreamInfoHolder = ((IncrementalAggregateCompileCondition) compiledCondition).
                 getAlteredMatchingMetaInfoHolder();

@@ -279,4 +279,150 @@ public class LengthWindowTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sumAggregatorTest57() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('sumAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(3) " +
+                "select sum(weight,deviceId) as total " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(55, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{10.0, "Box1"});
+        inputHandler.send(new Object[]{20.0, "Box2"});
+        inputHandler.send(new Object[]{25.0, "Box3"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sumAggregatorTest58() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('sumAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(3) " +
+                "select sum(deviceId) as total " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(3, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{10.0, "Box1"});
+        inputHandler.send(new Object[]{20.0, "Box2"});
+        inputHandler.send(new Object[]{25.0, "Box3"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void avgAggregatorTest59() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('avgAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight double, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(5) " +
+                "select avg(weight,deviceId) as avgWeight " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{20.0, "Box1"});
+        inputHandler.send(new Object[]{30.0, "Box2"});
+        inputHandler.send(new Object[]{20.0, "Box3"});
+        inputHandler.send(new Object[]{40.0, "Box4"});
+        inputHandler.send(new Object[]{20.0, "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
+
+    @Test
+    public void avgAggregatorTest60() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@app:name('avgAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (weight string, deviceId string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.length(5) " +
+                "select avg(weight) as avgWeight " +
+                "insert into outputStream;";
+
+        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"20", "Box1"});
+        inputHandler.send(new Object[]{"30", "Box2"});
+        inputHandler.send(new Object[]{"20", "Box3"});
+        inputHandler.send(new Object[]{"40", "Box4"});
+        inputHandler.send(new Object[]{"20", "Box5"});
+        Thread.sleep(100);
+        execPlanRunTime.shutdown();
+
+    }
 }
