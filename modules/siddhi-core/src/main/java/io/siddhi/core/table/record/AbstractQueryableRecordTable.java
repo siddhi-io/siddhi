@@ -748,7 +748,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     /**
      * Query records matching the compiled condition and selection
-     *x
+     *
      * @param parameterMap      map of matching StreamVariable Ids and their values
      *                          corresponding to the compiled condition and selection
      * @param compiledCondition the compiledCondition against which records should be matched

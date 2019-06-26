@@ -152,7 +152,6 @@ public class CacheExpireTestCase {
                 "define stream DeleteStream (symbol string); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\", cache.policy=\"LFU\", " +
                 "retention.period=\"1 sec\", purge.interval=\"1 sec\"))\n" +
-                //"@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
 
         String query1 = "" +
