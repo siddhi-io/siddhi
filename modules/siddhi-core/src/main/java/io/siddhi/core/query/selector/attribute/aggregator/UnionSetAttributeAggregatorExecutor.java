@@ -48,14 +48,14 @@ import java.util.Set;
         parameters =
         @Parameter(name = "set",
                 description = "The java.util.Set object that needs to be added into the union set.",
-                type = {DataType.OBJECT})
-        ,
-        returnAttributes = @ReturnAttribute(
-                description = "Returns a java.util.Set object which is the union of aggregated sets",
-                type = {DataType.OBJECT}),
+                type = {DataType.OBJECT},
+                dynamic = true),
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"set"})
         },
+        returnAttributes = @ReturnAttribute(
+                description = "Returns a java.util.Set object which is the union of aggregated sets",
+                type = {DataType.OBJECT}),
         examples = @Example(
                 syntax = "from stockStream \n" +
                         "select createSet(symbol) as initialSet \n" +

@@ -48,11 +48,13 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                 @Parameter(name = "to.be.caster",
                         description = "This specifies the attribute to be casted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
-                                DataType.STRING, DataType.BOOL, DataType.OBJECT}),
+                                DataType.STRING, DataType.BOOL, DataType.OBJECT},
+                        dynamic = true),
                 @Parameter(name = "cast.to",
                         description = "A string constant parameter expressing the cast to type using one of the " +
                                 "following strings values: int, long, float, double, string, bool.",
-                        type = {DataType.STRING})
+                        type = {DataType.STRING},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"to.be.caster", "cast.to"})

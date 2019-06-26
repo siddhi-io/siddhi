@@ -49,7 +49,8 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that needs to be compared to find the maximum value.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

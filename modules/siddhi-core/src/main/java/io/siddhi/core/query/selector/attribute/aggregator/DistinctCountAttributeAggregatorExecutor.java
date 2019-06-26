@@ -47,7 +47,8 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The object for which the number of distinct occurences needs to be counted.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

@@ -58,13 +58,6 @@ public class IncrementalAggregationAttributeValidationAnnotationProcessor extend
                                 " name:{0} -> type annotated in class {1} is null or empty.", parameterName,
                         extensionClassFullName));
             }
-            //Check if the @Parameter dynamic property false or empty in the classes extending
-            //super classes except the Sink & SinkMapper.
-            if (parameter.dynamic()) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter ->" +
-                                " name:{0} -> dynamic property cannot be annotated true in class {1}.", parameterName,
-                        extensionClassFullName));
-            }
         }
     }
 

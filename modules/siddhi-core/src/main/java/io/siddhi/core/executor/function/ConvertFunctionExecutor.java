@@ -43,12 +43,14 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                 @Parameter(name = "to.be.converted",
                         description = "This specifies the value to be converted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING,
-                                DataType.BOOL}),
+                                DataType.BOOL},
+                        dynamic = true),
                 @Parameter(name = "converted.to",
                         description = "A string constant parameter to which type the attribute need to be converted " +
                                 " using one of the following strings values: 'int', 'long', 'float', 'double', " +
                                 "'string', 'bool'.",
-                        type = DataType.STRING)
+                        type = DataType.STRING,
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"to.be.converted", "converted.to"})

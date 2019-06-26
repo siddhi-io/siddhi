@@ -46,7 +46,8 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that need to be averaged.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

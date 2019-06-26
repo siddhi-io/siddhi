@@ -48,7 +48,8 @@ import java.util.Set;
                         description = "The set object. " +
                                 "This parameter should be of type java.util.Set. " +
                                 "A set object may be created by the 'set' attribute aggregator in Siddhi. ",
-                        type = {DataType.OBJECT})
+                        type = {DataType.OBJECT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"set"})

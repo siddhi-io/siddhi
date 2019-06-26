@@ -38,7 +38,8 @@ import io.siddhi.query.api.expression.Expression;
                 @Parameter(name = "arg",
                         description = "The attribute that needs to be counted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE,
-                                DataType.FLOAT, DataType.STRING, DataType.BOOL})
+                                DataType.FLOAT, DataType.STRING, DataType.BOOL},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

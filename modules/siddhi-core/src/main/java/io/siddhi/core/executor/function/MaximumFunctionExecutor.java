@@ -44,7 +44,8 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                         description = "This function accepts one or more parameters. " +
                                 "They can belong to any one of the available types. " +
                                 "All the specified parameters should be of the same type.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

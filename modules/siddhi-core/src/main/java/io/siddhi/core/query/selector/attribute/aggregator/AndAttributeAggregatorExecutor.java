@@ -45,7 +45,8 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that needs to be AND operation.",
-                        type = {DataType.BOOL})
+                        type = {DataType.BOOL},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

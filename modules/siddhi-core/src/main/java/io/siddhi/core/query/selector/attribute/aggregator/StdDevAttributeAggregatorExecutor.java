@@ -47,7 +47,8 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that should be used to calculate the standard deviation.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})

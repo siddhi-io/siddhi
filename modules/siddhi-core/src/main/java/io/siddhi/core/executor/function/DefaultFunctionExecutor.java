@@ -46,11 +46,13 @@ import org.apache.log4j.Logger;
                 @Parameter(name = "attribute",
                         description = "The attribute that could be null.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
-                                DataType.STRING, DataType.BOOL, DataType.OBJECT}),
+                                DataType.STRING, DataType.BOOL, DataType.OBJECT},
+                        dynamic = true),
                 @Parameter(name = "default",
                         description = "The default value that will be used when 'attribute' parameter is null",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
-                                DataType.STRING, DataType.BOOL, DataType.OBJECT})
+                                DataType.STRING, DataType.BOOL, DataType.OBJECT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"attribute", "default"})

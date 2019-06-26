@@ -38,7 +38,8 @@ import io.siddhi.query.api.expression.Expression;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that needs to be averaged incrementally, for different durations.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"arg"})
