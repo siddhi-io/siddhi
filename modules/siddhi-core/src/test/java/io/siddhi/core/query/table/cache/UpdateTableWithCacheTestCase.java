@@ -62,7 +62,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price double, volume long); " +
                 "define stream UpdateStockStream (symbol string, price double, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price double, volume long); ";
 
         String query = "" +
@@ -101,7 +101,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price double, volume long); " +
                 "define stream UpdateStockStream (symbol string, price double, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price double, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -139,7 +139,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -189,7 +189,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -240,7 +240,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -290,7 +290,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -342,7 +342,7 @@ public class UpdateTableWithCacheTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (comp string, prc float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -416,7 +416,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -454,7 +454,7 @@ public class UpdateTableWithCacheTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price double, volume long); " +
                 "define stream UpdateStockStream (symbol string, price double, volume long); " +
-                "@Store(type=\"testWithCache\", @Cache(size=\"10\"))\n" +
+                "@Store(type=\"testStoreContainingInMemoryTable\", @Cache(size=\"10\"))\n" +
                 "define table StockTable (symbol string, price double, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

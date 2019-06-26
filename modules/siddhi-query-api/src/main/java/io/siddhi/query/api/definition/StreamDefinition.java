@@ -68,4 +68,15 @@ public class StreamDefinition extends AbstractDefinition {
         return this;
     }
 
+    public StreamDefinition clone() {
+        StreamDefinition streamDefinition = new StreamDefinition(this.id);
+        for (Attribute attribute: this.attributeList) {
+            streamDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        for (Annotation annotation: this.annotations) {
+            streamDefinition.annotation(annotation);
+        }
+        return streamDefinition;
+    }
+
 }

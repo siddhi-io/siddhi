@@ -92,7 +92,7 @@
     "description": "The siddhi-execution-map extension is an extension to Siddhi that provides the capability to send a map object inside Siddhi stream definitions and use it inside queries. The following are the functions of the map extension.."
   },
   "siddhi-io-http": {
-    "lastModifiedDateTime": "Fri, 12 Apr 2019 12:00:43 GMT",
+    "lastModifiedDateTime": "Wed, 17 Apr 2019 13:29:42 GMT",
     "description": "The siddhi-io-http extension is an extension to Siddhi that allows you to receive and publish events via http and https transports and also allow you perform synchronous request and response. This extension works with WSO2 Stream Processor and with standalone Siddhi."
   },
   "siddhi-io-kafka": {

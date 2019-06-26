@@ -48,6 +48,10 @@ public class IndexOperator implements Operator {
         this.queryName = queryName;
     }
 
+    public CollectionExecutor getCollectionExecutor() {
+        return collectionExecutor;
+    }
+
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         return collectionExecutor.find(matchingEvent, (IndexedEventHolder) storeEvents, storeEventCloner);
@@ -175,6 +179,7 @@ public class IndexOperator implements Operator {
                 StreamEvent first = foundEventChunk.getFirst();
                 while (first != null) {
                     StreamEvent streamEvent = first;
+                    handleCachePolicyAttributeUpdate(streamEvent);
                     for (Map.Entry<Integer, ExpressionExecutor> entry :
                             compiledUpdateSet.getExpressionExecutorMap().entrySet()) {
                         streamEvent.setOutputData(entry.getValue().execute(overwritingOrAddingEvent), entry.getKey());
@@ -187,4 +192,7 @@ public class IndexOperator implements Operator {
         }
     }
 
+    protected void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
+
+    }
 }

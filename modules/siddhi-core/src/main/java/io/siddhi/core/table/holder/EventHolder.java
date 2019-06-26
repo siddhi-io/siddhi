@@ -35,4 +35,6 @@ public interface EventHolder {
     void restore(SnapshotStateList snapshotStatelist);
 
     int size();
+
+    void deleteAll();
 }

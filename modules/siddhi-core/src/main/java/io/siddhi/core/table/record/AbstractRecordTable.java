@@ -353,7 +353,7 @@ public abstract class AbstractRecordTable extends Table {
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
-        return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
+        return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition, siddhiQueryContext);
     }
 
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
@@ -398,14 +398,22 @@ public abstract class AbstractRecordTable extends Table {
      */
     protected class RecordStoreCompiledCondition implements CompiledCondition {
         protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
-        protected CompiledCondition compiledCondition;
+        private CompiledCondition compiledCondition;
+        private SiddhiQueryContext siddhiQueryContext;
 
         RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
-                                     CompiledCondition compiledCondition) {
+                                     CompiledCondition compiledCondition, SiddhiQueryContext siddhiQueryContext) {
             this.variableExpressionExecutorMap = variableExpressionExecutorMap;
             this.compiledCondition = compiledCondition;
+            this.siddhiQueryContext = siddhiQueryContext;
         }
 
-    }
+        public CompiledCondition getCompiledCondition() {
+            return compiledCondition;
+        }
 
+        public SiddhiQueryContext getSiddhiQueryContext() {
+            return siddhiQueryContext;
+        }
+    }
 }
