@@ -21,6 +21,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -48,6 +49,9 @@ import java.util.Map;
                 @Parameter(name = "arg",
                         description = "The value that needs to be compared to find the maximum value.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"arg"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returns the maximum value in the same data type as the input.",

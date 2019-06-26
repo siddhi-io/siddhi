@@ -21,6 +21,7 @@ package io.siddhi.core.executor.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -52,6 +53,9 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                         description = "A string constant parameter expressing the cast to type using one of the " +
                                 "following strings values: int, long, float, double, string, bool.",
                         type = {DataType.STRING})
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"to.be.caster", "cast.to"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returned type will be defined by the cast.to string constant value.",

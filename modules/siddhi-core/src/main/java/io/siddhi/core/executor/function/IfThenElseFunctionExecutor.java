@@ -20,6 +20,7 @@ package io.siddhi.core.executor.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -56,6 +57,9 @@ import org.apache.log4j.Logger;
                                 "the value of the condition parameter is false.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
                                 DataType.STRING, DataType.BOOL, DataType.OBJECT})
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"condition", "if.expression", "else.expression"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returned type will be same as the 'if.expression' and 'else.expression' type.",

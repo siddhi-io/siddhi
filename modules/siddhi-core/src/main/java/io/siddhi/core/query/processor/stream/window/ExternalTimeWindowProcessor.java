@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -68,6 +69,9 @@ import java.util.Map;
                 @Parameter(name = "window.time",
                         description = "The sliding time period for which the window should hold events.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"timestamp", "window.time"})
         },
         examples = @Example(
                 syntax = "define window cseEventWindow (symbol string, price float, volume int) " +

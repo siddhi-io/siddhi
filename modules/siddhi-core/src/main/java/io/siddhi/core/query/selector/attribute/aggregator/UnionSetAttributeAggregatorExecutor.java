@@ -20,6 +20,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -52,6 +53,9 @@ import java.util.Set;
         returnAttributes = @ReturnAttribute(
                 description = "Returns a java.util.Set object which is the union of aggregated sets",
                 type = {DataType.OBJECT}),
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"set"})
+        },
         examples = @Example(
                 syntax = "from stockStream \n" +
                         "select createSet(symbol) as initialSet \n" +

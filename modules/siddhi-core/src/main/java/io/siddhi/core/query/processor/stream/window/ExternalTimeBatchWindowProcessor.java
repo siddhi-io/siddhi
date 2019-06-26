@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -83,7 +84,11 @@ import java.util.Map;
                         optional = true,
                         defaultValue = "System waits till an event from next batch arrives to flush current batch")
         },
-
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"timestamp", "window.time"}),
+                @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time"}),
+                @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time", "timeout"})
+        },
         examples = {
                 @Example(
                         syntax = "define window cseEventWindow (symbol string, price float, volume int) " +

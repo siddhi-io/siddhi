@@ -1180,6 +1180,8 @@ insert into sizeStream;
 <p style="word-wrap: break-word">The pol2Cart function calculating the cartesian coordinates x & y for the given theta, rho coordinates and adding them as new attributes to the existing events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+pol2Cart()
+pol2Cart(<DOUBLE> theta, <DOUBLE> rho)
 pol2Cart(<DOUBLE> theta, <DOUBLE> rho, <DOUBLE> z)
 ```
 
@@ -1536,6 +1538,8 @@ insert expired events into outputStream ;
 <p style="word-wrap: break-word">A batch (tumbling) time window based on external time, that holds events arrived during windowTime periods, and gets updated for every windowTime.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time)
+externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME> start.time)
 externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME> start.time, <INT|LONG|TIME> timeout)
 ```
 
@@ -1713,6 +1717,7 @@ insert all events into outputStream ;
 <p style="word-wrap: break-word">A batch (tumbling) length window that holds and process a number of events as specified in the window.length.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+lengthBatch(<INT> window.length)
 lengthBatch(<INT> window.length, <BOOL> stream.current.event)
 ```
 
@@ -1788,6 +1793,8 @@ insert all events into OutputStream ;
 <p style="word-wrap: break-word">This window identifies and returns all the events of which the current frequency exceeds the value specified for the supportThreshold parameter.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+lossyFrequent(<DOUBLE> support.threshold)
+lossyFrequent(<DOUBLE> support.threshold, <DOUBLE> error.bound)
 lossyFrequent(<DOUBLE> support.threshold, <DOUBLE> error.bound, <STRING> attribute)
 ```
 
@@ -1861,7 +1868,9 @@ insert all events into PotentialFraud;
 <p style="word-wrap: break-word">This is a session window that holds events that belong to a specific session. The events that belong to a specific session are identified by a grouping attribute (i.e., a session key). A session gap period is specified to determine the time period after which the session is considered to be expired. A new event that arrives with a specific value for the session key is matched with the session window with the same session key.<br>&nbsp;There can be out of order and late arrival of events, these events can arrive after the session is expired, to include those events to the matching session key specify a latency time period that is less than the session gap period.To have aggregate functions with session windows, the events need to be grouped by the session key via a 'group by' clause.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-session(<INT|LONG|TIME> window.session, <STRING> window.key, <INT|LONG|TIME> window.allowedlatency)
+session(<INT|LONG|TIME> window.session)
+session(<INT|LONG|TIME> window.session, <STRING> window.key)
+session(<INT|LONG|TIME> window.session, <STRING> window.key, <INT|LONG|TIME> window.allowed.latency)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1891,7 +1900,7 @@ session(<INT|LONG|TIME> window.session, <STRING> window.key, <INT|LONG|TIME> win
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.allowedlatency</td>
+        <td style="vertical-align: top">window.allowed.latency</td>
         <td style="vertical-align: top; word-wrap: break-word">This specifies the time period for which the session window is valid after the expiration of the session. The time period specified here should be less than the session time gap (which is specified via the 'window.session' parameter).</td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
@@ -1917,6 +1926,7 @@ insert all events into OutputStream;
 <p style="word-wrap: break-word">This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+sort(<INT> window.length, <STRING> attribute)
 sort(<INT> window.length, <STRING> attribute, <STRING> order)
 ```
 

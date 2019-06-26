@@ -20,6 +20,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -61,6 +62,9 @@ import java.util.Map;
                         description = "The time period (specified in sec, min, ms) for which " +
                                 " the window should delay the events.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME})
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"window.delay"})
         },
         examples = {
                 @Example(

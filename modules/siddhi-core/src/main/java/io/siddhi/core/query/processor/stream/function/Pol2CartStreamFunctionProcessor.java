@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -53,6 +54,11 @@ import java.util.List;
                         type = {DataType.DOUBLE},
                         optional = true,
                         defaultValue = "If z value is not given, drop the third parameter of the output.")
+        },
+        parameterOverloads = {
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"theta", "rho"}),
+                @ParameterOverload(parameterNames = {"theta", "rho", "z"})
         },
         examples = {
                 @Example(
