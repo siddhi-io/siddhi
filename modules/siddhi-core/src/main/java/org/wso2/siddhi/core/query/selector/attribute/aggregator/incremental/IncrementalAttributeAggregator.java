@@ -37,4 +37,5 @@ public abstract class IncrementalAttributeAggregator {
     public abstract Expression[] getBaseAggregators();
 
     public abstract Attribute.Type getReturnType();
+
 }

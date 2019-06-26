@@ -100,5 +100,6 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
     }
+
 }
 

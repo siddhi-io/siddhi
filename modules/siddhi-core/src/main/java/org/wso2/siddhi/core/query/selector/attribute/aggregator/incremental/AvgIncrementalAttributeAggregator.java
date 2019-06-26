@@ -114,4 +114,5 @@ public class AvgIncrementalAttributeAggregator extends IncrementalAttributeAggre
     public Attribute.Type getReturnType() {
         return Attribute.Type.DOUBLE;
     }
+
 }
