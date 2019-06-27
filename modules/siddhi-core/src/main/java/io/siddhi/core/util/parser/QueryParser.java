@@ -129,7 +129,7 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    query.getSelector().getGroupByList(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    query.getSelector(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
