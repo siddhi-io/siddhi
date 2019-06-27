@@ -33,7 +33,7 @@ import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
-import io.siddhi.query.api.expression.Variable;
+import io.siddhi.query.api.execution.query.selection.Selector;
 
 import java.util.List;
 import java.util.Map;
@@ -60,8 +60,7 @@ public class InputStreamParser {
      * @return StreamRuntime
 
      */
-    public static StreamRuntime parse(InputStream inputStream,
-                                      List<Variable> queryGroupByList,
+    public static StreamRuntime parse(InputStream inputStream, Selector selector,
                                       Map<String, AbstractDefinition> streamDefinitionMap,
                                       Map<String, AbstractDefinition> tableDefinitionMap,
                                       Map<String, AbstractDefinition> windowDefinitionMap,
@@ -88,7 +87,7 @@ public class InputStreamParser {
                     outputExpectsExpiredEvents, false, siddhiQueryContext);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream),
-                    queryGroupByList, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    selector, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
         } else if (inputStream instanceof StateInputStream) {
