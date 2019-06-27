@@ -6,7 +6,7 @@
 **OS, DB, other environment details and versions:**    
 
 **Steps to reproduce:**
-<!-- We applriciate if a testcase :), that help us to reprocude much faster -->
+<!-- We would appreciate it if you can provide a testcase :), this help us reproduce the issue much faster -->
 
 **Related Issues:**
 <!-- Any related issues such as sub tasks, issues reported in other repositories (e.g component repositories), similar problems, etc. -->
