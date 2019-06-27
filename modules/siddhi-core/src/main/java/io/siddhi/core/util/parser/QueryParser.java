@@ -21,7 +21,9 @@ package io.siddhi.core.util.parser;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.MetaStateEventAttribute;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
@@ -29,15 +31,18 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.input.stream.StreamRuntime;
+import io.siddhi.core.query.input.stream.join.JoinProcessor;
 import io.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
+import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import io.siddhi.core.util.lock.LockSynchronizer;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -45,6 +50,7 @@ import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.handler.StreamHandler;
@@ -132,6 +138,19 @@ public class QueryParser {
                     query.getSelector(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
+
+            boolean isOptimisedLookup = false;
+            MetaStateEvent newMetaComplexEventAfterOptimisation = null;
+
+            Processor processorChain = streamRuntime.getSingleStreamRuntimes().get(0).getProcessorChain();
+            if (processorChain instanceof JoinProcessor &&
+                            !(((JoinProcessor) processorChain).getCompiledCondition() instanceof IncrementalAggregateCompileCondition)) {
+                // Only for table joins
+                isOptimisedLookup = ((JoinProcessor) processorChain).isOptimisedLookup();
+                newMetaComplexEventAfterOptimisation = (
+                                    (JoinProcessor) processorChain).getMetaStateEventForOptimisedLookup();
+            }
+
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent(), tableMap, executors,
                     SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
@@ -223,8 +242,22 @@ public class QueryParser {
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
-            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
-                    .getMetaComplexEvent()));
+
+            MetaComplexEvent querySelectorMetaComplexEvent;
+            if (isOptimisedLookup) {
+
+                for (MetaStateEventAttribute attribute :
+                                ((MetaStateEvent) streamRuntime.getMetaComplexEvent()).getOutputDataAttributes()) {
+                    newMetaComplexEventAfterOptimisation.addOutputDataAllowingDuplicate(attribute);
+                }
+                QueryParserHelper.updateVariablePosition(newMetaComplexEventAfterOptimisation, executors);
+                querySelectorMetaComplexEvent = newMetaComplexEventAfterOptimisation;
+
+            } else {
+                querySelectorMetaComplexEvent = streamRuntime.getMetaComplexEvent();
+            }
+
+            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(querySelectorMetaComplexEvent));
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 
