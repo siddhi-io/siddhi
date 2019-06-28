@@ -103,8 +103,6 @@ public class InputParameterValidator {
                 }
             } else if (overloadParameterNames.length > 0 &&
                     overloadParameterNames[overloadParameterNames.length - 1].equals(REPETITIVE_PARAMETER_NOTATION)) {
-
-                Parameter previousParameter = null;
                 boolean isExpectedParameterOverload = true;
                 for (int i = 0; i < attributeExpressionExecutors.length; i++) {
                     Parameter parameter = null;
