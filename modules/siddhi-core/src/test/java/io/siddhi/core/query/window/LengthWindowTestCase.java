@@ -201,16 +201,16 @@ public class LengthWindowTestCase {
                 "from cseEventStream#window.length(4) " +
                 "select " +
                 "max(price) as maxp, min(price) as minp, sum(price) as sump, avg(price) as avgp, " +
-                "stdDev(price) as stdp, count(price) as cp, distinctCount(price) as dcp," +
+                "stdDev(price) as stdp, count() as cp, distinctCount(price) as dcp," +
                 "max(volume) as maxvolumep, min(volume) as minvolumep, sum(volume) as sumvolumep," +
                 " avg(volume) as avgvolumep, " +
-                "stdDev(volume) as stdvolumep, count(volume) as cvolumep, distinctCount(volume) as dcvolumep," +
+                "stdDev(volume) as stdvolumep, count() as cvolumep, distinctCount(volume) as dcvolumep," +
                 "max(price2) as maxprice2p, min(price2) as minprice2p, sum(price2) as sumprice2p," +
                 " avg(price2) as avgprice2p, " +
-                "stdDev(price2) as stdprice2p, count(price2) as cpprice2, distinctCount(price2) as dcprice2p," +
+                "stdDev(price2) as stdprice2p, count() as cpprice2, distinctCount(price2) as dcprice2p," +
                 "max(volume2) as maxvolume2p, min(volume2) as minvolume2p, sum(volume2) as sumvolume2p," +
                 " avg(volume2) as avgvolume2p, " +
-                "stdDev(volume2) as stdvolume2p, count(volume2) as cvolume2p, distinctCount(volume2) as dcvolume2p" +
+                "stdDev(volume2) as stdvolume2p, count() as cvolume2p, distinctCount(volume2) as dcvolume2p" +
                 " " +
                 "insert all events into outputStream ;";
 

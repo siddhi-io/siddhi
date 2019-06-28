@@ -285,42 +285,6 @@ public class StdDevAttributeAggregatorExecutorTestCase {
         execPlanRunTime.shutdown();
     }
 
-    @Test
-    public void stdDevAggregatorTest7() throws InterruptedException {
-
-        log.info("stdDevAggregator Test #7");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('stdDevAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (symbol string, price string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.lengthBatch(1) " +
-                "select stdDev(price) as deviation " +
-                "group by symbol " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 0) < epsilon);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"WSO2", "1345"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-    }
-
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void stdDevAggregatorTest8() throws InterruptedException {
 

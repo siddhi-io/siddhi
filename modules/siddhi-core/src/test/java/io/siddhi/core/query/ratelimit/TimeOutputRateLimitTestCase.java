@@ -587,7 +587,7 @@ public class TimeOutputRateLimitTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
-                "select ip, count(*) as total " +
+                "select ip, count() as total " +
                 "group by ip " +
                 "output first every 1 sec " +
                 "insert expired events into uniqueIps ;";
@@ -646,7 +646,7 @@ public class TimeOutputRateLimitTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
-                "select ip, count(*) as total " +
+                "select ip, count() as total " +
                 "group by ip " +
                 "output first every 1 sec " +
                 "insert all events into uniqueIps ;";
@@ -707,7 +707,7 @@ public class TimeOutputRateLimitTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
-                "select ip, count(*) as total " +
+                "select ip, count() as total " +
                 "group by ip " +
                 "output last every 1 sec " +
                 "insert all events into uniqueIps ;";

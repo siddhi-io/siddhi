@@ -45,14 +45,17 @@ import java.util.List;
         parameters = {
                 @Parameter(name = "theta",
                         description = "The theta value of the coordinates.",
-                        type = {DataType.DOUBLE}),
+                        type = {DataType.DOUBLE},
+                        dynamic = true),
                 @Parameter(name = "rho",
                         description = "The rho value of the coordinates.",
-                        type = {DataType.DOUBLE}),
+                        type = {DataType.DOUBLE},
+                        dynamic = true),
                 @Parameter(name = "z",
                         description = "z value of the cartesian coordinates.",
                         type = {DataType.DOUBLE},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "If z value is not given, drop the third parameter of the output.")
         },
         parameterOverloads = {

@@ -69,6 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
                                 "the concatenation of all the attributes of the event is considered.",
                         type = {DataType.STRING},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "The concatenation of all the attributes of the event is considered.")
         },
         parameterOverloads = {

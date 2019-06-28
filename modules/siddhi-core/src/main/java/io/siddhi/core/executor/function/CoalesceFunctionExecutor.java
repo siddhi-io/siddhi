@@ -40,7 +40,7 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
         description = "Returns the value of the first input parameter that is not null, " +
                 "and all input parameters have to be on the same type.",
         parameters = {
-                @Parameter(name = "args",
+                @Parameter(name = "arg",
                         description = "This function accepts one or more parameters. " +
                                 "They can belong to any one of the available types." +
                                 " All the specified parameters should be of the same type.",
@@ -49,7 +49,7 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                         dynamic = true)
         },
         parameterOverloads = {
-                @ParameterOverload(parameterNames = {"args"})
+                @ParameterOverload(parameterNames = {"arg", "..."})
         },
         returnAttributes = @ReturnAttribute(
                 description = "This will be the same as the type of the first input parameter.",

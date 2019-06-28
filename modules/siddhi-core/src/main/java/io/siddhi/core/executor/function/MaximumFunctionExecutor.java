@@ -48,7 +48,7 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                         dynamic = true)
         },
         parameterOverloads = {
-                @ParameterOverload(parameterNames = {"arg"})
+                @ParameterOverload(parameterNames = {"arg", "..."})
         },
         returnAttributes = @ReturnAttribute(
                 description = "This will be the same as the type of the first input parameter.",

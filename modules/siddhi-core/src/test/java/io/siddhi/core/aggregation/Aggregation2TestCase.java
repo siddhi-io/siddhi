@@ -665,46 +665,6 @@ public class Aggregation2TestCase {
 
     }
 
-    @Test
-    public void avgAggregatorTest60() throws InterruptedException {
-
-        LOG.info("avgAggregator Test 60");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('avgAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight string, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(5) " +
-                "select avg(weight) as avgWeight " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"20", "Box1"});
-        inputHandler.send(new Object[]{"30", "Box2"});
-        inputHandler.send(new Object[]{"20", "Box3"});
-        inputHandler.send(new Object[]{"40", "Box4"});
-        inputHandler.send(new Object[]{"20", "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
-    }
-
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest56"})
     public void incrementalStreamProcessorTest57() throws InterruptedException {
         LOG.info("Check interrupted exception being thrown when SiddhiRuntime has already been shutdown");

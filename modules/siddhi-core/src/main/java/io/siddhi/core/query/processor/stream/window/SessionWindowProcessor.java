@@ -79,7 +79,7 @@ import java.util.concurrent.ConcurrentHashMap;
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
                 @Parameter(name = "window.key",
                         description = "The grouping attribute for events.",
-                        type = {DataType.STRING}, optional = true, defaultValue = "default-key"),
+                        type = {DataType.STRING}, optional = true, defaultValue = "default-key", dynamic = true),
                 @Parameter(name = "window.allowed.latency",
                         description = "This specifies the time period for which the session window is valid after " +
                                 "the expiration of the session. The time period specified here should be less than " +

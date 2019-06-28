@@ -72,6 +72,7 @@ import java.util.Map;
                 ),
         },
         parameterOverloads = {
+                @ParameterOverload(),
                 @ParameterOverload(parameterNames = {"window.length"})
         },
         examples = {

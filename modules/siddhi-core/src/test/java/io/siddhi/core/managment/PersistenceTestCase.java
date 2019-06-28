@@ -972,7 +972,7 @@ public class PersistenceTestCase {
                 "partition with ( deviceID of TempInternalStream )\n" +
                 "begin\n" +
                 "from TempInternalStream\n" +
-                "select deviceID, count(deviceID) as count\n" +
+                "select deviceID, count() as count\n" +
                 "insert into DeviceTempStream\n" +
                 "end;";
 

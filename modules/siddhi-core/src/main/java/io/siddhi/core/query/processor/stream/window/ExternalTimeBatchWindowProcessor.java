@@ -65,7 +65,8 @@ import java.util.Map;
                 @Parameter(name = "timestamp",
                         description = "The time which the window determines as current time and will act upon. " +
                                 "The value of this parameter should be monotonically increasing.",
-                        type = {DataType.LONG}),
+                        type = {DataType.LONG},
+                        dynamic = true),
                 @Parameter(name = "window.time",
                         description = "The batch time period for which the window should hold events.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
@@ -76,18 +77,27 @@ import java.util.Map;
                                 "startTime.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "Timestamp of first event"),
                 @Parameter(name = "timeout",
                         description = "Time to wait for arrival of new event, before flushing " +
                                 "and giving output for events belonging to a specific batch.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME},
                         optional = true,
+                        defaultValue = "System waits till an event from next batch arrives to flush current batch"),
+                @Parameter(name = "replace.with.batchtime",
+                        description = "This indicates to replace the expired event timeStamp as the batch end " +
+                                "timeStamp",
+                        type = {DataType.BOOL},
+                        optional = true,
                         defaultValue = "System waits till an event from next batch arrives to flush current batch")
         },
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"timestamp", "window.time"}),
                 @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time"}),
-                @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time", "timeout"})
+                @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time", "timeout"}),
+                @ParameterOverload(parameterNames = {"timestamp", "window.time", "start.time", "timeout",
+                        "replace.with.batchtime"})
         },
         examples = {
                 @Example(

@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.siddhi.core.util.SiddhiConstants.REPETITIVE_PARAMETER_NOTATION;
+
 /**
  * Validates the extension specific parameters of siddhi App with the patterns specified in the
  * {@literal @}ParameterOverload annotation in the extension class
@@ -74,11 +76,45 @@ public class InputParameterValidator {
         ParameterOverload parameterOverload = null;
         for (ParameterOverload aParameterOverload : parameterOverloads) {
             String[] overloadParameterNames = aParameterOverload.parameterNames();
-            if (overloadParameterNames.length == attributeExpressionExecutors.length) {
+            if (overloadParameterNames.length == attributeExpressionExecutors.length &&
+                    ((overloadParameterNames.length == 0) || (overloadParameterNames.length > 0)
+                            && !(overloadParameterNames[overloadParameterNames.length - 1].
+                            equals(REPETITIVE_PARAMETER_NOTATION)))) {
                 boolean isExpectedParameterOverload = true;
                 for (int i = 0; i < overloadParameterNames.length; i++) {
                     String overloadParameterName = overloadParameterNames[i];
                     Parameter parameter = parameterMap.get(overloadParameterName);
+                    boolean supportedReturnType = false;
+                    for (DataType type : parameter.type()) {
+                        if (attributeExpressionExecutors[i].getReturnType().toString().
+                                equalsIgnoreCase(type.toString())) {
+                            supportedReturnType = true;
+                            break;
+                        }
+                    }
+                    if (!supportedReturnType) {
+                        isExpectedParameterOverload = false;
+                        break;
+                    }
+                }
+                if (isExpectedParameterOverload) {
+                    parameterOverload = aParameterOverload;
+                    break;
+                }
+            } else if (overloadParameterNames.length > 0 &&
+                    overloadParameterNames[overloadParameterNames.length - 1].equals(REPETITIVE_PARAMETER_NOTATION)) {
+
+                Parameter previousParameter = null;
+                boolean isExpectedParameterOverload = true;
+                for (int i = 0; i < attributeExpressionExecutors.length; i++) {
+                    Parameter parameter = null;
+                    String overloadParameterName = null;
+                    if (i < overloadParameterNames.length - 1) {
+                        overloadParameterName = overloadParameterNames[i];
+                    } else {
+                        overloadParameterName = overloadParameterNames[overloadParameterNames.length - 2];
+                    }
+                    parameter = parameterMap.get(overloadParameterName);
                     boolean supportedReturnType = false;
                     for (DataType type : parameter.type()) {
                         if (attributeExpressionExecutors[i].getReturnType().toString().
@@ -120,15 +156,14 @@ public class InputParameterValidator {
             for (int i = 0; i < overloadParameterNames.length; i++) {
                 String overloadParameterName = overloadParameterNames[i];
                 Parameter parameter = parameterMap.get(overloadParameterName);
-                if (!parameter.dynamic() && !(attributeExpressionExecutors[i]
-                        instanceof ConstantExpressionExecutor)) {
+                if (parameter != null && !parameter.dynamic() &&
+                        !(attributeExpressionExecutors[i] instanceof ConstantExpressionExecutor)) {
                     throw new SiddhiAppValidationException("The '" + key + "' expects input parameter '" +
                             parameter.name() + "' at position '" + i + "' to be static," +
                             " but found a dynamic attribute.");
                 }
             }
         }
-
     }
 }
 

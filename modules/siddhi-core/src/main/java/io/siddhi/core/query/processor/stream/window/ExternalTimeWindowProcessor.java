@@ -64,7 +64,8 @@ import java.util.Map;
                 @Parameter(name = "timestamp",
                         description = "The time which the window determines as current time and will act upon. " +
                                 "The value of this parameter should be monotonically increasing.",
-                        type = {DataType.LONG}),
+                        type = {DataType.LONG},
+                        dynamic = true),
 
                 @Parameter(name = "window.time",
                         description = "The sliding time period for which the window should hold events.",
