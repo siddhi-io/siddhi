@@ -21,7 +21,6 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
-import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -82,12 +81,7 @@ import java.util.Map;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "asc")
-        },
-        parameterOverloads = {
-                @ParameterOverload(parameterNames = {"window.length", "attribute"}),
-                @ParameterOverload(parameterNames = {"window.length", "attribute", "order"})
-        },
-        examples = @Example(
+        }, examples = @Example(
                 syntax = "define stream cseEventStream (symbol string, price float, volume long);\n" +
                         "define window cseEventWindow (symbol string, price float, volume long) sort(2,volume, 'asc')" +
                         ";\n@info(name = 'query0')\n" +
