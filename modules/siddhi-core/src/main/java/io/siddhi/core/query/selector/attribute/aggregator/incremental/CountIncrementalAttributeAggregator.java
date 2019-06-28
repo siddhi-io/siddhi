@@ -19,6 +19,7 @@ package io.siddhi.core.query.selector.attribute.aggregator.incremental;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.query.api.definition.Attribute;
@@ -32,6 +33,9 @@ import io.siddhi.query.api.expression.Expression;
         namespace = "incrementalAggregator",
         description = "Returns the count of all events, in incremental event processing",
         parameters = {},
+        parameterOverloads = {
+                @ParameterOverload()
+        },
         returnAttributes = @ReturnAttribute(
                 description = "Returns the event count as a long.",
                 type = {DataType.LONG}),
@@ -89,4 +93,5 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
     }
+
 }

@@ -20,6 +20,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -78,12 +79,18 @@ import java.util.concurrent.ConcurrentHashMap;
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
                 @Parameter(name = "window.key",
                         description = "The grouping attribute for events.",
-                        type = {DataType.STRING}, optional = true, defaultValue = "default-key"),
-                @Parameter(name = "window.allowedlatency",
+                        type = {DataType.STRING}, optional = true, defaultValue = "default-key", dynamic = true),
+                @Parameter(name = "window.allowed.latency",
                         description = "This specifies the time period for which the session window is valid after " +
                                 "the expiration of the session. The time period specified here should be less than " +
                                 "the session time gap (which is specified via the 'window.session' parameter).",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}, optional = true, defaultValue = "0")
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"window.session"}),
+                @ParameterOverload(parameterNames = {"window.session", "window.key"}),
+                @ParameterOverload(parameterNames = {"window.session", "window.key", "window.allowed.latency"})
+
         },
         examples = {
                 @Example(

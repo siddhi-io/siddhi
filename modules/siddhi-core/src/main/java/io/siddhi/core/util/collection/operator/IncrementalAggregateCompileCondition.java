@@ -29,19 +29,23 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
@@ -51,6 +55,10 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * based on the logical conditions defined herewith.
  */
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
+    private static final Logger LOG = Logger.getLogger(IncrementalAggregateCompileCondition.class);
+
+    private final boolean isStoreQuery;
+
     private final String aggregationName;
     private final boolean isProcessingOnExternalTime;
     private final boolean isDistributed;
@@ -58,6 +66,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private Map<TimePeriod.Duration, Table> aggregationTableMap;
     private List<ExpressionExecutor> outputExpressionExecutors;
 
+    private boolean isOptimisedLookup;
+    private Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions;
     private CompiledCondition inMemoryStoreCompileCondition;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition;
@@ -79,10 +89,11 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private MatchingMetaInfoHolder matchingHolderInfoForTableLookups;
     private List<VariableExpressionExecutor> variableExpExecutorsForTableLookups;
 
-    public IncrementalAggregateCompileCondition(
+    public IncrementalAggregateCompileCondition(boolean isStoreQuery,
             String aggregationName, boolean isProcessingOnExternalTime, boolean isDistributed,
             List<TimePeriod.Duration> incrementalDurations, Map<TimePeriod.Duration, Table> aggregationTableMap,
-            List<ExpressionExecutor> outputExpressionExecutors,
+            List<ExpressionExecutor> outputExpressionExecutors, boolean isOptimisedLookup,
+            Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection,
             Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions,
             CompiledCondition inMemoryStoreCompileCondition,
             Map<TimePeriod.Duration, CompiledCondition> withinTableLowerGranularityCompileCondition,
@@ -93,6 +104,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             MatchingMetaInfoHolder matchingHolderInfoForTableLookups,
             List<VariableExpressionExecutor> variableExpExecutorsForTableLookups) {
 
+        this.isStoreQuery = isStoreQuery;
         this.aggregationName = aggregationName;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.isDistributed = isDistributed;
@@ -100,6 +112,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.aggregationTableMap = aggregationTableMap;
         this.outputExpressionExecutors = outputExpressionExecutors;
 
+        this.isOptimisedLookup = isOptimisedLookup;
+        this.withinTableCompiledSelection = withinTableCompiledSelection;
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
         this.withinTableLowerGranularityCompileCondition = withinTableLowerGranularityCompileCondition;
@@ -181,8 +195,15 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         Table tableForPerDuration = aggregationTableMap.get(perValue);
 
-        StreamEvent withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
-                withinTableCompiledConditions.get(perValue));
+        StreamEvent withinMatchFromPersistedEvents;
+        if (isOptimisedLookup) {
+            withinMatchFromPersistedEvents = query(tableForPerDuration, matchingEvent,
+                    withinTableCompiledConditions.get(perValue), withinTableCompiledSelection.get(perValue),
+                    tableMetaStreamEvent.getLastInputDefinition().getAttributeList().toArray(new Attribute[0]));
+        } else {
+            withinMatchFromPersistedEvents = tableForPerDuration.find(matchingEvent,
+                                                                        withinTableCompiledConditions.get(perValue));
+        }
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
 
         // Optimization step.
@@ -201,14 +222,20 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                         lowerGranularityLookups.put(key, withinTableLowerGranularityCompileCondition.get(key));
                     }
                     List<StreamEvent> eventChunks = lowerGranularityLookups.entrySet().stream()
-                            .map((entry) ->
-                                        aggregationTableMap.get(entry.getKey()).find(matchingEvent, entry.getValue()))
+                            .map((entry) -> {
+                                Table table = aggregationTableMap.get(entry.getKey());
+                                if (isOptimisedLookup) {
+                                    return query(table, matchingEvent, entry.getValue(),
+                                            withinTableCompiledSelection.get(entry.getKey()),
+                                            tableMetaStreamEvent.getLastInputDefinition()
+                                                    .getAttributeList().toArray(new Attribute[0]));
+                                } else {
+                                    return table.find(matchingEvent, entry.getValue());
+                                }
+                            })
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toList());
-                    eventChunks.forEach((eventChunk) -> {
-                        if (eventChunk != null) {
-                            complexEventChunkToHoldWithinMatches.add(eventChunk);
-                        }
-                    });
+                    eventChunks.forEach(complexEventChunkToHoldWithinMatches::add);
                 }
             } else {
                 TimePeriod.Duration rootDuration = incrementalDurations.get(0);
@@ -250,6 +277,29 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         // Execute the on compile condition
         return ((Operator) onCompiledCondition).find(matchingEvent, aggregateSelectionComplexEventChunk,
                 aggregateEventCloner);
+    }
+
+    private StreamEvent query(Table tableForPerDuration, StateEvent matchingEvent, CompiledCondition compiledCondition,
+                              CompiledSelection compiledSelection, Attribute[] outputAttributes) {
+
+        try {
+            return ((QueryableProcessor) tableForPerDuration)
+                    .query(matchingEvent, compiledCondition, compiledSelection, outputAttributes);
+        } catch (ConnectionUnavailableException e) {
+            // Store query does not have retry logic and retry called manually
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
+                        + "as the datasource is unavailable.");
+            }
+
+            if (!isStoreQuery) {
+                tableForPerDuration.setIsTryingToConnectToFalse();
+                tableForPerDuration.connectWithRetry();
+                return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
+                                                                                                    outputAttributes);
+            }
+            throw new SiddhiAppRuntimeException(e.getMessage(), e);
+        }
     }
 
     private ComplexEventChunk<StreamEvent> createAggregateSelectionEventChunk(

@@ -20,6 +20,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -44,7 +45,11 @@ import java.util.Map;
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that needs to be OR operation.",
-                        type = {DataType.BOOL})
+                        type = {DataType.BOOL},
+                        dynamic = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"arg"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returns false only if all of its operands are false, else true.",

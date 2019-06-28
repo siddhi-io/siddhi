@@ -543,7 +543,7 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ", true) " +
-                "select symbol, price, count(volume) as volumes " +
+                "select symbol, price, count() as volumes " +
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -601,7 +601,7 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ", true) " +
-                "select symbol, price, count(volume) as volumes " +
+                "select symbol, price, count() as volumes " +
                 "insert expired events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -753,7 +753,7 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ", true) " +
-                "select symbol, price, count(volume) as volumes " +
+                "select symbol, price, count() as volumes " +
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -809,7 +809,7 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ") " +
-                "select symbol, price, count(volume) as volumes " +
+                "select symbol, price, count() as volumes " +
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -865,7 +865,7 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ") " +
-                "select symbol, price, count(volume) as volumes " +
+                "select symbol, price, count() as volumes " +
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);

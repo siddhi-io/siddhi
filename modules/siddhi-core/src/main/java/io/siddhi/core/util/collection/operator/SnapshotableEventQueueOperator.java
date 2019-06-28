@@ -41,6 +41,14 @@ public class SnapshotableEventQueueOperator implements Operator {
         this.storeEventPosition = storeEventPosition;
     }
 
+    public ExpressionExecutor getExpressionExecutor() {
+        return expressionExecutor;
+    }
+
+    public int getStoreEventPosition() {
+        return storeEventPosition;
+    }
+
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         SnapshotableStreamEventQueue storeEventQueue = (SnapshotableStreamEventQueue) storeEvents;

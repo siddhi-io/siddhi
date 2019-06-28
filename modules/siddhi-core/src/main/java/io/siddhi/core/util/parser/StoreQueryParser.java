@@ -272,7 +272,8 @@ public class StoreQueryParser {
         MatchingMetaInfoHolder metaStreamInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent,
                 aggregation.getAggregationDefinition());
         CompiledCondition compiledCondition = aggregation.compileExpression(onCondition, within, per,
-                metaStreamInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
+                storeQuery.getSelector().getGroupByList(), metaStreamInfoHolder, variableExpressionExecutors,
+                tableMap, siddhiQueryContext);
         ((IncrementalAggregateCompileCondition) compiledCondition).init();
         metaStreamInfoHolder = ((IncrementalAggregateCompileCondition) compiledCondition).
                 getAlteredMatchingMetaInfoHolder();
@@ -340,11 +341,11 @@ public class StoreQueryParser {
         List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery,
                 tableMap, metaPosition, matchingMetaInfoHolder, siddhiQueryContext);
 
-        MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
-                metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
-                table.getTableDefinition());
+//        MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
+//                metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
+//                table.getTableDefinition());
         CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
-                storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
+                storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
         StoreQueryRuntime storeQueryRuntime =
                 new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
@@ -355,7 +356,7 @@ public class StoreQueryParser {
             storeQueryRuntime.setSelector(compiledSelectionWithCache.getQuerySelector());
             storeQueryRuntime.setMetaStreamEvent(metaStreamEvent);
             storeQueryRuntime.setStateEventFactory(new StateEventFactory(
-                    matchingMetaInfoHolderForSelection.getMetaStateEvent()));
+                    matchingMetaInfoHolder.getMetaStateEvent()));
         } catch (ClassCastException ignored) {
 
         }

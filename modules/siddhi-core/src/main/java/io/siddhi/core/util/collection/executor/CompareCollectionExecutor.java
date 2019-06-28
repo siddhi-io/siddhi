@@ -23,6 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.query.api.expression.condition.Compare;
 
@@ -32,22 +33,23 @@ import java.util.Collection;
  * Implementation of {@link CollectionExecutor} which handle compare condition.
  */
 public class CompareCollectionExecutor implements CollectionExecutor {
-
-
     private final String attribute;
     private final Compare.Operator operator;
     private final ExpressionExecutor valueExpressionExecutor;
-    private ExpressionExecutor expressionExecutor;
-    private int storeEventIndex;
+    protected ExpressionExecutor expressionExecutor;
+    protected int storeEventIndex;
+    private CacheTable cacheTable;
 
     public CompareCollectionExecutor(ExpressionExecutor expressionExecutor, int storeEventIndex, String attribute,
-                                     Compare.Operator operator, ExpressionExecutor valueExpressionExecutor) {
+                                     Compare.Operator operator, ExpressionExecutor valueExpressionExecutor,
+                                     CacheTable cacheTable) {
         this.expressionExecutor = expressionExecutor;
         this.storeEventIndex = storeEventIndex;
 
         this.attribute = attribute;
         this.operator = operator;
         this.valueExpressionExecutor = valueExpressionExecutor;
+        this.cacheTable = cacheTable;
     }
 
     public StreamEvent find(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder, StreamEventCloner
@@ -73,6 +75,9 @@ public class CompareCollectionExecutor implements CollectionExecutor {
             return returnEventChunk.getFirst();
         } else {
             for (StreamEvent storeEvent : storeEventSet) {
+                if (cacheTable != null) {
+                    cacheTable.updateCachePolicyAttribute(storeEvent);
+                }
                 if (storeEventCloner != null) {
                     returnEventChunk.add(storeEventCloner.copyStreamEvent(storeEvent));
                 } else {
@@ -81,6 +86,10 @@ public class CompareCollectionExecutor implements CollectionExecutor {
             }
             return returnEventChunk.getFirst();
         }
+    }
+
+    public ExpressionExecutor getValueExpressionExecutor() {
+        return valueExpressionExecutor;
     }
 
     public Collection<StreamEvent> findEvents(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder) {
@@ -110,6 +119,10 @@ public class CompareCollectionExecutor implements CollectionExecutor {
         } else {
             return Cost.MULTI_RETURN_INDEX_MATCHING;
         }
+    }
+
+    public String getAttribute() {
+        return attribute;
     }
 
 }

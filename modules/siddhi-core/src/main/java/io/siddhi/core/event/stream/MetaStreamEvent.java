@@ -149,4 +149,25 @@ public class MetaStreamEvent implements MetaComplexEvent {
     public enum EventType {
         TABLE, WINDOW, AGGREGATE, DEFAULT
     }
+
+    public MetaStreamEvent clone() {
+        MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+        if (outputData != null) {
+            for (Attribute attribute : outputData) {
+                metaStreamEvent.addOutputData(attribute);
+            }
+        }
+        if (this.onAfterWindowData != null) {
+            metaStreamEvent.onAfterWindowData = new ArrayList<>(onAfterWindowData);
+        }
+        metaStreamEvent.beforeWindowData = new ArrayList<>(beforeWindowData);
+
+        for (AbstractDefinition abstractDefinition: this.getInputDefinitions()) {
+            metaStreamEvent.addInputDefinition(abstractDefinition);
+        }
+        metaStreamEvent.setInputReferenceId(this.getInputReferenceId());
+        metaStreamEvent.setOutputDefinition(this.getOutputStreamDefinition());
+        metaStreamEvent.setEventType(this.getEventType());
+        return metaStreamEvent;
+    }
 }

@@ -20,6 +20,7 @@ package io.siddhi.core.executor.function;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -40,6 +41,9 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
         namespace = "",
         description = "Returns the current timestamp of siddhi application in milliseconds.",
         parameters = {},
+        parameterOverloads = {
+                @ParameterOverload()
+        },
         returnAttributes = @ReturnAttribute(
                 description = "siddhi application's current timestamp in milliseconds.",
                 type = DataType.LONG),

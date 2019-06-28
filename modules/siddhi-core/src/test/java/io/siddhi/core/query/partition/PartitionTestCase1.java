@@ -778,7 +778,7 @@ public class PartitionTestCase1 {
                 + "define stream cseEventStream1 (symbol string, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
-                + "@info(name = 'query') from cseEventStream select count(symbol) as entries insert into " +
+                + "@info(name = 'query') from cseEventStream select count() as entries insert into " +
                 "OutStockStream ;"
                 + "end ";
 

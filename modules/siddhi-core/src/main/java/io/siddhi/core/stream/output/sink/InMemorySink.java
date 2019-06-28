@@ -21,6 +21,7 @@ package io.siddhi.core.stream.output.sink;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
@@ -48,6 +49,9 @@ import org.apache.log4j.Logger;
                 "is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).",
         parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Event will be delivered to all" +
                 "the subscribers of the same topic"),
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"topic"})
+        },
         examples = @Example(
                 syntax = "@sink(type='inMemory', @map(type='passThrough'))\n" +
                         "define stream BarStream (symbol string, price float, volume long)",

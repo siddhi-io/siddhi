@@ -357,7 +357,7 @@ public class SnapshotOutputRateLimitTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.time(2 sec) " +
-                "select ip, count(calls) as totalCalls " +
+                "select ip, count() as totalCalls " +
                 "group by ip " +
                 "output snapshot every 1 sec " +
                 "insert all events into uniqueIps ;";

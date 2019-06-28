@@ -20,6 +20,7 @@ package io.siddhi.core.query.selector.attribute.aggregator.incremental;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -37,7 +38,11 @@ import io.siddhi.query.api.expression.Expression;
                 @Parameter(name = "arg",
                         description = "The attribute that needs to be counted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE,
-                                DataType.FLOAT, DataType.STRING, DataType.BOOL})
+                                DataType.FLOAT, DataType.STRING, DataType.BOOL},
+                        dynamic = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"arg"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returns the distinct event count as a long.",
@@ -100,5 +105,6 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
     }
+
 }
 

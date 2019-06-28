@@ -22,12 +22,14 @@
 <suite name="Siddhi-Core-Test-Suite">
     <test name="siddhi-core-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
+            <class name="io.siddhi.core.aggregation.AggregationFindQueryValidationTestCase"/>
             <class name="io.siddhi.core.aggregation.Aggregation1TestCase"/>
             <class name="io.siddhi.core.aggregation.Aggregation2TestCase"/>
+            <class name="io.siddhi.core.aggregation.LatestAggregationTestCase"/>
             <class name="io.siddhi.core.aggregation.DistinctCountAggregationTestCase"/>
-            <class name="io.siddhi.core.aggregation.AggregationFindQueryValidationTestCase"/>
-            <class name="io.siddhi.core.aggregation.PurgingTestCase"/>
+            <class name="io.siddhi.core.aggregation.SelectOptimisationAggregationTestCase"/>
             <class name="io.siddhi.core.aggregation.AggregationFilterTestCase"/>
+            <class name="io.siddhi.core.aggregation.PurgingTestCase"/>
 
             <class name="io.siddhi.core.managment.AsyncTestCase"/>
             <class name="io.siddhi.core.managment.EventTestCase"/>

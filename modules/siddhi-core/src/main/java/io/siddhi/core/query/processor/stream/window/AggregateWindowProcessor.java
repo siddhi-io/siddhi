@@ -35,6 +35,7 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Variable;
 
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,15 @@ import java.util.Map;
 public class AggregateWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
     private final Within within;
     private final Expression per;
+    private List<Variable> queryGroupByList;
     private AggregationRuntime aggregationRuntime;
 
-    public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per) {
+    public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per,
+                                    List<Variable> queryGroupByList) {
         this.aggregationRuntime = aggregationRuntime;
         this.within = within;
         this.per = per;
+        this.queryGroupByList = queryGroupByList;
     }
 
     @Override
@@ -83,8 +87,8 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return aggregationRuntime.compileExpression(condition, within, per, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+        return aggregationRuntime.compileExpression(condition, within, per, queryGroupByList,
+                matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override

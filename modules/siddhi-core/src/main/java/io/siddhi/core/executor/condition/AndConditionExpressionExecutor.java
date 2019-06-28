@@ -27,7 +27,6 @@ import io.siddhi.query.api.definition.Attribute;
  * Executor class for And condition. Condition evaluation logic is implemented within executor.
  */
 public class AndConditionExpressionExecutor extends ConditionExpressionExecutor {
-
     protected ExpressionExecutor leftConditionExecutor;
     protected ExpressionExecutor rightConditionExecutor;
 
@@ -72,6 +71,14 @@ public class AndConditionExpressionExecutor extends ConditionExpressionExecutor 
             }
         }
         return Boolean.FALSE;
+    }
+
+    public ExpressionExecutor getLeftConditionExecutor() {
+        return leftConditionExecutor;
+    }
+
+    public ExpressionExecutor getRightConditionExecutor() {
+        return rightConditionExecutor;
     }
 
 }

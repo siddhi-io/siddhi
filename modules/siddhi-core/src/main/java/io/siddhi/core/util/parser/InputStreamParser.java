@@ -33,6 +33,7 @@ import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
+import io.siddhi.query.api.expression.Variable;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class InputStreamParser {
 
      */
     public static StreamRuntime parse(InputStream inputStream,
+                                      List<Variable> queryGroupByList,
                                       Map<String, AbstractDefinition> streamDefinitionMap,
                                       Map<String, AbstractDefinition> tableDefinitionMap,
                                       Map<String, AbstractDefinition> windowDefinitionMap,
@@ -86,10 +88,9 @@ public class InputStreamParser {
                     outputExpectsExpiredEvents, false, siddhiQueryContext);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream),
-                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    aggregationDefinitionMap, tableMap, windowMap, aggregationMap,
-                    executors, outputExpectsExpiredEvents,
-                    siddhiQueryContext);
+                    queryGroupByList, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
+                    outputExpectsExpiredEvents, siddhiQueryContext);
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream),

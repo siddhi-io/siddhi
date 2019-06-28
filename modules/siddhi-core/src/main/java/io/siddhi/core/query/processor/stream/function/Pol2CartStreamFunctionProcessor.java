@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -44,15 +45,23 @@ import java.util.List;
         parameters = {
                 @Parameter(name = "theta",
                         description = "The theta value of the coordinates.",
-                        type = {DataType.DOUBLE}),
+                        type = {DataType.DOUBLE},
+                        dynamic = true),
                 @Parameter(name = "rho",
                         description = "The rho value of the coordinates.",
-                        type = {DataType.DOUBLE}),
+                        type = {DataType.DOUBLE},
+                        dynamic = true),
                 @Parameter(name = "z",
                         description = "z value of the cartesian coordinates.",
                         type = {DataType.DOUBLE},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "If z value is not given, drop the third parameter of the output.")
+        },
+        parameterOverloads = {
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"theta", "rho"}),
+                @ParameterOverload(parameterNames = {"theta", "rho", "z"})
         },
         examples = {
                 @Example(

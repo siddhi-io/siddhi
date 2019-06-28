@@ -2094,7 +2094,7 @@ public class SequenceTestCase {
         String query = "" +
                 "@info(name = 'query1') " +
                 "from received_reclamations#window.timeBatch(1 sec) " +
-                "select product_id, defect_category, count(product_id) as num " +
+                "select product_id, defect_category, count() as num " +
                 "group by product_id, defect_category " +
                 "insert into reclamation_averages;" +
                 "" +

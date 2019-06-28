@@ -20,6 +20,7 @@ package io.siddhi.core.executor.function;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -39,6 +40,9 @@ import java.util.UUID;
         namespace = "",
         description = "Generates a UUID (Universally Unique Identifier).",
         parameters = {},
+        parameterOverloads = {
+                @ParameterOverload()
+        },
         returnAttributes = @ReturnAttribute(
                 description = "Returns a UUID string.",
                 type = {DataType.STRING}),

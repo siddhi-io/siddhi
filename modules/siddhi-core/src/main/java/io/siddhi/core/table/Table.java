@@ -66,7 +66,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
-    private SiddhiAppContext siddhiAppContext;
+    protected SiddhiAppContext siddhiAppContext;
     private RecordTableHandler recordTableHandler;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
@@ -432,6 +432,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 throw e;
             }
         }
+    }
+
+    public void setIsTryingToConnectToFalse() {
+        this.isTryingToConnect.set(false);
     }
 
     /**

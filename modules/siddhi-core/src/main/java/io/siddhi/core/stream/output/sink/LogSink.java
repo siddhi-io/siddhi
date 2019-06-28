@@ -21,6 +21,7 @@ package io.siddhi.core.stream.output.sink;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
@@ -61,6 +62,12 @@ import java.util.Arrays;
                         optional = true,
                         defaultValue = "default prefix will be <Siddhi App Name> : <Stream Name>"
                 )
+        },
+        parameterOverloads = {
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"priority"}),
+                @ParameterOverload(parameterNames = {"prefix"}),
+                @ParameterOverload(parameterNames = {"priority", "prefix"})
         },
         examples = {
                 @Example(
