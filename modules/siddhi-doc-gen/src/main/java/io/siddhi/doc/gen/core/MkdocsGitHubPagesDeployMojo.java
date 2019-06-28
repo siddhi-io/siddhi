@@ -100,6 +100,13 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
     @Parameter(property = "doc.gen.base.directory")
     private boolean includeOrigin;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(defaultValue = "${siddhi.version}", readonly = true)
+    private String siddhiVersion;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Finding the root maven project
@@ -167,7 +174,7 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
         // Generating the documentation
         if (namespaceMetaDataList.size() > 0) {
             DocumentationUtils.generateDocumentation(namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(),
-                    getLog());
+                    getLog(), siddhiVersion);
             DocumentationUtils.updateHeadingsInMarkdownFile(homePageTemplateFile, homePageFile,
                     rootMavenProject.getArtifactId(), mavenProject.getVersion(), namespaceMetaDataList);
             DocumentationUtils.updateHeadingsInMarkdownFile(readmeFile, readmeFile, rootMavenProject.getArtifactId(),

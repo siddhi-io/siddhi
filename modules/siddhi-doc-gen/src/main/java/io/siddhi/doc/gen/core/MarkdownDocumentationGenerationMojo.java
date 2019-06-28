@@ -77,6 +77,13 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
     @Parameter(property = "doc.gen.base.directory")
     private boolean includeOrigin;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(defaultValue = "${siddhi.version}", readonly = true)
+    private String siddhiVersion;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Finding the root maven project
@@ -120,8 +127,8 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
 
         // Generating the documentation
         if (namespaceMetaDataList.size() > 0) {
-            DocumentationUtils.generateDocumentation(namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(),
-                    getLog());
+            DocumentationUtils.generateDocumentation(
+                    namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(), getLog(), siddhiVersion);
         }
     }
 }

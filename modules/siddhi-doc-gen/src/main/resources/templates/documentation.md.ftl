@@ -18,6 +18,11 @@
 <#import "utils.ftl" as utils>
 # API Docs - v${latestDocumentationVersion}
 
+<#if siddhiVersion??>
+!!! Info "Tested Siddhi Core version: *${siddhiVersion}*"
+    It could also support other Siddhi Core minor versions.
+</#if>
+
 <#list metaData as namespace>
 ## ${namespace.name?capitalize}
 

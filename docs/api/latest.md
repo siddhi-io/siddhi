@@ -2,7 +2,7 @@
 
 ## Core
 
-### and *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### and *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the results of AND operation for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -26,7 +26,7 @@
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -39,7 +39,7 @@ insert into alertStream;
 ```
 <p style="word-wrap: break-word">This will returns the result for AND operation of isFraud values as a boolean value for event chunk expiry by window length batch.</p>
 
-### avg *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### avg *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Calculates the average for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -63,7 +63,7 @@ insert into alertStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -76,13 +76,34 @@ from fooStream#window.timeBatch
 ```
 <p style="word-wrap: break-word">avg(temp) returns the average temp value for all the events based on their arrival and expiry.</p>
 
-### count *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### count *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the count of all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
 <LONG> count()
+<LONG> count(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
 ```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one parameter. It can belong to any one of the available types.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+</table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
@@ -93,7 +114,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will return the count of all the events for time batch in 10 seconds.</p>
 
-### distinctCount *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### distinctCount *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">This returns the count of distinct occurrences for a given arg.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -117,7 +138,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -130,7 +151,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">distinctcount(pageID) for the following output returns '3' when the available values are as follows.<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"<br>&nbsp;"WEB_PAGE_3"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"<br>&nbsp;The three distinct occurences identified are 'WEB_PAGE_1', 'WEB_PAGE_2', and 'WEB_PAGE_3'.</p>
 
-### max *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### max *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the maximum value for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -154,7 +175,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -167,7 +188,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">max(temp) returns the maximum temp value recorded for all the events based on their arrival and expiry.</p>
 
-### maxForever *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### maxForever *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -191,7 +212,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -204,7 +225,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">maxForever(temp) returns the maximum temp value recorded for all the events throughout the lifetime of the query.</p>
 
-### min *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### min *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the minimum value for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -228,7 +249,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -241,7 +262,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">min(temp) returns the minimum temp value recorded for all the events based on their arrival and expiry.</p>
 
-### minForever *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### minForever *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -265,7 +286,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -278,7 +299,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">minForever(temp) returns the minimum temp value recorded for all the events throughoutthe lifetime of the query.</p>
 
-### or *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### or *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the results of OR operation for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -302,7 +323,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -315,7 +336,7 @@ insert into alertStream;
 ```
 <p style="word-wrap: break-word">This will returns the result for OR operation of isFraud values as a boolean value for event chunk expiry by window length batch.</p>
 
-### stdDev *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### stdDev *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the calculated standard deviation for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -339,7 +360,7 @@ insert into alertStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -352,7 +373,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">stddev(temp) returns the calculated standard deviation of temp for all the events based on their arrival and expiry.</p>
 
-### sum *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### sum *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Returns the sum for all the events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -376,7 +397,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -389,7 +410,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will returns the sum of volume values as a long value for each event arrival and expiry.</p>
 
-### unionSet *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#aggregate-function">(Aggregate Function)</a>*
+### unionSet *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
 
 <p style="word-wrap: break-word">Union multiple sets. <br>&nbsp;This attribute aggregator maintains a union of sets. The given input set is put into the union set and the union set is returned.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -413,7 +434,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -430,7 +451,7 @@ insert into distinctStockStream;
 ```
 <p style="word-wrap: break-word">distinctStockStream will return the set object which contains the distinct set of stock symbols received during a sliding window of 10 seconds.</p>
 
-### UUID *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### UUID *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Generates a UUID (Universally Unique Identifier).</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -447,7 +468,7 @@ insert into RoomTempStream;
 ```
 <p style="word-wrap: break-word">This will converts a room number to string, introducing a message ID to each event asUUID() returns a34eec40-32c2-44fe-8075-7f4fde2e2dd8<br><br>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</p>
 
-### cast *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### cast *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Converts the first parameter according to the cast.to parameter. Incompatible arguments cause Class Cast exceptions if further processed. This function is used with map extension that returns attributes of the object type. You can use this function to cast the object to an accurate and concrete type.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -471,7 +492,7 @@ insert into RoomTempStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">cast.to</td>
@@ -479,7 +500,7 @@ insert into RoomTempStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -492,12 +513,12 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will cast the fooStream temp field value into 'double' format.</p>
 
-### coalesce *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### coalesce *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the value of the first input parameter that is not null, and all input parameters have to be on the same type.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> coalesce(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> args)
+<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> coalesce(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg, <INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> ...)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -511,12 +532,12 @@ insert into barStream;
         <th>Dynamic</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">args</td>
+        <td style="vertical-align: top">arg</td>
         <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -545,7 +566,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will returns null as there are no notnull values.</p>
 
-### convert *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### convert *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Converts the first input parameter according to the convertedTo parameter.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -569,7 +590,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">converted.to</td>
@@ -577,7 +598,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -598,7 +619,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will convert fooStream temp value into 'int' (value = "convert(45.9, 'int') returns 46").</p>
 
-### createSet *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### createSet *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Includes the given input parameter in a java.util.HashSet and returns the set. </p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -622,7 +643,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -635,7 +656,7 @@ insert into initStream;
 ```
 <p style="word-wrap: break-word">For every incoming stockStream event, the initStream stream will produce a set object having only one element: the symbol in the incoming stockStream.</p>
 
-### currentTimeMillis *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### currentTimeMillis *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the current timestamp of siddhi application in milliseconds.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -652,7 +673,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will extract current siddhi application timestamp.</p>
 
-### default *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### default *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks if the 'attribute' parameter is null and if so returns the value of the 'default' parameter</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -676,7 +697,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">default</td>
@@ -684,7 +705,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -697,7 +718,7 @@ insert into StandardTempStream;
 ```
 <p style="word-wrap: break-word">This will replace TempStream's temp attribute with default value if the temp is null.</p>
 
-### eventTimestamp *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### eventTimestamp *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the timestamp of the processed event.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -714,7 +735,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will extract current events timestamp.</p>
 
-### ifThenElse *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### ifThenElse *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Evaluates the 'condition' parameter and returns value of the 'if.expression' parameter if the condition is true, or returns value of the 'else.expression' parameter if the condition is false. Here both 'if.expression' and 'else.expression' should be of the same type.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -738,7 +759,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">if.expression</td>
@@ -746,7 +767,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">else.expression</td>
@@ -754,7 +775,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -786,7 +807,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will returns  passwordState as true if password = admin.</p>
 
-### instanceOfBoolean *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfBoolean *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Boolean or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -810,7 +831,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -831,7 +852,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the value = 32 then this will returns false as the value is not an instance of the boolean.</p>
 
-### instanceOfDouble *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfDouble *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Double or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -855,7 +876,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -876,7 +897,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is not an instance of the double.</p>
 
-### instanceOfFloat *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfFloat *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Float or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -900,7 +921,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -921,7 +942,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a float.</p>
 
-### instanceOfInteger *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfInteger *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Integer or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -945,7 +966,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -966,7 +987,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
 
-### instanceOfLong *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfLong *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Long or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -990,7 +1011,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1011,7 +1032,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
 
-### instanceOfString *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### instanceOfString *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of String or not.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1035,7 +1056,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1056,12 +1077,12 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a string.</p>
 
-### maximum *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### maximum *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the maximum value of the input parameters.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-<INT|LONG|DOUBLE|FLOAT> maximum(<INT|LONG|DOUBLE|FLOAT> arg)
+<INT|LONG|DOUBLE|FLOAT> maximum(<INT|LONG|DOUBLE|FLOAT> arg, <INT|LONG|DOUBLE|FLOAT> ...)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1080,7 +1101,7 @@ insert into barStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1093,12 +1114,12 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will returns the maximum value of the input parameters price1, price2, price3.</p>
 
-### minimum *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### minimum *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the minimum value of the input parameters.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-<INT|LONG|DOUBLE|FLOAT> minimum(<INT|LONG|DOUBLE|FLOAT> arg)
+<INT|LONG|DOUBLE|FLOAT> minimum(<INT|LONG|DOUBLE|FLOAT> arg, <INT|LONG|DOUBLE|FLOAT> ...)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1117,7 +1138,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1130,7 +1151,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will returns the minimum value of the input parameters price1, price2, price3.</p>
 
-### sizeOfSet *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#function">(Function)</a>*
+### sizeOfSet *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#function">Function</a>)*
 
 <p style="word-wrap: break-word">Returns the size of an object of type java.util.Set.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1154,7 +1175,7 @@ insert into outputStream;
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">OBJECT</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1175,7 +1196,7 @@ insert into sizeStream;
 ```
 <p style="word-wrap: break-word">The sizeStream stream will output the number of distinct stock symbols received during a sliding window of 10 seconds.</p>
 
-### pol2Cart *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#stream-function">(Stream Function)</a>*
+### pol2Cart *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#stream-function">Stream Function</a>)*
 
 <p style="word-wrap: break-word">The pol2Cart function calculating the cartesian coordinates x & y for the given theta, rho coordinates and adding them as new attributes to the existing events.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1201,7 +1222,7 @@ pol2Cart(<DOUBLE> theta, <DOUBLE> rho, <DOUBLE> z)
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">DOUBLE</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">rho</td>
@@ -1209,7 +1230,7 @@ pol2Cart(<DOUBLE> theta, <DOUBLE> rho, <DOUBLE> z)
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">DOUBLE</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">z</td>
@@ -1217,7 +1238,7 @@ pol2Cart(<DOUBLE> theta, <DOUBLE> rho, <DOUBLE> z)
         <td style="vertical-align: top">If z value is not given, drop the third parameter of the output.</td>
         <td style="vertical-align: top">DOUBLE</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1238,7 +1259,7 @@ insert into outputStream ;
 ```
 <p style="word-wrap: break-word">This will return cartesian coordinates (4.99953024681082, 0.06853693328228748, 3.4)for theta: 0.7854 and rho: 5 and z: 3.4.</p>
 
-### log *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#stream-processor">(Stream Processor)</a>*
+### log *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#stream-processor">Stream Processor</a>)*
 
 <p style="word-wrap: break-word">The logger logs the message on the given priority with or without processed event.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1275,7 +1296,7 @@ log(<STRING> priority, <STRING> log.message, <BOOL> is.event.logged)
         <td style="vertical-align: top"><siddhi app name> :</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">is.event.logged</td>
@@ -1336,11 +1357,12 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will log message and fooStream:events.</p>
 
-### batch *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### batch *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A window that holds an incoming events batch. When a new set of events arrives, the previously arrived old events will be expired. Batch window can be used to aggregate events that comes in batches. If it has the parameter length specified, then batch window process the batch as several chunks.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+batch()
 batch(<INT> window.length)
 ```
 
@@ -1376,7 +1398,7 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will output comma separated items IDs that have the same price for each incoming batch of events.</p>
 
-### cron *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### cron *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">This window outputs the arriving events as and when they arrive, and resets (expires) the window periodically based on the given cron expression.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1432,7 +1454,7 @@ insert into OutputStream ;
 ```
 <p style="word-wrap: break-word">The defined window will let the totalPrice to gradually increase and resets to zero as a batch every 5 seconds.</p>
 
-### delay *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### delay *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A delay window holds events for a specific time period that is regarded as a delay period before processing them.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1481,7 +1503,7 @@ insert into OutputStream;
 ```
 <p style="word-wrap: break-word">In this example, purchase events that arrive in the 'PurchaseStream' stream are directed to a delay window. At any given time, this delay window holds purchase events that have arrived within the last hour. These purchase events in the window are matched by the 'symbol' attribute, with delivery events that arrive in the 'DeliveryStream' stream. This monitors whether the delivery of products is done with a minimum delay of one hour after the purchase.</p>
 
-### externalTime *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### externalTime *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A sliding time window based on external time. It holds events that arrived during the last windowTime period from the external timestamp, and gets updated on every monotonically increasing timestamp.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1505,7 +1527,7 @@ externalTime(<LONG> timestamp, <INT|LONG|TIME> window.time)
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">LONG</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">window.time</td>
@@ -1533,7 +1555,7 @@ insert expired events into outputStream ;
 ```
 <p style="word-wrap: break-word">processing events arrived within the last 20 seconds from the eventTime and output expired events.</p>
 
-### externalTimeBatch *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### externalTimeBatch *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A batch (tumbling) time window based on external time, that holds events arrived during windowTime periods, and gets updated for every windowTime.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1541,6 +1563,7 @@ insert expired events into outputStream ;
 externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time)
 externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME> start.time)
 externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME> start.time, <INT|LONG|TIME> timeout)
+externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME> start.time, <INT|LONG|TIME> timeout, <BOOL> replace.with.batchtime)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1559,7 +1582,7 @@ externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">LONG</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">window.time</td>
@@ -1575,13 +1598,21 @@ externalTimeBatch(<LONG> timestamp, <INT|LONG|TIME> window.time, <INT|LONG|TIME>
         <td style="vertical-align: top">Timestamp of first event</td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">timeout</td>
         <td style="vertical-align: top; word-wrap: break-word">Time to wait for arrival of new event, before flushing and giving output for events belonging to a specific batch.</td>
         <td style="vertical-align: top">System waits till an event from next batch arrives to flush current batch</td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">replace.with.batchtime</td>
+        <td style="vertical-align: top; word-wrap: break-word">This indicates to replace the expired event timeStamp as the batch end timeStamp</td>
+        <td style="vertical-align: top">System waits till an event from next batch arrives to flush current batch</td>
+        <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -1613,11 +1644,12 @@ define window cseEventWindow (symbol string, price float, volume int) externalTi
 ```
 <p style="word-wrap: break-word">This will processing events that arrive every 2 seconds from the eventTim. Considers the first event's eventTimestamp value as startTime. Waits 100 milliseconds for the arrival of a new event before flushing current batch.</p>
 
-### frequent *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### frequent *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+frequent(<INT> event.count)
 frequent(<INT> event.count, <STRING> attribute)
 ```
 
@@ -1645,7 +1677,7 @@ frequent(<INT> event.count, <STRING> attribute)
         <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1668,7 +1700,7 @@ insert all events into PotentialFraud;
 ```
 <p style="word-wrap: break-word">This will returns the 2 latest events with the most frequently appeared card numbers.</p>
 
-### length *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### length *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A sliding length window that holds the last 'window.length' events at a given time, and gets updated for each arrival and expiry.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1712,7 +1744,7 @@ insert all events into outputStream ;
 ```
 <p style="word-wrap: break-word">This will process last 10 events in a sliding manner.</p>
 
-### lengthBatch *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### lengthBatch *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A batch (tumbling) length window that holds and process a number of events as specified in the window.length.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1788,7 +1820,7 @@ insert all events into OutputStream ;
 ```
 <p style="word-wrap: break-word">This uses an defined window to process 10 events  as a batch and output all events.</p>
 
-### lossyFrequent *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### lossyFrequent *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">This window identifies and returns all the events of which the current frequency exceeds the value specified for the supportThreshold parameter.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1830,7 +1862,7 @@ lossyFrequent(<DOUBLE> support.threshold, <DOUBLE> error.bound, <STRING> attribu
         <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
 </table>
 
@@ -1863,7 +1895,7 @@ insert all events into PotentialFraud;
 ```
 <p style="word-wrap: break-word">lossyFrequent(0.3, 0.05, cardNo) returns all the events of which the cardNo attributes frequency exceeds 0.3, with an error bound of 0.05.</p>
 
-### session *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### session *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">This is a session window that holds events that belong to a specific session. The events that belong to a specific session are identified by a grouping attribute (i.e., a session key). A session gap period is specified to determine the time period after which the session is considered to be expired. A new event that arrives with a specific value for the session key is matched with the session window with the same session key.<br>&nbsp;There can be out of order and late arrival of events, these events can arrive after the session is expired, to include those events to the matching session key specify a latency time period that is less than the session gap period.To have aggregate functions with session windows, the events need to be grouped by the session key via a 'group by' clause.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -1897,7 +1929,7 @@ session(<INT|LONG|TIME> window.session, <STRING> window.key, <INT|LONG|TIME> win
         <td style="vertical-align: top">default-key</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">window.allowed.latency</td>
@@ -1921,13 +1953,14 @@ insert all events into OutputStream;
 ```
 <p style="word-wrap: break-word">This query processes events that arrive at the PurchaseEvent input stream. The 'user' attribute is the session key, and the session gap is 5 seconds. '2 sec' is specified as the allowed latency. Therefore, events with the matching user name that arrive 2 seconds after the expiration of the session are also considered when performing aggregations for the session identified by the given user name.</p>
 
-### sort *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### sort *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-sort(<INT> window.length, <STRING> attribute)
-sort(<INT> window.length, <STRING> attribute, <STRING> order)
+sort(<INT> window.length, <STRING|DOUBLE|INT|LONG|FLOAT|LONG> attribute)
+sort(<INT> window.length, <STRING|DOUBLE|INT|LONG|FLOAT|LONG> attribute, <STRING> order, <STRING> ...)
+sort(<INT> window.length, <STRING|DOUBLE|INT|LONG|FLOAT|LONG> attribute, <STRING> order, <STRING|DOUBLE|INT|LONG|FLOAT|LONG> attribute, <STRING|DOUBLE|INT|LONG|FLOAT|LONG> ...)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1952,9 +1985,9 @@ sort(<INT> window.length, <STRING> attribute, <STRING> order)
         <td style="vertical-align: top">attribute</td>
         <td style="vertical-align: top; word-wrap: break-word">The attribute that should be checked for the order.</td>
         <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
-        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">STRING<br>DOUBLE<br>INT<br>LONG<br>FLOAT<br>LONG</td>
         <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">order</td>
@@ -1981,7 +2014,7 @@ insert all events into outputStream ;
 ```
 <p style="word-wrap: break-word">sort(5, price, 'asc') keeps the events sorted by price in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.</p>
 
-### time *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### time *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2023,7 +2056,7 @@ insert all events into outputStream ;
 ```
 <p style="word-wrap: break-word">This will processing events that arrived within the last 20 milliseconds.</p>
 
-### timeBatch *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### timeBatch *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A batch (tumbling) time window that holds and process events that arrive during 'window.time' period as a batch.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2109,7 +2142,7 @@ insert all events into OutputStream ;
 ```
 <p style="word-wrap: break-word">This uses an defined window to process events arrived every 20 seconds as a batch and output all events.</p>
 
-### timeLength *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window">(Window)</a>*
+### timeLength *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#window">Window</a>)*
 
 <p style="word-wrap: break-word">A sliding time window that, at a given time holds the last window.length events that arrived during last window.time period, and gets updated for every event arrival and expiry.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2161,7 +2194,7 @@ insert all events into outputStream;
 
 ## Sink
 
-### inMemory *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink">(Sink)</a>*
+### inMemory *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#sink">Sink</a>)*
 
 <p style="word-wrap: break-word">In-memory transport that can communicate with other in-memory transports within the same JVM, itis assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2197,7 +2230,7 @@ define stream BarStream (symbol string, price float, volume long)
 ```
 <p style="word-wrap: break-word">In this example BarStream uses inMemory transport which emit the Siddhi events internally without using external transport and transformation.</p>
 
-### log *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink">(Sink)</a>*
+### log *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#sink">Sink</a>)*
 
 <p style="word-wrap: break-word">This is a sink that can be used as a logger. This will log the output events in the output stream with user specified priority and a prefix</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2264,7 +2297,7 @@ define stream BarStream (symbol string, price float, volume long)
 
 ## Sinkmapper
 
-### passThrough *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink-mapper">(Sink Mapper)</a>*
+### passThrough *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#sink-mapper">Sink Mapper</a>)*
 
 <p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2282,7 +2315,7 @@ define stream BarStream (symbol string, price float, volume long);
 
 ## Source
 
-### inMemory *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source">(Source)</a>*
+### inMemory *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#source">Source</a>)*
 
 <p style="word-wrap: break-word">In-memory source that can communicate with other in-memory sinks within the same JVM, it is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
@@ -2320,7 +2353,7 @@ define stream BarStream (symbol string, price float, volume long)
 
 ## Sourcemapper
 
-### passThrough *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source-mapper">(Source Mapper)</a>*
+### passThrough *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#source-mapper">Source Mapper</a>)*
 
 <p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>

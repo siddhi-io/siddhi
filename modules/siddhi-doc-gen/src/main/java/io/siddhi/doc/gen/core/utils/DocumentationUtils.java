@@ -195,16 +195,31 @@ public class DocumentationUtils {
      * @param documentationBaseDirectory The path of the directory in which the documentation will be generated
      * @param documentationVersion       The version of the documentation being generated
      * @param logger                     The logger to log errors
+     * @param siddhiVersion              Siddhi Core version
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
     public static void generateDocumentation(List<NamespaceMetaData> namespaceMetaDataList,
-                                             String documentationBaseDirectory, String documentationVersion, Log logger)
+                                             String documentationBaseDirectory, String documentationVersion,
+                                             Log logger, String siddhiVersion)
             throws MojoFailureException {
         // Generating data model
         Map<String, Object> rootDataModel = new HashMap<>();
         rootDataModel.put("metaData", namespaceMetaDataList);
         rootDataModel.put("formatDescription", new FormatDescriptionMethod());
         rootDataModel.put("latestDocumentationVersion", documentationVersion);
+        rootDataModel.put("siddhiVersion", siddhiVersion);
+        String siddhiDocVersion;
+        if (siddhiVersion != null) {
+            siddhiDocVersion = siddhiVersion;
+        } else {
+            siddhiDocVersion = documentationVersion;
+        }
+        if (Integer.parseInt(siddhiDocVersion.substring(0, siddhiDocVersion.indexOf("."))) < 5) {
+            siddhiDocVersion = "v4.x";
+        } else {
+            siddhiDocVersion = "v" + siddhiDocVersion.substring(0, siddhiDocVersion.lastIndexOf("."));
+        }
+        rootDataModel.put("siddhiDocVersion", siddhiDocVersion);
 
         String outputFileRelativePath = Constants.API_SUB_DIRECTORY + File.separator + documentationVersion
                 + Constants.MARKDOWN_FILE_EXTENSION;
