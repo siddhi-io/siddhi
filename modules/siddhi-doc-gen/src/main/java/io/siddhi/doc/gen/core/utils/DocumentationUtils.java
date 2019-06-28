@@ -229,15 +229,6 @@ public class DocumentationUtils {
                         + Constants.FREEMARKER_TEMPLATE_FILE_EXTENSION,
                 rootDataModel, documentationBaseDirectory, outputFileRelativePath
         );
-        File newVersionFile = new File(documentationBaseDirectory + File.separator + outputFileRelativePath);
-        File latestLabelFile = new File(documentationBaseDirectory + File.separator +
-                Constants.API_SUB_DIRECTORY + File.separator + Constants.LATEST_FILE_NAME +
-                Constants.MARKDOWN_FILE_EXTENSION);
-        try {
-            Files.copy(newVersionFile, latestLabelFile);
-        } catch (IOException e) {
-            logger.warn("Failed to generate latest.md file", e);
-        }
     }
 
     /**
@@ -315,9 +306,10 @@ public class DocumentationUtils {
      *
      * @param mkdocsConfigFile           The mkdocs configuration file
      * @param documentationBaseDirectory The base directory of the documentation
+     * @return latestVersion
      * @throws FileNotFoundException If mkdocs configuration file is not found
      */
-    public static void updateAPIPagesInMkdocsConfig(File mkdocsConfigFile, String documentationBaseDirectory)
+    public static String updateAPIPagesInMkdocsConfig(File mkdocsConfigFile, String documentationBaseDirectory)
             throws FileNotFoundException {
         // Retrieving the documentation file names
         File documentationDirectory = new File(documentationBaseDirectory
@@ -359,6 +351,8 @@ public class DocumentationUtils {
                 }
             });
         }
+
+        String latestVersion = apiDirectoryContent.get(0).replace(".md", "");
 
         // Creating yaml parser
         DumperOptions dumperOptions = new DumperOptions();
@@ -406,74 +400,8 @@ public class DocumentationUtils {
         yaml.dump(yamlConfig, new OutputStreamWriter(
                 new FileOutputStream(mkdocsConfigFile), Constants.DEFAULT_CHARSET)
         );
-    }
 
-    /**
-     * Generate a extension index file from the template file
-     *
-     * @param extensionRepositories      The list of extension repository names
-     * @param extensionRepositoryOwner   The extension repository owner's name
-     * @param documentationBaseDirectory The output directory path in which the extension index will be generated
-     * @param extensionsIndexFileName    The name of the index file that will be generated
-     * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
-     */
-    public static void createExtensionsIndex(List<String> extensionRepositories,
-                                             String extensionRepositoryOwner,
-                                             String documentationBaseDirectory,
-                                             String projectBaseDir,
-                                             String extensionsIndexFileName)
-            throws MojoFailureException {
-        // Separating Apache and GPL extensions based on siddhi repository prefix conventions
-        List<String> gplExtensionRepositories = new ArrayList<>();
-        List<String> apacheExtensionRepositories = new ArrayList<>();
-        for (String extensionRepository : extensionRepositories) {
-            if (extensionRepository.startsWith(Constants.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX)) {
-                gplExtensionRepositories.add(extensionRepository);
-            } else if (extensionRepository.startsWith(Constants.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX)) {
-                apacheExtensionRepositories.add(extensionRepository);
-            }
-        }
-
-        // Generating data model
-        Map<String, Object> rootDataModel = new HashMap<>();
-        rootDataModel.put("extensionsOwner", extensionRepositoryOwner);
-
-        Path gplDocCachePath = Paths.get(
-                projectBaseDir, "src", "main", "resources", "gpl.docs.json");
-        Path apacheDocCachePath = Paths.get(
-                projectBaseDir, "src", "main", "resources", "apache.docs.json");
-
-        rootDataModel.put("gplExtensions", retrieveExtensionWithDescriptions(
-                gplDocCachePath, extensionRepositoryOwner, gplExtensionRepositories));
-        rootDataModel.put("apacheExtensions", retrieveExtensionWithDescriptions(
-                apacheDocCachePath, extensionRepositoryOwner, apacheExtensionRepositories));
-
-        generateFileFromTemplate(
-                Constants.MARKDOWN_EXTENSIONS_INDEX_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION
-                        + Constants.FREEMARKER_TEMPLATE_FILE_EXTENSION,
-                rootDataModel, documentationBaseDirectory,
-                extensionsIndexFileName + Constants.MARKDOWN_FILE_EXTENSION
-        );
-    }
-
-    private static Map<String, String> retrieveExtensionWithDescriptions(Path cachePath,
-                                                                         String extensionRepositoryOwner,
-                                                                         List<String> extensions)
-            throws MojoFailureException {
-        ExtensionDocCache cache = new ExtensionDocCache(cachePath);
-        ExtensionDocRetriever retriever = new ExtensionDocRetriever(extensionRepositoryOwner, extensions, cache);
-
-        retriever.pull();
-
-        boolean inMemory = cache.isInMemory();
-        boolean throttled = retriever.isThrottled();
-
-        if (throttled && inMemory) {
-            throw new MojoFailureException("The API has reached the throttling limits while fetching the extensions." +
-                    "The extension cache is also not available. Try again later or check whether cache is present " +
-                    "in path: " + cachePath.toString());
-        }
-        return cache.getExtensionDescriptionMap();
+        return latestVersion;
     }
 
     /**
