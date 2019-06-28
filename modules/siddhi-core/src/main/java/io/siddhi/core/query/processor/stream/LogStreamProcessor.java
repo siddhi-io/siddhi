@@ -62,6 +62,7 @@ import java.util.List;
                 @Parameter(name = "log.message",
                         description = "This message will be logged.",
                         defaultValue = "<siddhi app name> :", optional = true,
+                        dynamic = true,
                         type = {DataType.STRING}),
                 @Parameter(name = "is.event.logged",
                         description = "To log the processed event.",

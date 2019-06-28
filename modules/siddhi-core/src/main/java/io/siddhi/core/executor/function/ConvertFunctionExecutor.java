@@ -20,6 +20,7 @@ package io.siddhi.core.executor.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -42,12 +43,17 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                 @Parameter(name = "to.be.converted",
                         description = "This specifies the value to be converted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING,
-                                DataType.BOOL}),
+                                DataType.BOOL},
+                        dynamic = true),
                 @Parameter(name = "converted.to",
                         description = "A string constant parameter to which type the attribute need to be converted " +
                                 " using one of the following strings values: 'int', 'long', 'float', 'double', " +
                                 "'string', 'bool'.",
-                        type = DataType.STRING)
+                        type = DataType.STRING,
+                        dynamic = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"to.be.converted", "converted.to"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Based on the given convertedTo parameter.",

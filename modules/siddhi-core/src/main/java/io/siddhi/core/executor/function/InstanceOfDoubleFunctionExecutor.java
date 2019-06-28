@@ -21,6 +21,7 @@ package io.siddhi.core.executor.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -42,7 +43,11 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                 @Parameter(name = "arg",
                         description = "The parameter to be checked.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
-                                DataType.STRING, DataType.BOOL, DataType.OBJECT})
+                                DataType.STRING, DataType.BOOL, DataType.OBJECT},
+                        dynamic = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"arg"})
         },
         returnAttributes = @ReturnAttribute(
                 description = "Returned type will be boolean and true if and only if the input " +

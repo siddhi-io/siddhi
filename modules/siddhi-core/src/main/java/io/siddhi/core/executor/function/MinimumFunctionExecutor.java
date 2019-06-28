@@ -22,6 +22,7 @@ package io.siddhi.core.executor.function;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -44,7 +45,11 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                         description = "This function accepts one or more parameters. " +
                                 "They can belong to any one of the available types. " +
                                 "All the specified parameters should be of the same type.",
-                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT})
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT},
+                        dynamic = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"arg", "..."})
         },
         returnAttributes = @ReturnAttribute(
                 description = "This will be the same as the type of the first input parameter.",

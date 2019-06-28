@@ -886,7 +886,7 @@ public class ExternalTimeBatchWindowTestCase {
                 "" +
                 "@info(name='query1') " +
                 "from jmxMetricWindow " +
-                "select avg(cpu) as avgCpu, count(1) as count insert into tmp;";
+                "select avg(cpu) as avgCpu, count() as count insert into tmp;";
 
         SiddhiAppRuntime runtime = siddhiManager.createSiddhiAppRuntime(query);
 
@@ -956,7 +956,7 @@ public class ExternalTimeBatchWindowTestCase {
                 + " '|' as s3, "
                 + " timestamp as timeWindowEnds, "
                 + " '|' as s4, "
-                + " count(1) as metric_count "
+                + " count() as metric_count "
                 + " INSERT INTO tmp;";
 
         SiddhiManager sm = new SiddhiManager();

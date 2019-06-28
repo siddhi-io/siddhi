@@ -84,8 +84,8 @@ public class DelayWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
         } catch (SiddhiAppCreationException e) {
             error = false;
-            AssertJUnit.assertEquals("Delay window should only have one parameter (<int|long|time> delayTime), " +
-                    "but found 2 input attributes", e.getCause().getMessage());
+            AssertJUnit.assertEquals("There is no parameterOverload for 'delay' that matches attribute types " +
+                    "'[INT, INT]'.", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -105,8 +105,8 @@ public class DelayWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
         } catch (SiddhiAppCreationException e) {
             error = false;
-            AssertJUnit.assertEquals("Delay window's parameter attribute should be either int or long, " +
-                    "but found STRING", e.getCause().getMessage());
+            AssertJUnit.assertEquals("There is no parameterOverload for 'delay' that matches attribute types " +
+                    "'[STRING]'.", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {

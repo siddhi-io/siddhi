@@ -20,6 +20,7 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -47,8 +48,11 @@ import java.util.Set;
         parameters =
         @Parameter(name = "set",
                 description = "The java.util.Set object that needs to be added into the union set.",
-                type = {DataType.OBJECT})
-        ,
+                type = {DataType.OBJECT},
+                dynamic = true),
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"set"})
+        },
         returnAttributes = @ReturnAttribute(
                 description = "Returns a java.util.Set object which is the union of aggregated sets",
                 type = {DataType.OBJECT}),

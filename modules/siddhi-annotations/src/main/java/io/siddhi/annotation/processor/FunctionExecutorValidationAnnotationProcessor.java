@@ -39,7 +39,9 @@ public class FunctionExecutorValidationAnnotationProcessor extends AbstractAnnot
             if (parameterName.isEmpty()) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
                         "-> name annotated in class {0} is null or empty.", extensionClassFullName));
-            } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+            } else if (!(PARAMETER_NAME_PATTERN.matcher(parameterName).find() ||
+                    REPETITIVE_PARAMETER_NOTATION.equals(parameterName))) {
+
                 //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
                                 "-> name:{0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
@@ -57,14 +59,7 @@ public class FunctionExecutorValidationAnnotationProcessor extends AbstractAnnot
                                 "-> name:{0} -> type annotated in class {1} is null or empty.", parameterName,
                         extensionClassFullName));
             }
-            //Check if the @Parameter dynamic property false or empty in the classes extending
-            //super classes except the Sink & SinkMapper.
-            if (parameter.dynamic()) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
-                                "-> name:{0} -> dynamic property cannot be annotated true in class {1}. " +
-                                "Only classes extending Sink and SinkMapper can have the dynamic parameters.",
-                        parameterName, extensionClassFullName));
-            }
+
             if (parameter.optional()) {
                 if (parameter.defaultValue().isEmpty()) {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
