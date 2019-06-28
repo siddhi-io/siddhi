@@ -28,6 +28,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
 import io.siddhi.doc.gen.extensions.ExtensionDocCache;
 import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
@@ -681,7 +682,24 @@ public class DocumentationUtils {
                     ParameterMetaData[] overloadParameters = new ParameterMetaData[
                             parameterOverloadAnnotation.parameterNames().length];
                     for (int j = 0; j < parameterOverloadAnnotation.parameterNames().length; j++) {
-                        overloadParameters[j] = parameterMap.get(parameterOverloadAnnotation.parameterNames()[j]);
+                        ParameterMetaData parameterMetaData = parameterMap.
+                                get(parameterOverloadAnnotation.parameterNames()[j]);
+                        if (parameterMetaData != null) {
+                            overloadParameters[j] = parameterMetaData;
+                        } else if (parameterOverloadAnnotation.parameterNames()[j].
+                                equals(SiddhiConstants.REPETITIVE_PARAMETER_NOTATION)) {
+                            ParameterMetaData repetitiveParamMetaData =
+                                    new ParameterMetaData();
+                            ParameterMetaData previousParameterMetaData = parameterMap.
+                                    get(parameterOverloadAnnotation.parameterNames()[j - 1]);
+                            repetitiveParamMetaData.setName(SiddhiConstants.REPETITIVE_PARAMETER_NOTATION);
+                            repetitiveParamMetaData.setType(previousParameterMetaData.getType());
+                            repetitiveParamMetaData.setDescription(previousParameterMetaData.getDescription());
+                            repetitiveParamMetaData.setOptional(previousParameterMetaData.isOptional());
+                            repetitiveParamMetaData.setDynamic(previousParameterMetaData.isDynamic());
+                            repetitiveParamMetaData.setDefaultValue(previousParameterMetaData.getDefaultValue());
+                            overloadParameters[j] = repetitiveParamMetaData;
+                        }
                     }
                     parameterOverload.setParameters(Arrays.asList(overloadParameters));
                     parameterOverloads[i] = parameterOverload;

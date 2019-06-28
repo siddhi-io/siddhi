@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 public class AbstractAnnotationProcessor {
     protected static final Pattern CORE_PACKAGE_PATTERN = Pattern.compile("^io.siddhi.core.");
     protected static final Pattern PARAMETER_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$");
+    protected static final String REPETITIVE_PARAMETER_NOTATION = "...";
     protected static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("^(([a-z][a-z0-9]+)([A-Z]{0,1}[a-z0-9]*)*)$");
     protected String extensionClassFullName;
 
@@ -92,7 +93,8 @@ public class AbstractAnnotationProcessor {
             if (parameterName.isEmpty()) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                         "name annotated in class {0} is null or empty.", extensionClassFullName));
-            } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+            } else if (!(PARAMETER_NAME_PATTERN.matcher(parameterName).find() ||
+                    REPETITIVE_PARAMETER_NOTATION.equals(parameterName))) {
                 //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                                 "name {0} annotated in class {1} is not in proper format 'abc.def.ghi'.",
@@ -144,13 +146,15 @@ public class AbstractAnnotationProcessor {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                                     "@ParameterOverload -> parameterNames annotated in class {0} is null or empty.",
                             extensionClassFullName));
-                } else if (!PARAMETER_NAME_PATTERN.matcher(overloadParameterName).find()) {
+                } else if (!(PARAMETER_NAME_PATTERN.matcher(overloadParameterName).find() ||
+                        REPETITIVE_PARAMETER_NOTATION.equals(overloadParameterName))) {
                     //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                             "@ParameterOverload -> parameterNames {0} annotated in class {1} is not " +
                             "in proper format 'abc.def.ghi'.", overloadParameterName, extensionClassFullName));
                 }
-                if (!parameterMap.containsKey(overloadParameterName)) {
+                if (!(parameterMap.containsKey(overloadParameterName) ||
+                        REPETITIVE_PARAMETER_NOTATION.equals(overloadParameterName))) {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                             "@ParameterOverload -> parameterNames {0} annotated in class {1} is not defined in " +
                             "@Extension -> @Parameter.", overloadParameterName, extensionClassFullName));

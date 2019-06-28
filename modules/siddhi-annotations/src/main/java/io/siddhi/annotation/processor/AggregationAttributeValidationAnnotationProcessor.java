@@ -39,7 +39,8 @@ public class AggregationAttributeValidationAnnotationProcessor extends AbstractA
             if (parameterName.isEmpty()) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
                         "-> name annotated in class {0} is null or empty.", extensionClassFullName));
-            } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+            } else if (!(PARAMETER_NAME_PATTERN.matcher(parameterName).find() ||
+                    REPETITIVE_PARAMETER_NOTATION.equals(parameterName))) {
                 //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
                                 "-> name:{0} annotated in class {1} is not in proper format ''abc.def.ghi''.",
