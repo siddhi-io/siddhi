@@ -140,7 +140,7 @@ Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.0.0/">5.0.0</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.0.1">5.0.1</a>.
 
 ## Contact us 
 * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 

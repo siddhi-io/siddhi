@@ -31,11 +31,12 @@ markdown_extensions:
     guess_lang: false
 - pymdownx.tasklist:
     custom_checkbox: true
-- markdown.extensions.attr_list:
+- markdown.extensions.attr_list: null
 pages:
 - Welcome to Siddhi: index.md
 - API Docs:
   - latest: api/latest.md
+  - 5.0.1: api/5.0.1.md
   - 5.0.0: api/5.0.0.md
   - 4.5.11: api/4.5.11.md
   - 4.5.10: api/4.5.10.md
