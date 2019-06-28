@@ -1,5 +1,8 @@
 # API Docs - v5.0.1-SNAPSHOT
 
+!!! Info "Tested Siddhi Core version: *<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/">5.0.1-SNAPSHOT</a>*"
+    It could also support other Siddhi Core minor versions.
+
 ## Core
 
 ### and *(<a target="_blank" href="http://siddhi.io/en/v5.0/docs/query-guide/#aggregate-function">Aggregate Function</a>)*
