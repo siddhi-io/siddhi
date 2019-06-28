@@ -37,7 +37,7 @@ import java.util.Map;
  * Custom store for testing of in memory cache for store tables.
  */
 @Extension(
-        name = "testWithCache",
+        name = "testStoreDummyForCache",
         namespace = "store",
         description = "Using this implementation a testing for store extension can be done.",
         examples = {

@@ -26,6 +26,7 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
@@ -33,14 +34,7 @@ import io.siddhi.core.util.collection.expression.AndMultiPrimaryKeyCollectionExp
 import io.siddhi.core.util.collection.expression.AttributeCollectionExpression;
 import io.siddhi.core.util.collection.expression.CollectionExpression;
 import io.siddhi.core.util.collection.expression.CompareCollectionExpression;
-import io.siddhi.core.util.collection.operator.CollectionOperator;
-import io.siddhi.core.util.collection.operator.EventChunkOperator;
-import io.siddhi.core.util.collection.operator.IndexOperator;
-import io.siddhi.core.util.collection.operator.MapOperator;
-import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import io.siddhi.core.util.collection.operator.Operator;
-import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
-import io.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
+import io.siddhi.core.util.collection.operator.*;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -67,7 +61,7 @@ public class OperatorParser {
                     expression, matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
             CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor(
                     collectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    true, ProcessingMode.BATCH, false, siddhiQueryContext);
+                    true, ProcessingMode.BATCH, false, siddhiQueryContext, false, null);
             if (collectionExpression instanceof CompareCollectionExpression &&
                     ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
                     (collectionExpression.getCollectionScope() == INDEXED_RESULT_SET ||
@@ -112,6 +106,42 @@ public class OperatorParser {
         } else {
             throw new OperationNotSupportedException(storeEvents.getClass() + " is not supported by OperatorParser!");
         }
+    }
+
+    public static Operator constructOperatorForCache(Object storeEvents, Expression expression,
+                                                     MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                                     List<VariableExpressionExecutor> variableExpressionExecutors,
+                                                     Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext,
+                                                     boolean updateCachePolicyAttribute, CacheTable cacheTable) {
+        if (storeEvents instanceof IndexedEventHolder && updateCachePolicyAttribute) {
+            CollectionExpression collectionExpression = CollectionExpressionParser.parseCollectionExpression(
+                    expression, matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
+            CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor(
+                    collectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                    true, ProcessingMode.BATCH, false, siddhiQueryContext, true, cacheTable);
+            if (collectionExpression instanceof CompareCollectionExpression &&
+                    ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
+                    (collectionExpression.getCollectionScope() == INDEXED_RESULT_SET ||
+                            collectionExpression.getCollectionScope() == PRIMARY_KEY_RESULT_SET) &&
+                    ((IndexedEventHolder) storeEvents).getPrimaryKeyReferenceHolders() != null &&
+                    ((IndexedEventHolder) storeEvents).getPrimaryKeyReferenceHolders().length == 1 &&
+                    ((IndexedEventHolder) storeEvents).getPrimaryKeyReferenceHolders()[0].getPrimaryKeyAttribute().
+                            equals(((AttributeCollectionExpression)
+                                    ((CompareCollectionExpression) collectionExpression)
+                                            .getAttributeCollectionExpression()).getAttribute())) {
+
+                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
+                        cacheTable);
+            } else if (collectionExpression instanceof AndMultiPrimaryKeyCollectionExpression &&
+                    collectionExpression.getCollectionScope() == PRIMARY_KEY_RESULT_SET) {
+                return new OverwriteTableIndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(),
+                        cacheTable);
+            } else {
+                return new IndexOperatorForCache(collectionExecutor, siddhiQueryContext.getName(), cacheTable);
+            }
+        }
+        return constructOperator(storeEvents, expression, matchingMetaInfoHolder, variableExpressionExecutors,
+                tableMap, siddhiQueryContext);
     }
 
     private static boolean isTableIndexVariable(MatchingMetaInfoHolder matchingMetaInfoHolder, Expression expression,

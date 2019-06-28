@@ -71,7 +71,7 @@ public class IndexTableTestCase {
                 "" +
                 "@info(name = 'query2') " +
                 "from CheckStockStream join StockTable " +
-                " on CheckStockStream.symbol==StockTable.symbol " +
+                " on CheckStockStream.volume==StockTable.volume AND CheckStockStream.symbol==StockTable.symbol " +
                 "select CheckStockStream.symbol, StockTable.volume " +
                 "insert into OutStream;";
 

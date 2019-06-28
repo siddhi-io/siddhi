@@ -56,11 +56,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * In-memory event table implementation of SiddhiQL.
  */
 public class InMemoryTable extends Table {
-
-    private TableDefinition tableDefinition;
-    private StreamEventCloner tableStreamEventCloner;
-    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private StateHolder<TableState> stateHolder;
+    StreamEventCloner tableStreamEventCloner;
+    ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    StateHolder<TableState> stateHolder;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
@@ -68,7 +66,7 @@ public class InMemoryTable extends Table {
                      RecordTableHandler recordTableHandler) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
-        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext);
+        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext, false);
 
         stateHolder = siddhiAppContext.generateStateHolder(tableDefinition.getId(),
                 () -> new TableState(eventHolder));
@@ -139,8 +137,9 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
-
     }
+
+
 
     @Override
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
@@ -152,7 +151,6 @@ public class InMemoryTable extends Table {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
-
     }
 
     @Override
@@ -213,12 +211,18 @@ public class InMemoryTable extends Table {
 
     }
 
-    class TableState extends State {
-
+    /**
+     * class to store the state of table
+     */
+    public class TableState extends State {
         private final EventHolder eventHolder;
 
         public TableState(EventHolder eventHolder) {
             this.eventHolder = eventHolder;
+        }
+        
+        public EventHolder getEventHolder() {
+            return eventHolder;
         }
 
         @Override

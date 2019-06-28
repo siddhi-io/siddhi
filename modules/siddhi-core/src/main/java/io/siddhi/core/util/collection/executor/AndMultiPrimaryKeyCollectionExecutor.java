@@ -23,6 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -34,15 +35,16 @@ import java.util.List;
  * Implementation of {@link CollectionExecutor}
  */
 public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor {
-
-
     private final String compositePrimaryKey;
     private final List<ExpressionExecutor> multiPrimaryKeyExpressionExecutors;
+    private CacheTable cacheTable;
 
     public AndMultiPrimaryKeyCollectionExecutor(String compositePrimaryKey,
-                                                List<ExpressionExecutor> multiPrimaryKeyExpressionExecutors) {
+                                                List<ExpressionExecutor> multiPrimaryKeyExpressionExecutors,
+                                                CacheTable cacheTable) {
         this.compositePrimaryKey = compositePrimaryKey;
         this.multiPrimaryKeyExpressionExecutors = multiPrimaryKeyExpressionExecutors;
+        this.cacheTable = cacheTable;
     }
 
     public StreamEvent find(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder, StreamEventCloner
@@ -55,6 +57,9 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
             return returnEventChunk.getFirst();
         } else {
             for (StreamEvent storeEvent : storeEventSet) {
+                if (cacheTable != null) {
+                    cacheTable.updateCachePolicyAttribute(storeEvent);
+                }
                 if (storeEventCloner != null) {
                     returnEventChunk.add(storeEventCloner.copyStreamEvent(storeEvent));
                 } else {
@@ -63,6 +68,10 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
             }
             return returnEventChunk.getFirst();
         }
+    }
+
+    public List<ExpressionExecutor> getMultiPrimaryKeyExpressionExecutors() {
+        return multiPrimaryKeyExpressionExecutors;
     }
 
     public Collection<StreamEvent> findEvents(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder) {
@@ -99,5 +108,9 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
             }
             return stringBuilder.toString();
         }
+    }
+
+    public String getCompositePrimaryKey() {
+        return compositePrimaryKey;
     }
 }

@@ -117,4 +117,5 @@ public class SumIncrementalAttributeAggregator extends IncrementalAttributeAggre
     public Attribute.Type getReturnType() {
         return returnType;
     }
+
 }

@@ -87,4 +87,14 @@ public class MetaStateEvent implements MetaComplexEvent {
         return outputStreamDefinition;
     }
 
+    public MetaStateEvent clone() {
+        MetaStateEvent metaStateEvent = new MetaStateEvent(this.getStreamEventCount());
+        for (MetaStreamEvent metaStreamEvent: this.getMetaStreamEvents()) {
+            metaStateEvent.addEvent(metaStreamEvent.clone());
+        }
+        if (this.getOutputStreamDefinition() != null) {
+            metaStateEvent.setOutputDefinition(this.getOutputStreamDefinition().clone());
+        }
+        return metaStateEvent;
+    }
 }

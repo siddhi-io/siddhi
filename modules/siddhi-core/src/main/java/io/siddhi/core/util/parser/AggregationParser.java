@@ -37,6 +37,7 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator;
 import io.siddhi.core.table.Table;
@@ -138,8 +139,8 @@ public class AggregationParser {
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, aggregatorName);
 
             StreamRuntime streamRuntime = InputStreamParser.parse(aggregationDefinition.getBasicSingleInputStream(),
-                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap, tableMap,
-                    windowMap, aggregationMap, incomingVariableExpressionExecutors, false,
+                    null, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap,
+                    tableMap, windowMap, aggregationMap, incomingVariableExpressionExecutors, false,
                     siddhiQueryContext);
 
             // Get original meta for later use.
@@ -336,8 +337,21 @@ public class AggregationParser {
                     isProcessingOnExternalTime, isDistributed);
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
-                    processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations, aggregationTables,
-                    siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
+                    processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
+                    aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
+
+            boolean isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+
+            List<String> groupByVariablesList = groupByVariableList.stream()
+                    .map(Variable::getAttributeName)
+                    .collect(Collectors.toList());
+
+            List<OutputAttribute> defaultSelectorList = new ArrayList<>();
+            if (isOptimisedLookup) {
+                defaultSelectorList = incomingOutputStreamDefinition.getAttributeList().stream()
+                        .map((attribute) -> new OutputAttribute(new Variable(attribute.getName())))
+                        .collect(Collectors.toList());
+            }
 
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
             incrementalDataPurger.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
@@ -375,9 +389,11 @@ public class AggregationParser {
 
             AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
                     isProcessingOnExternalTime, isDistributed, incrementalDurations, incrementalExecutorMap,
-                    aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind, shouldUpdateTimestamp,
-                    groupByKeyGeneratorMapForReading, incrementalDataPurger,
-                    incrementalExecutorsInitialiser, ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
+                    aggregationTables, outputExpressionExecutors, processExpressionExecutorsMapForFind,
+                    shouldUpdateTimestamp, groupByKeyGeneratorMapForReading, isOptimisedLookup, defaultSelectorList,
+                    groupByVariablesList, isLatestEventColAdded, baseAggregatorBeginIndex,
+                    finalBaseExpressions, incrementalDataPurger, incrementalExecutorsInitialiser,
+                    ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
                     latencyTrackerFind, throughputTrackerFind);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,

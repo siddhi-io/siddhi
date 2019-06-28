@@ -61,12 +61,12 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private static final Logger log = Logger.getLogger(IndexEventHolder.class);
     private static final long serialVersionUID = 1272291743721603253L;
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
-    private final Map<Object, StreamEvent> primaryKeyData;
-    private final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
+    protected final Map<Object, StreamEvent> primaryKeyData;
+    protected final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
     private final PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders;
     private final String tableName;
     private final String siddhiAppName;
-    private String primaryKeyAttributes = null;
+    protected String primaryKeyAttributes = null;
     private StreamEventFactory tableStreamEventFactory;
     private StreamEventConverter eventConverter;
     private Map<String, Integer> indexMetaData;
@@ -121,6 +121,10 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             indexData = null;
         }
 
+    }
+
+    public void replace(Object key, StreamEvent streamEvent) {
+        primaryKeyData.replace(key, streamEvent);
     }
 
     @Override
@@ -216,6 +220,10 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
+    protected void handleCachePolicyAttributeUpdate(StreamEvent streamEvent) {
+
+    }
+
     @Override
     public void overwrite(StreamEvent streamEvent) {
         if (isOperationLogEnabled) {
@@ -232,6 +240,9 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         if (primaryKeyData != null) {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
             deletedEvent = primaryKeyData.put(primaryKey, streamEvent);
+            if (deletedEvent != null) {
+                handleCachePolicyAttributeUpdate(streamEvent);
+            }
         }
 
         if (indexData != null) {
@@ -274,6 +285,14 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         } else {
             return new HashSet<StreamEvent>();
         }
+    }
+
+    public StreamEvent getEvent(Object key) {
+        return primaryKeyData.get(key);
+    }
+
+    public void deleteEvent(Object key) {
+        primaryKeyData.remove(key);
     }
 
     @Override

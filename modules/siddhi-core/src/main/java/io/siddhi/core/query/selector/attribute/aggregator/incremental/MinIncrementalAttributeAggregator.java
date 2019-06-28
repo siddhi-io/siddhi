@@ -106,4 +106,5 @@ public class MinIncrementalAttributeAggregator extends IncrementalAttributeAggre
     public Attribute.Type getReturnType() {
         return this.returnType;
     }
+
 }

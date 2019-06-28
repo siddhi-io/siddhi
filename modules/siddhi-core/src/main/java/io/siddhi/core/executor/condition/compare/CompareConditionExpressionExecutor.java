@@ -25,7 +25,6 @@ import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
  * Parent Executor class for Compare conditions. common evaluation logic is implemented within executor.
  */
 public abstract class CompareConditionExpressionExecutor extends ConditionExpressionExecutor {
-
     protected ExpressionExecutor leftExpressionExecutor;
     protected ExpressionExecutor rightExpressionExecutor;
 
@@ -44,4 +43,11 @@ public abstract class CompareConditionExpressionExecutor extends ConditionExpres
 
     protected abstract Boolean execute(Object left, Object right);
 
+    public ExpressionExecutor getLeftExpressionExecutor() {
+        return leftExpressionExecutor;
+    }
+
+    public ExpressionExecutor getRightExpressionExecutor() {
+        return rightExpressionExecutor;
+    }
 }
