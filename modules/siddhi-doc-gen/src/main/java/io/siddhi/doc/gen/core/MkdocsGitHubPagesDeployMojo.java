@@ -216,8 +216,6 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
                 Constants.API_SUB_DIRECTORY + File.separator + Constants.LATEST_FILE_NAME +
                 Constants.MARKDOWN_FILE_EXTENSION);
         try {
-            System.out.println("NVVVV " + newVersionFile.getAbsolutePath());
-            System.out.println("NVVVV222 " + latestLabelFile.getAbsolutePath());
             Files.copy(newVersionFile, latestLabelFile);
         } catch (IOException e) {
             getLog().warn("Failed to generate latest.md file", e);
