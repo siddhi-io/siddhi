@@ -19,10 +19,11 @@ For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and i
 ## Download 
 
 Download Siddhi Core Libraries;
+
 * Versions 5.x and above with group id `io.siddhi.*` from <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/">here</a>.
 * Versions 4.x and lower with group id `org.wso2.siddhi.*` from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.siddhi/">here</a>.
 
-Download <a target="_blank" href="https://siddhi.io/redirect/download.html">Siddhi Distributions</a> that can run as an embedded Java & Python library, as a micro service on bare metal, VM, & Docker, and natively in Kubernetes.
+<a target="_blank" href="https://siddhi.io/redirect/download.html">Download</a> Siddhi graphical and textual tooling, and Siddhi runtime distributions that can run as an embedded Java and Python library, as a micro service on bare metal, VM and Docker, and natively in Kubernetes. 
 
 ## Get Started!
 
