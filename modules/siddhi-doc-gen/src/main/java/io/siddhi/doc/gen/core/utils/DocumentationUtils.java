@@ -590,6 +590,7 @@ public class DocumentationUtils {
             }
             extensionMetaData.setName(extensionAnnotation.name());
             extensionMetaData.setDescription(extensionAnnotation.description());
+            extensionMetaData.setDeprecated(extensionAnnotation.deprecated());
 
             if (includeOrigin) {
                 Manifest manifest = getManifest(extensionClass);

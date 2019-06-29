@@ -49,26 +49,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>documentation-deploy</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>io.siddhi</groupId>
-                        <artifactId>siddhi-doc-gen</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>deploy-mkdocs-github-pages</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

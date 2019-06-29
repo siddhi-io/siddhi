@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
         description = "This window returns the latest events with the most frequently occurred value for " +
                 "a given attribute(s). Frequency calculation for this window processor is based on " +
                 "Misra-Gries counting algorithm.",
+        deprecated = true,
         parameters = {
                 @Parameter(name = "event.count",
                         description = "The number of most frequent events to be emitted to the stream.",

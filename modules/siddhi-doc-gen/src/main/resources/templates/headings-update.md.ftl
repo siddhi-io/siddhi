@@ -32,7 +32,7 @@ ${line}
 <#list metaData as namespace>
 <#list namespace.extensionMap as extensionType, extensionsList>
 <#list extensionsList as extension>
-* <a target="_blank" href="https://${repositoryOwner}.github.io/${extensionRepositoryName}/api/${latestDocumentationVersion}/#<@utils.getHTMLIDForHeading heading=(extension.name + "-" + extensionType)/>">${extension.name}</a> <@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/><br><div style="padding-left: 1em;"><p>${formatDescription(extension.description)}</p></div>
+* <a target="_blank" href="https://${repositoryOwner}.github.io/${extensionRepositoryName}/api/${latestDocumentationVersion}/#<@utils.getHTMLIDForHeading heading=(extension.name + "-" + extensionType)/>"><#if extension.depricated == true><s>${extension.name}</s><#else>${extension.name}</#if></a> <@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/><br><div style="padding-left: 1em;"><p>${formatDescription(extension.description)}</p></div>
 </#list>
 </#list>
 <#else>

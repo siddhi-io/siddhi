@@ -28,8 +28,12 @@
 
 <#list namespace.extensionMap as extensionType, extensionsList>
 <#list extensionsList as extension>
+<#if extension.depricated == true>
+### <s>${extension.name}</s> <@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>
+<p><i>Deprecated</i></p>
+<#else>
 ### ${extension.name} <@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>
-
+</#if>
 <p style="word-wrap: break-word">${formatDescription(extension.description)}</p>
 <#if extension.originName??>
 <p><i>Origin: ${extension.originName}:${extension.originVersion}</i></p>
