@@ -56,3 +56,4 @@ pages:
   - 4.1.0: api/4.1.0.md
   - 4.0.9: api/4.0.9.md
   - 4.0.0: api/4.0.0.md
+- License: license.md

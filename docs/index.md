@@ -10,6 +10,10 @@
 
 Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
 
+Siddhi can can run as an embedded Java and Python library, as a micro service on bare metal, VM, and Docker and natively in Kubernetes. 
+
+Siddhi provides web-based graphical and textual tooling for development.
+
 For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and it's features refer <a target="_blank" href="https://siddhi.io/redirect/docs.html">Siddhi Documentation</a>. 
 
 ## Overview 
@@ -23,7 +27,8 @@ Download Siddhi Core Libraries;
 * Versions 5.x and above with group id `io.siddhi.*` from <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/">here</a>.
 * Versions 4.x and lower with group id `org.wso2.siddhi.*` from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.siddhi/">here</a>.
 
-<a target="_blank" href="https://siddhi.io/redirect/download.html">Download</a> Siddhi graphical and textual tooling, and Siddhi runtime distributions that can run as an embedded Java and Python library, as a micro service on bare metal, VM and Docker, and natively in Kubernetes. 
+Download Siddhi tooling and runtime distributions <a target="_blank" href="https://siddhi.io/redirect/download.html">here</a>.
+
 
 ## Get Started!
 
