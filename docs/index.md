@@ -1,14 +1,17 @@
-**Siddhi** - Cloud Native Stream Processor
-===========================================
+Siddhi Core Libraries
+=====================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
-  [![GitHub (pre-)release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub (pre-)Release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
   [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
-  [![GitHub last commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
-  [![codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
+  [![GitHub Open Issues](https://img.shields.io/github/issues-raw/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
+  [![GitHub Last Commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
+  [![Codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 <a target="_blank" href="https://siddhi.io/">Siddhi</a> is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
+
+**Siddhi Core Libraries** contains the essential core libraries need for Siddhi execution such as [`siddhi-core`](https://github.com/siddhi-io/siddhi/tree/master/modules/siddhi-core), [`siddhi-query-api`](https://github.com/siddhi-io/siddhi/tree/master/modules/siddhi-query-api), [`siddhi-query-compiler`](https://github.com/siddhi-io/siddhi/tree/master/modules/siddhi-query-compiler), and [`siddhi-annotations`](https://github.com/siddhi-io/siddhi/tree/master/modules/siddhi-annotations).
 
 ## Overview 
 
