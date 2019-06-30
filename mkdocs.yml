@@ -1,17 +1,9 @@
-
-# Project information
 site_name: Siddhi Core Libraries
 site_description: Siddhi Core Libraries
-
-# Repository
 repo_name: Siddhi
 repo_url: https://github.com/siddhi-io/siddhi/
 edit_uri: https://github.com/siddhi-io/siddhi/blob/master/
-
-# Copyright
 copyright: Siddhi - Documentation
-
-# Configuration
 theme:
   name: material
   logo: images/siddhi-logo.svg
@@ -33,15 +25,11 @@ extra:
     link: https://twitter.com/siddhi_io
   - type: linkedin
     link: https://www.linkedin.com/groups/13553064
-
 google_analytics:
 - UA-103065-28
 - auto
-
-# Extensions
 markdown_extensions:
-  - markdown.extensions.admonition
-
+- markdown.extensions.admonition
 pages:
 - Introduction: index.md
 - API Docs:
