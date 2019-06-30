@@ -92,56 +92,31 @@ public class DocumentationUtils {
      * @param targetDirectoryPath The path of the target directory of the maven module containing extensions
      * @param logger              The maven plugin logger
      * @param includeOrigin
+     * @param loadFromAllJars
      * @return NamespaceMetaData namespace meta data list
      * @throws MojoFailureException   If this fails to access project dependencies
      * @throws MojoExecutionException If the classes directory from which classes are loaded is invalid
      */
     public static List<NamespaceMetaData> getExtensionMetaData(String targetDirectoryPath,
                                                                List<String> runtimeClasspathElements,
-                                                               Log logger, boolean includeOrigin)
+                                                               Log logger, boolean includeOrigin,
+                                                               boolean loadFromAllJars)
             throws MojoFailureException, MojoExecutionException {
-        List<NamespaceMetaData> namespaceMetaDataList = new ArrayList<NamespaceMetaData>();
-        File classesDirectory = new File(targetDirectoryPath);
+        List<NamespaceMetaData> namespaceMetaDataList = new ArrayList<>();
+        File targetDirectory = null;
         try {
-            List<File> jarFiles = new ArrayList<>();
-            listOfJarFiles(targetDirectoryPath, jarFiles);
-            // +1 to include the module's target/classes folder
-            int urlCount = runtimeClasspathElements.size() + jarFiles.size() + 1;
-            // Creating a list of URLs with all project dependencies
-            URL[] urls = new URL[urlCount];
-            int index = 0;
-            for (; index < runtimeClasspathElements.size(); index++) {
-                try {
-                    urls[index] = new File(runtimeClasspathElements.get(index)).toURI().toURL();
-                } catch (MalformedURLException e) {
-                    throw new MojoFailureException("Unable to access project dependency: "
-                            + runtimeClasspathElements.get(index), e);
-                }
-            }
-
-            for (int j = 0; index < urlCount - 1; index++, j++) {
-                try {
-                    urls[index] = jarFiles.get(j).toURI().toURL();
-                } catch (MalformedURLException e) {
-                    throw new MojoFailureException("Unable to access project dependency: "
-                            + runtimeClasspathElements.get(index), e);
-                }
-            }
-
-            // Adding the generated classes to the class loader
-            urls[urlCount - 1] = classesDirectory.toURI().toURL();
-            ClassLoader urlClassLoader = AccessController.doPrivileged(
-                    (PrivilegedAction<ClassLoader>) () -> new URLClassLoader(
-                            urls, Thread.currentThread().getContextClassLoader()
-                    )
-            );
-
-            Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, urlClassLoader);
-            for (Class extension : extensions) {
-                addExtensionMetaDataIntoNamespaceList(namespaceMetaDataList, extension, logger, includeOrigin);
+            if (loadFromAllJars) {
+                targetDirectory = new File(targetDirectoryPath);
+                addExtensionMetaFromAllFiles(targetDirectory, runtimeClasspathElements, logger, includeOrigin,
+                        namespaceMetaDataList);
+            } else {
+                targetDirectory = new File(targetDirectoryPath
+                        + File.separator + Constants.CLASSES_DIRECTORY);
+                addExtensionMetaFromClassFiles(targetDirectory, runtimeClasspathElements, logger, includeOrigin,
+                        namespaceMetaDataList);
             }
         } catch (MalformedURLException e) {
-            throw new MojoExecutionException("Invalid classes directory: " + classesDirectory.getAbsolutePath(), e);
+            throw new MojoExecutionException("Invalid classes directory: " + targetDirectory.getAbsolutePath(), e);
         }
         for (NamespaceMetaData aNamespaceMetaData : namespaceMetaDataList) {
             for (List<ExtensionMetaData> extensionMetaData : aNamespaceMetaData.getExtensionMap().values()) {
@@ -150,6 +125,80 @@ public class DocumentationUtils {
         }
         Collections.sort(namespaceMetaDataList);
         return namespaceMetaDataList;
+
+    }
+
+    private static void addExtensionMetaFromAllFiles(File targetDirectory, List<String> runtimeClasspathElements,
+                                                     Log logger, boolean includeOrigin,
+                                                     List<NamespaceMetaData> namespaceMetaDataList)
+            throws MojoFailureException, MalformedURLException {
+        List<File> jarFiles = new ArrayList<>();
+        listOfJarFiles(targetDirectory.getAbsolutePath(), jarFiles);
+        // +1 to include the module's target folder
+        int urlCount = runtimeClasspathElements.size() + jarFiles.size() + 1;
+        // Creating a list of URLs with all project dependencies
+        URL[] urls = new URL[urlCount];
+        int index = 0;
+        for (; index < runtimeClasspathElements.size(); index++) {
+            try {
+                urls[index] = new File(runtimeClasspathElements.get(index)).toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new MojoFailureException("Unable to access project dependency: "
+                        + runtimeClasspathElements.get(index), e);
+            }
+        }
+
+        for (int j = 0; index < urlCount - 1; index++, j++) {
+            try {
+                urls[index] = jarFiles.get(j).toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new MojoFailureException("Unable to access project dependency: "
+                        + runtimeClasspathElements.get(index), e);
+            }
+        }
+
+        // Adding the generated classes to the class loader
+        urls[urlCount - 1] = targetDirectory.toURI().toURL();
+        ClassLoader urlClassLoader = AccessController.doPrivileged(
+                (PrivilegedAction<ClassLoader>) () -> new URLClassLoader(
+                        urls, Thread.currentThread().getContextClassLoader()
+                )
+        );
+
+        Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, urlClassLoader);
+        for (Class extension : extensions) {
+            addExtensionMetaDataIntoNamespaceList(namespaceMetaDataList, extension, logger, includeOrigin);
+        }
+    }
+
+    private static void addExtensionMetaFromClassFiles(File targetDirectory, List<String> runtimeClasspathElements,
+                                                       Log logger, boolean includeOrigin,
+                                                       List<NamespaceMetaData> namespaceMetaDataList)
+            throws MojoFailureException, MalformedURLException {
+
+        int urlCount = runtimeClasspathElements.size() + 1;     // +1 to include the module's target/classes folder
+
+        // Creating a list of URLs with all project dependencies
+        URL[] urls = new URL[urlCount];
+        for (int i = 0; i < runtimeClasspathElements.size(); i++) {
+            try {
+                urls[i] = new File(runtimeClasspathElements.get(i)).toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new MojoFailureException("Unable to access project dependency: "
+                        + runtimeClasspathElements.get(i), e);
+            }
+        }
+
+        // Adding the generated classes to the class loader
+        urls[urlCount - 1] = targetDirectory.toURI().toURL();
+        ClassLoader urlClassLoader = AccessController.doPrivileged(
+                (PrivilegedAction<ClassLoader>) () -> new URLClassLoader(
+                        urls, Thread.currentThread().getContextClassLoader()
+                )
+        );
+        // Getting extensions from all the class files in the classes directory
+        addExtensionInDirectory(targetDirectory, targetDirectory.getAbsolutePath(), urlClassLoader,
+                namespaceMetaDataList, logger, includeOrigin);
     }
 
     private static Manifest getManifest(Class<?> clz) {
@@ -183,6 +232,71 @@ public class DocumentationUtils {
         }
     }
 
+    /**
+     * Search for class files in the directory and add extensions from them
+     * This method recursively searches the sub directories
+     *
+     * @param moduleTargetClassesDirectory The directory from which the extension metadata will be loaded
+     * @param classesDirectoryPath         The absolute path to the classes directory in the target folder in the module
+     * @param urlClassLoader               The url class loader which should be used for loading the classes
+     * @param namespaceMetaDataList        List of namespace meta data
+     * @param logger                       The maven logger
+     * @param includeOrigin
+     */
+    private static void addExtensionInDirectory(File moduleTargetClassesDirectory, String classesDirectoryPath,
+                                                ClassLoader urlClassLoader,
+                                                List<NamespaceMetaData> namespaceMetaDataList,
+                                                Log logger,
+                                                boolean includeOrigin) {
+        File[] innerFiles = moduleTargetClassesDirectory.listFiles();
+        if (innerFiles != null) {
+            for (File innerFile : innerFiles) {
+                if (innerFile.isDirectory()) {
+                    addExtensionInDirectory(innerFile, classesDirectoryPath, urlClassLoader, namespaceMetaDataList,
+                            logger, includeOrigin);
+                } else {
+                    addExtensionInFile(innerFile, classesDirectoryPath, urlClassLoader, namespaceMetaDataList,
+                            logger, includeOrigin);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add an extension annotation in a file
+     * This first checks if this is a class file and loads the class and adds the annotation if present
+     *
+     * @param file                  The file from which the extension metadata will be loaded
+     * @param classesDirectoryPath  The absolute path to the classes directory in the target folder in the module
+     * @param urlClassLoader        The url class loader which should be used for loading the classes
+     * @param namespaceMetaDataList List of namespace meta data
+     * @param logger                The maven logger
+     * @param includeOrigin
+     */
+    private static void addExtensionInFile(File file, String classesDirectoryPath, ClassLoader urlClassLoader,
+                                           List<NamespaceMetaData> namespaceMetaDataList, Log logger,
+                                           boolean includeOrigin) {
+        String filePath = file.getAbsolutePath();
+        if (filePath.endsWith(Constants.CLASS_FILE_EXTENSION) &&
+                filePath.length() > classesDirectoryPath.length()) {
+            String relativePathToClass = filePath.substring((classesDirectoryPath + File.separator).length());
+
+            try {
+                // Loading class
+                Class<?> extensionClass = Class.forName(
+                        relativePathToClass
+                                .substring(0, relativePathToClass.length() - Constants.CLASS_FILE_EXTENSION.length())
+                                .replace(File.separator, "."),
+                        false, urlClassLoader
+                );
+
+                // Generating metadata and adding the it to the list of relevant extensions
+                addExtensionMetaDataIntoNamespaceList(namespaceMetaDataList, extensionClass, logger, includeOrigin);
+            } catch (Throwable ignored) {
+                logger.warn("Ignoring the failed class loading from " + file.getAbsolutePath());
+            }
+        }
+    }
 
     /**
      * Generate documentation related files using metadata
@@ -205,24 +319,8 @@ public class DocumentationUtils {
         rootDataModel.put("formatDescription", new FormatDescriptionMethod());
         rootDataModel.put("latestDocumentationVersion", documentationVersion);
         rootDataModel.put("siddhiVersion", siddhiVersion);
-        String siddhiDocVersion;
-        if (siddhiVersion != null) {
-            siddhiDocVersion = siddhiVersion;
-        } else {
-            siddhiDocVersion = documentationVersion;
-        }
-        if (Integer.parseInt(siddhiDocVersion.substring(0, siddhiDocVersion.indexOf("."))) < 5) {
-            siddhiDocVersion = "v4.x";
-        } else {
-            siddhiDocVersion = "v" + siddhiDocVersion.substring(0, siddhiDocVersion.lastIndexOf("."));
-        }
-        rootDataModel.put("siddhiDocVersion", siddhiDocVersion);
-
-        if (mavenProjectGroupId.startsWith("io.siddhi")) {
-            rootDataModel.put("repositoryOwner", "siddhi-io");
-        } else {
-            rootDataModel.put("repositoryOwner", "wso2-extensions");
-        }
+        rootDataModel.put("siddhiDocVersion", findSiddhiDocVersion(siddhiVersion, documentationVersion));
+        rootDataModel.put("repositoryOwner", findRepositoryOwner(mavenProjectGroupId));
 
         String outputFileRelativePath = Constants.API_SUB_DIRECTORY + File.separator + documentationVersion
                 + Constants.MARKDOWN_FILE_EXTENSION;
@@ -234,6 +332,20 @@ public class DocumentationUtils {
         );
     }
 
+    private static Object findSiddhiDocVersion(String siddhiVersion, String documentationVersion) {
+        String siddhiDocVersion;
+        if (siddhiVersion != null) {
+            siddhiDocVersion = siddhiVersion;
+        } else {
+            siddhiDocVersion = documentationVersion;
+        }
+        if (Integer.parseInt(siddhiDocVersion.substring(0, siddhiDocVersion.indexOf("."))) < 5) {
+            return "v4.x";
+        } else {
+            return "v" + siddhiDocVersion.substring(0, siddhiDocVersion.lastIndexOf("."));
+        }
+    }
+
     /**
      * Update the documentation home page
      *
@@ -243,13 +355,14 @@ public class DocumentationUtils {
      * @param latestDocumentationVersion The version of the latest documentation generated
      * @param namespaceMetaDataList      Metadata in this repository
      * @param groupId
+     * @param siddhiVersion
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
     public static void updateHeadingsInMarkdownFile(File inputFile, File outputFile,
                                                     String extensionRepositoryName,
                                                     String latestDocumentationVersion,
                                                     List<NamespaceMetaData> namespaceMetaDataList,
-                                                    String groupId)
+                                                    String groupId, String siddhiVersion)
             throws MojoFailureException {
         // Retrieving the content of the README.md file
         List<String> inputFileLines = new ArrayList<>();
@@ -265,16 +378,21 @@ public class DocumentationUtils {
         rootDataModel.put("latestDocumentationVersion", latestDocumentationVersion);
         rootDataModel.put("metaData", namespaceMetaDataList);
         rootDataModel.put("formatDescription", new FormatDescriptionMethod());
-        if (groupId.startsWith("io.siddhi")) {
-            rootDataModel.put("repositoryOwner", "siddhi-io");
-        } else {
-            rootDataModel.put("repositoryOwner", "wso2-extensions");
-        }
+        rootDataModel.put("siddhiDocVersion", findSiddhiDocVersion(siddhiVersion, latestDocumentationVersion));
+        rootDataModel.put("repositoryOwner", findRepositoryOwner(groupId));
         generateFileFromTemplate(
                 Constants.MARKDOWN_HEADINGS_UPDATE_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION
                         + Constants.FREEMARKER_TEMPLATE_FILE_EXTENSION,
                 rootDataModel, outputFile.getParent(), outputFile.getName()
         );
+    }
+
+    private static String findRepositoryOwner(String groupId) {
+        if (groupId.startsWith("io.siddhi")) {
+            return "siddhi-io";
+        } else {
+            return "wso2-extensions";
+        }
     }
 
     /**

@@ -116,6 +116,12 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
     @Parameter(property = "doc.gen.deploy.docs", defaultValue = "true")
     private boolean deployDocs;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(property = "doc.gen.load.from.all.jars", defaultValue = "false")
+    private boolean loadFromAllJars;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -176,7 +182,7 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
                     moduleTargetPath,
                     mavenProject.getRuntimeClasspathElements(),
                     getLog(),
-                    includeOrigin);
+                    includeOrigin, loadFromAllJars);
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoFailureException("Unable to resolve dependencies of the project", e);
         }
@@ -204,9 +210,9 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
         if (namespaceMetaDataList.size() > 0) {
             DocumentationUtils.updateHeadingsInMarkdownFile(homePageTemplateFile, homePageFile,
                     rootMavenProject.getArtifactId(), latestVersion, namespaceMetaDataList,
-                    rootMavenProject.getGroupId());
+                    rootMavenProject.getGroupId(), siddhiVersion);
             DocumentationUtils.updateHeadingsInMarkdownFile(readmeFile, readmeFile, rootMavenProject.getArtifactId(),
-                    latestVersion, namespaceMetaDataList, rootMavenProject.getGroupId());
+                    latestVersion, namespaceMetaDataList, rootMavenProject.getGroupId(), siddhiVersion);
         }
 
         //copy to latest file

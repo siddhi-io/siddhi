@@ -84,6 +84,13 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
     @Parameter(defaultValue = "${siddhi.version}", readonly = true)
     private String siddhiVersion;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(property = "doc.gen.load.from.all.jars", defaultValue = "false")
+    private boolean loadFromAllJars;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -120,8 +127,8 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
         List<NamespaceMetaData> namespaceMetaDataList;
         try {
             namespaceMetaDataList = DocumentationUtils.getExtensionMetaData(
-                    moduleTargetPath, mavenProject.getRuntimeClasspathElements(), getLog(), includeOrigin
-            );
+                    moduleTargetPath, mavenProject.getRuntimeClasspathElements(), getLog(), includeOrigin,
+                    loadFromAllJars);
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoFailureException("Unable to resolve dependencies of the project", e);
         }
