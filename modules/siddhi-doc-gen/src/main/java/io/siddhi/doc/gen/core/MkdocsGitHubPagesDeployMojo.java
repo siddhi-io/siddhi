@@ -113,7 +113,7 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
      * Deploy Docs
      * Optional
      */
-    @Parameter(property = "doc.gen.deploy.docs")
+    @Parameter(property = "doc.gen.deploy.docs", defaultValue = "true")
     private boolean deployDocs;
 
 
@@ -203,9 +203,10 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
         // Generating the documentation
         if (namespaceMetaDataList.size() > 0) {
             DocumentationUtils.updateHeadingsInMarkdownFile(homePageTemplateFile, homePageFile,
-                    rootMavenProject.getArtifactId(), latestVersion, namespaceMetaDataList);
+                    rootMavenProject.getArtifactId(), latestVersion, namespaceMetaDataList,
+                    rootMavenProject.getGroupId());
             DocumentationUtils.updateHeadingsInMarkdownFile(readmeFile, readmeFile, rootMavenProject.getArtifactId(),
-                    latestVersion, namespaceMetaDataList);
+                    latestVersion, namespaceMetaDataList, rootMavenProject.getGroupId());
         }
 
         //copy to latest file

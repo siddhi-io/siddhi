@@ -86,6 +86,7 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+
         // Finding the root maven project
         MavenProject rootMavenProject = mavenProject;
         while (rootMavenProject.getParent() != null &&

@@ -242,12 +242,14 @@ public class DocumentationUtils {
      * @param extensionRepositoryName    The name of  the extension repository
      * @param latestDocumentationVersion The version of the latest documentation generated
      * @param namespaceMetaDataList      Metadata in this repository
+     * @param groupId
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
     public static void updateHeadingsInMarkdownFile(File inputFile, File outputFile,
                                                     String extensionRepositoryName,
                                                     String latestDocumentationVersion,
-                                                    List<NamespaceMetaData> namespaceMetaDataList)
+                                                    List<NamespaceMetaData> namespaceMetaDataList,
+                                                    String groupId)
             throws MojoFailureException {
         // Retrieving the content of the README.md file
         List<String> inputFileLines = new ArrayList<>();
@@ -263,7 +265,11 @@ public class DocumentationUtils {
         rootDataModel.put("latestDocumentationVersion", latestDocumentationVersion);
         rootDataModel.put("metaData", namespaceMetaDataList);
         rootDataModel.put("formatDescription", new FormatDescriptionMethod());
-
+        if (groupId.startsWith("io.siddhi")) {
+            rootDataModel.put("repositoryOwner", "siddhi-io");
+        } else {
+            rootDataModel.put("repositoryOwner", "wso2-extensions");
+        }
         generateFileFromTemplate(
                 Constants.MARKDOWN_HEADINGS_UPDATE_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION
                         + Constants.FREEMARKER_TEMPLATE_FILE_EXTENSION,

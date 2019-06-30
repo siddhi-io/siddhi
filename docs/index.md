@@ -29,7 +29,6 @@ Download Siddhi Core Libraries;
 
 Download Siddhi tooling and runtime distributions <a target="_blank" href="https://siddhi.io/redirect/download.html">here</a>.
 
-
 ## Get Started!
 
 Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi.io/redirect/quick-start.html">Siddhi Quick Start Guide</a>. 
