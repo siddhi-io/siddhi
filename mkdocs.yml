@@ -1,39 +1,37 @@
-site_name: Siddhi
-site_description: Cloud Native Stream Processor
-site_author: WSO2
-site_url: http://siddhi.io
-extra_css:
-- stylesheets/extra.css
+site_name: Siddhi Core Libraries
+site_description: Siddhi Core Libraries
 repo_name: Siddhi
-repo_url: https://github.com/siddhi-io/siddhi
-copyright: Copyright &copy; 2011 - 2019 WSO2
+repo_url: https://github.com/siddhi-io/siddhi/
+edit_uri: https://github.com/siddhi-io/siddhi/blob/master/
+copyright: Siddhi - Documentation
 theme:
   name: material
-  logo: images/siddhi-logo-w.svg
+  logo: images/siddhi-logo.svg
   favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
+extra_css:
+- assets/stylesheets/extra.css
+extra_javascript:
+- assets/javascripts/extra.js
 extra:
   social:
   - type: github
     link: https://github.com/siddhi-io/siddhi
+  - type: medium
+    link: https://medium.com/siddhi-io
+  - type: twitter
+    link: https://twitter.com/siddhi_io
   - type: linkedin
     link: https://www.linkedin.com/groups/13553064
 google_analytics:
 - UA-103065-28
 - auto
 markdown_extensions:
-- admonition
-- toc:
-    permalink: true
-- codehilite:
-    guess_lang: false
-- pymdownx.tasklist:
-    custom_checkbox: true
-- markdown.extensions.attr_list: null
+- markdown.extensions.admonition
 pages:
-- Welcome to Siddhi: index.md
+- Introduction: index.md
 - API Docs:
   - latest: api/latest.md
   - 5.0.1: api/5.0.1.md
@@ -55,3 +53,4 @@ pages:
   - 4.1.0: api/4.1.0.md
   - 4.0.9: api/4.0.9.md
   - 4.0.0: api/4.0.0.md
+- License: license.md

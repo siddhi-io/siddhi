@@ -77,10 +77,28 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
     @Parameter(property = "doc.gen.base.directory")
     private boolean includeOrigin;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(defaultValue = "${siddhi.version}", readonly = true)
+    private String siddhiVersion;
+
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(property = "doc.gen.load.from.all.jars", defaultValue = "false")
+    private boolean loadFromAllJars;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+
         // Finding the root maven project
         MavenProject rootMavenProject = mavenProject;
+        if (loadFromAllJars) {
+            siddhiVersion = null;
+        }
         while (rootMavenProject.getParent() != null &&
                 rootMavenProject.getParent().getBasedir() != null) {
             rootMavenProject = rootMavenProject.getParent();
@@ -112,16 +130,17 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
         List<NamespaceMetaData> namespaceMetaDataList;
         try {
             namespaceMetaDataList = DocumentationUtils.getExtensionMetaData(
-                    moduleTargetPath, mavenProject.getRuntimeClasspathElements(), getLog(), includeOrigin
-            );
+                    moduleTargetPath, mavenProject.getRuntimeClasspathElements(), getLog(), includeOrigin,
+                    loadFromAllJars);
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoFailureException("Unable to resolve dependencies of the project", e);
         }
 
         // Generating the documentation
         if (namespaceMetaDataList.size() > 0) {
-            DocumentationUtils.generateDocumentation(namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(),
-                    getLog());
+            DocumentationUtils.generateDocumentation(
+                    namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(), getLog(),
+                    siddhiVersion, mavenProject.getGroupId());
         }
     }
 }

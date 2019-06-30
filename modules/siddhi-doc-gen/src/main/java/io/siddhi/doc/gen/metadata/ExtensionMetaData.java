@@ -26,6 +26,7 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
     private String name;
     private String namespace;
     private String description;
+    private boolean deprecated;
     private String originName;
     private String originVersion;
     private List<ParameterMetaData> parameters;
@@ -56,6 +57,14 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
+    public boolean isDeprecated() {
+        return deprecated;
     }
 
     public List<ParameterMetaData> getParameters() {
@@ -125,6 +134,9 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
 
         ExtensionMetaData that = (ExtensionMetaData) o;
 
+        if (deprecated != that.deprecated) {
+            return false;
+        }
         if (name != null ? !name.equals(that.name) : that.name != null) {
             return false;
         }
@@ -167,6 +179,7 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
         result = 31 * result + (systemParameters != null ? systemParameters.hashCode() : 0);
         result = 31 * result + (returnAttributes != null ? returnAttributes.hashCode() : 0);
         result = 31 * result + (examples != null ? examples.hashCode() : 0);
+        result = 31 * result + (deprecated ? 1 : 0);
         return result;
     }
 

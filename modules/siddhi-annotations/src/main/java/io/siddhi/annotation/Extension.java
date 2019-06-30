@@ -60,6 +60,8 @@ public @interface Extension {
 
     String description() default "";
 
+    boolean deprecated() default false;
+
     Parameter[] parameters() default {};
 
     ParameterOverload[] parameterOverloads() default {};

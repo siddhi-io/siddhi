@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
         namespace = "",
         description = "This window identifies and returns all the events of which the current frequency exceeds " +
                 "the value specified for the supportThreshold parameter.",
+        deprecated = true,
         parameters = {
                 @Parameter(name = "support.threshold",
                         description = "The support threshold value.",
