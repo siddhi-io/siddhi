@@ -21,8 +21,8 @@
 <#if siddhiVersion??>
 !!! Info "Tested Siddhi Core version: *<a target="_blank" href="${CONSTANTS.FREEMARKER_SIDDHI_HOME_PAGE}/en/${siddhiDocVersion}/docs/query-guide/">${siddhiVersion}</a>*"
     It could also support other Siddhi Core minor versions.
-</#if>
 
+</#if>
 <#list metaData as namespace>
 ## ${namespace.name?capitalize}
 

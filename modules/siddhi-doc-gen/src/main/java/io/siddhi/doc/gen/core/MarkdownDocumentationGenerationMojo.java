@@ -96,6 +96,9 @@ public class MarkdownDocumentationGenerationMojo extends AbstractMojo {
 
         // Finding the root maven project
         MavenProject rootMavenProject = mavenProject;
+        if (loadFromAllJars) {
+            siddhiVersion = null;
+        }
         while (rootMavenProject.getParent() != null &&
                 rootMavenProject.getParent().getBasedir() != null) {
             rootMavenProject = rootMavenProject.getParent();
