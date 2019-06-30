@@ -30,8 +30,6 @@ import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
-import io.siddhi.doc.gen.extensions.ExtensionDocCache;
-import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
@@ -65,8 +63,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -196,11 +192,12 @@ public class DocumentationUtils {
      * @param documentationVersion       The version of the documentation being generated
      * @param logger                     The logger to log errors
      * @param siddhiVersion              Siddhi Core version
+     * @param mavenProjectGroupId        Project Group ID
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
     public static void generateDocumentation(List<NamespaceMetaData> namespaceMetaDataList,
                                              String documentationBaseDirectory, String documentationVersion,
-                                             Log logger, String siddhiVersion)
+                                             Log logger, String siddhiVersion, String mavenProjectGroupId)
             throws MojoFailureException {
         // Generating data model
         Map<String, Object> rootDataModel = new HashMap<>();
@@ -220,6 +217,12 @@ public class DocumentationUtils {
             siddhiDocVersion = "v" + siddhiDocVersion.substring(0, siddhiDocVersion.lastIndexOf("."));
         }
         rootDataModel.put("siddhiDocVersion", siddhiDocVersion);
+
+        if (mavenProjectGroupId.startsWith("io.siddhi")) {
+            rootDataModel.put("repositoryOwner", "siddhi-io");
+        } else {
+            rootDataModel.put("repositoryOwner", "wso2-extensions");
+        }
 
         String outputFileRelativePath = Constants.API_SUB_DIRECTORY + File.separator + documentationVersion
                 + Constants.MARKDOWN_FILE_EXTENSION;

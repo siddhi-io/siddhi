@@ -19,6 +19,8 @@
 
 <#macro renderLinkToExtensionTypeDoc extensionType>*(<a target="_blank" href="${CONSTANTS.FREEMARKER_SIDDHI_HOME_PAGE}/en/${siddhiDocVersion}/docs/query-guide/#<@getHTMLIDForHeading heading=extensionType/>">${extensionType}</a>)*</#macro>
 
+<#macro renderLinkToExtensionTypeDocWB extensionType>*<a target="_blank" href="${CONSTANTS.FREEMARKER_SIDDHI_HOME_PAGE}/en/${siddhiDocVersion}/docs/query-guide/#<@getHTMLIDForHeading heading=extensionType/>">(${extensionType})</a>*</#macro>
+
 <#macro renderHeadingOneWithStylesOnly heading><span id="<@getHTMLIDForHeading heading=heading/>" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 31.25px; font-weight: 300; margin: 0 0 40px 0">${heading}</span></#macro>
 
 <#macro renderHeadingTwoWithStylesOnly heading><span id="<@getHTMLIDForHeading heading=heading/>" class="md-typeset" style="display: block; font-size: 25px; font-weight: 300; margin: 40px 0 16px 0">${heading}</span></#macro>
