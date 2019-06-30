@@ -8,17 +8,17 @@
   [![codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Siddhi is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
+<a target="_blank" href="https://siddhi.io/">Siddhi</a> is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
+
+## Overview 
+
+![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
 Siddhi can can run as an embedded Java and Python library, as a micro service on bare metal, VM, and Docker and natively in Kubernetes. 
 
 Siddhi provides web-based graphical and textual tooling for development.
 
 For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and it's features refer <a target="_blank" href="https://siddhi.io/redirect/docs.html">Siddhi Documentation</a>. 
-
-## Overview 
-
-![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
 ## Download 
 
