@@ -64,6 +64,8 @@ import java.util.concurrent.ConcurrentHashMap;
                         type = {DataType.DOUBLE}),
                 @Parameter(name = "error.bound",
                         description = "The error bound value.",
+                        optional = true,
+                        defaultValue = "`support.threshold`/10",
                         type = {DataType.DOUBLE}),
                 @Parameter(name = "attribute",
                         description = "The attributes to group the events. If no attributes are given, " +

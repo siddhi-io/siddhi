@@ -77,9 +77,8 @@ public class InputParameterValidator {
         for (ParameterOverload aParameterOverload : parameterOverloads) {
             String[] overloadParameterNames = aParameterOverload.parameterNames();
             if (overloadParameterNames.length == attributeExpressionExecutors.length &&
-                    ((overloadParameterNames.length == 0) || (overloadParameterNames.length > 0)
-                            && !(overloadParameterNames[overloadParameterNames.length - 1].
-                            equals(REPETITIVE_PARAMETER_NOTATION)))) {
+                    (overloadParameterNames.length == 0 || !overloadParameterNames[overloadParameterNames.length - 1].
+                            equals(REPETITIVE_PARAMETER_NOTATION))) {
                 boolean isExpectedParameterOverload = true;
                 for (int i = 0; i < overloadParameterNames.length; i++) {
                     String overloadParameterName = overloadParameterNames[i];

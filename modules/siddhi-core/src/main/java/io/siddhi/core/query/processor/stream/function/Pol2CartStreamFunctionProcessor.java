@@ -59,7 +59,6 @@ import java.util.List;
                         defaultValue = "If z value is not given, drop the third parameter of the output.")
         },
         parameterOverloads = {
-                @ParameterOverload(),
                 @ParameterOverload(parameterNames = {"theta", "rho"}),
                 @ParameterOverload(parameterNames = {"theta", "rho", "z"})
         },
