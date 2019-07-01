@@ -26,7 +26,10 @@ import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -134,8 +137,12 @@ public class AbstractAnnotationProcessor {
             throws AnnotationValidationException {
 
         Map<String, Parameter> parameterMap = new HashMap<>();
+        Set<String> mandatoryParameterSet = new HashSet<>();
         for (Parameter parameter : parameters) {
             parameterMap.put(parameter.name(), parameter);
+            if (!parameter.optional()) {
+                mandatoryParameterSet.add(parameter.name());
+            }
         }
 
         for (ParameterOverload parameterOverload : parameterOverloads) {
@@ -159,6 +166,33 @@ public class AbstractAnnotationProcessor {
                             "@ParameterOverload -> parameterNames {0} annotated in class {1} is not defined in " +
                             "@Extension -> @Parameter.", overloadParameterName, extensionClassFullName));
                 }
+            }
+        }
+
+        if (parameterOverloads.length > 0) {
+            Set<String> mandatoryParameterSetViaOverload = new HashSet<>(parameterMap.keySet());
+            for (Iterator<String> iterator = mandatoryParameterSetViaOverload.iterator(); iterator.hasNext(); ) {
+                String parameter = iterator.next();
+                for (ParameterOverload parameterOverload : parameterOverloads) {
+                    boolean contains = false;
+                    for (String parameterName : parameterOverload.parameterNames()) {
+                        if (parameter.equalsIgnoreCase(parameterName)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+            }
+
+            if (!mandatoryParameterSetViaOverload.equals(mandatoryParameterSet)) {
+                throw new AnnotationValidationException("Mandatory parameter information in ParameterOverload " +
+                        "and based on 'optional' annotation is a mismatch. The parameters '" +
+                        mandatoryParameterSetViaOverload + "' always appearing in ParameterOverload, but '" +
+                        mandatoryParameterSet + "' are defined as not 'optional' in the annotations.");
             }
         }
     }
