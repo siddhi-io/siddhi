@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.doc.gen.commons.metadata;
+package org.wso2.siddhi.doc.gen.metadata;
 
 import java.util.List;
 
@@ -26,6 +26,8 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
     private String name;
     private String namespace;
     private String description;
+    private String originName;
+    private String originVersion;
     private List<ParameterMetaData> parameters;
     private List<SystemParameterMetaData> systemParameters;
     private List<ReturnAttributeMetaData> returnAttributes;
@@ -87,12 +89,28 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
         this.examples = examples;
     }
 
+    public String getOriginName() {
+        return originName;
+    }
+
+    public void setOriginName(String originName) {
+        this.originName = originName;
+    }
+
+    public String getOriginVersion() {
+        return originVersion;
+    }
+
+    public void setOriginVersion(String originVersion) {
+        this.originVersion = originVersion;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ExtensionMetaData)) {
             return false;
         }
 
@@ -107,15 +125,21 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
         if (description != null ? !description.equals(that.description) : that.description != null) {
             return false;
         }
+        if (originName != null ? !originName.equals(that.originName) : that.originName != null) {
+            return false;
+        }
+        if (originVersion != null ? !originVersion.equals(that.originVersion) : that.originVersion != null) {
+            return false;
+        }
         if (parameters != null ? !parameters.equals(that.parameters) : that.parameters != null) {
             return false;
         }
-        if (systemParameters != null ? !systemParameters.equals(that.systemParameters) :
-                that.systemParameters != null) {
+        if (systemParameters != null ? !systemParameters.equals(that.systemParameters)
+                : that.systemParameters != null) {
             return false;
         }
-        if (returnAttributes != null ? !returnAttributes.equals(that.returnAttributes) :
-                that.returnAttributes != null) {
+        if (returnAttributes != null ? !returnAttributes.equals(that.returnAttributes)
+                : that.returnAttributes != null) {
             return false;
         }
         return examples != null ? examples.equals(that.examples) : that.examples == null;
@@ -126,6 +150,8 @@ public class ExtensionMetaData implements Comparable<ExtensionMetaData> {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (namespace != null ? namespace.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (originName != null ? originName.hashCode() : 0);
+        result = 31 * result + (originVersion != null ? originVersion.hashCode() : 0);
         result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
         result = 31 * result + (systemParameters != null ? systemParameters.hashCode() : 0);
         result = 31 * result + (returnAttributes != null ? returnAttributes.hashCode() : 0);

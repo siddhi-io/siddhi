@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.doc.gen.commons.metadata;
+package org.wso2.siddhi.doc.gen.metadata;
 
 import java.util.Iterator;
 import java.util.List;
@@ -100,5 +100,12 @@ public class NamespaceMetaData implements Comparable<NamespaceMetaData> {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "NamespaceMetaData{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }
