@@ -18,16 +18,22 @@
 <#import "utils.ftl" as utils>
 # API Docs - v${latestDocumentationVersion}
 
+<#if siddhiVersion??>
+!!! Info "Tested Siddhi Core version: *<a target="_blank" href="${CONSTANTS.FREEMARKER_SIDDHI_HOME_PAGE}/en/${siddhiDocVersion}/docs/query-guide/">${siddhiVersion}</a>*"
+    It could also support other Siddhi Core minor versions.
+
+</#if>
 <#list metaData as namespace>
 ## ${namespace.name?capitalize}
 
 <#list namespace.extensionMap as extensionType, extensionsList>
 <#list extensionsList as extension>
-### ${extension.name} *<@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>*
+### ${extension.name} *<@utils.renderLinkToExtensionTypeDocWB extensionType=extensionType/>*
 
 <p style="word-wrap: break-word">${formatDescription(extension.description)}</p>
 
 <@utils.renderHeadingFourWithStylesOnly heading="Syntax"/>
+
 
 <#if [EXTENSION_TYPE.FUNCTION, EXTENSION_TYPE.ATTRIBUTE_AGGREGATOR]?seq_index_of(extensionType) != -1>
 ```

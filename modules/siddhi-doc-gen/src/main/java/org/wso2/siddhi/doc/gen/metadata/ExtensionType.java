@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.doc.gen.commons.metadata;
+package org.wso2.siddhi.doc.gen.metadata;
 
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 import org.wso2.siddhi.core.function.Script;
@@ -34,10 +34,10 @@ import java.util.Map;
 
 /**
  * Enum for holding extension types supported by the doc generator and the free marker templates
- *
+ * <p>
  * The enum values should be changed to match the names used in the documentation
  * The enum values will affect the names used in the documentation as well as the hyperlinks
- *
+ * <p>
  * These enum values will be passed onto the freemarker templates as a map
  * The other members of the enum class will not be accessible from the freemarker templates
  * These can be accesses using the EXTENSION_TYPE variable
@@ -55,11 +55,6 @@ public enum ExtensionType {
     SINK_MAPPER("Sink Mapper"),
     STORE("Store"),
     SCRIPT("Script");
-
-    /**
-     * Contains the name to be displayed as the extension type
-     */
-    private final String value;
 
     /**
      * The map from extension class type to super class
@@ -82,15 +77,20 @@ public enum ExtensionType {
         superClassMap.put(ExtensionType.SCRIPT, Script.class);
     }
 
+    /**
+     * Contains the name to be displayed as the extension type
+     */
+    private final String value;
+
     ExtensionType(String value) {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public static Map<ExtensionType, Class<?>> getSuperClassMap() {
         return superClassMap;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
