@@ -265,6 +265,7 @@ public class JoinInputStreamParser {
                                 leftMatchingMetaInfoHolder.getStoreEventIndex()).getInputReferenceId();
                         metaStoreEvent.setInputReferenceId(tableReference);
                         StreamDefinition streamDefinition =  new StreamDefinition();
+                        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(0).getLastInputDefinition().getId());
                         metaStateEvent.getMetaStreamEvent(0).getLastInputDefinition().getAttributeList()
                                 .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
                         metaStoreEvent.addInputDefinition(streamDefinition);
@@ -301,6 +302,7 @@ public class JoinInputStreamParser {
                             siddhiQueryContext
                     );
 
+                    //Update meta store event
                     if (leftCompiledSelection != null) {
                         MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
                         expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
@@ -308,6 +310,7 @@ public class JoinInputStreamParser {
                                 rightMatchingMetaInfoHolder.getStoreEventIndex()).getInputReferenceId();
                         metaStoreEvent.setInputReferenceId(tableReference);
                         StreamDefinition streamDefinition =  new StreamDefinition();
+                        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(1).getLastInputDefinition().getId());
                         metaStateEvent.getMetaStreamEvent(1).getLastInputDefinition().getAttributeList()
                                 .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
                         metaStoreEvent.addInputDefinition(streamDefinition);
