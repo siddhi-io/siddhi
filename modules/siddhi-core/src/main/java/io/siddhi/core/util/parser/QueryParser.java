@@ -138,19 +138,6 @@ public class QueryParser {
                     query.getSelector(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
-
-            boolean isOptimisedLookup = false;
-            MetaStateEvent newMetaComplexEventAfterOptimisation = null;
-
-            Processor processorChain = streamRuntime.getSingleStreamRuntimes().get(0).getProcessorChain();
-            if (processorChain instanceof JoinProcessor &&
-                            !(((JoinProcessor) processorChain).getCompiledCondition() instanceof IncrementalAggregateCompileCondition)) {
-                // Only for table joins
-                isOptimisedLookup = ((JoinProcessor) processorChain).isOptimisedLookup();
-                newMetaComplexEventAfterOptimisation = (
-                                    (JoinProcessor) processorChain).getMetaStateEventForOptimisedLookup();
-            }
-
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent(), tableMap, executors,
                     SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
@@ -242,22 +229,8 @@ public class QueryParser {
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
-
-            MetaComplexEvent querySelectorMetaComplexEvent;
-            if (isOptimisedLookup) {
-
-                for (MetaStateEventAttribute attribute :
-                                ((MetaStateEvent) streamRuntime.getMetaComplexEvent()).getOutputDataAttributes()) {
-                    newMetaComplexEventAfterOptimisation.addOutputDataAllowingDuplicate(attribute);
-                }
-                QueryParserHelper.updateVariablePosition(newMetaComplexEventAfterOptimisation, executors);
-                querySelectorMetaComplexEvent = newMetaComplexEventAfterOptimisation;
-
-            } else {
-                querySelectorMetaComplexEvent = streamRuntime.getMetaComplexEvent();
-            }
-
-            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(querySelectorMetaComplexEvent));
+            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
+                    .getMetaComplexEvent()));
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 

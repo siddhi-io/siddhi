@@ -19,7 +19,6 @@ package io.siddhi.core.query.input.stream.join;
 
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -52,8 +51,6 @@ public class JoinProcessor implements Processor {
     private FindableProcessor findableProcessor;
     private Processor nextProcessor;
     private QuerySelector selector;
-    private boolean isOptimisedLookup;
-    private MetaStateEvent metaStateEventForOptimisedLookup;
 
     public JoinProcessor(boolean leftJoinProcessor, boolean preJoinProcessor, boolean outerJoinProcessor,
                          int matchingStreamIndex) {
@@ -61,7 +58,6 @@ public class JoinProcessor implements Processor {
         this.preJoinProcessor = preJoinProcessor;
         this.outerJoinProcessor = outerJoinProcessor;
         this.matchingStreamIndex = matchingStreamIndex;
-        this.isOptimisedLookup = false;
     }
 
     /**
@@ -154,24 +150,11 @@ public class JoinProcessor implements Processor {
     }
 
     public void setCompiledSelection(CompiledSelection compiledSelection) {
-        this.isOptimisedLookup = true;
         this.compiledSelection = compiledSelection;
     }
 
     public void setExpectedOutputAttributes(List<Attribute> expectedOutputAttributes) {
         this.expectedOutputAttributes = expectedOutputAttributes.toArray(new Attribute[0]);
-    }
-
-    public boolean isOptimisedLookup() {
-        return isOptimisedLookup;
-    }
-
-    public MetaStateEvent getMetaStateEventForOptimisedLookup() {
-        return metaStateEventForOptimisedLookup;
-    }
-
-    public void setMetaStateEventForOptimisedLookup(MetaStateEvent metaStateEventForOptimisedLookup) {
-        this.metaStateEventForOptimisedLookup = metaStateEventForOptimisedLookup;
     }
 
     /**
