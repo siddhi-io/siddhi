@@ -102,32 +102,34 @@ public class InputParameterValidator {
                 }
             } else if (overloadParameterNames.length > 0 &&
                     overloadParameterNames[overloadParameterNames.length - 1].equals(REPETITIVE_PARAMETER_NOTATION)) {
-                boolean isExpectedParameterOverload = true;
-                for (int i = 0; i < attributeExpressionExecutors.length; i++) {
-                    Parameter parameter = null;
-                    String overloadParameterName = null;
-                    if (i < overloadParameterNames.length - 1) {
-                        overloadParameterName = overloadParameterNames[i];
-                    } else {
-                        overloadParameterName = overloadParameterNames[overloadParameterNames.length - 2];
-                    }
-                    parameter = parameterMap.get(overloadParameterName);
-                    boolean supportedReturnType = false;
-                    for (DataType type : parameter.type()) {
-                        if (attributeExpressionExecutors[i].getReturnType().toString().
-                                equalsIgnoreCase(type.toString())) {
-                            supportedReturnType = true;
+                if (attributeExpressionExecutors.length > 0) {
+                    boolean isExpectedParameterOverload = true;
+                    for (int i = 0; i < attributeExpressionExecutors.length; i++) {
+                        Parameter parameter = null;
+                        String overloadParameterName = null;
+                        if (i < overloadParameterNames.length - 1) {
+                            overloadParameterName = overloadParameterNames[i];
+                        } else {
+                            overloadParameterName = overloadParameterNames[overloadParameterNames.length - 2];
+                        }
+                        parameter = parameterMap.get(overloadParameterName);
+                        boolean supportedReturnType = false;
+                        for (DataType type : parameter.type()) {
+                            if (attributeExpressionExecutors[i].getReturnType().toString().
+                                    equalsIgnoreCase(type.toString())) {
+                                supportedReturnType = true;
+                                break;
+                            }
+                        }
+                        if (!supportedReturnType) {
+                            isExpectedParameterOverload = false;
                             break;
                         }
                     }
-                    if (!supportedReturnType) {
-                        isExpectedParameterOverload = false;
+                    if (isExpectedParameterOverload) {
+                        parameterOverload = aParameterOverload;
                         break;
                     }
-                }
-                if (isExpectedParameterOverload) {
-                    parameterOverload = aParameterOverload;
-                    break;
                 }
             }
         }
