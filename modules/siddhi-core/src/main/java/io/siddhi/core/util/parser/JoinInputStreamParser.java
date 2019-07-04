@@ -20,7 +20,6 @@ package io.siddhi.core.util.parser;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
-import io.siddhi.core.event.state.MetaStateEventAttribute;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
@@ -49,12 +48,10 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
-import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
@@ -237,88 +234,63 @@ public class JoinInputStreamParser {
             if (!(rightFindableProcessor instanceof TableWindowProcessor ||
                     rightFindableProcessor instanceof AggregateWindowProcessor) &&
                     (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT)) {
-
                 MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                         (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(),
                                 SiddhiConstants.UNKNOWN_STATE);
                 CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
                         leftMatchingMetaInfoHolder, executors, tableMap, siddhiQueryContext);
-
-                CompiledSelection rightCompiledSelection = null;
                 List<Attribute> expectedOutputAttributes = new ArrayList<>();
+                CompiledSelection rightCompiledSelection = null;
                 if (leftFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) leftFindableProcessor).isOptimisableLookup()) {
 
-                    expectedOutputAttributes = getSelectAttributes(selector, tableMap, executors,
-                                                                    siddhiQueryContext, leftMatchingMetaInfoHolder);
+                    MetaStateEvent leftMetaStateEvent =
+                            new MetaStateEvent(leftMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents());
+
+                    SelectorParser.parse(selector,
+                            new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), leftMetaStateEvent ,
+                            tableMap, executors, SiddhiConstants.UNKNOWN_STATE, ProcessingMode.BATCH,
+                            false, siddhiQueryContext);
+
+                    expectedOutputAttributes = leftMetaStateEvent.getOutputStreamDefinition().getAttributeList();
 
                     rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
                             selector, expectedOutputAttributes, leftMatchingMetaInfoHolder, executors, tableMap,
                             siddhiQueryContext
                     );
-
-                    //Update meta store event
-                    if (rightCompiledSelection != null) {
-                        MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
-                        expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
-                        String tableReference = leftMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
-                                leftMatchingMetaInfoHolder.getStoreEventIndex()).getInputReferenceId();
-                        metaStoreEvent.setInputReferenceId(tableReference);
-                        StreamDefinition streamDefinition =  new StreamDefinition();
-                        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(0).getLastInputDefinition().getId());
-                        metaStateEvent.getMetaStreamEvent(0).getLastInputDefinition().getAttributeList()
-                                .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
-                        metaStoreEvent.addInputDefinition(streamDefinition);
-                        metaStoreEvent.setEventType(TABLE);
-                        metaStateEvent.replaceEvent(metaStoreEvent, 0);
-                    }
                 }
-
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
                         rightPostJoinProcessor, rightCompiledCondition, rightCompiledSelection,
                         expectedOutputAttributes);
             }
-
             if (!(leftFindableProcessor instanceof TableWindowProcessor ||
                     leftFindableProcessor instanceof AggregateWindowProcessor) &&
                     (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT)) {
-
                 MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                         (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(),
                                 SiddhiConstants.UNKNOWN_STATE);
                 CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
                         rightMatchingMetaInfoHolder, executors, tableMap, siddhiQueryContext);
-
-                CompiledSelection leftCompiledSelection = null;
                 List<Attribute> expectedOutputAttributes = new ArrayList<>();
+                CompiledSelection leftCompiledSelection = null;
                 if (rightFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) rightFindableProcessor).isOptimisableLookup()) {
 
-                    expectedOutputAttributes = getSelectAttributes(selector, tableMap, executors, siddhiQueryContext,
-                                                                                rightMatchingMetaInfoHolder);
+                    MetaStateEvent rightMetaStateEvent =
+                            new MetaStateEvent(rightMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents());
+
+                    SelectorParser.parse(selector,
+                            new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), rightMetaStateEvent ,
+                            tableMap, executors, SiddhiConstants.UNKNOWN_STATE, ProcessingMode.BATCH,
+                            false, siddhiQueryContext);
+
+                    expectedOutputAttributes = rightMetaStateEvent.getOutputStreamDefinition().getAttributeList();
 
                     leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
                             selector, expectedOutputAttributes, rightMatchingMetaInfoHolder, executors, tableMap,
                             siddhiQueryContext
                     );
-
-                    //Update meta store event
-                    if (leftCompiledSelection != null) {
-                        MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
-                        expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
-                        String tableReference = rightMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
-                                rightMatchingMetaInfoHolder.getStoreEventIndex()).getInputReferenceId();
-                        metaStoreEvent.setInputReferenceId(tableReference);
-                        StreamDefinition streamDefinition =  new StreamDefinition();
-                        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(1).getLastInputDefinition().getId());
-                        metaStateEvent.getMetaStreamEvent(1).getLastInputDefinition().getAttributeList()
-                                .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
-                        metaStoreEvent.addInputDefinition(streamDefinition);
-                        metaStoreEvent.setEventType(TABLE);
-                        metaStateEvent.replaceEvent(metaStoreEvent, 1);
-                    }
                 }
-
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,
                         leftPostJoinProcessor, leftCompiledCondition, leftCompiledSelection, expectedOutputAttributes);
             }
@@ -330,23 +302,6 @@ public class JoinInputStreamParser {
             ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext());
             throw t;
         }
-    }
-
-    private static List<Attribute> getSelectAttributes(Selector selector, Map<String, Table> tableMap,
-                                                       List<VariableExpressionExecutor> executors,
-                                                       SiddhiQueryContext siddhiQueryContext,
-                                                       MatchingMetaInfoHolder rightMatchingMetaInfoHolder) {
-        List<Attribute> expectedOutputAttributes;
-        MetaStateEvent rightMetaStateEvent =
-                new MetaStateEvent(rightMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents());
-
-        SelectorParser.parse(selector,
-                new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), rightMetaStateEvent,
-                tableMap, executors, SiddhiConstants.UNKNOWN_STATE, ProcessingMode.BATCH,
-                false, siddhiQueryContext);
-
-        expectedOutputAttributes = rightMetaStateEvent.getOutputStreamDefinition().getAttributeList();
-        return expectedOutputAttributes;
     }
 
     private static void setEventType(Map<String, AbstractDefinition> streamDefinitionMap,

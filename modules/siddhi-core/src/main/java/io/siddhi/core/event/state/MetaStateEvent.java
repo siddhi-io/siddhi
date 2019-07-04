@@ -56,10 +56,6 @@ public class MetaStateEvent implements MetaComplexEvent {
         streamEventCount++;
     }
 
-    public void replaceEvent(MetaStreamEvent metaStreamEvent, int position) {
-        metaStreamEvents[position] = metaStreamEvent;
-    }
-
     public void addOutputDataAllowingDuplicate(MetaStateEventAttribute metaStateEventAttribute) {
         if (outputDataAttributes == null) {
             outputDataAttributes = new ArrayList<MetaStateEventAttribute>();
