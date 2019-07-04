@@ -19,6 +19,8 @@ package io.siddhi.core.query.selector.attribute.aggregator;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
@@ -39,7 +41,19 @@ import java.util.Map;
         name = "count",
         namespace = "",
         description = "Returns the count of all the events.",
-        parameters = {},
+        parameters = {
+                @Parameter(name = "arg",
+                        description = "This function accepts one parameter. " +
+                                "It can belong to any one of the available types.",
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
+                                DataType.STRING, DataType.BOOL, DataType.OBJECT},
+                        dynamic = true,
+                        optional = true)
+        },
+        parameterOverloads = {
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"arg"})
+        },
         returnAttributes = @ReturnAttribute(
                 description = "Returns the event count as a long.",
                 type = {DataType.LONG}),

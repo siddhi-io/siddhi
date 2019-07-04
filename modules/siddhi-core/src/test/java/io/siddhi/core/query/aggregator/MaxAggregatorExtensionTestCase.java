@@ -101,46 +101,6 @@ public class MaxAggregatorExtensionTestCase {
 
     }
 
-    @Test
-    public void maxAttributeAggregatorTest1() throws InterruptedException {
-
-        log.info("maxAttributeAggregator Test #1");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('minAttributeAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight string, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.lengthBatch(5) " +
-                "select max(weight) as max " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(50, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"20", "Box1"});
-        inputHandler.send(new Object[]{"30", "Box2"});
-        inputHandler.send(new Object[]{"10", "Box3"});
-        inputHandler.send(new Object[]{"40", "Box4"});
-        inputHandler.send(new Object[]{"50", "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
-    }
-
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void maxAttributeAggregatorTest2() throws InterruptedException {
 
@@ -178,46 +138,6 @@ public class MaxAggregatorExtensionTestCase {
         inputHandler.send(new Object[]{50.0, "Box5"});
         Thread.sleep(100);
         execPlanRunTime.shutdown();
-    }
-
-    @Test
-    public void minAttributeAggregatorTest1() throws InterruptedException {
-
-        log.info("minAttributeAggregator Test #1");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('minAttributeAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight string, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.lengthBatch(5) " +
-                "select min(weight) as max " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(10, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"20", "Box1"});
-        inputHandler.send(new Object[]{"30", "Box2"});
-        inputHandler.send(new Object[]{"10", "Box3"});
-        inputHandler.send(new Object[]{"40", "Box4"});
-        inputHandler.send(new Object[]{"50", "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)

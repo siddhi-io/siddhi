@@ -201,16 +201,16 @@ public class LengthWindowTestCase {
                 "from cseEventStream#window.length(4) " +
                 "select " +
                 "max(price) as maxp, min(price) as minp, sum(price) as sump, avg(price) as avgp, " +
-                "stdDev(price) as stdp, count(price) as cp, distinctCount(price) as dcp," +
+                "stdDev(price) as stdp, count() as cp, distinctCount(price) as dcp," +
                 "max(volume) as maxvolumep, min(volume) as minvolumep, sum(volume) as sumvolumep," +
                 " avg(volume) as avgvolumep, " +
-                "stdDev(volume) as stdvolumep, count(volume) as cvolumep, distinctCount(volume) as dcvolumep," +
+                "stdDev(volume) as stdvolumep, count() as cvolumep, distinctCount(volume) as dcvolumep," +
                 "max(price2) as maxprice2p, min(price2) as minprice2p, sum(price2) as sumprice2p," +
                 " avg(price2) as avgprice2p, " +
-                "stdDev(price2) as stdprice2p, count(price2) as cpprice2, distinctCount(price2) as dcprice2p," +
+                "stdDev(price2) as stdprice2p, count() as cpprice2, distinctCount(price2) as dcprice2p," +
                 "max(volume2) as maxvolume2p, min(volume2) as minvolume2p, sum(volume2) as sumvolume2p," +
                 " avg(volume2) as avgvolume2p, " +
-                "stdDev(volume2) as stdvolume2p, count(volume2) as cvolume2p, distinctCount(volume2) as dcvolume2p" +
+                "stdDev(volume2) as stdvolume2p, count() as cvolume2p, distinctCount(volume2) as dcvolume2p" +
                 " " +
                 "insert all events into outputStream ;";
 
@@ -383,44 +383,6 @@ public class LengthWindowTestCase {
         inputHandler.send(new Object[]{20.0, "Box3"});
         inputHandler.send(new Object[]{40.0, "Box4"});
         inputHandler.send(new Object[]{20.0, "Box5"});
-        Thread.sleep(100);
-        execPlanRunTime.shutdown();
-
-    }
-
-    @Test
-    public void avgAggregatorTest60() throws InterruptedException {
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String execPlan = "" +
-                "@app:name('avgAggregatorTests') " +
-                "" +
-                "define stream cseEventStream (weight string, deviceId string);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream#window.length(5) " +
-                "select avg(weight) as avgWeight " +
-                "insert into outputStream;";
-
-        SiddhiAppRuntime execPlanRunTime = siddhiManager.createSiddhiAppRuntime(execPlan);
-        execPlanRunTime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals(26, inEvents[0].getData()[0]);
-            }
-        });
-
-        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
-
-        execPlanRunTime.start();
-        inputHandler.send(new Object[]{"20", "Box1"});
-        inputHandler.send(new Object[]{"30", "Box2"});
-        inputHandler.send(new Object[]{"20", "Box3"});
-        inputHandler.send(new Object[]{"40", "Box4"});
-        inputHandler.send(new Object[]{"20", "Box5"});
         Thread.sleep(100);
         execPlanRunTime.shutdown();
 

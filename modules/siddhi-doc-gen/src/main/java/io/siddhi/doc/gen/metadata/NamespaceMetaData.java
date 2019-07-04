@@ -101,4 +101,11 @@ public class NamespaceMetaData implements Comparable<NamespaceMetaData> {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "NamespaceMetaData{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

@@ -94,7 +94,7 @@ public class ExternalTimeBatchWindowTestCase {
         String query = "define stream jmxMetric(cpu int, timestamp long); "
                 + "@info(name='query')"
                 + "from jmxMetric#window.externalTimeBatch(timestamp, 10 sec) "
-                + "select avg(cpu) as avgCpu, count(1) as count insert into tmp;";
+                + "select avg(cpu) as avgCpu, count() as count insert into tmp;";
 
         return siddhiManager.createSiddhiAppRuntime(query);
     }
@@ -174,7 +174,7 @@ public class ExternalTimeBatchWindowTestCase {
                 + " '|' as s3, "
                 + " timestamp as timeWindowEnds, "
                 + " '|' as s4, "
-                + " count(1) as metric_count "
+                + " count() as metric_count "
                 + " INSERT INTO tmp;";
 
         SiddhiManager sm = new SiddhiManager();

@@ -23,7 +23,7 @@
     <groupId>io.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>5.0.3-SNAPSHOT</version>
     <name>Siddhi</name>
     <description>Siddhi, Stream Processing and Complex Event Processing Engine</description>
 
@@ -238,16 +238,6 @@
                 <artifactId>org.jacoco.agent</artifactId>
                 <version>${org.jacoco.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${json.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jsoup</groupId>
-                <artifactId>jsoup</artifactId>
-                <version>${jsoup.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -791,8 +781,6 @@
         <maven.remote.resources.plugin.version>1.6.0</maven.remote.resources.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <clirr.maven.plugin.version>2.8</clirr.maven.plugin.version>
-        <json.version>20180813</json.version>
-        <jsoup.version>1.12.1</jsoup.version>
 
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>

@@ -17,12 +17,7 @@
   -->
 <#import "utils.ftl" as utils>
 <#assign skipMaxHeadingLevel = -1>
-<#if extensionRepositoryName == CONSTANTS.FREEMARKER_SIDDHI_REPOSITORY_ARTIFACT_ID>
-    <#assign repositoryOwner = "siddhi-io">
-<#else>
-    <#assign repositoryOwner = "wso2-extensions">
-    <#assign extensionRepositoryName = extensionRepositoryName?replace(CONSTANTS.FREEMARKER_EXTENSION_REPOSITORY_PARENT_POSTFIX, "", "r")>
-</#if>
+<#assign extensionRepositoryName = extensionRepositoryName?replace(CONSTANTS.FREEMARKER_EXTENSION_REPOSITORY_PARENT_POSTFIX, "", "r")>
 <#macro renderLine line>
 ${line}
 <#if line?starts_with(CONSTANTS.FREEMARKER_FEATURES_HEADING)>
@@ -32,7 +27,7 @@ ${line}
 <#list metaData as namespace>
 <#list namespace.extensionMap as extensionType, extensionsList>
 <#list extensionsList as extension>
-* <a target="_blank" href="https://${repositoryOwner}.github.io/${extensionRepositoryName}/api/${latestDocumentationVersion}/#<@utils.getHTMLIDForHeading heading=(extension.name + "-" + extensionType)/>">${extension.name}</a> *<@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>*<br><div style="padding-left: 1em;"><p>${formatDescription(extension.description)}</p></div>
+* <#if extension.deprecated ><s></#if><a target="_blank" href="https://${repositoryOwner}.github.io/${extensionRepositoryName}/api/${latestDocumentationVersion}/#<@utils.getHTMLIDForHeading heading=(extension.name + "-" + extensionType)/>">${extension.name}</a> <@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/><#if extension.deprecated ></s></#if><br> <div style="padding-left: 1em;"><p>${formatDescription(extension.description)}</p></div>
 </#list>
 </#list>
 <#else>

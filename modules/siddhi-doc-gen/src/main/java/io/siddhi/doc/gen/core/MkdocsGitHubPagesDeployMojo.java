@@ -17,6 +17,7 @@
  */
 package io.siddhi.doc.gen.core;
 
+import com.google.common.io.Files;
 import io.siddhi.doc.gen.core.utils.Constants;
 import io.siddhi.doc.gen.core.utils.DocumentationUtils;
 import io.siddhi.doc.gen.metadata.NamespaceMetaData;
@@ -32,6 +33,7 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import static io.siddhi.doc.gen.core.utils.DocumentationUtils.updateAPIPagesInMkdocsConfig;
@@ -100,6 +102,27 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
     @Parameter(property = "doc.gen.base.directory")
     private boolean includeOrigin;
 
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(defaultValue = "${siddhi.version}", readonly = true)
+    private String siddhiVersion;
+
+    /**
+     * Deploy Docs
+     * Optional
+     */
+    @Parameter(property = "doc.gen.deploy.docs", defaultValue = "true")
+    private boolean deployDocs;
+
+    /**
+     * Add siddhi version
+     * Optional
+     */
+    @Parameter(property = "doc.gen.load.from.all.jars", defaultValue = "false")
+    private boolean loadFromAllJars;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Finding the root maven project
@@ -159,52 +182,79 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
                     moduleTargetPath,
                     mavenProject.getRuntimeClasspathElements(),
                     getLog(),
-                    includeOrigin);
+                    includeOrigin, loadFromAllJars);
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoFailureException("Unable to resolve dependencies of the project", e);
         }
 
+
         // Generating the documentation
         if (namespaceMetaDataList.size() > 0) {
             DocumentationUtils.generateDocumentation(namespaceMetaDataList, docGenBasePath, mavenProject.getVersion(),
-                    getLog());
-            DocumentationUtils.updateHeadingsInMarkdownFile(homePageTemplateFile, homePageFile,
-                    rootMavenProject.getArtifactId(), mavenProject.getVersion(), namespaceMetaDataList);
-            DocumentationUtils.updateHeadingsInMarkdownFile(readmeFile, readmeFile, rootMavenProject.getArtifactId(),
-                    mavenProject.getVersion(), namespaceMetaDataList);
+                    getLog(), siddhiVersion, mavenProject.getGroupId());
         }
 
         // Delete snapshot files
         DocumentationUtils.removeSnapshotAPIDocs(mkdocsConfigFile, docGenBasePath, getLog());
 
         // Updating the links in the home page to the mkdocs config
+        String latestVersion = mavenProject.getVersion();
         try {
-            updateAPIPagesInMkdocsConfig(mkdocsConfigFile, docGenBasePath);
+            latestVersion = updateAPIPagesInMkdocsConfig(mkdocsConfigFile, docGenBasePath);
         } catch (FileNotFoundException e) {
             getLog().warn("Unable to find mkdocs configuration file: "
                     + mkdocsConfigFile.getAbsolutePath() + ". Mkdocs configuration file not updated.");
         }
+
+        // Generating the documentation
+        if (namespaceMetaDataList.size() > 0) {
+            DocumentationUtils.updateHeadingsInMarkdownFile(homePageTemplateFile, homePageFile,
+                    rootMavenProject.getArtifactId(), latestVersion, namespaceMetaDataList,
+                    rootMavenProject.getGroupId(), siddhiVersion);
+            DocumentationUtils.updateHeadingsInMarkdownFile(readmeFile, readmeFile, rootMavenProject.getArtifactId(),
+                    latestVersion, namespaceMetaDataList, rootMavenProject.getGroupId(), siddhiVersion);
+        }
+
+        //copy to latest file
+        File newVersionFile = new File(docGenBasePath + File.separator +
+                Constants.API_SUB_DIRECTORY + File.separator + latestVersion +
+                Constants.MARKDOWN_FILE_EXTENSION);
+        File latestLabelFile = new File(docGenBasePath + File.separator +
+                Constants.API_SUB_DIRECTORY + File.separator + Constants.LATEST_FILE_NAME +
+                Constants.MARKDOWN_FILE_EXTENSION);
+        try {
+            Files.copy(newVersionFile, latestLabelFile);
+        } catch (IOException e) {
+            getLog().warn("Failed to generate latest.md file", e);
+        }
+
         // Deploying the documentation
         if (DocumentationUtils.generateMkdocsSite(mkdocsConfigFile, getLog())) {
-            // Creating the credential provider fot Git
-            String scmUsername = System.getenv(Constants.SYSTEM_PROPERTY_SCM_USERNAME_KEY);
-            String scmPassword = System.getenv(Constants.SYSTEM_PROPERTY_SCM_PASSWORD_KEY);
-
-            if (scmUsername == null && scmPassword == null) {
-                getLog().info("SCM_USERNAME and SCM_PASSWORD not defined!");
+            if (deployDocs) {
+                deployDocumentation(rootMavenProject, docGenBasePath);
             }
-            String url = null;
-            Scm scm = rootMavenProject.getScm();
-            if (scm != null) {
-                url = scm.getUrl();
-            }
-            // Deploying documentation
-            DocumentationUtils.updateDocumentationOnGitHub(docGenBasePath, mkdocsConfigFile, readmeFile,
-                    mavenProject.getVersion(), getLog());
-            DocumentationUtils.deployMkdocsOnGitHubPages(mavenProject.getVersion(),
-                    rootMavenProject.getBasedir(), url, scmUsername, scmPassword, getLog());
         } else {
             getLog().warn("Unable to generate documentation. Skipping documentation deployment.");
         }
+    }
+
+    private void deployDocumentation(MavenProject rootMavenProject, String docGenBasePath) {
+        // Creating the credential provider fot Git
+        String scmUsername = System.getenv(Constants.SYSTEM_PROPERTY_SCM_USERNAME_KEY);
+        String scmPassword = System.getenv(Constants.SYSTEM_PROPERTY_SCM_PASSWORD_KEY);
+
+        if (scmUsername == null && scmPassword == null) {
+            getLog().info("SCM_USERNAME and SCM_PASSWORD not defined!");
+        }
+        String url = null;
+        Scm scm = rootMavenProject.getScm();
+        if (scm != null) {
+            url = scm.getUrl();
+        }
+        // Deploying documentation
+        DocumentationUtils.updateDocumentationOnGitHub(docGenBasePath, mkdocsConfigFile, readmeFile,
+                mavenProject.getVersion(), getLog());
+        DocumentationUtils.deployMkdocsOnGitHubPages(mavenProject.getVersion(),
+                rootMavenProject.getBasedir(), url, scmUsername, scmPassword, getLog());
     }
 }

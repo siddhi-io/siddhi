@@ -26,7 +26,10 @@ import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -39,6 +42,7 @@ import java.util.regex.Pattern;
 public class AbstractAnnotationProcessor {
     protected static final Pattern CORE_PACKAGE_PATTERN = Pattern.compile("^io.siddhi.core.");
     protected static final Pattern PARAMETER_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$");
+    protected static final String REPETITIVE_PARAMETER_NOTATION = "...";
     protected static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("^(([a-z][a-z0-9]+)([A-Z]{0,1}[a-z0-9]*)*)$");
     protected String extensionClassFullName;
 
@@ -92,7 +96,8 @@ public class AbstractAnnotationProcessor {
             if (parameterName.isEmpty()) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                         "name annotated in class {0} is null or empty.", extensionClassFullName));
-            } else if (!PARAMETER_NAME_PATTERN.matcher(parameterName).find()) {
+            } else if (!(PARAMETER_NAME_PATTERN.matcher(parameterName).find() ||
+                    REPETITIVE_PARAMETER_NOTATION.equals(parameterName))) {
                 //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter -> " +
                                 "name {0} annotated in class {1} is not in proper format 'abc.def.ghi'.",
@@ -132,8 +137,12 @@ public class AbstractAnnotationProcessor {
             throws AnnotationValidationException {
 
         Map<String, Parameter> parameterMap = new HashMap<>();
+        Set<String> mandatoryParameterSet = new HashSet<>();
         for (Parameter parameter : parameters) {
             parameterMap.put(parameter.name(), parameter);
+            if (!parameter.optional()) {
+                mandatoryParameterSet.add(parameter.name());
+            }
         }
 
         for (ParameterOverload parameterOverload : parameterOverloads) {
@@ -144,17 +153,46 @@ public class AbstractAnnotationProcessor {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                                     "@ParameterOverload -> parameterNames annotated in class {0} is null or empty.",
                             extensionClassFullName));
-                } else if (!PARAMETER_NAME_PATTERN.matcher(overloadParameterName).find()) {
+                } else if (!(PARAMETER_NAME_PATTERN.matcher(overloadParameterName).find() ||
+                        REPETITIVE_PARAMETER_NOTATION.equals(overloadParameterName))) {
                     //Check if the @Parameter name is in a correct format 'abc.def.ghi' using regex pattern.
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                             "@ParameterOverload -> parameterNames {0} annotated in class {1} is not " +
                             "in proper format 'abc.def.ghi'.", overloadParameterName, extensionClassFullName));
                 }
-                if (!parameterMap.containsKey(overloadParameterName)) {
+                if (!(parameterMap.containsKey(overloadParameterName) ||
+                        REPETITIVE_PARAMETER_NOTATION.equals(overloadParameterName))) {
                     throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
                             "@ParameterOverload -> parameterNames {0} annotated in class {1} is not defined in " +
                             "@Extension -> @Parameter.", overloadParameterName, extensionClassFullName));
                 }
+            }
+        }
+
+        if (parameterOverloads.length > 0) {
+            Set<String> mandatoryParameterSetViaOverload = new HashSet<>(parameterMap.keySet());
+            for (Iterator<String> iterator = mandatoryParameterSetViaOverload.iterator(); iterator.hasNext(); ) {
+                String parameter = iterator.next();
+                for (ParameterOverload parameterOverload : parameterOverloads) {
+                    boolean contains = false;
+                    for (String parameterName : parameterOverload.parameterNames()) {
+                        if (parameter.equalsIgnoreCase(parameterName)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+            }
+
+            if (!mandatoryParameterSetViaOverload.equals(mandatoryParameterSet)) {
+                throw new AnnotationValidationException("Mandatory parameter information in ParameterOverload " +
+                        "and based on 'optional' annotation is a mismatch. The parameters '" +
+                        mandatoryParameterSetViaOverload + "' always appearing in ParameterOverload, but '" +
+                        mandatoryParameterSet + "' are defined as not 'optional' in the annotations.");
             }
         }
     }

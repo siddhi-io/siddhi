@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -57,6 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
         description = "This window returns the latest events with the most frequently occurred value for " +
                 "a given attribute(s). Frequency calculation for this window processor is based on " +
                 "Misra-Gries counting algorithm.",
+        deprecated = true,
         parameters = {
                 @Parameter(name = "event.count",
                         description = "The number of most frequent events to be emitted to the stream.",
@@ -66,7 +68,12 @@ import java.util.concurrent.ConcurrentHashMap;
                                 "the concatenation of all the attributes of the event is considered.",
                         type = {DataType.STRING},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "The concatenation of all the attributes of the event is considered.")
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"event.count"}),
+                @ParameterOverload(parameterNames = {"event.count", "attribute"})
         },
         examples = {
                 @Example(

@@ -21,6 +21,7 @@ package io.siddhi.core.query.processor.stream.window;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -56,19 +57,28 @@ import java.util.concurrent.ConcurrentHashMap;
         namespace = "",
         description = "This window identifies and returns all the events of which the current frequency exceeds " +
                 "the value specified for the supportThreshold parameter.",
+        deprecated = true,
         parameters = {
                 @Parameter(name = "support.threshold",
                         description = "The support threshold value.",
                         type = {DataType.DOUBLE}),
                 @Parameter(name = "error.bound",
                         description = "The error bound value.",
+                        optional = true,
+                        defaultValue = "`support.threshold`/10",
                         type = {DataType.DOUBLE}),
                 @Parameter(name = "attribute",
                         description = "The attributes to group the events. If no attributes are given, " +
                                 "the concatenation of all the attributes of the event is considered.",
                         type = {DataType.STRING},
                         optional = true,
+                        dynamic = true,
                         defaultValue = "The concatenation of all the attributes of the event is considered.")
+        },
+        parameterOverloads = {
+                @ParameterOverload(parameterNames = {"support.threshold"}),
+                @ParameterOverload(parameterNames = {"support.threshold", "error.bound"}),
+                @ParameterOverload(parameterNames = {"support.threshold", "error.bound", "attribute"})
         },
         examples = {
                 @Example(
