@@ -63,6 +63,10 @@ public class QuerySelector implements Processor {
     private long limit = SiddhiConstants.UNKNOWN_STATE;
     private long offset = SiddhiConstants.UNKNOWN_STATE;
 
+    public QuerySelector(String id) {
+        this.id = id;
+    }
+
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiQueryContext
             siddhiQueryContext) {
         this.id = id;
@@ -477,6 +481,10 @@ public class QuerySelector implements Processor {
                 }
             }
         }
+    }
+
+    public String getId() {
+        return id;
     }
 
 }

@@ -34,6 +34,7 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
+import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;
@@ -129,13 +130,18 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    query.getSelector(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    query, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
-            QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    streamRuntime.getMetaComplexEvent(), tableMap, executors,
-                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
-                    siddhiQueryContext);
+            QuerySelector selector;
+            if (streamRuntime.getQuerySelector() != null) {
+                selector = streamRuntime.getQuerySelector();
+            } else {
+                selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        streamRuntime.getMetaComplexEvent(), tableMap, executors,
+                        SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
+                        siddhiQueryContext);
+            }
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
@@ -223,8 +229,12 @@ public class QueryParser {
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
-            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
-                    .getMetaComplexEvent()));
+
+            if (!(streamRuntime.getQuerySelector() instanceof OptimisedJoinQuerySelector)) {
+                selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
+                        .getMetaComplexEvent()));
+            }
+
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 

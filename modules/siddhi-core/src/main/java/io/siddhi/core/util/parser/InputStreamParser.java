@@ -28,12 +28,12 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
-import io.siddhi.query.api.execution.query.selection.Selector;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class InputStreamParser {
      * @return StreamRuntime
 
      */
-    public static StreamRuntime parse(InputStream inputStream, Selector selector,
+    public static StreamRuntime parse(InputStream inputStream, Query query,
                                       Map<String, AbstractDefinition> streamDefinitionMap,
                                       Map<String, AbstractDefinition> tableDefinitionMap,
                                       Map<String, AbstractDefinition> windowDefinitionMap,
@@ -87,7 +87,7 @@ public class InputStreamParser {
                     outputExpectsExpiredEvents, false, siddhiQueryContext);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream),
-                    selector, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    query, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
         } else if (inputStream instanceof StateInputStream) {

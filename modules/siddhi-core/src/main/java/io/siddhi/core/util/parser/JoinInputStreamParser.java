@@ -41,6 +41,7 @@ import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowWindowProcessor;
+import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -52,12 +53,10 @@ import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
-import io.siddhi.query.api.execution.query.output.stream.OutputStream;
-import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
-import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
@@ -73,7 +72,7 @@ import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.WINDOW;
 public class JoinInputStreamParser {
 
 
-    public static StreamRuntime parseInputStream(JoinInputStream joinInputStream, Selector selector,
+    public static StreamRuntime parseInputStream(JoinInputStream joinInputStream, Query query,
                                                  Map<String, AbstractDefinition> streamDefinitionMap,
                                                  Map<String, AbstractDefinition> tableDefinitionMap,
                                                  Map<String, AbstractDefinition> windowDefinitionMap,
@@ -177,12 +176,12 @@ public class JoinInputStreamParser {
 
             setStreamRuntimeProcessorChain(leftMetaStreamEvent, leftStreamRuntime, leftInputStreamId, tableMap,
                     windowMap, aggregationMap, executors, outputExpectsExpiredEvents,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), selector.getGroupByList(), siddhiQueryContext,
-                    joinInputStream.getLeftInputStream());
+                    joinInputStream.getWithin(), joinInputStream.getPer(), query.getSelector().getGroupByList(),
+                    siddhiQueryContext, joinInputStream.getLeftInputStream());
             setStreamRuntimeProcessorChain(rightMetaStreamEvent, rightStreamRuntime, rightInputStreamId, tableMap,
                     windowMap, aggregationMap, executors, outputExpectsExpiredEvents,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), selector.getGroupByList(),  siddhiQueryContext,
-                    joinInputStream.getRightInputStream());
+                    joinInputStream.getWithin(), joinInputStream.getPer(), query.getSelector().getGroupByList(),
+                    siddhiQueryContext, joinInputStream.getRightInputStream());
 
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
             metaStateEvent.addEvent(leftMetaStreamEvent);
@@ -231,6 +230,7 @@ public class JoinInputStreamParser {
             if (compareCondition == null) {
                 compareCondition = Expression.value(true);
             }
+            QuerySelector querySelector = null;
             if (!(rightFindableProcessor instanceof TableWindowProcessor ||
                     rightFindableProcessor instanceof AggregateWindowProcessor) &&
                     (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT)) {
@@ -244,20 +244,23 @@ public class JoinInputStreamParser {
                 if (leftFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) leftFindableProcessor).isOptimisableLookup()) {
 
-                    MetaStateEvent leftMetaStateEvent =
-                            new MetaStateEvent(leftMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents());
-
-                    SelectorParser.parse(selector,
-                            new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), leftMetaStateEvent ,
+                    querySelector = SelectorParser.parse(query.getSelector(),
+                            query.getOutputStream(), metaStateEvent,
                             tableMap, executors, SiddhiConstants.UNKNOWN_STATE, ProcessingMode.BATCH,
-                            false, siddhiQueryContext);
+                            outputExpectsExpiredEvents, siddhiQueryContext);
 
-                    expectedOutputAttributes = leftMetaStateEvent.getOutputStreamDefinition().getAttributeList();
+                    expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
                     rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
-                            selector, expectedOutputAttributes, leftMatchingMetaInfoHolder, executors, tableMap,
-                            siddhiQueryContext
+                            query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, executors,
+                            tableMap, siddhiQueryContext
                     );
+
+                    if (rightCompiledSelection != null) {
+                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, metaStateEvent,
+                                expectedOutputAttributes, false, tableMap, outputExpectsExpiredEvents,
+                                siddhiQueryContext);
+                    }
                 }
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
                         rightPostJoinProcessor, rightCompiledCondition, rightCompiledSelection,
@@ -276,20 +279,23 @@ public class JoinInputStreamParser {
                 if (rightFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) rightFindableProcessor).isOptimisableLookup()) {
 
-                    MetaStateEvent rightMetaStateEvent =
-                            new MetaStateEvent(rightMatchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents());
-
-                    SelectorParser.parse(selector,
-                            new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS), rightMetaStateEvent ,
+                    querySelector = SelectorParser.parse(query.getSelector(),
+                            query.getOutputStream(), metaStateEvent,
                             tableMap, executors, SiddhiConstants.UNKNOWN_STATE, ProcessingMode.BATCH,
-                            false, siddhiQueryContext);
+                            outputExpectsExpiredEvents, siddhiQueryContext);
 
-                    expectedOutputAttributes = rightMetaStateEvent.getOutputStreamDefinition().getAttributeList();
+                    expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
                     leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
-                            selector, expectedOutputAttributes, rightMatchingMetaInfoHolder, executors, tableMap,
-                            siddhiQueryContext
+                            query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder, executors,
+                            tableMap, siddhiQueryContext
                     );
+
+                    if (leftCompiledSelection != null){
+                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, metaStateEvent,
+                                expectedOutputAttributes, true, tableMap, outputExpectsExpiredEvents,
+                                siddhiQueryContext);
+                    }
                 }
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,
                         leftPostJoinProcessor, leftCompiledCondition, leftCompiledSelection, expectedOutputAttributes);
@@ -297,6 +303,7 @@ public class JoinInputStreamParser {
             JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiQueryContext, metaStateEvent);
             joinStreamRuntime.addRuntime(leftStreamRuntime);
             joinStreamRuntime.addRuntime(rightStreamRuntime);
+            joinStreamRuntime.setQuerySelector(querySelector);
             return joinStreamRuntime;
         } catch (Throwable t) {
             ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext());

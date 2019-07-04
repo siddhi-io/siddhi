@@ -28,6 +28,7 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.selector.QuerySelector;
 
 import java.util.List;
 
@@ -62,6 +63,11 @@ public class StateStreamRuntime implements StreamRuntime {
     @Override
     public ProcessingMode getProcessingMode() {
         return ProcessingMode.BATCH;
+    }
+
+    @Override
+    public QuerySelector getQuerySelector() {
+        return null;
     }
 
     public InnerStateRuntime getInnerStateRuntime() {
