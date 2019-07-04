@@ -33,6 +33,7 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
     private String id;
     private OutputRateLimiter outputRateLimiter;
     private StateEventPopulator eventPopulator;
+    private StateEventPopulator eventPopulatorForOptimisedLookup;
 
     public OptimisedJoinQuerySelector(String id) {
         super(id);
@@ -57,7 +58,10 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
-                eventPopulator.populateStateEvent(event);
+                boolean isDummyEvent = eventPopulatorForOptimisedLookup.populateStateEventWithEvaluation(event);
+                if (isDummyEvent) {
+                    eventPopulator.populateStateEvent(event);
+                }
             }
         }
         complexEventChunk.reset();
@@ -78,4 +82,10 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
     public void setEventPopulator(StateEventPopulator eventPopulator) {
         this.eventPopulator = eventPopulator;
     }
+
+
+    public void setEventPopulatorForOptimisedLookup(StateEventPopulator eventPopulatorForOptimisedLookup) {
+        this.eventPopulatorForOptimisedLookup = eventPopulatorForOptimisedLookup;
+    }
+
 }

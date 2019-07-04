@@ -96,7 +96,7 @@ public class OptimisedJoinQuerySelectorParser {
         QueryParserHelper.updateVariablePosition(newMetaStateEvent, variableExpressionExecutors);
 
         OptimisedJoinQuerySelector optimisedJoinQuerySelector = new OptimisedJoinQuerySelector(querySelector.getId());
-        optimisedJoinQuerySelector.setEventPopulator(
+        optimisedJoinQuerySelector.setEventPopulatorForOptimisedLookup(
                 StateEventPopulatorFactory.constructEventPopulator(newMetaStateEvent));
 
         return optimisedJoinQuerySelector;
