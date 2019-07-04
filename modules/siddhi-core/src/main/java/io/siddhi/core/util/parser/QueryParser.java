@@ -230,10 +230,8 @@ public class QueryParser {
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
 
-            if (!(streamRuntime.getQuerySelector() instanceof OptimisedJoinQuerySelector)) {
-                selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
+            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                         .getMetaComplexEvent()));
-            }
 
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
