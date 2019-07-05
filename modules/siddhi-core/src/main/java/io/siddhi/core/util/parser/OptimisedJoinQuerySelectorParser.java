@@ -32,6 +32,7 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Variable;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
  */
 public class OptimisedJoinQuerySelectorParser {
 
-    public static QuerySelector parse(QuerySelector querySelector, MetaStateEvent metaStateEvent,
+    public static QuerySelector parse(QuerySelector querySelector, Selector selector, MetaStateEvent metaStateEvent,
                                       List<Attribute> expectedOutputAttributes, boolean isTableRightOfJoin,
                                       Map<String, Table> tableMap, boolean outputExpectsExpiredEvents,
                                       SiddhiQueryContext siddhiQueryContext) {
@@ -95,9 +96,29 @@ public class OptimisedJoinQuerySelectorParser {
 
         QueryParserHelper.updateVariablePosition(newMetaStateEvent, variableExpressionExecutors);
 
-        OptimisedJoinQuerySelector optimisedJoinQuerySelector = new OptimisedJoinQuerySelector(querySelector.getId());
+        OptimisedJoinQuerySelector optimisedJoinQuerySelector = new OptimisedJoinQuerySelector(querySelector.getId(),
+                selector, querySelector.isCurrentOn(), querySelector.isExpiredOn(), siddhiQueryContext);
         optimisedJoinQuerySelector.setEventPopulatorForOptimisedLookup(
                 StateEventPopulatorFactory.constructEventPopulator(newMetaStateEvent));
+        optimisedJoinQuerySelector.setAttributeProcessorList(querySelector.getAttributeProcessorList(),
+                                                                                querySelector.isContainsAggregator());
+        optimisedJoinQuerySelector.setHavingConditionExecutor(querySelector.getHavingConditionExecutor(),
+                                                                                querySelector.isContainsAggregator());
+        if (querySelector.isGroupBy()) {
+            optimisedJoinQuerySelector.setGroupByKeyGenerator(querySelector.getGroupByKeyGenerator());
+        }
+
+        if (querySelector.isOrderBy()) {
+            optimisedJoinQuerySelector.setOrderByEventComparator(querySelector.getOrderByEventComparator());
+        }
+
+        if (querySelector.getLimit() > 0) {
+            optimisedJoinQuerySelector.setLimit(querySelector.getLimit());
+        }
+
+        if (querySelector.getOffset() > 0) {
+            optimisedJoinQuerySelector.setOffset(querySelector.getOffset());
+        }
 
         return optimisedJoinQuerySelector;
 

@@ -55,32 +55,6 @@ public class SelectiveStateEventPopulator implements StateEventPopulator {
         }
     }
 
-    public boolean populateStateEventWithEvaluation(ComplexEvent complexEvent) {
-        boolean isDummyStoreEvent = true;
-        StateEvent stateEvent = (StateEvent) complexEvent;
-        for (StateMappingElement stateMappingElement : stateMappingElements) {
-            int toPosition = stateMappingElement.getToPosition();
-            Object fromData = getFromData(stateEvent, stateMappingElement.getFromPosition());
-            stateEvent.setOutputData(fromData, toPosition);
-            isDummyStoreEvent = isDummyStoreEvent && fromData == null;
-
-//            switch (toPosition[0]) {
-//                case 0:
-//                    stateEvent.setPreOutputData(getFromData(stateEvent, stateMappingElement.getFromPosition()),
-//                            toPosition[1]);
-//                    break;
-//                case 1:
-//                    stateEvent.setOutputData(getFromData(stateEvent, stateMappingElement.getFromPosition()),
-//                            toPosition[1]);
-//                    break;
-//                default:
-//                    //will not happen
-//                    throw new IllegalStateException("To Position cannot be :" + toPosition[0]);
-//            }
-        }
-        return isDummyStoreEvent;
-    }
-
     private Object getFromData(StateEvent stateEvent, int[] fromPosition) {
         return stateEvent.getAttribute(fromPosition);
 //        StreamEvent streamEvent = stateEvent.getStreamEvent(fromPosition[0]);

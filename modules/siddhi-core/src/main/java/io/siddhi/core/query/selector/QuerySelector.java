@@ -50,22 +50,18 @@ public class QuerySelector implements Processor {
     private boolean currentOn = false;
     private boolean expiredOn = false;
     private boolean containsAggregator = false;
-    private OutputRateLimiter outputRateLimiter;
+    OutputRateLimiter outputRateLimiter;
     private List<AttributeProcessor> attributeProcessorList;
     private ConditionExpressionExecutor havingConditionExecutor = null;
     private boolean isGroupBy = false;
     private GroupByKeyGenerator groupByKeyGenerator;
     private boolean isOrderBy = false;
     private OrderByEventComparator orderByEventComparator;
-    private String id;
-    private StateEventPopulator eventPopulator;
+    String id;
+    StateEventPopulator eventPopulator;
     private boolean batchingEnabled = true;
     private long limit = SiddhiConstants.UNKNOWN_STATE;
     private long offset = SiddhiConstants.UNKNOWN_STATE;
-
-    public QuerySelector(String id) {
-        this.id = id;
-    }
 
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiQueryContext
             siddhiQueryContext) {
@@ -485,6 +481,46 @@ public class QuerySelector implements Processor {
 
     public String getId() {
         return id;
+    }
+
+    public boolean isCurrentOn() {
+        return currentOn;
+    }
+
+    public boolean isExpiredOn() {
+        return expiredOn;
+    }
+
+    public boolean isContainsAggregator() {
+        return containsAggregator;
+    }
+
+    public ConditionExpressionExecutor getHavingConditionExecutor() {
+        return havingConditionExecutor;
+    }
+
+    public boolean isGroupBy() {
+        return isGroupBy;
+    }
+
+    public GroupByKeyGenerator getGroupByKeyGenerator() {
+        return groupByKeyGenerator;
+    }
+
+    public boolean isOrderBy() {
+        return isOrderBy;
+    }
+
+    public OrderByEventComparator getOrderByEventComparator() {
+        return orderByEventComparator;
+    }
+
+    public long getLimit() {
+        return limit;
+    }
+
+    public long getOffset() {
+        return offset;
     }
 
 }

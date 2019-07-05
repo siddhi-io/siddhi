@@ -27,9 +27,4 @@ public class SkipStateEventPopulator implements StateEventPopulator {
     public void populateStateEvent(ComplexEvent complexEvent) {
         //Do nothing
     }
-
-    @Override
-    public boolean populateStateEventWithEvaluation(ComplexEvent complexEvent) {
-        return false;
-    }
 }
