@@ -17,11 +17,11 @@
  */
 package io.siddhi.core.query.selector;
 
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.populater.StateEventPopulator;
-import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.query.api.execution.query.selection.Selector;
 import org.apache.log4j.Logger;
 
 /**
@@ -30,18 +30,14 @@ import org.apache.log4j.Logger;
 public class OptimisedJoinQuerySelector extends QuerySelector {
 
     private static final Logger log = Logger.getLogger(OptimisedJoinQuerySelector.class);
-    private String id;
-    private OutputRateLimiter outputRateLimiter;
-    private StateEventPopulator eventPopulator;
     private StateEventPopulator eventPopulatorForOptimisedLookup;
 
-    public OptimisedJoinQuerySelector(String id) {
-        super(id);
-        this.id = id;
+    public OptimisedJoinQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn,
+                                      SiddhiQueryContext siddhiQueryContext) {
+        super(id, selector, currentOn, expiredOn, siddhiQueryContext);
     }
 
-    @Override
-    public void process(ComplexEventChunk complexEventChunk) {
+    public void processOptimisedQueryEvents(ComplexEventChunk complexEventChunk) {
         if (log.isTraceEnabled()) {
             log.trace("event is processed by selector '" + id + "', "  + complexEventChunk);
         }
@@ -58,10 +54,7 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
-                boolean isDummyEvent = eventPopulatorForOptimisedLookup.populateStateEventWithEvaluation(event);
-                if (isDummyEvent) {
-                    eventPopulator.populateStateEvent(event);
-                }
+                eventPopulatorForOptimisedLookup.populateStateEvent(event);
             }
         }
         complexEventChunk.reset();
@@ -70,19 +63,6 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
         }
         return null;
     }
-
-    public void setNextProcessor(OutputRateLimiter outputRateLimiter) {
-        if (this.outputRateLimiter == null) {
-            this.outputRateLimiter = outputRateLimiter;
-        } else {
-            throw new SiddhiAppCreationException("outputRateLimiter is already assigned");
-        }
-    }
-
-    public void setEventPopulator(StateEventPopulator eventPopulator) {
-        this.eventPopulator = eventPopulator;
-    }
-
 
     public void setEventPopulatorForOptimisedLookup(StateEventPopulator eventPopulatorForOptimisedLookup) {
         this.eventPopulatorForOptimisedLookup = eventPopulatorForOptimisedLookup;
