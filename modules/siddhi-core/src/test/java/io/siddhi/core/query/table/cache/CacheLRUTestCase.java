@@ -118,7 +118,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase1") // using query api and 1 primary key & LRu
+    @Test(description = "cacheLRUTestCase1", dependsOnMethods = {"cacheLRUTestCase0"})
+    // using query api and 1 primary key & LRu
     public void cacheLRUTestCase1() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -186,7 +187,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase2") // 1 primary key & LRu & cointains api (in)
+    @Test(description = "cacheLRUTestCase2", dependsOnMethods = {"cacheLRUTestCase1"})
+    // 1 primary key & LRu & cointains api (in)
     public void cacheLRUTestCase2() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -247,7 +249,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase3") // 2 primary keys & LRu & cointains api (in)
+    @Test(description = "cacheLRUTestCase3", dependsOnMethods = {"cacheLRUTestCase2"})
+    // 2 primary keys & LRu & cointains api (in)
     public void cacheLRUTestCase3() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -341,7 +344,7 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase4") // 1 primary key & LRu & update func
+    @Test(description = "cacheLRUTestCase4", dependsOnMethods = {"cacheLRUTestCase3"}) // 1 primary key & LRu & update func
     public void cacheLRUTestCase4() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -429,7 +432,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase5") // 2 primary keys & LRu & update func
+    @Test(description = "cacheLRUTestCase5", dependsOnMethods = {"cacheLRUTestCase4"})
+    // 2 primary keys & LRu & update func
     public void cacheLRUTestCase5() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -517,7 +521,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase6") // 1 primary key & LRu & update or add func
+    @Test(description = "cacheLRUTestCase6", dependsOnMethods = {"cacheLRUTestCase5"})
+    // 1 primary key & LRu & update or add func
     public void cacheLRUTestCase6() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -572,7 +577,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase7") // 2 primary keys & LRu & update or add func
+    @Test(description = "cacheLRUTestCase7", dependsOnMethods = {"cacheLRUTestCase6"})
+    // 2 primary keys & LRu & update or add func
     public void cacheLRUTestCase7() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -627,7 +633,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase8") // 2 primary keys & LRu & update or add func with update
+    @Test(description = "cacheLRUTestCase8", dependsOnMethods = {"cacheLRUTestCase7"})
+    // 2 primary keys & LRu & update or add func with update
     public void cacheLRUTestCase8() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -714,7 +721,7 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase9")
+    @Test(description = "cacheLRUTestCase9", dependsOnMethods = {"cacheLRUTestCase8"})
     public void cacheLRUTestCase9() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -812,7 +819,7 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase10")
+    @Test(description = "cacheLRUTestCase10", dependsOnMethods = {"cacheLRUTestCase9"})
     public void cacheLRUTestCase10() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
