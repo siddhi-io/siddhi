@@ -88,7 +88,8 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'<LONG, STRING, LONG, INT>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
+                    "'<LONG, STRING, LONG, INT>'. Supported parameter overloads are " +
+                    "(<INT|LONG|TIME> window.session), " +
                     "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
                     "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
