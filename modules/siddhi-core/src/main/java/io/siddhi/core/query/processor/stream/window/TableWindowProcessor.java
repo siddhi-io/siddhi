@@ -137,8 +137,7 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
         return compiledSelection;
     }
 
-    public void tableUnavailable() {
-        table.setIsTryingToConnectToFalse();
-        table.connectWithRetry();
+    public Table getTable() {
+        return table;
     }
 }

@@ -30,6 +30,7 @@ import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.QuerySelector;
+import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
@@ -163,12 +164,26 @@ public class JoinProcessor implements Processor {
     }
 
     private StreamEvent query(StateEvent joinStateEvent) throws SiddhiAppRuntimeException {
-        try {
-             return ((QueryableProcessor) findableProcessor).query(joinStateEvent, compiledCondition, compiledSelection,
-                     expectedOutputAttributes);
-        } catch (ConnectionUnavailableException e) {
-            ((TableWindowProcessor) findableProcessor).tableUnavailable();
-             return query(joinStateEvent);
+        Table table = ((TableWindowProcessor) findableProcessor).getTable();
+        if (table.getIsConnected()) {
+            try {
+                return ((QueryableProcessor) findableProcessor).query(joinStateEvent, compiledCondition,
+                        compiledSelection, expectedOutputAttributes);
+            } catch (ConnectionUnavailableException e) {
+                table.setIsConnectedToFalse();
+                table.connectWithRetry();
+                return query(joinStateEvent);
+            }
+        } else if (table.getIsTryingToConnect()) {
+            log.warn("Error while performing query for event '" +  joinStateEvent + "', operation busy waiting at " +
+                    "Table '" + table.getTableDefinition().getId() + "' as its trying to reconnect!");
+            table.waitWhileConnect();
+            log.info("Table '" + table.getTableDefinition().getId() + "' has become available for query operation " +
+                    "for matching event '" + joinStateEvent + "'");
+            return query(joinStateEvent);
+        } else {
+            table.connectWithRetry();
+            return query(joinStateEvent);
         }
     }
 
