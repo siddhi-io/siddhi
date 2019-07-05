@@ -1076,4 +1076,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public void setCacheLastReloadTime(long cacheLastReloadTime) {
         this.cacheLastReloadTime = cacheLastReloadTime;
     }
+
+    public boolean isCacheEnabled() {
+        return this.cacheEnabled;
+    }
 }

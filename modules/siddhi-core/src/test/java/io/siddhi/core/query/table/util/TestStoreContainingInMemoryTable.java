@@ -384,4 +384,9 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
     protected void destroy() {
 
     }
+
+    @Override
+    public boolean isCacheEnabled() {
+        return true;
+    }
 }
