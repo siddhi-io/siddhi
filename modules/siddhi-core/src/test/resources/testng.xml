@@ -102,6 +102,30 @@
             <class name="io.siddhi.core.query.table.set.SetUpdateOrInsertInMemoryTableTestCase"/>
             <class name="io.siddhi.core.query.table.util.TestStore"/>
 
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.DeleteFromTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.InsertIntoTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.InTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.JoinTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.QueryAPITestCaseForTestStore"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateOrInsertTestStoreTestCase"/>
+
+            <class name="io.siddhi.core.query.table.cache.CacheCornerCasesTest"/>
+            <class name="io.siddhi.core.query.table.cache.CacheExpireTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CacheExpiryAndReloadTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CacheFIFOTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CacheLFUTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CacheLRUTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CacheMissTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.CachePreLoadingTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.DeleteFromTableWithCacheTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.InsertIntoTableWithCacheTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.InTableWithCacheTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.JoinTableWithCacheTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.QueryAPITestCaseForTableWithCache"/>
+            <class name="io.siddhi.core.query.table.cache.UpdateOrInsertTableWithCacheTestCase"/>
+            <class name="io.siddhi.core.query.table.cache.UpdateTableWithCacheTestCase"/>
+
             <class name="io.siddhi.core.query.trigger.TriggerTestCase"/>
 
             <class name="io.siddhi.core.query.window.CronWindowTestCase"/>
