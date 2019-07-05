@@ -54,7 +54,6 @@ import org.wso2.siddhi.query.api.util.AnnotationHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -109,12 +108,17 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    siddhiAppContext, query.getSelector().getGroupByList(), streamDefinitionMap, tableDefinitionMap,
+                    siddhiAppContext, query, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     latencyTracker, outputExpectsExpiredEvents, queryName);
-            QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
-                    SiddhiConstants.UNKNOWN_STATE);
+            QuerySelector selector;
+            if (streamRuntime.getQuerySelector() != null) {
+                selector = streamRuntime.getQuerySelector();
+            } else {
+                selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
+                        SiddhiConstants.UNKNOWN_STATE);
+            }
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {

@@ -319,6 +319,16 @@ public class ExpressionBuilder {
                                 buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
                                         .getStoreDefinition());
                             }
+                        } else {
+                            // Having state : i.e attribute is in the select clause
+                            definition = matchingMetaInfoHolder.getMetaStateEvent().getOutputStreamDefinition();
+                            try {
+                                type = definition.getAttributeType(attributeName);
+                            } catch (AttributeNotExistException e) {
+                                //do nothing as its not expected
+                            }
+                            buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
+                                    .getStoreDefinition());
                         }
                     } else {
 

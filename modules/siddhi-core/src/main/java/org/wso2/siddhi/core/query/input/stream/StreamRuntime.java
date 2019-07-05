@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.query.input.stream;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 import java.util.List;
 
@@ -35,4 +36,7 @@ public interface StreamRuntime {
     void setCommonProcessor(Processor commonProcessor);
 
     MetaComplexEvent getMetaComplexEvent();
+
+    QuerySelector getQuerySelector();
+
 }

@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +38,13 @@ public class JoinStreamRuntime implements StreamRuntime {
     List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
     private SiddhiAppContext siddhiAppContext;
     private MetaStateEvent metaStateEvent;
+    private QuerySelector querySelector;
 
     public JoinStreamRuntime(SiddhiAppContext siddhiAppContext, MetaStateEvent metaStateEvent) {
 
         this.siddhiAppContext = siddhiAppContext;
         this.metaStateEvent = metaStateEvent;
+        this.querySelector = null;
     }
 
 
@@ -103,4 +106,14 @@ public class JoinStreamRuntime implements StreamRuntime {
     public MetaComplexEvent getMetaComplexEvent() {
         return metaStateEvent;
     }
+
+    @Override
+    public QuerySelector getQuerySelector() {
+        return this.querySelector;
+    }
+
+    public void setQuerySelector(QuerySelector querySelector) {
+        this.querySelector = querySelector;
+    }
+
 }
