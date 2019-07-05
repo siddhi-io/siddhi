@@ -318,7 +318,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             }
 
             if (!isStoreQuery) {
-                tableForPerDuration.setIsTryingToConnectToFalse();
+                tableForPerDuration.setIsConnectedToFalse();
                 tableForPerDuration.connectWithRetry();
                 return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
                         outputAttributes);
