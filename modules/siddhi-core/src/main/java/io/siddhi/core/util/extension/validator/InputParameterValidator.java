@@ -24,6 +24,7 @@ import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.helper.AnnotationHelper;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static io.siddhi.core.util.SiddhiConstants.REPETITIVE_PARAMETER_NOTATION;
 
@@ -140,8 +143,11 @@ public class InputParameterValidator {
                 for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
                     returnTypes.add(expressionExecutor.getReturnType());
                 }
+                String formattedParamOverloadString = getSupportedParamOverloads(parameterMap, parameterOverloads);
                 throw new SiddhiAppValidationException("There is no parameterOverload for '" + key +
-                        "' that matches attribute types '" + returnTypes + "'.");
+                        "' that matches attribute types '" + returnTypes.stream()
+                        .map(String::valueOf).collect(Collectors.joining(", ", "<", ">")) +
+                        "'. Supported parameter overloads are " + formattedParamOverloadString + ".");
             } else {
                 if (mandatoryCount > attributeExpressionExecutors.length) {
                     throw new SiddhiAppValidationException("The '" + key + "' expects at least " + mandatoryCount +
@@ -163,6 +169,40 @@ public class InputParameterValidator {
                 }
             }
         }
+    }
+
+    private static String getSupportedParamOverloads(Map<String, Parameter> parameterMap,
+                                                     ParameterOverload[] parameterOverloads) {
+        StringJoiner stringJoiner = new StringJoiner(", ");
+        for (ParameterOverload parameterOverload : parameterOverloads) {
+            String[] parameterNames = parameterOverload.parameterNames();
+            if (parameterNames.length != 0) {
+                StringJoiner paramOverloadStringJoiner = new StringJoiner(", ", "(", ")");
+                for (int i = 0; i < parameterNames.length; i++) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (!SiddhiConstants.REPETITIVE_PARAMETER_NOTATION.equals(parameterNames[i])) {
+                        stringBuilder.append(getFormattedStringForDataType(parameterMap.
+                                get(parameterNames[i]).type()));
+                        stringBuilder.append(" ").append(parameterNames[i]);
+                    } else {
+                        stringBuilder.append(getFormattedStringForDataType(parameterMap.
+                                get(parameterNames[i - 1]).type()));
+                        stringBuilder.append(" ").append(SiddhiConstants.REPETITIVE_PARAMETER_NOTATION);
+                    }
+                    paramOverloadStringJoiner.add(stringBuilder);
+                }
+                stringJoiner.add(paramOverloadStringJoiner.toString());
+            }
+        }
+        return stringJoiner.toString();
+    }
+
+    private static String getFormattedStringForDataType(DataType[] dataTypes) {
+        StringJoiner stringJoiner = new StringJoiner("|", "<", ">");
+        for (DataType dataType : dataTypes) {
+            stringJoiner.add(dataType.name());
+        }
+        return stringJoiner.toString();
     }
 }
 
