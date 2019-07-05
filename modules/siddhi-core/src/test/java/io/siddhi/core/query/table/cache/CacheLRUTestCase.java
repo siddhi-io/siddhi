@@ -773,7 +773,7 @@ public class CacheLRUTestCase {
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
         checkStockStream.send(new Object[]{"WSO2"});
-        Thread.sleep(1000);
+        Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
         Thread.sleep(15000);
 
@@ -873,7 +873,7 @@ public class CacheLRUTestCase {
         checkStockStream.send(new Object[]{"WSO2", 55.6f});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
-        Thread.sleep(11000);
+        Thread.sleep(15000);
 
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable " +
