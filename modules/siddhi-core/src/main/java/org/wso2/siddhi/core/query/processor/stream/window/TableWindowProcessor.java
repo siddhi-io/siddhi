@@ -127,9 +127,8 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
         return compiledSelection;
     }
 
-    public void tableUnavailable() {
-        table.setIsTryingToConnectToFalse();
-        table.connectWithRetry();
+    public Table getTable() {
+        return table;
     }
 
     @Override
