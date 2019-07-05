@@ -344,7 +344,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase4", dependsOnMethods = {"cacheLRUTestCase3"}) // 1 primary key & LRu & update func
+    @Test(description = "cacheLRUTestCase4", dependsOnMethods = {"cacheLRUTestCase3"})
+    // 1 primary key & LRu & update func
     public void cacheLRUTestCase4() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
