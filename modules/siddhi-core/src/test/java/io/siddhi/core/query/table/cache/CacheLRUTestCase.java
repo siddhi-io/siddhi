@@ -49,7 +49,7 @@ public class CacheLRUTestCase {
         removeEventCount = 0;
     }
 
-    @Test(description = "cacheLRUTestCase0")
+    @Test(description = "cacheLRUTestCase0")//, dependsOnMethods = {"cacheLRUTestCase10"})
     // using query api and 2 primary keys & LRu
     public void cacheLRUTestCase0() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
