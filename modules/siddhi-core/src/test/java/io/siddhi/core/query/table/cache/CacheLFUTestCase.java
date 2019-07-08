@@ -772,6 +772,7 @@ public class CacheLFUTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
+        Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO2"});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
@@ -870,6 +871,7 @@ public class CacheLFUTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
+        Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO2", 55.6f});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
