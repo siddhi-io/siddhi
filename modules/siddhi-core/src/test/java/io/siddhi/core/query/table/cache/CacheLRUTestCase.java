@@ -49,7 +49,7 @@ public class CacheLRUTestCase {
         removeEventCount = 0;
     }
 
-    @Test(description = "cacheLRUTestCase0") // using query api and 2 primary keys & LRu
+    @Test(description = "cacheLRUTestCase0", dependsOnMethods = {"cacheLRUTestCase10"}) // using query api and 2 primary keys & LRu
     public void cacheLRUTestCase0() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -820,10 +820,11 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase10", dependsOnMethods = {"cacheLRUTestCase9"})
+    @Test(description = "cacheLRUTestCase10")//, dependsOnMethods = {"cacheLRUTestCase9"})
     public void cacheLRUTestCase10() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
+        logger.removeAllAppenders();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         log.info("testTableJoinQuery2 - OUT 1");
@@ -917,4 +918,5 @@ public class CacheLRUTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
 }
