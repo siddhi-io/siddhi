@@ -76,7 +76,7 @@ public class AvgIncrementalAttributeAggregator extends IncrementalAttributeAggre
         sumIncrementalAttributeAggregator.init(attributeName, attributeType);
         CountIncrementalAttributeAggregator countIncrementalAttributeAggregator =
                 new CountIncrementalAttributeAggregator();
-        countIncrementalAttributeAggregator.init(attributeName, attributeType);
+        countIncrementalAttributeAggregator.init(null, null);
 
         // Only one attribute exists for sum and count
         sum = sumIncrementalAttributeAggregator.getBaseAttributes()[0];
