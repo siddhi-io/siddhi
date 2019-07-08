@@ -159,7 +159,7 @@
             <class name="io.siddhi.core.transport.SingleClientDistributedTransportTestCases"/>
 
             <class name="io.siddhi.core.query.table.cache.CacheExpireTestCase"/>
-            <class name="io.siddhi.core.query.table.cache.CacheExpiryAndReloadTestCase"/>
+            <!--<class name="io.siddhi.core.query.table.cache.CacheExpiryAndReloadTestCase"/>-->
             <class name="io.siddhi.core.query.table.cache.CacheCornerCasesTest"/>
             <class name="io.siddhi.core.query.table.cache.CacheFIFOTestCase"/>
             <class name="io.siddhi.core.query.table.cache.CacheLFUTestCase"/>
