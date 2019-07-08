@@ -88,7 +88,10 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'[LONG, STRING, LONG, INT]'.", e.getCause().getMessage());
+                    "'<LONG, STRING, LONG, INT>'. Supported parameter overloads are " +
+                    "(<INT|LONG|TIME> window.session), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
+                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -150,7 +153,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'[STRING, STRING, LONG]'.", e.getCause().getMessage());
+                    "'<STRING, STRING, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
+                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -215,7 +220,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'[LONG, INT, LONG]'.", e.getCause().getMessage());
+                    "'<LONG, INT, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
+                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -279,7 +286,10 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute " +
-                    "types '[LONG, STRING, STRING]'.", e.getCause().getMessage());
+                    "types '<LONG, STRING, STRING>'. Supported parameter overloads are " +
+                    "(<INT|LONG|TIME> window.session), (<INT|LONG|TIME> window.session, <STRING> window.key), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key, <INT|LONG|TIME> window.allowed.latency).",
+                    e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -312,7 +322,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types" +
-                    " '[LONG, INT]'.", e.getCause().getMessage());
+                    " '<LONG, INT>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
+                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -377,7 +389,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'[LONG, LONG]'.", e.getCause().getMessage());
+                    "'<LONG, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
+                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
+                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
