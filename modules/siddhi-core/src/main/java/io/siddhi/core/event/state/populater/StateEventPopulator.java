@@ -25,5 +25,4 @@ import io.siddhi.core.event.ComplexEvent;
 public interface StateEventPopulator {
 
     void populateStateEvent(ComplexEvent complexEvent);
-
 }
