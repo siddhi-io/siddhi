@@ -22,14 +22,12 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.query.api.execution.query.selection.Selector;
-import org.apache.log4j.Logger;
 
 /**
  * Processor implementation representing selector portion of the Siddhi query after table optimisation
  */
 public class OptimisedJoinQuerySelector extends QuerySelector {
 
-    private static final Logger log = Logger.getLogger(OptimisedJoinQuerySelector.class);
     private StateEventPopulator eventPopulatorForOptimisedLookup;
 
     public OptimisedJoinQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn,
@@ -38,9 +36,6 @@ public class OptimisedJoinQuerySelector extends QuerySelector {
     }
 
     public void processOptimisedQueryEvents(ComplexEventChunk complexEventChunk) {
-        if (log.isTraceEnabled()) {
-            log.trace("event is processed by selector '" + id + "', "  + complexEventChunk);
-        }
 
         ComplexEventChunk outputComplexEventChunk = processEventChunk(complexEventChunk);
 
