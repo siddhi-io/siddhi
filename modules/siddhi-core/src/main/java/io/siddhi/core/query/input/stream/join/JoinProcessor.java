@@ -28,7 +28,6 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
-import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
@@ -150,7 +149,7 @@ public class JoinProcessor implements Processor {
                 if (returnEventChunk.getFirst() != null) {
                     if (this.isOptimisedQuery) {
                         if (!isJoinEventNull) {
-                            ((OptimisedJoinQuerySelector) selector).processOptimisedQueryEvents(returnEventChunk);
+                            selector.processOptimisedQueryEvents(returnEventChunk);
                         } else {
                             selector.process(returnEventChunk);
                         }

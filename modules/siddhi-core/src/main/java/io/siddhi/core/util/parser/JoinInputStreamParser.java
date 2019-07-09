@@ -259,9 +259,8 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, executors,
                                 tableMap, siddhiQueryContext
                         );
-                        querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
-                                metaStateEvent, expectedOutputAttributes, false, tableMap, outputExpectsExpiredEvents,
-                                siddhiQueryContext);
+                        SelectorParser.populateForOptimisedJoin(querySelector, metaStateEvent, expectedOutputAttributes,
+                                false);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
@@ -300,9 +299,8 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder, executors,
                                 tableMap, siddhiQueryContext
                         );
-                        querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
-                                metaStateEvent, expectedOutputAttributes, true, tableMap, outputExpectsExpiredEvents,
-                                siddhiQueryContext);
+                        SelectorParser.populateForOptimisedJoin(querySelector, metaStateEvent, expectedOutputAttributes,
+                                true);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +

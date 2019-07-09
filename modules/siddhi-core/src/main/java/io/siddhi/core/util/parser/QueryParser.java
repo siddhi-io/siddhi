@@ -34,7 +34,6 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
-import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;

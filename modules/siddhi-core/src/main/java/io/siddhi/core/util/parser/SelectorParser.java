@@ -29,7 +29,6 @@ import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
-import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.OrderByEventComparator;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
@@ -270,11 +269,9 @@ public class SelectorParser {
     }
 
 
-    public static QuerySelector parseOptimisedSelector(QuerySelector querySelector, Selector selector,
-                                                       MetaStateEvent metaStateEvent,
-                                                       List<Attribute> expectedOutputAttributes, boolean isTableRightOfJoin,
-                                                       Map<String, Table> tableMap, boolean outputExpectsExpiredEvents,
-                                                       SiddhiQueryContext siddhiQueryContext) {
+    public static void populateForOptimisedJoin(QuerySelector querySelector, MetaStateEvent metaStateEvent,
+                                                List<Attribute> expectedOutputAttributes,
+                                                boolean isTableRightOfJoin) {
 
         int storeIndex;
         if (isTableRightOfJoin) {
@@ -294,58 +291,8 @@ public class SelectorParser {
         metaStoreEvent.addInputDefinition(streamDefinition);
         metaStoreEvent.setEventType(TABLE);
 
-        MetaStateEvent newMetaStateEvent = new MetaStateEvent(2);
-        if (isTableRightOfJoin) {
-            newMetaStateEvent.addEvent(metaStateEvent.getMetaStreamEvent(0));
-            newMetaStateEvent.addEvent(metaStoreEvent);
-        } else {
-            newMetaStateEvent.addEvent(metaStoreEvent);
-            newMetaStateEvent.addEvent(metaStateEvent.getMetaStreamEvent(1));
-        }
-
-        List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
-        for (Attribute outputAttribute : expectedOutputAttributes) {
-            Variable variable = new Variable(outputAttribute.getName());
-            if (tableReference != null) {
-                variable.setStreamId(tableReference);
-            } else {
-                variable.setStreamId(metaStateEvent.getMetaStreamEvent(storeIndex).getLastInputDefinition().getId());
-            }
-            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(variable, newMetaStateEvent,
-                    SiddhiConstants.UNKNOWN_STATE, tableMap, variableExpressionExecutors, false, 0,
-                    ProcessingMode.BATCH, outputExpectsExpiredEvents, siddhiQueryContext);
-            VariableExpressionExecutor executor = ((VariableExpressionExecutor) expressionExecutor);
-            newMetaStateEvent.addOutputDataAllowingDuplicate(new MetaStateEventAttribute(executor
-                    .getAttribute(), executor.getPosition()));
-        }
-
-        QueryParserHelper.updateVariablePosition(newMetaStateEvent, variableExpressionExecutors);
-
-        OptimisedJoinQuerySelector optimisedJoinQuerySelector = new OptimisedJoinQuerySelector(querySelector.getId(),
-                selector, querySelector.isCurrentOn(), querySelector.isExpiredOn(), siddhiQueryContext);
-        optimisedJoinQuerySelector.setEventPopulatorForOptimisedLookup(
-                StateEventPopulatorFactory.constructEventPopulator(newMetaStateEvent));
-        optimisedJoinQuerySelector.setAttributeProcessorList(querySelector.getAttributeProcessorList(),
-                querySelector.isContainsAggregator());
-        optimisedJoinQuerySelector.setHavingConditionExecutor(querySelector.getHavingConditionExecutor(),
-                querySelector.isContainsAggregator());
-        if (querySelector.isGroupBy()) {
-            optimisedJoinQuerySelector.setGroupByKeyGenerator(querySelector.getGroupByKeyGenerator());
-        }
-
-        if (querySelector.isOrderBy()) {
-            optimisedJoinQuerySelector.setOrderByEventComparator(querySelector.getOrderByEventComparator());
-        }
-
-        if (querySelector.getLimit() > 0) {
-            optimisedJoinQuerySelector.setLimit(querySelector.getLimit());
-        }
-
-        if (querySelector.getOffset() > 0) {
-            optimisedJoinQuerySelector.setOffset(querySelector.getOffset());
-        }
-
-        return optimisedJoinQuerySelector;
+        querySelector.setEventPopulatorForOptimisedLookup(
+                StateEventPopulatorFactory.constructEventPopulator(metaStoreEvent));
 
     }
 
