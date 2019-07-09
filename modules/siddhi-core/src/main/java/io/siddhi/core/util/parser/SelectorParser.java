@@ -21,7 +21,6 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.MetaStateEventAttribute;
-import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -48,8 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
 
 /**
  * Class to parse {@link QuerySelector}.
@@ -266,5 +263,4 @@ public class SelectorParser {
     public static ThreadLocal<String> getContainsAggregatorThreadLocal() {
         return containsAggregatorThreadLocal;
     }
-
 }
