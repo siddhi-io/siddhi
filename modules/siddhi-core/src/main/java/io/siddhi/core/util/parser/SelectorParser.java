@@ -34,7 +34,6 @@ import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -266,34 +265,6 @@ public class SelectorParser {
 
     public static ThreadLocal<String> getContainsAggregatorThreadLocal() {
         return containsAggregatorThreadLocal;
-    }
-
-
-    public static void populateForOptimisedJoin(QuerySelector querySelector, MetaStateEvent metaStateEvent,
-                                                List<Attribute> expectedOutputAttributes,
-                                                boolean isTableRightOfJoin) {
-
-        int storeIndex;
-        if (isTableRightOfJoin) {
-            storeIndex = 1;
-        } else {
-            storeIndex = 0;
-        }
-
-        MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
-        expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
-        String tableReference = metaStateEvent.getMetaStreamEvent(storeIndex).getInputReferenceId();
-        metaStoreEvent.setInputReferenceId(tableReference);
-        StreamDefinition streamDefinition =  new StreamDefinition();
-        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(storeIndex).getLastInputDefinition().getId());
-        expectedOutputAttributes
-                .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
-        metaStoreEvent.addInputDefinition(streamDefinition);
-        metaStoreEvent.setEventType(TABLE);
-
-        querySelector.setEventPopulatorForOptimisedLookup(
-                StateEventPopulatorFactory.constructEventPopulator(metaStoreEvent));
-
     }
 
 }
