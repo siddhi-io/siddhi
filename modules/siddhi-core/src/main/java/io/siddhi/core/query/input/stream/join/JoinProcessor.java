@@ -58,13 +58,17 @@ public class JoinProcessor implements Processor {
     private FindableProcessor findableProcessor;
     private Processor nextProcessor;
     private QuerySelector selector;
+    private String siddhiAppName;
+    private String queryName;
 
     public JoinProcessor(boolean leftJoinProcessor, boolean preJoinProcessor, boolean outerJoinProcessor,
-                         int matchingStreamIndex) {
+                         int matchingStreamIndex, String siddhiAppName, String queryName) {
         this.leftJoinProcessor = leftJoinProcessor;
         this.preJoinProcessor = preJoinProcessor;
         this.outerJoinProcessor = outerJoinProcessor;
         this.matchingStreamIndex = matchingStreamIndex;
+        this.siddhiAppName = siddhiAppName;
+        this.queryName = queryName;
     }
 
     /**
@@ -105,8 +109,8 @@ public class JoinProcessor implements Processor {
                         try {
                             foundStreamEvent = query(joinStateEvent);
                         } catch (SiddhiAppRuntimeException e) {
-                            log.warn("Optimised lookup failed with '" + e.getMessage() + "' reverting to " +
-                                    "regular join.", e);
+                            log.warn("Optimised join failed with '" + e.getMessage() + " in query '" + queryName +
+                                    "' within Siddhi app '" + siddhiAppName + "' reverting to regular join.", e);
                             this.isOptimisedQuery = false;
                             foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
                         }
@@ -175,11 +179,13 @@ public class JoinProcessor implements Processor {
                 return query(joinStateEvent);
             }
         } else if (table.getIsTryingToConnect()) {
-            log.warn("Error while performing query for event '" +  joinStateEvent + "', operation busy waiting at " +
-                    "Table '" + table.getTableDefinition().getId() + "' as its trying to reconnect!");
+            log.warn("Error while performing query '" + queryName + "' within Siddhi app '" + siddhiAppName +
+                    "' for event '" +  joinStateEvent + "', operation busy waiting at Table '" +
+                    table.getTableDefinition().getId() + "' as its trying to reconnect!");
             table.waitWhileConnect();
-            log.info("Table '" + table.getTableDefinition().getId() + "' has become available for query operation " +
-                    "for matching event '" + joinStateEvent + "'");
+            log.info("Table '" + table.getTableDefinition().getId() + "' has become available for query '" +
+                    queryName + "' within Siddhi app '" + siddhiAppName + "for matching event '" +
+                    joinStateEvent + "'");
             return query(joinStateEvent);
         } else {
             table.connectWithRetry();

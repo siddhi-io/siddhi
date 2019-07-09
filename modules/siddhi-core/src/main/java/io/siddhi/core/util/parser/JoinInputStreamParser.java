@@ -203,20 +203,20 @@ public class JoinInputStreamParser {
                     break;
             }
 
-            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true,
-                    leftOuterJoinProcessor, 0);
-            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false,
-                    leftOuterJoinProcessor, 0);
+            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor, 0,
+                    siddhiQueryContext.getSiddhiAppContext().getName(), siddhiQueryContext.getName());
+            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor, 0,
+                    siddhiQueryContext.getSiddhiAppContext().getName(), siddhiQueryContext.getName());
 
             FindableProcessor leftFindableProcessor = insertJoinProcessorsAndGetFindable(leftPreJoinProcessor,
                     leftPostJoinProcessor, leftStreamRuntime, outputExpectsExpiredEvents,
                     joinInputStream.getLeftInputStream(), siddhiQueryContext
             );
 
-            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true,
-                    rightOuterJoinProcessor, 1);
-            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false,
-                    rightOuterJoinProcessor, 1);
+            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor, 1,
+                    siddhiQueryContext.getSiddhiAppContext().getName(), siddhiQueryContext.getName());
+            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor, 1,
+                    siddhiQueryContext.getSiddhiAppContext().getName(), siddhiQueryContext.getName());
 
             FindableProcessor rightFindableProcessor = insertJoinProcessorsAndGetFindable(rightPreJoinProcessor,
                     rightPostJoinProcessor, rightStreamRuntime, outputExpectsExpiredEvents,
@@ -264,10 +264,9 @@ public class JoinInputStreamParser {
                                 siddhiQueryContext);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for table: " +
-                                    ((TableWindowProcessor) leftFindableProcessor).getTableId() +
-                                    ". Creating Store Query runtime in normal  mode.  Reason for failure: " +
-                                    e.getMessage());
+                            log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
+                                    "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
+                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
@@ -306,10 +305,9 @@ public class JoinInputStreamParser {
                                 siddhiQueryContext);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for table: " +
-                                    ((TableWindowProcessor) rightFindableProcessor).getTableId() +
-                                    ". Creating Store Query runtime in normal  mode.  Reason for failure: " +
-                                    e.getMessage());
+                            log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
+                                    "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
+                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
