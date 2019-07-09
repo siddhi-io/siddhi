@@ -22,6 +22,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
+import io.siddhi.core.exception.QueryableRecordTableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -60,6 +61,7 @@ import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,7 @@ import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
 import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.WINDOW;
 
 public class JoinInputStreamParser {
+    private static final Logger log = Logger.getLogger(JoinInputStreamParser.class);
 
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream, Query query,
@@ -251,15 +254,22 @@ public class JoinInputStreamParser {
 
                     expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
-                    rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
-                            query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, executors,
-                            tableMap, siddhiQueryContext
-                    );
-
-                    if (rightCompiledSelection != null) {
+                    try {
+                        rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
+                                query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, executors,
+                                tableMap, siddhiQueryContext
+                        );
                         querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
                                 metaStateEvent, expectedOutputAttributes, false, tableMap, outputExpectsExpiredEvents,
                                 siddhiQueryContext);
+                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Query optimization failed for table: " +
+                                    ((TableWindowProcessor) leftFindableProcessor).getTableId() +
+                                    ". Creating Store Query runtime in normal  mode.  Reason for failure: " +
+                                    e.getMessage());
+                        }
+                        // Nothing to override
                     }
                 }
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
@@ -286,15 +296,22 @@ public class JoinInputStreamParser {
 
                     expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
-                    leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
-                            query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder, executors,
-                            tableMap, siddhiQueryContext
-                    );
-
-                    if (leftCompiledSelection != null){
+                    try {
+                        leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
+                                query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder, executors,
+                                tableMap, siddhiQueryContext
+                        );
                         querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
                                 metaStateEvent, expectedOutputAttributes, true, tableMap, outputExpectsExpiredEvents,
                                 siddhiQueryContext);
+                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Query optimization failed for table: " +
+                                    ((TableWindowProcessor) rightFindableProcessor).getTableId() +
+                                    ". Creating Store Query runtime in normal  mode.  Reason for failure: " +
+                                    e.getMessage());
+                        }
+                        // Nothing to override
                     }
                 }
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,

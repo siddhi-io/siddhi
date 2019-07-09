@@ -24,8 +24,6 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.exception.QueryableRecordTableException;
-import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
@@ -40,7 +38,6 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -48,9 +45,7 @@ import java.util.Map;
 /**
  * Implementation of {@link WindowProcessor} which represent a Window operating based on {@link Table}.
  */
-public class TableWindowProcessor extends BatchingWindowProcessor implements FindableProcessor, QueryableProcessor {
-
-    private static final Logger log = Logger.getLogger(TableWindowProcessor.class);
+public class TableWindowProcessor extends BatchingWindowProcessor implements QueryableProcessor {
 
     private Table table;
     private boolean isOptimisableLookup;
@@ -121,23 +116,16 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        CompiledSelection compiledSelection = null;
-        try {
-            compiledSelection = ((AbstractQueryableRecordTable) this.table).compileSelection(selector,
-                    expectedOutputAttributes, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiQueryContext);
-        } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Store Query optimization failed for table: "
-                        + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
-                        "Reason for failure: " + e.getMessage());
-            }
-            this.isOptimisableLookup = false;
-        }
-        return compiledSelection;
+        return ((AbstractQueryableRecordTable) this.table).compileSelection(selector,
+                expectedOutputAttributes, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                siddhiQueryContext);
     }
 
     public Table getTable() {
         return table;
+    }
+
+    public String getTableId() {
+        return table.getTableDefinition().getId();
     }
 }
