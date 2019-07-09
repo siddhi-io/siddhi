@@ -257,7 +257,7 @@ public class JoinInputStreamParser {
                     );
 
                     if (rightCompiledSelection != null) {
-                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, query.getSelector(),
+                        querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
                                 metaStateEvent, expectedOutputAttributes, false, tableMap, outputExpectsExpiredEvents,
                                 siddhiQueryContext);
                     }
@@ -292,7 +292,7 @@ public class JoinInputStreamParser {
                     );
 
                     if (leftCompiledSelection != null){
-                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, query.getSelector(),
+                        querySelector = SelectorParser.parseOptimisedSelector(querySelector, query.getSelector(),
                                 metaStateEvent, expectedOutputAttributes, true, tableMap, outputExpectsExpiredEvents,
                                 siddhiQueryContext);
                     }

@@ -21,6 +21,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.MetaStateEventAttribute;
+import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -28,11 +29,13 @@ import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
+import io.siddhi.core.query.selector.OptimisedJoinQuerySelector;
 import io.siddhi.core.query.selector.OrderByEventComparator;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -47,6 +50,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
 
 /**
  * Class to parse {@link QuerySelector}.
@@ -263,4 +268,85 @@ public class SelectorParser {
     public static ThreadLocal<String> getContainsAggregatorThreadLocal() {
         return containsAggregatorThreadLocal;
     }
+
+
+    public static QuerySelector parseOptimisedSelector(QuerySelector querySelector, Selector selector,
+                                                       MetaStateEvent metaStateEvent,
+                                                       List<Attribute> expectedOutputAttributes, boolean isTableRightOfJoin,
+                                                       Map<String, Table> tableMap, boolean outputExpectsExpiredEvents,
+                                                       SiddhiQueryContext siddhiQueryContext) {
+
+        int storeIndex;
+        if (isTableRightOfJoin) {
+            storeIndex = 1;
+        } else {
+            storeIndex = 0;
+        }
+
+        MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
+        expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
+        String tableReference = metaStateEvent.getMetaStreamEvent(storeIndex).getInputReferenceId();
+        metaStoreEvent.setInputReferenceId(tableReference);
+        StreamDefinition streamDefinition =  new StreamDefinition();
+        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(storeIndex).getLastInputDefinition().getId());
+        expectedOutputAttributes
+                .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
+        metaStoreEvent.addInputDefinition(streamDefinition);
+        metaStoreEvent.setEventType(TABLE);
+
+        MetaStateEvent newMetaStateEvent = new MetaStateEvent(2);
+        if (isTableRightOfJoin) {
+            newMetaStateEvent.addEvent(metaStateEvent.getMetaStreamEvent(0));
+            newMetaStateEvent.addEvent(metaStoreEvent);
+        } else {
+            newMetaStateEvent.addEvent(metaStoreEvent);
+            newMetaStateEvent.addEvent(metaStateEvent.getMetaStreamEvent(1));
+        }
+
+        List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+        for (Attribute outputAttribute : expectedOutputAttributes) {
+            Variable variable = new Variable(outputAttribute.getName());
+            if (tableReference != null) {
+                variable.setStreamId(tableReference);
+            } else {
+                variable.setStreamId(metaStateEvent.getMetaStreamEvent(storeIndex).getLastInputDefinition().getId());
+            }
+            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(variable, newMetaStateEvent,
+                    SiddhiConstants.UNKNOWN_STATE, tableMap, variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, outputExpectsExpiredEvents, siddhiQueryContext);
+            VariableExpressionExecutor executor = ((VariableExpressionExecutor) expressionExecutor);
+            newMetaStateEvent.addOutputDataAllowingDuplicate(new MetaStateEventAttribute(executor
+                    .getAttribute(), executor.getPosition()));
+        }
+
+        QueryParserHelper.updateVariablePosition(newMetaStateEvent, variableExpressionExecutors);
+
+        OptimisedJoinQuerySelector optimisedJoinQuerySelector = new OptimisedJoinQuerySelector(querySelector.getId(),
+                selector, querySelector.isCurrentOn(), querySelector.isExpiredOn(), siddhiQueryContext);
+        optimisedJoinQuerySelector.setEventPopulatorForOptimisedLookup(
+                StateEventPopulatorFactory.constructEventPopulator(newMetaStateEvent));
+        optimisedJoinQuerySelector.setAttributeProcessorList(querySelector.getAttributeProcessorList(),
+                querySelector.isContainsAggregator());
+        optimisedJoinQuerySelector.setHavingConditionExecutor(querySelector.getHavingConditionExecutor(),
+                querySelector.isContainsAggregator());
+        if (querySelector.isGroupBy()) {
+            optimisedJoinQuerySelector.setGroupByKeyGenerator(querySelector.getGroupByKeyGenerator());
+        }
+
+        if (querySelector.isOrderBy()) {
+            optimisedJoinQuerySelector.setOrderByEventComparator(querySelector.getOrderByEventComparator());
+        }
+
+        if (querySelector.getLimit() > 0) {
+            optimisedJoinQuerySelector.setLimit(querySelector.getLimit());
+        }
+
+        if (querySelector.getOffset() > 0) {
+            optimisedJoinQuerySelector.setOffset(querySelector.getOffset());
+        }
+
+        return optimisedJoinQuerySelector;
+
+    }
+
 }
