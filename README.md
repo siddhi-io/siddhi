@@ -2,8 +2,8 @@ Siddhi Core Libraries
 =====================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
-  [![GitHub (pre-)Release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
-  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub Release](https://img.shields.io/github/release/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub Release Date](https://img.shields.io/github/release-date/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
   [![GitHub Open Issues](https://img.shields.io/github/issues-raw/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
   [![Codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)

@@ -140,16 +140,15 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                         this.resetState();
                     }
                     this.updateState();
+
+                    StateEvent expiredStateEvent = null;
                     iterator = state.getPendingStateEventList().iterator();
                     while (iterator.hasNext()) {
                         StateEvent stateEvent = iterator.next();
                         // Remove expired events based on within
                         if (isExpired(stateEvent, currentTime)) {
+                            expiredStateEvent = stateEvent;
                             iterator.remove();
-                            if (withinEveryPreStateProcessor != null) {
-                                withinEveryPreStateProcessor.addEveryState(stateEvent);
-                                withinEveryPreStateProcessor.updateState();
-                            }
                             continue;
                         }
                         // Collect the events that came before the waiting time
@@ -171,6 +170,10 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                                 stateEvent.addEvent(stateId, streamEventFactory.newInstance());
                             }
                         }
+                    }
+                    if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                        withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                        withinEveryPreStateProcessor.updateState();
                     }
                     retEventChunk.reset();
                     notProcessed = retEventChunk.getFirst() == null;
@@ -256,15 +259,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
             this.lock.lock();
             try {
+                StateEvent expiredStateEvent = null;
                 for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator();
                      iterator.hasNext(); ) {
                     StateEvent stateEvent = iterator.next();
                     if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                        if (withinEveryPreStateProcessor != null) {
-                            withinEveryPreStateProcessor.addEveryState(stateEvent);
-                            withinEveryPreStateProcessor.updateState();
-                        }
                         iterator.remove();
+                        expiredStateEvent = stateEvent;
                         continue;
                     }
                     if (logicalType == LogicalStateElement.Type.OR &&
@@ -300,6 +301,10 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                                 break;
                         }
                     }
+                }
+                if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                    withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                    withinEveryPreStateProcessor.updateState();
                 }
             } finally {
                 this.lock.unlock();
