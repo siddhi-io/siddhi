@@ -71,8 +71,10 @@ public abstract class AbstractRecordTable extends Table {
         initCache(tableDefinition, siddhiAppContext, storeEventCloner, configReader);
     }
 
-    protected abstract void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
-                                 StreamEventCloner storeEventCloner, ConfigReader configReader);
+    protected void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
+                             StreamEventCloner storeEventCloner, ConfigReader configReader) {
+
+    }
 
     /**
      * Initializing the Record Table
@@ -215,6 +217,13 @@ public abstract class AbstractRecordTable extends Table {
             delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
         }
     }
+
+    protected void connectAndLoadCache() throws ConnectionUnavailableException {
+        connect();
+    }
+
+    protected abstract void connect() throws ConnectionUnavailableException;
+
 
     /**
      * Delete all matching records

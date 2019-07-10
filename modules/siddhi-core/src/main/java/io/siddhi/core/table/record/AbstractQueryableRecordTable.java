@@ -225,8 +225,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    protected abstract void connect() throws ConnectionUnavailableException;
-
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection) throws ConnectionUnavailableException {
