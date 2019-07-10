@@ -1035,7 +1035,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     public void handleCacheExpiry(CompiledCondition cacheExpiryCompiledCondition,
                                   ComplexEventChunk<StateEvent> deleteEventChunk) {
-        log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
+        if (log.isDebugEnabled()) {
+            log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
+        }
         StateEvent stateEventForCaching = new StateEvent(1, 0);
         StreamEvent loadedDataFromStore;
 
@@ -1091,7 +1093,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
                 }
             }
-            log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
+            if (log.isDebugEnabled()) {
+                log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
+            }
         } finally {
             readWriteLock.writeLock().unlock();
         }
