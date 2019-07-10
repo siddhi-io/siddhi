@@ -43,8 +43,6 @@ public class QueryAPITestCaseForTableWithCache {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Store(type=\"testStoreDummyForCache\", @Cache(size=\"10\"))\n" +
-//                "@PrimaryKey(\"symbol\")" +
-//                "@Index(\"volume\")" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
