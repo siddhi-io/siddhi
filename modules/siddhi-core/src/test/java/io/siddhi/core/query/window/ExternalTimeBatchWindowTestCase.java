@@ -55,7 +55,6 @@ public class ExternalTimeBatchWindowTestCase {
 
     @Test
     public void test02NoMsg() throws Exception {
-        SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime runtime = simpleQueryRuntime();
 
         final AtomicBoolean recieved = new AtomicBoolean();
@@ -79,9 +78,7 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(1000);
         AssertJUnit.assertFalse("Event happens inner external time batch window, should not have event recieved in " +
                 "callback!", recieved.get());
-
         runtime.shutdown();
-        siddhiManager.shutdown();
     }
 
     private SiddhiAppRuntime simpleQueryRuntime() {
@@ -137,12 +134,10 @@ public class ExternalTimeBatchWindowTestCase {
         }
         // to trigger second round
         input.send(new Object[]{10000, now + 10 * 10000});
-
-//        latch.await();// for debug
-
         Thread.sleep(1000);
 
         AssertJUnit.assertEquals(2, recCount.get());
+        runtime.shutdown();
     }
 
     @Test
