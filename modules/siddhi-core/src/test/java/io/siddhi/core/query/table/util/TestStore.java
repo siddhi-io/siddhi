@@ -69,6 +69,11 @@ public class TestStore extends AbstractRecordTable {
     }
 
     @Override
+    protected void connect() throws ConnectionUnavailableException {
+
+    }
+
+    @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
         systemConfigs = new HashMap<>();
         systemConfigs = AnnotationHelper.getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations())
