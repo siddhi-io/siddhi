@@ -238,14 +238,14 @@ public class ExternalTimeBatchWindowTestCase {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (count.get() == 0) {
+                count.getAndIncrement();
+                if (count.get() == 1) {
                     AssertJUnit.assertEquals(1, inEvents[0].getData(0));
-                } else if (count.get() == 1) {
-                    AssertJUnit.assertEquals(6, inEvents[0].getData(0));
                 } else if (count.get() == 2) {
+                    AssertJUnit.assertEquals(6, inEvents[0].getData(0));
+                } else if (count.get() == 3) {
                     AssertJUnit.assertEquals(11, inEvents[0].getData(0));
                 }
-                count.getAndIncrement();
             }
         });
 
