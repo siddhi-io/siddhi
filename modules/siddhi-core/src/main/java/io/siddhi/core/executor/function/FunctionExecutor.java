@@ -60,7 +60,7 @@ public abstract class FunctionExecutor<S extends State> implements ExpressionExe
             StateFactory<S> stateFactory = init(attributeExpressionExecutors, configReader, this.siddhiQueryContext);
             stateHolder = this.siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, stateFactory);
         } catch (Throwable t) {
-            throw new SiddhiAppCreationException(t);
+            throw new SiddhiAppCreationException(t.getMessage(), t);
         }
     }
 
