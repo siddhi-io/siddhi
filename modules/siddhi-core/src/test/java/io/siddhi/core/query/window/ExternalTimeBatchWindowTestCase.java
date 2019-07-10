@@ -280,7 +280,7 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{25000L, 14});
         Thread.sleep(100);
-        AssertJUnit.assertEquals(count.get(), 2);
+        AssertJUnit.assertEquals(3, count.get());
         siddhiManager.shutdown();
     }
 
