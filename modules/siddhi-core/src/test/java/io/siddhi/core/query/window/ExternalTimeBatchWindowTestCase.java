@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExternalTimeBatchWindowTestCase {
 
     private static final Logger log = Logger.getLogger(TimeWindowTestCase.class);
-    private static SiddhiManager siddhiManager;
     private int inEventCount;
     private int removeEventCount;
     private long sum;
@@ -49,7 +48,6 @@ public class ExternalTimeBatchWindowTestCase {
 
     @BeforeMethod
     public void init() {
-
         inEventCount = 0;
         removeEventCount = 0;
         eventArrived = false;
@@ -57,46 +55,39 @@ public class ExternalTimeBatchWindowTestCase {
 
     @Test
     public void test02NoMsg() throws Exception {
-
-        siddhiManager = new SiddhiManager();
-
         SiddhiAppRuntime runtime = simpleQueryRuntime();
 
         final AtomicBoolean recieved = new AtomicBoolean();
+
         runtime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 recieved.set(true);
                 EventPrinter.print(timestamp, inEvents, removeEvents);
             }
         });
+        runtime.start();
 
         InputHandler input = runtime.getInputHandler("jmxMetric");
-
-        runtime.start();
         // external events' time stamp less than the window, should not have event recieved in call back.
         long now = System.currentTimeMillis();
         int length = 5;
         for (int i = 0; i < length; i++) {
             input.send(new Object[]{15, now + i * 1000});
         }
-
         Thread.sleep(1000);
         AssertJUnit.assertFalse("Event happens inner external time batch window, should not have event recieved in " +
                 "callback!", recieved.get());
-
         runtime.shutdown();
     }
 
     private SiddhiAppRuntime simpleQueryRuntime() {
-
         String query = "define stream jmxMetric(cpu int, timestamp long); "
                 + "@info(name='query')"
                 + "from jmxMetric#window.externalTimeBatch(timestamp, 10 sec) "
                 + "select avg(cpu) as avgCpu, count() as count insert into tmp;";
 
-        return siddhiManager.createSiddhiAppRuntime(query);
+        return new SiddhiManager().createSiddhiAppRuntime(query);
     }
 
     // for test findable
@@ -107,9 +98,6 @@ public class ExternalTimeBatchWindowTestCase {
 
     @Test
     public void test05EdgeCase() throws Exception {
-
-        siddhiManager = new SiddhiManager();
-
         // every 10 sec
         SiddhiAppRuntime runtime = simpleQueryRuntime();
 
@@ -117,7 +105,6 @@ public class ExternalTimeBatchWindowTestCase {
         runtime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 AssertJUnit.assertEquals(1, inEvents.length);
                 recCount.incrementAndGet();
                 double avgCpu = (Double) inEvents[0].getData()[0];
@@ -147,19 +134,14 @@ public class ExternalTimeBatchWindowTestCase {
         }
         // to trigger second round
         input.send(new Object[]{10000, now + 10 * 10000});
-
-//        latch.await();// for debug
-
         Thread.sleep(1000);
 
         AssertJUnit.assertEquals(2, recCount.get());
+        runtime.shutdown();
     }
 
     @Test
     public void test01DownSampling() throws Exception {
-
-        siddhiManager = new SiddhiManager();
-
         String stream = "define stream jmxMetric(cpu int, memory int, bytesIn long, bytesOut long, timestamp long);";
         String query = "@info(name = 'downSample') "
                 + "from jmxMetric#window.externalTimeBatch(timestamp, 10 sec) "
@@ -189,7 +171,6 @@ public class ExternalTimeBatchWindowTestCase {
             plan.addCallback("jmxMetric", new StreamCallback() {
                 @Override
                 public void receive(Event[] arg0) {
-
                     counter.addAndGet(arg0.length);
                 }
             });
@@ -199,7 +180,6 @@ public class ExternalTimeBatchWindowTestCase {
             plan.addCallback("downSample", new QueryCallback() {
                 @Override
                 public void receive(long timestamp, Event[] inevents, Event[] removevents) {
-
                     int currentCount = queryWideCounter.addAndGet(inevents.length);
                     log.info(MessageFormat.format("Round {0} ====", currentCount));
                     log.info(" events count " + inevents.length);
@@ -209,7 +189,6 @@ public class ExternalTimeBatchWindowTestCase {
 
             });
         }
-
         plan.start();
 
         int round = 4;
@@ -230,7 +209,6 @@ public class ExternalTimeBatchWindowTestCase {
 
     // one round of sending events
     private int sendEvent(InputHandler input, int ite, long externalTs) throws Exception {
-
         int len = 3;
         Event[] events = new Event[len];
         for (int i = 0; i < len; i++) {
@@ -246,8 +224,8 @@ public class ExternalTimeBatchWindowTestCase {
 
     @Test
     public void test1() throws InterruptedException {
-
-        siddhiManager = new SiddhiManager();
+        final AtomicInteger count = new AtomicInteger(0);
+        SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream(currentTime long,value int); ";
         String query = " " +
                 "@info(name='query') " +
@@ -257,20 +235,17 @@ public class ExternalTimeBatchWindowTestCase {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
-            int count = 0;
-
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (count == 0) {
+                count.getAndIncrement();
+                if (count.get() == 1) {
                     AssertJUnit.assertEquals(1, inEvents[0].getData(0));
-                } else if (count == 1) {
+                } else if (count.get() == 2) {
                     AssertJUnit.assertEquals(6, inEvents[0].getData(0));
-                } else if (count == 2) {
-                    AssertJUnit.assertEquals(13, inEvents[0].getData(0));
+                } else if (count.get() == 3) {
+                    AssertJUnit.assertEquals(11, inEvents[0].getData(0));
                 }
-                count += 1;
             }
         });
 
@@ -303,14 +278,15 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{22000L, 13});
         Thread.sleep(100);
-        inputHandler.send(new Object[]{23000L, 14});
+        inputHandler.send(new Object[]{25000L, 14});
         Thread.sleep(100);
+        AssertJUnit.assertEquals(3, count.get());
+        siddhiManager.shutdown();
     }
 
     @Test
     public void test2() throws InterruptedException {
-
-        siddhiManager = new SiddhiManager();
+        SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream(currentTime long,value int); ";
         String query = " @info(name='query') " +
                 "from inputStream#window.externalTimeBatch(currentTime,5 sec,1200) " +
@@ -323,7 +299,6 @@ public class ExternalTimeBatchWindowTestCase {
 
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (count == 0) {
                     AssertJUnit.assertEquals(0L, inEvents[0].getData(0));
@@ -344,13 +319,12 @@ public class ExternalTimeBatchWindowTestCase {
             inputHandler.send(new Object[]{i + 10000, i / 100});
             Thread.sleep(200);
         }
-
+        siddhiManager.shutdown();
     }
 
     @Test
     public void schedulerLastBatchTriggerTest() throws InterruptedException {
-
-        siddhiManager = new SiddhiManager();
+        SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream(currentTime long,value int); ";
         String query = " " +
                 "@info(name='query') " +
@@ -364,7 +338,6 @@ public class ExternalTimeBatchWindowTestCase {
 
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 if (count == 0) {
                     AssertJUnit.assertEquals(1, inEvents[0].getData(0));
                 } else if (count == 1) {
@@ -415,12 +388,11 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{33000L, 16});
         Thread.sleep(6000);
-
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest1() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -438,7 +410,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -465,12 +436,11 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 2, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest2() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -488,7 +458,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -516,13 +485,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 2, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest3() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -540,7 +508,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -568,13 +535,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 3, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest4() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test4");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -592,7 +558,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -621,13 +586,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 3, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest5() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test5");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -671,13 +635,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 1, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest6() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test6");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -695,7 +658,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -724,13 +686,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 2, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest7() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test7");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -748,7 +709,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -782,13 +742,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest8() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test8");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -806,7 +765,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
@@ -853,12 +811,11 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 5, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest9() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test9");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -892,10 +849,8 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.start();
 
         Runnable runnable = new Runnable() {
-
             @Override
             public void run() {
-
                 int i = 0;
                 long time = 1366335804341L;
                 while (i < 10000) {
@@ -923,12 +878,11 @@ public class ExternalTimeBatchWindowTestCase {
 
         Thread.sleep(10000);
         AssertJUnit.assertEquals(10 * 10000, sum);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest10() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test10");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -946,7 +900,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
@@ -993,12 +946,11 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 5, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest11() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test11");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1057,12 +1009,11 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 2, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest12() throws InterruptedException {
-
         log.info("externalTimeBatchWindow Test12");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1082,7 +1033,6 @@ public class ExternalTimeBatchWindowTestCase {
             siddhiAppRuntime.addCallback("query1", new QueryCallback() {
                 @Override
                 public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                     EventPrinter.print(timestamp, inEvents, removeEvents);
                     if (inEvents != null) {
                         inEventCount += (inEvents.length);
@@ -1106,13 +1056,12 @@ public class ExternalTimeBatchWindowTestCase {
             org.testng.AssertJUnit.assertEquals(0, removeEventCount);
             org.testng.AssertJUnit.assertTrue(eventArrived);
         } finally {
-            siddhiAppRuntime.shutdown();
+            siddhiManager.shutdown();
         }
     }
 
     @Test
     public void externalTimeBatchWindowTest13() throws InterruptedException {
-
         log.info("externalTimeBatchWindow Test13");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1156,13 +1105,12 @@ public class ExternalTimeBatchWindowTestCase {
             org.testng.AssertJUnit.assertEquals(1, removeEventCount);
             org.testng.AssertJUnit.assertTrue(eventArrived);
         } finally {
-            siddhiAppRuntime.shutdown();
+            siddhiManager.shutdown();
         }
     }
 
     @Test
     public void externalTimeBatchWindowTest14() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test14");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1208,12 +1156,11 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 2, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
     public void externalTimeBatchWindowTest15() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test15");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1231,7 +1178,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -1261,13 +1207,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest16() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test16");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1285,7 +1230,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -1321,13 +1265,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test
     public void externalTimeBatchWindowTest17() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test17");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1382,13 +1325,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void externalTimeBatchWindowTest18() throws InterruptedException {
-
         log.info("externalTimeBatchWindow test18");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1406,7 +1348,6 @@ public class ExternalTimeBatchWindowTestCase {
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
@@ -1443,7 +1384,7 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
 
     }
 
@@ -1491,10 +1432,10 @@ public class ExternalTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{1366335824351L, "192.10.1.9"});
         inputHandler.send(new Object[]{1366335824441L, "192.10.1.10"});
         Thread.sleep(1000);
-        org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
-        org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("In Events ", 4, inEventCount);
+        AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
@@ -1534,10 +1475,10 @@ public class ExternalTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{1366335824351L, "192.10.1.9"});
         inputHandler.send(new Object[]{1366335824441L, "192.10.1.10"});
         Thread.sleep(1000);
-        org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
-        org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("In Events ", 4, inEventCount);
+        AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
@@ -1586,12 +1527,12 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void test22() throws InterruptedException {
-        siddhiManager = new SiddhiManager();
+        SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream(currentTime int,value int); ";
         String query = " " +
                 "@info(name='query') " +
@@ -1644,11 +1585,12 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{2300, 14});
         Thread.sleep(100);
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void test23() throws InterruptedException {
-        siddhiManager = new SiddhiManager();
+        SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream(currentTime int,value int); ";
         String query = " " +
                 "@info(name='query') " +
@@ -1702,6 +1644,7 @@ public class ExternalTimeBatchWindowTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{2300, 14});
         Thread.sleep(100);
+        siddhiManager.shutdown();
     }
 
     @Test
@@ -1741,10 +1684,10 @@ public class ExternalTimeBatchWindowTestCase {
         inputHandler.send(new Object[]{1366335824351L, "192.10.1.9"});
         inputHandler.send(new Object[]{1366335824441L, "192.10.1.10"});
         Thread.sleep(1000);
-        org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
-        org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("In Events ", 4, inEventCount);
+        AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
@@ -1787,7 +1730,7 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
@@ -1830,6 +1773,6 @@ public class ExternalTimeBatchWindowTestCase {
         org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         org.testng.AssertJUnit.assertEquals("In Events ", 4, inEventCount);
         org.testng.AssertJUnit.assertEquals("Remove Events ", 0, removeEventCount);
-        siddhiAppRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 }
