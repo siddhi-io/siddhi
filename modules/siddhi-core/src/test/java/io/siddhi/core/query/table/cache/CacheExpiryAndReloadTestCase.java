@@ -52,6 +52,7 @@ public class CacheExpiryAndReloadTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -115,6 +116,7 @@ public class CacheExpiryAndReloadTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -127,6 +129,7 @@ public class CacheExpiryAndReloadTestCase {
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -141,7 +144,7 @@ public class CacheExpiryAndReloadTestCase {
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
         Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
-
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -202,6 +205,7 @@ public class CacheExpiryAndReloadTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -214,6 +218,7 @@ public class CacheExpiryAndReloadTestCase {
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -228,7 +233,7 @@ public class CacheExpiryAndReloadTestCase {
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
         Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
-
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -290,6 +295,7 @@ public class CacheExpiryAndReloadTestCase {
 
         Event[] events;
         stockStream.send(new Object[]{"WSO2", 55.6f, 1L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -302,6 +308,7 @@ public class CacheExpiryAndReloadTestCase {
 
         stockStream.send(new Object[]{"WSO4", 55.6f, 2L});
         stockStream.send(new Object[]{"WSO1", 55.6f, 3L});
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);
@@ -316,7 +323,7 @@ public class CacheExpiryAndReloadTestCase {
         stockStream.send(new Object[]{"WS2", 55.6f, 5L});
         Thread.sleep(2000);
         stockStream.send(new Object[]{"WSOr", 55.6f, 6L});
-
+        Thread.sleep(100);
         events = siddhiAppRuntime.query("" +
                 "from StockTable ");
         EventPrinter.print(events);

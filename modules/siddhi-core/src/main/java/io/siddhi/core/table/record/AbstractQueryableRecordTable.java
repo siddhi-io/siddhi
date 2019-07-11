@@ -31,6 +31,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -117,6 +118,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private long cacheLastReloadTime;
     public static ThreadLocal<Boolean> queryStoreWithoutCheckingCache = ThreadLocal.withInitial(() -> Boolean.FALSE);
     private CompiledSelection compiledSelectionForSelectAll;
+    private int storeTableSize = -1;
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
@@ -388,76 +390,71 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         StreamEvent cacheResults;
-        // when table is smaller than max cache send results from cache
-        if (cacheEnabled & storeTableSize <= maxCacheSize) {
-            if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                        getName() + ": store table size is smaller than max cache. " +
-                        "Sending results from cache");
-            }
-            readWriteLock.readLock().lock();
+        if (cacheEnabled) {
+            readWriteLock.writeLock().lock();
             try {
-                cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                        matchingEvent);
-                return cacheResults;
-            } finally {
-                readWriteLock.readLock().unlock();
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                        getName() + ": store table size is bigger than cache.");
-            }
-            if (cacheEnabled && compiledConditionWithCache.isRouteToCache()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": cache constraints satisfied. Checking cache");
-                }
-                readWriteLock.readLock().lock();
-                try {
+                // when table is smaller than max cache send results from cache
+                if (storeTableSize <= maxCacheSize) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(siddhiAppContext.getName() + "-" +
+                                recordStoreCompiledCondition.getSiddhiQueryContext().getName() +
+                                ": store table size is smaller than max cache. Sending results from cache");
+                    }
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
-                    if (cacheResults != null) {
+                    return cacheResults;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug(siddhiAppContext.getName() + "-" +
+                                recordStoreCompiledCondition.getSiddhiQueryContext().getName() +
+                                ": store table size is bigger than cache.");
+                    }
+                    if (compiledConditionWithCache.isRouteToCache()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(siddhiAppContext.getName() + "-" +
+                                    recordStoreCompiledCondition.getSiddhiQueryContext().
+                                            getName() + ": cache constraints satisfied. Checking cache");
+                        }
+                        cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                                matchingEvent);
+                        if (cacheResults != null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                        getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
+                            }
+                            return cacheResults;
+                        }
+                        // cache miss
+                        if (log.isDebugEnabled()) {
+                            log.debug(siddhiAppContext.getName() + "-" +
+                                    recordStoreCompiledCondition.getSiddhiQueryContext().
+                                            getName() + ": cache miss. Loading from store");
+                        }
+                        StreamEvent streamEvent = super.find(recordStoreCompiledCondition, matchingEvent);
+                        if (streamEvent == null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                        getSiddhiQueryContext().getName() + ": store also miss. sending null");
+                            }
+                            return null;
+                        }
+
+                        if (cacheTable.size() == maxCacheSize) {
+                            ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
+                        }
+                        ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
+                        cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                                matchingEvent);
                         if (log.isDebugEnabled()) {
                             log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
-                                    getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
+                                    getSiddhiQueryContext().getName() +
+                                    ": sending results from cache after loading from store");
                         }
                         return cacheResults;
                     }
-                } finally {
-                    readWriteLock.readLock().unlock();
                 }
-                // cache miss
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": cache miss. Loading from store");
-                }
-                StreamEvent streamEvent = super.find(recordStoreCompiledCondition, matchingEvent);
-                if (streamEvent == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
-                                getSiddhiQueryContext().getName() + ": store also miss. sending null");
-                    }
-                    return null;
-                }
-
-                readWriteLock.readLock().lock();
-                if (cacheTable.size() == maxCacheSize) {
-                    ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
-                }
-                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
-                try {
-                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                            matchingEvent);
-                    if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
-                                getSiddhiQueryContext().getName() + ": sending results from cache after loading from " +
-                                "store");
-                    }
-                    return cacheResults;
-                } finally {
-                    readWriteLock.readLock().unlock();
-                }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
         }
         // when cache is not enabled or cache query conditions are not satisfied
@@ -527,19 +524,24 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     private void updateStoreTableSize() throws ConnectionUnavailableException {
         if (cacheEnabled && !queryStoreWithoutCheckingCache.get()) {
-            // check if we need to check the size of store
-            if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
-                    getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
-                StateEvent stateEventForCaching = new StateEvent(1, 0);
-                queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-                try {
-                    StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
-                            compiledSelectionForCaching, outputAttributesForCaching);
-                    storeTableSize = findEventChunkSize(preLoadedData);
-                    storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
-                } finally {
-                    queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+            readWriteLock.writeLock().lock();
+            try {
+                // check if we need to check the size of store
+                if (storeTableSize == -1 || (!cacheExpiryEnabled && storeSizeLastCheckedTime < siddhiAppContext.
+                        getTimestampGenerator().currentTime() - storeSizeCheckInterval)) {
+                    StateEvent stateEventForCaching = new StateEvent(1, 0);
+                    queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                    try {
+                        StreamEvent preLoadedData = query(stateEventForCaching, compiledConditionForCaching,
+                                compiledSelectionForCaching, outputAttributesForCaching);
+                        storeTableSize = findEventChunkSize(preLoadedData);
+                        storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                    } finally {
+                        queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                    }
                 }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
         }
     }
@@ -586,110 +588,106 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         Iterator<Object[]> records;
-
-        // when store is smaller than max cache size
-        if (cacheEnabled && storeTableSize <= maxCacheSize && !queryStoreWithoutCheckingCache.get()) {
-            // return results from cache
-            readWriteLock.readLock().lock();
+        if (cacheEnabled) {
+            readWriteLock.writeLock().lock();
             try {
-                cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                        matchingEvent);
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": store table size is smaller than max cache. " +
-                            "Sending results from cache");
-                }
-                if (cacheResults == null) {
-                    return null;
-                }
-                return executeSelectorOnCacheResults(compiledSelectionWithCache,
-                        cacheResults);
-            } finally {
-                readWriteLock.readLock().unlock();
-            }
-        } else { // when store is bigger than max cache size
-            if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
-                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                        getName() + ": store table size is bigger than cache.");
-            }
-            if (cacheEnabled && compiledConditionWithCache.isRouteToCache() && !queryStoreWithoutCheckingCache.get()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": cache constraints satisfied. Checking cache");
-                }
-                // if query conrains all primary keys and has == only for them
-                readWriteLock.readLock().lock();
-                try {
+                // when store is smaller than max cache size
+                if (storeTableSize <= maxCacheSize && !queryStoreWithoutCheckingCache.get()) {
+                    // return results from cache
                     cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                             matchingEvent);
-                    if (cacheResults != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(siddhiAppContext.getName() + "-" +
+                                recordStoreCompiledCondition.getSiddhiQueryContext().getName() +
+                                ": store table size is smaller than max cache. Sending results from cache");
+                    }
+                    if (cacheResults == null) {
+                        return null;
+                    }
+                    return executeSelectorOnCacheResults(compiledSelectionWithCache,
+                            cacheResults);
+                } else { // when store is bigger than max cache size
+                    if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
+                        log.debug(siddhiAppContext.getName() + "-" +
+                                recordStoreCompiledCondition.getSiddhiQueryContext().getName() +
+                                ": store table size is bigger than cache.");
+                    }
+                    if (compiledConditionWithCache.isRouteToCache() && !queryStoreWithoutCheckingCache.get()) {
                         if (log.isDebugEnabled()) {
-                            log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
-                                    getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
+                            log.debug(siddhiAppContext.getName() + "-" +
+                                    recordStoreCompiledCondition.getSiddhiQueryContext().
+                                            getName() + ": cache constraints satisfied. Checking cache");
                         }
+                        // if query conrains all primary keys and has == only for them
+                        cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                                matchingEvent);
+                        if (cacheResults != null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                        getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
+                            }
+                            return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
+                        }
+
+                        if (log.isDebugEnabled()) {
+                            log.debug(siddhiAppContext.getName() + "-" +
+                                    recordStoreCompiledCondition.getSiddhiQueryContext().
+                                            getName() + ": cache miss. Loading from store");
+                        }
+                        // read all fields of missed entry from store
+
+                        Iterator<Object[]> recordsFromSelectAll;
+                        if (recordTableHandler != null) {
+                            recordsFromSelectAll = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
+                                    recordStoreCompiledCondition.getCompiledCondition(), compiledSelectionForSelectAll,
+                                    outputAttributes);
+                        } else {
+                            recordsFromSelectAll = query(parameterMap,
+                                    recordStoreCompiledCondition.getCompiledCondition(),
+                                    compiledSelectionForSelectAll, outputAttributes);
+                        }
+                        if (recordsFromSelectAll == null || !recordsFromSelectAll.hasNext()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
+                                        getSiddhiQueryContext().getName() + ": store also miss. sending null");
+                            }
+                            return null;
+                        }
+                        Object[] recordSelectAll = recordsFromSelectAll.next();
+                        StreamEvent streamEvent = storeEventPool.newInstance();
+                        streamEvent.setOutputData(new Object[outputAttributes.length]);
+                        System.arraycopy(recordSelectAll, 0, streamEvent.getOutputData(), 0, recordSelectAll.length);
+
+                        if (cacheTable.size() == maxCacheSize) {
+                            ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
+                        }
+                        ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
+                        if (log.isDebugEnabled()) {
+                            log.debug(siddhiAppContext.getName() + "-" +
+                                    recordStoreCompiledCondition.getSiddhiQueryContext().getName() +
+                                    ": sending results from cache after loading from store");
+                        }
+                        cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
+                                matchingEvent);
                         return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
                     }
-                } finally {
-                    readWriteLock.readLock().unlock();
                 }
-
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": cache miss. Loading from store");
-                }
-                // read all fields of missed entry from store
-
-                Iterator<Object[]> recordsFromSelectAll;
-                if (recordTableHandler != null) {
-                    recordsFromSelectAll = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                            recordStoreCompiledCondition.getCompiledCondition(), compiledSelectionForSelectAll,
-                            outputAttributes);
-                } else {
-                    recordsFromSelectAll = query(parameterMap, recordStoreCompiledCondition.getCompiledCondition(),
-                            compiledSelectionForSelectAll, outputAttributes);
-                }
-                if (recordsFromSelectAll == null || !recordsFromSelectAll.hasNext()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
-                                getSiddhiQueryContext().getName() + ": store also miss. sending null");
-                    }
-                    return null;
-                }
-                Object[] recordSelectAll = recordsFromSelectAll.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                streamEvent.setOutputData(new Object[outputAttributes.length]);
-                System.arraycopy(recordSelectAll, 0, streamEvent.getOutputData(), 0, recordSelectAll.length);
-
-                readWriteLock.readLock().lock();
-                if (cacheTable.size() == maxCacheSize) {
-                    ((CacheTable) cacheTable).deleteOneEntryUsingCachePolicy();
-                }
-                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(streamEvent);
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                            getName() + ": sending results from cache after loading from store");
-                }
-                try {
-                    cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
-                            matchingEvent);
-                    return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
-                } finally {
-                    readWriteLock.readLock().unlock();
-                }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
-            if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
-                log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
-                        getName() + ": sending results from store");
-            }
-            // query conditions are not satisfied check from store/ cache not enabled
-            if (recordTableHandler != null) {
-                records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
-                        recordStoreCompiledCondition.getCompiledCondition(),
-                        recordStoreCompiledSelection.compiledSelection, outputAttributes);
-            } else {
-                records = query(parameterMap, recordStoreCompiledCondition.getCompiledCondition(),
-                        recordStoreCompiledSelection.compiledSelection, outputAttributes);
-            }
+        }
+        if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
+            log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.getSiddhiQueryContext().
+                    getName() + ": sending results from store");
+        }
+        // query conditions are not satisfied check from store/ cache not enabled
+        if (recordTableHandler != null) {
+            records = recordTableHandler.query(matchingEvent.getTimestamp(), parameterMap,
+                    recordStoreCompiledCondition.getCompiledCondition(),
+                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
+        } else {
+            records = query(parameterMap, recordStoreCompiledCondition.getCompiledCondition(),
+                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
         }
         addStreamEventToChunk(outputAttributes, streamEventComplexEventChunk, records);
         return streamEventComplexEventChunk.getFirst();
@@ -897,40 +895,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    public void setStoreSizeLastCheckedTime(long storeSizeLastCheckedTime) {
-        this.storeSizeLastCheckedTime = storeSizeLastCheckedTime;
-    }
-
-    public void setStoreTableSize(int storeTableSize) {
-        this.storeTableSize = storeTableSize;
-    }
-
-    private int storeTableSize = -1;
-
-    public long getStoreSizeLastCheckedTime() {
-        return storeSizeLastCheckedTime;
-    }
-
-    public int getStoreTableSize() {
-        return storeTableSize;
-    }
-
-    public int getMaxCacheSize() {
-        return maxCacheSize;
-    }
-
-    public CompiledCondition getCompiledConditionForCaching() {
-        return compiledConditionForCaching;
-    }
-
-    public CompiledSelection getCompiledSelectionForCaching() {
-        return compiledSelectionForCaching;
-    }
-
-    public Attribute[] getOutputAttributesForCaching() {
-        return outputAttributesForCaching;
-    }
-
     /**
      * Compile the query selection
      *
@@ -1067,11 +1031,79 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
     }
 
-    public long getCacheLastReloadTime() {
-        return cacheLastReloadTime;
+    public void handleCacheExpiry(CompiledCondition cacheExpiryCompiledCondition,
+                                  ComplexEventChunk<StateEvent> deleteEventChunk) {
+        if (log.isDebugEnabled()) {
+            log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
+        }
+        StateEvent stateEventForCaching = new StateEvent(1, 0);
+        StreamEvent loadedDataFromStore;
+
+        readWriteLock.writeLock().lock();
+        try {
+            if (storeTableSize != -1 && storeSizeLastCheckedTime >
+                    siddhiAppContext.getTimestampGenerator().currentTime() - retentionPeriod * 10) {
+                if (log.isDebugEnabled()) {
+                    log.debug(siddhiAppContext.getName() + ": checking size of store table");
+                }
+                try {
+                    if (storeTableSize <= maxCacheSize) {
+                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                        try {
+                            if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
+                                    retentionPeriod) {
+                                loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
+                                        compiledSelectionForCaching, outputAttributesForCaching);
+                                clearCacheAndReload(loadedDataFromStore);
+                                cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                            }
+                        } finally {
+                            AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                        }
+                    } else {
+                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
+                    }
+                } catch (ConnectionUnavailableException e) {
+                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+                }
+            } else {
+
+                try {
+                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                    try {
+                        loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
+                                compiledSelectionForCaching, outputAttributesForCaching);
+                        storeTableSize = findEventChunkSize(loadedDataFromStore);
+                        storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                    } finally {
+                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                    }
+                    if (storeTableSize <= maxCacheSize) {
+                        if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
+                                retentionPeriod) {
+                            clearCacheAndReload(loadedDataFromStore);
+                            cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                        }
+                    } else {
+                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
+                    }
+                } catch (Exception e) {
+                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
+            }
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
-    public void setCacheLastReloadTime(long cacheLastReloadTime) {
-        this.cacheLastReloadTime = cacheLastReloadTime;
+    private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
+        ((CacheTable) cacheTable).deleteAll();
+        if (loadedDataFromStore != null) {
+            ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
+        }
     }
+
 }
