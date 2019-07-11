@@ -996,4 +996,236 @@ public class CountPatternTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test
+    public void testQuery17() throws InterruptedException {
+        log.info("testQuery17");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream InputStream (name string); \n" +
+                "@info(name = 'query1') " +
+                "from every e1=InputStream[(e1.name == 'A')]<2> " +
+                "   -> e2=InputStream[(e2.name == 'B')] " +
+                "   within 3 seconds " +
+                "select 'rule1' as ruleId, count() as numOfEvents " +
+                "insert into OutputStream";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] inEvents) {
+                EventPrinter.print(inEvents);
+                eventArrived = true;
+                inEventCount += inEvents.length;
+            }
+
+        });
+
+        InputHandler inputStream = siddhiAppRuntime.getInputHandler("InputStream");
+        siddhiAppRuntime.start();
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+
+        inputStream.send(new Object[]{"A"});
+        Thread.sleep(4000);
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Event count", 3, inEventCount);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testQuery18() throws InterruptedException {
+        log.info("testQuery18");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream InputStream (name string); \n" +
+                "@info(name = 'query1') " +
+                "from every e1=InputStream[(e1.name == 'A')]<2> " +
+                "   -> e2=InputStream[(e2.name == 'B')]<2> " +
+                "   within 3 seconds " +
+                "select 'rule1' as ruleId, count() as numOfEvents " +
+                "insert into OutputStream";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] inEvents) {
+                EventPrinter.print(inEvents);
+                eventArrived = true;
+                inEventCount += inEvents.length;
+            }
+
+        });
+
+        InputHandler inputStream = siddhiAppRuntime.getInputHandler("InputStream");
+        siddhiAppRuntime.start();
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        Thread.sleep(4000);
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Event count", 3, inEventCount);
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQuery19() throws InterruptedException {
+        log.info("testQuery19");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream InputStream (name string); \n" +
+                "@info(name = 'query1') " +
+                "from every e1=InputStream[(e1.name == 'A')]<2> " +
+                "   -> e2=InputStream[(e2.name == 'B')]<2:> " +
+                "   within 3 seconds " +
+                "select 'rule1' as ruleId, count() as numOfEvents " +
+                "insert into OutputStream";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] inEvents) {
+                EventPrinter.print(inEvents);
+                eventArrived = true;
+                inEventCount += inEvents.length;
+            }
+
+        });
+
+        InputHandler inputStream = siddhiAppRuntime.getInputHandler("InputStream");
+        siddhiAppRuntime.start();
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+
+        inputStream.send(new Object[]{"A"});
+        Thread.sleep(4000);
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Event count", 4, inEventCount);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testQuery20() throws InterruptedException {
+        log.info("testQuery20");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream InputStream (name string); \n" +
+                "@info(name = 'query1') " +
+                "from e1=InputStream[(e1.name == 'A')]<2> " +
+                "   -> every e2=InputStream[(e2.name == 'B')]<2> " +
+                "   within 3 seconds " +
+                "select 'rule1' as ruleId, count() as numOfEvents " +
+                "insert into OutputStream";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] inEvents) {
+                EventPrinter.print(inEvents);
+                eventArrived = true;
+                inEventCount += inEvents.length;
+            }
+
+        });
+
+        InputHandler inputStream = siddhiAppRuntime.getInputHandler("InputStream");
+        siddhiAppRuntime.start();
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        Thread.sleep(4000);
+        inputStream.send(new Object[]{"B"});
+
+        //AA are not consumed after within time period
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"A"});
+        inputStream.send(new Object[]{"B"});
+        inputStream.send(new Object[]{"B"});
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Event count", 2, inEventCount);
+        siddhiAppRuntime.shutdown();
+    }
 }

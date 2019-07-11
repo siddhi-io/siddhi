@@ -126,14 +126,12 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
         StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
+            StateEvent expiredStateEvent = null;
             for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
                 if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                     iterator.remove();
-                    if (withinEveryPreStateProcessor != null) {
-                        withinEveryPreStateProcessor.addEveryState(stateEvent);
-                        withinEveryPreStateProcessor.updateState();
-                    }
+                    expiredStateEvent = stateEvent;
                     continue;
                 }
                 if (logicalType == LogicalStateElement.Type.OR &&
@@ -160,6 +158,10 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
                             break;
                     }
                 }
+            }
+            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();

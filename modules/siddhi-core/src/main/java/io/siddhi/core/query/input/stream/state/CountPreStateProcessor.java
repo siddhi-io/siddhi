@@ -55,15 +55,13 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
         CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
         lock.lock();
+        StateEvent expiredStateEvent = null;
         try {
             for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
                 if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                     iterator.remove();
-                    if (withinEveryPreStateProcessor != null) {
-                        withinEveryPreStateProcessor.addEveryState(stateEvent);
-                        withinEveryPreStateProcessor.updateState();
-                    }
+                    expiredStateEvent = stateEvent;
                     continue;
                 }
                 if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
@@ -93,6 +91,10 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
                             break;
                     }
                 }
+            }
+            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();
@@ -141,6 +143,23 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
             eventChunk.add(stateEvent);
             countPostStateProcessor.processMinCountReached(stateEvent, eventChunk);
             eventChunk.clear();
+        }
+    }
+
+    @Override
+    public void addEveryState(StateEvent stateEvent) {
+        lock.lock();
+        try {
+            StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+            StreamPreState state = stateHolder.getState();
+            try {
+                clonedEvent.setEvent(stateId, null);
+                state.getNewAndEveryStateEventList().add(clonedEvent);
+            } finally {
+                stateHolder.returnState(state);
+            }
+        } finally {
+            lock.unlock();
         }
     }
 

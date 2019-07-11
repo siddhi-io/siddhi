@@ -302,14 +302,12 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
+            StateEvent expiredStateEvent = null;
             for (Iterator<StateEvent> iterator = state.pendingStateEventList.iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
                 if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                     iterator.remove();
-                    if (withinEveryPreStateProcessor != null) {
-                        withinEveryPreStateProcessor.addEveryState(stateEvent);
-                        withinEveryPreStateProcessor.updateState();
-                    }
+                    expiredStateEvent = stateEvent;
                     continue;
                 }
                 stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
@@ -336,6 +334,10 @@ public class StreamPreStateProcessor implements PreStateProcessor {
                             break;
                     }
                 }
+            }
+            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();

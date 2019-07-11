@@ -118,7 +118,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase1") // using query api and 1 primary key & LRu
+    @Test(description = "cacheLRUTestCase1", dependsOnMethods = {"cacheLRUTestCase0"})
+    // using query api and 1 primary key & LRu
     public void cacheLRUTestCase1() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -186,7 +187,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase2") // 1 primary key & LRu & cointains api (in)
+    @Test(description = "cacheLRUTestCase2", dependsOnMethods = {"cacheLRUTestCase1"})
+    // 1 primary key & LRu & cointains api (in)
     public void cacheLRUTestCase2() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -247,7 +249,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase3") // 2 primary keys & LRu & cointains api (in)
+    @Test(description = "cacheLRUTestCase3", dependsOnMethods = {"cacheLRUTestCase2"})
+    // 2 primary keys & LRu & cointains api (in)
     public void cacheLRUTestCase3() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -341,7 +344,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase4") // 1 primary key & LRu & update func
+    @Test(description = "cacheLRUTestCase4", dependsOnMethods = {"cacheLRUTestCase3"})
+    // 1 primary key & LRu & update func
     public void cacheLRUTestCase4() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -429,7 +433,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase5") // 2 primary keys & LRu & update func
+    @Test(description = "cacheLRUTestCase5", dependsOnMethods = {"cacheLRUTestCase4"})
+    // 2 primary keys & LRu & update func
     public void cacheLRUTestCase5() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -517,7 +522,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase6") // 1 primary key & LRu & update or add func
+    @Test(description = "cacheLRUTestCase6", dependsOnMethods = {"cacheLRUTestCase5"})
+    // 1 primary key & LRu & update or add func
     public void cacheLRUTestCase6() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -572,7 +578,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase7") // 2 primary keys & LRu & update or add func
+    @Test(description = "cacheLRUTestCase7", dependsOnMethods = {"cacheLRUTestCase6"})
+    // 2 primary keys & LRu & update or add func
     public void cacheLRUTestCase7() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -627,7 +634,8 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase8") // 2 primary keys & LRu & update or add func with update
+    @Test(description = "cacheLRUTestCase8", dependsOnMethods = {"cacheLRUTestCase7"})
+    // 2 primary keys & LRu & update or add func with update
     public void cacheLRUTestCase8() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
@@ -714,13 +722,13 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase9")
+    @Test(description = "cacheLRUTestCase9", dependsOnMethods = {"cacheLRUTestCase8"})
     public void cacheLRUTestCase9() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
-        log.info("testTableJoinQuery2 - OUT 1");
+        log.info("cacheLRUTestCase9 - OUT 1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -772,10 +780,11 @@ public class CacheLRUTestCase {
 
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
+        Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO2"});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
-        Thread.sleep(11000);
+        Thread.sleep(15000);
 
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable " +
@@ -812,13 +821,14 @@ public class CacheLRUTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "cacheLRUTestCase10")
+    @Test(description = "cacheLRUTestCase9", dependsOnMethods = {"cacheLRUTestCase9"})
     public void cacheLRUTestCase10() throws InterruptedException, SQLException {
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
         final Logger logger = Logger.getRootLogger();
+//        logger.removeAllAppenders();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
-        log.info("testTableJoinQuery2 - OUT 1");
+        log.info("cacheLRUTestCase10 - OUT 1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -867,13 +877,13 @@ public class CacheLRUTestCase {
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
         InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
         siddhiAppRuntime.start();
-
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
+        Thread.sleep(100);
         checkStockStream.send(new Object[]{"WSO2", 55.6f});
         Thread.sleep(10);
         stockStream.send(new Object[]{"CISCO", 86.6f, 5L});
-        Thread.sleep(11000);
+        Thread.sleep(15000);
 
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable " +
@@ -909,4 +919,5 @@ public class CacheLRUTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
 }
