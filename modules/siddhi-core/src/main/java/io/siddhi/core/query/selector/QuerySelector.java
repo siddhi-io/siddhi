@@ -98,6 +98,23 @@ public class QuerySelector implements Processor {
         }
     }
 
+    public void executePassThrough(ComplexEventChunk complexEventChunk) {
+        complexEventChunk.reset();
+        synchronized (this) {
+            while (complexEventChunk.hasNext()) {
+                ComplexEvent event = complexEventChunk.next();
+                if (((event.getType() != StreamEvent.Type.CURRENT || !currentOn) &&
+                        (event.getType() != StreamEvent.Type.EXPIRED || !expiredOn))) {
+                    complexEventChunk.remove();
+                }
+            }
+        }
+        complexEventChunk.reset();
+        if (complexEventChunk.hasNext()) {
+            outputRateLimiter.process(complexEventChunk);
+        }
+    }
+
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
         if (log.isTraceEnabled()) {
             log.trace("event is executed by selector " + id + this);
@@ -478,5 +495,4 @@ public class QuerySelector implements Processor {
             }
         }
     }
-
 }

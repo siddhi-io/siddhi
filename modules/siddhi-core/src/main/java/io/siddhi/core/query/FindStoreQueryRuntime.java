@@ -101,7 +101,11 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                 return null;
             } else {
                 if (selector != null) {
-                    return executeSelector(streamEvents, selector, stateEventFactory, eventType);
+                    if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
+                        return executeSelector(stateEventFactory, null, streamEvents, 1, selector);
+                    } else {
+                        return executeSelector(stateEventFactory, null, streamEvents, 0, selector);
+                    }
                 } else {
                     List<Event> events = new ArrayList<Event>();
                     while (streamEvents != null) {

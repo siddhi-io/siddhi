@@ -23,7 +23,6 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
-import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.selector.QuerySelector;
 
@@ -34,11 +33,11 @@ import java.util.List;
  * Class to hold util functions used during StoreQueryRuntime
  */
 public class StoreQueryRuntimeUtil {
-    public static Event[] executeSelector(StreamEvent streamEvents, QuerySelector selector,
-                                          StateEventFactory stateEventFactory,
-                                          MetaStreamEvent.EventType eventType) {
-        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(streamEvents, selector,
-                stateEventFactory, eventType);
+    public static Event[] executeSelector(StateEventFactory stateEventFactory,
+                                          StreamEvent streamEvent, StreamEvent storeEvents,
+                                          int storeEventIndex, QuerySelector selector) {
+        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(stateEventFactory, streamEvent,
+                storeEvents, storeEventIndex, selector);
         if (outputComplexEventChunk != null) {
             List<Event> events = new ArrayList<>();
             outputComplexEventChunk.reset();
@@ -53,32 +52,33 @@ public class StoreQueryRuntimeUtil {
 
     }
 
-    private static ComplexEventChunk executeSelectorAndReturnChunk(StreamEvent streamEvents, QuerySelector selector,
-                                                                   StateEventFactory stateEventFactory,
-                                                                   MetaStreamEvent.EventType eventType) {
+    private static ComplexEventChunk executeSelectorAndReturnChunk(StateEventFactory stateEventFactory,
+                                                                   StreamEvent streamEvent, StreamEvent storeEvents,
+                                                                   int storeEventIndex, QuerySelector selector) {
         ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
-        while (streamEvents != null) {
+        while (storeEvents != null) {
 
-            StreamEvent streamEvent = streamEvents;
-            streamEvents = streamEvents.getNext();
-            streamEvent.setNext(null);
+            StreamEvent storeEvent = storeEvents;
+            storeEvents = storeEvents.getNext();
+            storeEvent.setNext(null);
 
-            StateEvent stateEvent = stateEventFactory.newInstance();
-            if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
-                stateEvent.addEvent(1, streamEvent);
+            StateEvent joinEvent = stateEventFactory.newInstance();
+            if (streamEvent == null) {
+                joinEvent.addEvent(storeEventIndex, storeEvent);
             } else {
-                stateEvent.addEvent(0, streamEvent);
+                joinEvent.addEvent(0, streamEvent);
+                joinEvent.addEvent(1, storeEvent);
             }
-            complexEventChunk.add(stateEvent);
+            complexEventChunk.add(joinEvent);
         }
         return selector.execute(complexEventChunk);
     }
 
-    public static StreamEvent executeSelectorAndReturnStreamEvent(StreamEvent streamEvents, QuerySelector selector,
-                                                                  StateEventFactory stateEventFactory,
-                                                                  MetaStreamEvent.EventType eventType) {
-        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(streamEvents, selector,
-                stateEventFactory, eventType);
+    public static StreamEvent executeSelectorAndReturnStreamEvent(StateEventFactory stateEventFactory,
+                                                                  StreamEvent streamEvent, StreamEvent storeEvents,
+                                                                  int storeEventIndex, QuerySelector selector) {
+        ComplexEventChunk outputComplexEventChunk = executeSelectorAndReturnChunk(stateEventFactory, streamEvent,
+                storeEvents, storeEventIndex, selector);
         if (outputComplexEventChunk != null) {
             outputComplexEventChunk.reset();
             ComplexEvent firstComplexEvent = outputComplexEventChunk.next();
@@ -87,10 +87,10 @@ public class StoreQueryRuntimeUtil {
             StreamEvent eventPointer = firstEvent;
             while (outputComplexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = outputComplexEventChunk.next();
-                StreamEvent streamEvent = new StreamEvent(0, 0, complexEvent.getOutputData().length);
-                streamEvent.setOutputData(complexEvent.getOutputData());
-                eventPointer.setNext(streamEvent);
-                eventPointer = streamEvent;
+                StreamEvent resultEvent = new StreamEvent(0, 0, complexEvent.getOutputData().length);
+                resultEvent.setOutputData(complexEvent.getOutputData());
+                eventPointer.setNext(resultEvent);
+                eventPointer = resultEvent;
             }
             return firstEvent;
         } else {

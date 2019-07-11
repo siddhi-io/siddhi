@@ -21,6 +21,7 @@ import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.selector.QuerySelector;
 
 import java.util.List;
 
@@ -36,4 +37,6 @@ public interface StreamRuntime {
     MetaComplexEvent getMetaComplexEvent();
 
     ProcessingMode getProcessingMode();
+
+    QuerySelector getQuerySelector();
 }

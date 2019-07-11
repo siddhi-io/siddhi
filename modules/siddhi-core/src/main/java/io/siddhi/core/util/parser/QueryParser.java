@@ -29,15 +29,19 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.input.stream.StreamRuntime;
+import io.siddhi.core.query.input.stream.join.JoinProcessor;
 import io.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
+import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.lock.LockSynchronizer;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -129,13 +133,18 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    query.getSelector().getGroupByList(), streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    query, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
                     outputExpectsExpiredEvents, siddhiQueryContext);
-            QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    streamRuntime.getMetaComplexEvent(), tableMap, executors,
-                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
-                    siddhiQueryContext);
+            QuerySelector selector;
+            if (streamRuntime.getQuerySelector() != null) {
+                selector = streamRuntime.getQuerySelector();
+            } else {
+                selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        streamRuntime.getMetaComplexEvent(), tableMap, executors,
+                        SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
+                        siddhiQueryContext);
+            }
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
@@ -223,8 +232,27 @@ public class QueryParser {
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
                     siddhiQueryContext.getName());
+
+            // Update cache compile selection variable expression executors
+            if (streamRuntime instanceof JoinStreamRuntime) {
+                streamRuntime.getSingleStreamRuntimes().forEach((singleStreamRuntime -> {
+                    Processor processorChain = singleStreamRuntime.getProcessorChain();
+                    if (processorChain instanceof JoinProcessor) {
+                        CompiledSelection compiledSelection = ((JoinProcessor) processorChain).getCompiledSelection();
+                        if (compiledSelection instanceof AbstractQueryableRecordTable.CompiledSelectionWithCache) {
+                            List<VariableExpressionExecutor> variableExpressionExecutors =
+                                    ((AbstractQueryableRecordTable.CompiledSelectionWithCache) compiledSelection)
+                                            .getVariableExpressionExecutorsForQuerySelector();
+                            QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(),
+                                                variableExpressionExecutors);
+                        }
+                    }
+                }));
+            }
+
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
-                    .getMetaComplexEvent()));
+                        .getMetaComplexEvent()));
+
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 

@@ -30,6 +30,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.selector.QuerySelector;
@@ -122,8 +123,8 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         if (outEvent != null) {
             compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.getMetaStateEvent());
-            Event[] cacheResultsAfterSelection = executeSelector(outEvent,
-                    compiledSelectionWithCache.getQuerySelector(), stateEventFactory, MetaStreamEvent.EventType.TABLE);
+            Event[] cacheResultsAfterSelection = executeSelector(stateEventFactory, null, outEvent,
+                    compiledSelectionWithCache.getStoreEventIndex(), compiledSelectionWithCache.getQuerySelector());
 
             if (compiledSelectionWithCache.getQuerySelector() !=  null &
                     compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() !=  0) {
@@ -145,6 +146,16 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                                                  ExpressionBuilder havingExpressionBuilder,
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
                                                  Long offset) {
+
+        selectAttributeBuilders.forEach((selectAttributeBuilder -> {
+            TestStoreConditionVisitor testStoreConditionVisitor = new TestStoreConditionVisitor("");
+            selectAttributeBuilder.getExpressionBuilder().build(testStoreConditionVisitor);
+            if (testStoreConditionVisitor.getStreamVarCount() > 0) {
+                throw new SiddhiAppCreationException("testStoreContainingInMemoryTable does not support " +
+                        "lookup with stream variables");
+            }
+        }));
+
         CompiledSelectionWithCache compiledSelectionWithCache;
         MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent().clone();
 
@@ -175,8 +186,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         querySelector.setEventPopulator(
                 StateEventPopulatorFactory.constructEventPopulator(metaStateEvent));
 
-        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector,
-                metaStateEvent);
+        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector, metaStateEvent, 0, null);
         return compiledSelectionWithCache;
     }
 
@@ -384,4 +394,5 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
     protected void destroy() {
 
     }
+
 }

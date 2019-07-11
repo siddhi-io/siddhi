@@ -24,6 +24,7 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.selector.QuerySelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +37,12 @@ public class JoinStreamRuntime implements StreamRuntime {
     private List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
     private MetaStateEvent metaStateEvent;
     private ProcessingMode overallProcessingMode = ProcessingMode.BATCH;
+    private QuerySelector querySelector;
 
     public JoinStreamRuntime(SiddhiQueryContext siddhiQueryContext, MetaStateEvent metaStateEvent) {
 
         this.metaStateEvent = metaStateEvent;
+        this.querySelector = null;
     }
 
 
@@ -63,6 +66,15 @@ public class JoinStreamRuntime implements StreamRuntime {
     @Override
     public MetaComplexEvent getMetaComplexEvent() {
         return metaStateEvent;
+    }
+
+    @Override
+    public QuerySelector getQuerySelector() {
+        return this.querySelector;
+    }
+
+    public void setQuerySelector(QuerySelector querySelector) {
+        this.querySelector = querySelector;
     }
 
     public ProcessingMode getProcessingMode() {

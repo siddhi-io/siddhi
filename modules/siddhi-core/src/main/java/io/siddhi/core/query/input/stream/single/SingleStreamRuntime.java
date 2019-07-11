@@ -22,6 +22,7 @@ import io.siddhi.core.query.input.ProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.selector.QuerySelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +74,11 @@ public class SingleStreamRuntime implements StreamRuntime {
             processStreamReceiver.setNext(processorChain);
             processorChain.setToLast(commonProcessor);
         }
+    }
+
+    @Override
+    public QuerySelector getQuerySelector() {
+        return null;
     }
 
     public MetaComplexEvent getMetaComplexEvent() {
