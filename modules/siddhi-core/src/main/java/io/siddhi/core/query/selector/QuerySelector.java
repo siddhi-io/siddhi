@@ -110,7 +110,9 @@ public class QuerySelector implements Processor {
             }
         }
         complexEventChunk.reset();
-        outputRateLimiter.process(complexEventChunk);
+        if (complexEventChunk.hasNext()) {
+            outputRateLimiter.process(complexEventChunk);
+        }
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {

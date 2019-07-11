@@ -342,11 +342,11 @@ public class ExpressionBuilder {
                             definition = matchingMetaInfoHolder.getMetaStateEvent().getOutputStreamDefinition();
                             try {
                                 type = definition.getAttributeType(attributeName);
+                                buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
+                                        .getStoreDefinition());
                             } catch (AttributeNotExistException e) {
                                 //do nothing as its not expected
                             }
-                            buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
-                                    .getStoreDefinition());
                         }
                     } else {
 
