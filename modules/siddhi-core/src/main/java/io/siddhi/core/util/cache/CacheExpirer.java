@@ -25,10 +25,8 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
-import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.table.record.AbstractQueryableRecordTable;
@@ -42,31 +40,25 @@ import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.LongConstant;
 import io.siddhi.query.api.expression.math.Subtract;
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.siddhi.core.util.SiddhiConstants.CACHE_EXPIRE_CURRENT_TIME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
-import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
 
 /**
  * this class has a runnable which runs on a separate thread called by AbstractQueryableRecordTable and handles cache
  * expiry
  */
 public class CacheExpirer {
-    private static final Logger log = Logger.getLogger(CacheExpirer.class);
     private InMemoryTable cacheTable;
     private StreamEventFactory streamEventFactory;
     private Map<String, Table> tableMap;
     private AbstractQueryableRecordTable storeTable;
     private SiddhiAppContext siddhiAppContext;
     private long retentionPeriod;
-    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private CompiledCondition cacheExpiryCompiledCondition;
 
     public CacheExpirer(long retentionPeriod, InMemoryTable cacheTable, Map<String, Table> tableMap,
@@ -130,82 +122,6 @@ public class CacheExpirer {
                 tableMap, siddhiQueryContext);
     }
 
-    private void handleCacheExpiry() {
-        log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
-        StateEvent stateEventForCaching = new StateEvent(1, 0);
-        StreamEvent loadedDataFromStore;
-
-        if (storeTable.getStoreTableSize() != -1 && storeTable.getStoreSizeLastCheckedTime() >
-                        siddhiAppContext.getTimestampGenerator().currentTime() - retentionPeriod * 10) {
-            if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + ": checking size of store table");
-            }
-            try {
-            if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-                try {
-                    if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +
-                            retentionPeriod) {
-                        loadedDataFromStore = storeTable.query(stateEventForCaching,
-                                storeTable.getCompiledConditionForCaching(),
-                                storeTable.getCompiledSelectionForCaching(), storeTable.
-                                        getOutputAttributesForCaching());
-                        clearCacheAndReload(loadedDataFromStore);
-                        storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
-                    }
-                } finally {
-                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
-                }
-            } else {
-                cacheTable.delete(generateDeleteEventChunk(), cacheExpiryCompiledCondition);
-            }
-            } catch (ConnectionUnavailableException e) {
-                throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
-            }
-        } else {
-            readWriteLock.writeLock().lock();
-            try {
-                AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-                try {
-                    loadedDataFromStore = storeTable.query(stateEventForCaching,
-                            storeTable.getCompiledConditionForCaching(),
-                            storeTable.getCompiledSelectionForCaching(), storeTable.getOutputAttributesForCaching());
-                    storeTable.setStoreTableSize(findEventChunkSize(loadedDataFromStore));
-                    storeTable.setStoreSizeLastCheckedTime(siddhiAppContext.getTimestampGenerator().currentTime());
-                } finally {
-                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
-                }
-                if (storeTable.getStoreTableSize() <= storeTable.getMaxCacheSize()) {
-                    if (storeTable.getCacheLastReloadTime() < siddhiAppContext.getTimestampGenerator().currentTime() +
-                            retentionPeriod) {
-                        clearCacheAndReload(loadedDataFromStore);
-                        storeTable.setCacheLastReloadTime(siddhiAppContext.getTimestampGenerator().currentTime());
-                    }
-                } else {
-                    cacheTable.delete(generateDeleteEventChunk(), cacheExpiryCompiledCondition);
-                }
-            } catch (Exception e) {
-                throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
-            } finally {
-                readWriteLock.writeLock().unlock();
-            }
-        }
-        log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
-    }
-
-    private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
-        readWriteLock.writeLock().lock();
-        try {
-            ((CacheTable) cacheTable).deleteAll();
-            if (loadedDataFromStore != null) {
-                ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
-            }
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-
     public Runnable generateCacheExpirer() {
         class CheckAndExpireCache implements Runnable {
             
@@ -215,7 +131,7 @@ public class CacheExpirer {
             @Override
             public void run() {
                 try {
-                    handleCacheExpiry();
+                    storeTable.handleCacheExpiry(cacheExpiryCompiledCondition, generateDeleteEventChunk());
                 } catch (Exception e) {
                     throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
                 }
