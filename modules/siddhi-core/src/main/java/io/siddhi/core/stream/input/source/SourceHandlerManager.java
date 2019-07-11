@@ -31,7 +31,7 @@ public abstract class SourceHandlerManager {
      */
     private HashMap<String, SourceHandler> registeredSourceHandlers = new HashMap<>();
 
-    public abstract SourceHandler generateSourceHandler();
+    public abstract SourceHandler generateSourceHandler(String type);
 
     public void registerSourceHandler(String elementId, SourceHandler sourceHandler) {
         this.registeredSourceHandlers.put(elementId, sourceHandler);
