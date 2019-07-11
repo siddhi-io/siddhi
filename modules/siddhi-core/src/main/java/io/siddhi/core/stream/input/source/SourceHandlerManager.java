@@ -30,7 +30,24 @@ public abstract class SourceHandlerManager {
      * Saves a list of registered {@link SourceHandler} classes against the respective {@link Source} elementId.
      */
     private HashMap<String, SourceHandler> registeredSourceHandlers = new HashMap<>();
+    protected String sourceType;
 
+    /**
+     * Generate source handler based on source type.
+     *
+     * @return SourceHandler
+     */
+    public SourceHandler generateSourceHandler(String sourceType) {
+        this.sourceType = sourceType;
+        return generateSourceHandler();
+    }
+
+    /**
+     * Use io.siddhi.core.stream.input.source.SourceHandlerManager#generateSourceHandler(java.lang.String) interred.
+     *
+     * @return SourceHandler
+     */
+    @Deprecated
     public abstract SourceHandler generateSourceHandler();
 
     public void registerSourceHandler(String elementId, SourceHandler sourceHandler) {
