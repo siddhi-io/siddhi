@@ -307,23 +307,38 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private StreamEvent query(Table tableForPerDuration, StateEvent matchingEvent, CompiledCondition compiledCondition,
                               CompiledSelection compiledSelection, Attribute[] outputAttributes) {
 
-        try {
-            return ((QueryableProcessor) tableForPerDuration)
-                    .query(matchingEvent, compiledCondition, compiledSelection, outputAttributes);
-        } catch (ConnectionUnavailableException e) {
-            // Store query does not have retry logic and retry called manually
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
-                        + "as the datasource is unavailable.");
+        if (tableForPerDuration.getIsConnected()) {
+            try {
+                return ((QueryableProcessor) tableForPerDuration)
+                        .query(matchingEvent, compiledCondition, compiledSelection, outputAttributes);
+            } catch (ConnectionUnavailableException e) {
+                // Store query does not have retry logic and retry called manually
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Unable to query table '" + tableForPerDuration.getTableDefinition().getId() + "', "
+                            + "as the datasource is unavailable.");
+                }
+                if (!isStoreQuery) {
+                    tableForPerDuration.setIsConnectedToFalse();
+                    tableForPerDuration.connectWithRetry();
+                    return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
+                            outputAttributes);
+                }
+                throw new SiddhiAppRuntimeException(e.getMessage(), e);
             }
-
-            if (!isStoreQuery) {
-                tableForPerDuration.setIsConnectedToFalse();
-                tableForPerDuration.connectWithRetry();
-                return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
-                        outputAttributes);
-            }
-            throw new SiddhiAppRuntimeException(e.getMessage(), e);
+        } else if (tableForPerDuration.getIsTryingToConnect()) {
+            LOG.warn("Error on '" + aggregationName + "' while performing query for event '" + matchingEvent +
+                    "', operation busy waiting at Table '" + tableForPerDuration.getTableDefinition().getId() +
+                    "' as its trying to reconnect!");
+            tableForPerDuration.waitWhileConnect();
+            LOG.info("Aggregation '" + aggregationName + "' table '" +
+                    tableForPerDuration.getTableDefinition().getId() + "' has become available for query for " +
+                    "matching event '" + matchingEvent + "'");
+            return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
+                    outputAttributes);
+        } else {
+            tableForPerDuration.connectWithRetry();
+            return query(tableForPerDuration, matchingEvent, compiledCondition, compiledSelection,
+                    outputAttributes);
         }
     }
 
