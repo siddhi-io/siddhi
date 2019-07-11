@@ -50,18 +50,19 @@ public class QuerySelector implements Processor {
     private boolean currentOn = false;
     private boolean expiredOn = false;
     private boolean containsAggregator = false;
-    OutputRateLimiter outputRateLimiter;
+    private OutputRateLimiter outputRateLimiter;
     private List<AttributeProcessor> attributeProcessorList;
     private ConditionExpressionExecutor havingConditionExecutor = null;
     private boolean isGroupBy = false;
     private GroupByKeyGenerator groupByKeyGenerator;
     private boolean isOrderBy = false;
     private OrderByEventComparator orderByEventComparator;
-    String id;
-    StateEventPopulator eventPopulator;
+    private String id;
+    private StateEventPopulator eventPopulator;
     private boolean batchingEnabled = true;
     private long limit = SiddhiConstants.UNKNOWN_STATE;
     private long offset = SiddhiConstants.UNKNOWN_STATE;
+    private StateEventPopulator eventPopulatorForOptimisedLookup;
 
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiAppContext
             siddhiAppContext) {
@@ -98,6 +99,28 @@ public class QuerySelector implements Processor {
             outputRateLimiter.process(outputComplexEventChunk);
         }
 
+    }
+
+    public void processOptimisedQueryEvents(ComplexEventChunk complexEventChunk) {
+        ComplexEventChunk outputComplexEventChunk = processEventChunk(complexEventChunk);
+        if (outputComplexEventChunk != null) {
+            outputRateLimiter.process(outputComplexEventChunk);
+        }
+    }
+
+    private ComplexEventChunk processEventChunk(ComplexEventChunk complexEventChunk) {
+        complexEventChunk.reset();
+        synchronized (this) {
+            while (complexEventChunk.hasNext()) {
+                ComplexEvent event = complexEventChunk.next();
+                eventPopulatorForOptimisedLookup.populateStateEvent(event);
+            }
+        }
+        complexEventChunk.reset();
+        if (complexEventChunk.hasNext()) {
+            return complexEventChunk;
+        }
+        return null;
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
@@ -434,6 +457,10 @@ public class QuerySelector implements Processor {
         this.eventPopulator = eventPopulator;
     }
 
+    public void setEventPopulatorForOptimisedLookup(StateEventPopulator eventPopulatorForOptimisedLookup) {
+        this.eventPopulatorForOptimisedLookup = eventPopulatorForOptimisedLookup;
+    }
+
     public void setLimit(long limit) {
         if (limit < 0) {
             throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
@@ -518,49 +545,4 @@ public class QuerySelector implements Processor {
             }
         }
     }
-
-    public String getId() {
-        return id;
-    }
-
-    public boolean isCurrentOn() {
-        return currentOn;
-    }
-
-    public boolean isExpiredOn() {
-        return expiredOn;
-    }
-
-    public boolean isContainsAggregator() {
-        return containsAggregator;
-    }
-
-    public ConditionExpressionExecutor getHavingConditionExecutor() {
-        return havingConditionExecutor;
-    }
-
-    public boolean isGroupBy() {
-        return isGroupBy;
-    }
-
-    public GroupByKeyGenerator getGroupByKeyGenerator() {
-        return groupByKeyGenerator;
-    }
-
-    public boolean isOrderBy() {
-        return isOrderBy;
-    }
-
-    public OrderByEventComparator getOrderByEventComparator() {
-        return orderByEventComparator;
-    }
-
-    public long getLimit() {
-        return limit;
-    }
-
-    public long getOffset() {
-        return offset;
-    }
-
 }

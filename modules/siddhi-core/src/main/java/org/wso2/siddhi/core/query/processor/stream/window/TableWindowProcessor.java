@@ -24,8 +24,6 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.exception.QueryableRecordTableException;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -46,7 +44,7 @@ import java.util.Map;
 /**
  * Implementation of {@link WindowProcessor} which represent a Window operating based on {@link Table}.
  */
-public class TableWindowProcessor extends WindowProcessor implements FindableProcessor, QueryableProcessor {
+public class TableWindowProcessor extends WindowProcessor implements QueryableProcessor {
 
     private static final Logger log = Logger.getLogger(TableWindowProcessor.class);
     private Table table;
@@ -111,24 +109,16 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
                                               SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
-        CompiledSelection compiledSelection = null;
-        try {
-            compiledSelection = ((AbstractQueryableRecordTable) this.table).compileSelection(selector,
-                    expectedOutputAttributes, matchingMetaInfoHolder, siddhiAppContext,
-                    variableExpressionExecutors, tableMap, queryName);
-        } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Store Query optimization failed for table: "
-                        + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
-                        "Reason for failure: " + e.getMessage());
-            }
-            this.isOptimisableLookup = false;
-        }
-        return compiledSelection;
+        return ((AbstractQueryableRecordTable) this.table).compileSelection(selector, expectedOutputAttributes,
+                matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
     }
 
     public Table getTable() {
         return table;
+    }
+
+    public String getTableId() {
+        return table.getTableDefinition().getId();
     }
 
     @Override

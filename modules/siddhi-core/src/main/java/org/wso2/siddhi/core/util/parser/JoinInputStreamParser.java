@@ -17,11 +17,13 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.exception.QueryableRecordTableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -71,7 +73,7 @@ import static org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType.WINDOW
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 
 public class JoinInputStreamParser {
-
+    private static final Logger log = Logger.getLogger(JoinInputStreamParser.class);
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream, Query query,
                                                  SiddhiAppContext siddhiAppContext,
@@ -200,15 +202,19 @@ public class JoinInputStreamParser {
                     break;
             }
 
-            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor, 0);
-            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor, 0);
+            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor, 0,
+                    siddhiAppContext.getName(), queryName);
+            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor, 0,
+                    siddhiAppContext.getName(), queryName);
 
             FindableProcessor leftFindableProcessor = insertJoinProcessorsAndGetFindable(leftPreJoinProcessor,
                     leftPostJoinProcessor, leftStreamRuntime, siddhiAppContext, outputExpectsExpiredEvents, queryName,
                     joinInputStream.getLeftInputStream());
 
-            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor, 1);
-            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor, 1);
+            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor, 1,
+                    siddhiAppContext.getName(), queryName);
+            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor, 1,
+                    siddhiAppContext.getName(), queryName);
 
             FindableProcessor rightFindableProcessor = insertJoinProcessorsAndGetFindable(rightPreJoinProcessor,
                     rightPostJoinProcessor, rightStreamRuntime, siddhiAppContext, outputExpectsExpiredEvents,
@@ -227,7 +233,7 @@ public class JoinInputStreamParser {
             QuerySelector querySelector = null;
             if (!(rightFindableProcessor instanceof TableWindowProcessor ||
                     rightFindableProcessor instanceof AggregateWindowProcessor) &&
-                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT)){
+                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT)) {
                 MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                         (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
                 CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
@@ -237,20 +243,25 @@ public class JoinInputStreamParser {
                 if (leftFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) leftFindableProcessor).isOptimisableLookup()) {
 
-                    querySelector = SelectorParser.parse(query.getSelector(),
-                            query.getOutputStream(), siddhiAppContext, metaStateEvent,
-                            tableMap, executors,queryName, SiddhiConstants.UNKNOWN_STATE);
+                    querySelector = SelectorParser.parse(query.getSelector(), query.getOutputStream(), siddhiAppContext,
+                            metaStateEvent, tableMap, executors, queryName, SiddhiConstants.UNKNOWN_STATE);
 
                     expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
-                    rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
-                            query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, siddhiAppContext,
-                            executors, tableMap, queryName
-                    );
-
-                    if (rightCompiledSelection != null) {
-                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, query.getSelector(),
-                                metaStateEvent, expectedOutputAttributes, false, tableMap, siddhiAppContext, queryName);
+                    try {
+                        rightCompiledSelection = ((QueryableProcessor) leftFindableProcessor).compileSelection(
+                                query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, siddhiAppContext,
+                                executors, tableMap, queryName
+                        );
+                        SelectorParser.parseOptimisedSelector(querySelector, metaStateEvent, expectedOutputAttributes,
+                                false);
+                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Query optimization failed for query: '" + queryName +
+                                    "' within Siddhi app '" + siddhiAppContext.getName() +
+                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                        }
+                        // Nothing to override
                     }
                 }
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
@@ -259,7 +270,7 @@ public class JoinInputStreamParser {
             }
             if (!(leftFindableProcessor instanceof TableWindowProcessor ||
                     leftFindableProcessor instanceof AggregateWindowProcessor) &&
-                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT)){
+                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT)) {
                 MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                         (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
                 CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
@@ -269,20 +280,25 @@ public class JoinInputStreamParser {
                 if (rightFindableProcessor instanceof TableWindowProcessor &&
                         ((TableWindowProcessor) rightFindableProcessor).isOptimisableLookup()) {
 
-                    querySelector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                            siddhiAppContext, metaStateEvent, tableMap, executors, queryName,
-                            SiddhiConstants.UNKNOWN_STATE);
+                    querySelector = SelectorParser.parse(query.getSelector(), query.getOutputStream(), siddhiAppContext,
+                            metaStateEvent, tableMap, executors, queryName, SiddhiConstants.UNKNOWN_STATE);
 
                     expectedOutputAttributes = metaStateEvent.getOutputStreamDefinition().getAttributeList();
 
-                    leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
-                            query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder,
-                            siddhiAppContext, executors, tableMap, queryName
-                    );
-
-                    if (leftCompiledSelection != null){
-                        querySelector = OptimisedJoinQuerySelectorParser.parse(querySelector, query.getSelector(),
-                                metaStateEvent, expectedOutputAttributes, true, tableMap, siddhiAppContext, queryName);
+                    try {
+                        leftCompiledSelection = ((QueryableProcessor) rightFindableProcessor).compileSelection(
+                                query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder,
+                                siddhiAppContext, executors, tableMap, queryName
+                        );
+                        SelectorParser.parseOptimisedSelector(querySelector, metaStateEvent, expectedOutputAttributes,
+                                true);
+                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Query optimization failed for query: '" + queryName +
+                                    "' within Siddhi app '" + siddhiAppContext.getName() +
+                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                        }
+                        // Nothing to override
                     }
                 }
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,
