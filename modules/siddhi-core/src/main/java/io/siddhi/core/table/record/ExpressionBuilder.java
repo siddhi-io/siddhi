@@ -356,11 +356,20 @@ public class ExpressionBuilder {
                         try {
                             type = definition.getAttributeType(attributeName);
                         } catch (AttributeNotExistException e) {
-                            throw new SiddhiAppValidationException(e.getMessageWithOutContext() + " Input Stream: " +
-                                    definition.getId() + " with " + "reference: " +
-                                    metaStreamEvent.getInputReferenceId(), e.getQueryContextStartIndex(),
-                                    e.getQueryContextEndIndex(), siddhiQueryContext.getSiddhiAppContext().getName(),
-                                    siddhiQueryContext.getSiddhiAppContext().getSiddhiAppString());
+                            // Having state : i.e attribute is in the select clause
+                            definition = matchingMetaInfoHolder.getMetaStateEvent().getOutputStreamDefinition();
+                            try {
+                                type = definition.getAttributeType(attributeName);
+                                buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
+                                        .getStoreDefinition());
+                            } catch (AttributeNotExistException e1) {
+                                throw new SiddhiAppValidationException(e1.getMessageWithOutContext() +
+                                        " Input Stream: " + definition.getId() + " with " + "reference: " +
+                                        metaStreamEvent.getInputReferenceId(), e1.getQueryContextStartIndex(),
+                                        e1.getQueryContextEndIndex(),
+                                        siddhiQueryContext.getSiddhiAppContext().getName(),
+                                        siddhiQueryContext.getSiddhiAppContext().getSiddhiAppString());
+                            }
                         }
 
                         if (matchingMetaInfoHolder.getCurrentState() == matchingMetaInfoHolder

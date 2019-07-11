@@ -54,6 +54,7 @@ import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
@@ -258,7 +259,7 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, executors,
                                 tableMap, siddhiQueryContext
                         );
-                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                    } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
                                     "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
@@ -295,7 +296,7 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder, executors,
                                 tableMap, siddhiQueryContext
                         );
-                    } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+                    } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
                                     "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
