@@ -739,7 +739,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
                 metaStateEvent);
         return executeSelectorAndReturnStreamEvent(cacheResults, compiledSelectionWithCache.querySelector,
-                stateEventFactory, MetaStreamEvent.EventType.TABLE);
+                stateEventFactory, compiledSelectionWithCache.getStoreEventIndex());
     }
 
     /**
@@ -888,7 +888,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
 
             compiledSelectionWithCache = new CompiledSelectionWithCache(recordStoreCompiledSelection, querySelector,
-                    metaStateEventForCacheSelection);
+                    metaStateEventForCacheSelection, matchingMetaInfoHolder.getStoreEventIndex());
             return compiledSelectionWithCache;
         } else {
             return  new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
@@ -955,13 +955,15 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         QuerySelector querySelector;
         MetaStateEvent metaStateEvent;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
+        int storeEventIndex;
 
         public CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
                                           QuerySelector querySelector,
-                                          MetaStateEvent metaStateEvent) {
+                                          MetaStateEvent metaStateEvent, int storeEventIndex) {
             this.recordStoreCompiledSelection = recordStoreCompiledSelection;
             this.querySelector = querySelector;
             this.metaStateEvent = metaStateEvent;
+            this.storeEventIndex = storeEventIndex;
         }
 
         public RecordStoreCompiledSelection getRecordStoreCompiledSelection() {
@@ -974,6 +976,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         public MetaStateEvent getMetaStateEvent() {
             return metaStateEvent;
+        }
+
+        public int getStoreEventIndex() {
+            return storeEventIndex;
         }
     }
 

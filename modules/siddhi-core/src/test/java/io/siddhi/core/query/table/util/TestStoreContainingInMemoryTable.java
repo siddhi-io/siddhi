@@ -123,7 +123,8 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
             compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.getMetaStateEvent());
             Event[] cacheResultsAfterSelection = executeSelector(outEvent,
-                    compiledSelectionWithCache.getQuerySelector(), stateEventFactory, MetaStreamEvent.EventType.TABLE);
+                    compiledSelectionWithCache.getQuerySelector(), stateEventFactory,
+                    compiledSelectionWithCache.getStoreEventIndex());
 
             if (compiledSelectionWithCache.getQuerySelector() !=  null &
                     compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() !=  0) {
@@ -175,8 +176,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         querySelector.setEventPopulator(
                 StateEventPopulatorFactory.constructEventPopulator(metaStateEvent));
 
-        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector,
-                metaStateEvent);
+        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector, metaStateEvent, 0);
         return compiledSelectionWithCache;
     }
 
