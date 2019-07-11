@@ -30,8 +30,28 @@ public abstract class SourceHandlerManager {
      * Saves a list of registered {@link SourceHandler} classes against the respective {@link Source} elementId.
      */
     private HashMap<String, SourceHandler> registeredSourceHandlers = new HashMap<>();
+    private String sourceType;
 
-    public abstract SourceHandler generateSourceHandler(String type);
+    /**
+     * Generate source handler based on source type.
+     *
+     * @return SourceHandler
+     */
+    public SourceHandler generateSourceHandler(String sourceType) {
+        this.sourceType = sourceType;
+        return generateSourceHandler();
+    }
+
+    /**
+     * Generate source handler.
+     *
+     * @return SourceHandler
+     */
+    public abstract SourceHandler generateSourceHandler();
+
+    public String getSourceType() {
+        return sourceType;
+    }
 
     public void registerSourceHandler(String elementId, SourceHandler sourceHandler) {
         this.registeredSourceHandlers.put(elementId, sourceHandler);
