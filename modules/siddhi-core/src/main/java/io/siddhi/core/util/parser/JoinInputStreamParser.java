@@ -261,9 +261,10 @@ public class JoinInputStreamParser {
                         );
                     } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
-                                    "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
-                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                            log.debug("Performing select clause in databases failed for query: '" +
+                                    siddhiQueryContext.getName() + "' within Siddhi app '" +
+                                    siddhiQueryContext.getSiddhiAppContext().getName() + "' hence reverting back to " +
+                                    "querying only with where clause. Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
@@ -298,9 +299,10 @@ public class JoinInputStreamParser {
                         );
                     } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for query: '" + siddhiQueryContext.getName() +
-                                    "' within Siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() +
-                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                            log.debug("Performing select clause in databases failed for query: '" +
+                                    siddhiQueryContext.getName() + "' within Siddhi app '" +
+                                    siddhiQueryContext.getSiddhiAppContext().getName() + "' hence reverting back to " +
+                                    "querying only with where clause. Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
