@@ -253,8 +253,6 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, leftMatchingMetaInfoHolder, siddhiAppContext,
                                 executors, tableMap, queryName
                         );
-                        SelectorParser.parseOptimisedSelector(querySelector, metaStateEvent, expectedOutputAttributes,
-                                false);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + queryName +
@@ -290,8 +288,6 @@ public class JoinInputStreamParser {
                                 query.getSelector(), expectedOutputAttributes, rightMatchingMetaInfoHolder,
                                 siddhiAppContext, executors, tableMap, queryName
                         );
-                        SelectorParser.parseOptimisedSelector(querySelector, metaStateEvent, expectedOutputAttributes,
-                                true);
                     } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Query optimization failed for query: '" + queryName +

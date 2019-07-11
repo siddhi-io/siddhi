@@ -21,7 +21,6 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEventAttribute;
-import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -47,8 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
 
 /**
  * Class to parse {@link QuerySelector}.
@@ -263,29 +260,5 @@ public class SelectorParser {
 
     public static ThreadLocal<String> getContainsAggregatorThreadLocal() {
         return containsAggregatorThreadLocal;
-    }
-
-    public static void parseOptimisedSelector(QuerySelector querySelector, MetaStateEvent metaStateEvent,
-                                              List<Attribute> expectedOutputAttributes, boolean isTableRightOfJoin) {
-        int storeIndex;
-        if (isTableRightOfJoin) {
-            storeIndex = 1;
-        } else {
-            storeIndex = 0;
-        }
-
-        MetaStreamEvent metaStoreEvent = new MetaStreamEvent();
-        expectedOutputAttributes.forEach(metaStoreEvent::addOutputData);
-        String tableReference = metaStateEvent.getMetaStreamEvent(storeIndex).getInputReferenceId();
-        metaStoreEvent.setInputReferenceId(tableReference);
-        StreamDefinition streamDefinition =  new StreamDefinition();
-        streamDefinition.setId(metaStateEvent.getMetaStreamEvent(storeIndex).getLastInputDefinition().getId());
-        expectedOutputAttributes
-                .forEach((attribute) -> streamDefinition.attribute(attribute.getName(), attribute.getType()));
-        metaStoreEvent.addInputDefinition(streamDefinition);
-        metaStoreEvent.setEventType(TABLE);
-
-        querySelector.setEventPopulatorForOptimisedLookup(
-                StateEventPopulatorFactory.constructEventPopulator(metaStoreEvent));
     }
 }

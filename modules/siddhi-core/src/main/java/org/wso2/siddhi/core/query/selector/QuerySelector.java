@@ -102,25 +102,20 @@ public class QuerySelector implements Processor {
     }
 
     public void processOptimisedQueryEvents(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk outputComplexEventChunk = processEventChunk(complexEventChunk);
-        if (outputComplexEventChunk != null) {
-            outputRateLimiter.process(outputComplexEventChunk);
-        }
-    }
-
-    private ComplexEventChunk processEventChunk(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
-                eventPopulatorForOptimisedLookup.populateStateEvent(event);
+                if (((event.getType() != StreamEvent.Type.CURRENT || !currentOn) &&
+                        (event.getType() != StreamEvent.Type.EXPIRED || !expiredOn))) {
+                    complexEventChunk.remove();
+                }
             }
         }
         complexEventChunk.reset();
         if (complexEventChunk.hasNext()) {
-            return complexEventChunk;
+            outputRateLimiter.process(complexEventChunk);
         }
-        return null;
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
@@ -455,10 +450,6 @@ public class QuerySelector implements Processor {
 
     public void setEventPopulator(StateEventPopulator eventPopulator) {
         this.eventPopulator = eventPopulator;
-    }
-
-    public void setEventPopulatorForOptimisedLookup(StateEventPopulator eventPopulatorForOptimisedLookup) {
-        this.eventPopulatorForOptimisedLookup = eventPopulatorForOptimisedLookup;
     }
 
     public void setLimit(long limit) {
