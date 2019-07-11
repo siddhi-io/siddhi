@@ -52,8 +52,7 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Que
 
     public TableWindowProcessor(Table table) {
         this.table = table;
-        this.isOptimisableLookup = table instanceof AbstractQueryableRecordTable &&
-                                                            !((AbstractQueryableRecordTable) table).isCacheEnabled();
+        this.isOptimisableLookup = table instanceof AbstractQueryableRecordTable;
     }
 
     public boolean isOptimisableLookup() {

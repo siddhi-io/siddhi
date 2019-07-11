@@ -80,6 +80,10 @@ public class TestStoreConditionVisitor extends BaseExpressionVisitor {
         return isContainsConditionExist;
     }
 
+    public int getStreamVarCount() {
+        return streamVarCount;
+    }
+
     @Override
     public void beginVisitAnd() {
         condition.append(TestStoreTableConstants.OPEN_PARENTHESIS);

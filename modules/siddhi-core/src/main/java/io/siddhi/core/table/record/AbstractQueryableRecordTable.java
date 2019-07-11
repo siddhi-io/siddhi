@@ -604,8 +604,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     if (cacheResults == null) {
                         return null;
                     }
-                    return executeSelectorOnCacheResults(compiledSelectionWithCache,
-                            cacheResults);
+                    return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults,
+                            matchingEvent.getStreamEvent(0));
                 } else { // when store is bigger than max cache size
                     if (log.isDebugEnabled() && !queryStoreWithoutCheckingCache.get()) {
                         log.debug(siddhiAppContext.getName() + "-" +
@@ -626,7 +626,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                 log.debug(siddhiAppContext.getName() + "-" + recordStoreCompiledCondition.
                                         getSiddhiQueryContext().getName() + ": cache hit. Sending results from cache");
                             }
-                            return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
+                            return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults,
+                                    matchingEvent.getStreamEvent(0));
                         }
 
                         if (log.isDebugEnabled()) {
@@ -669,7 +670,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         }
                         cacheResults = cacheTable.find(compiledConditionWithCache.getCacheCompileCondition(),
                                 matchingEvent);
-                        return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults);
+                        return executeSelectorOnCacheResults(compiledSelectionWithCache, cacheResults,
+                                matchingEvent.getStreamEvent(0));
                     }
                 }
             } finally {
@@ -735,11 +737,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     private StreamEvent executeSelectorOnCacheResults(CompiledSelectionWithCache compiledSelectionWithCache,
-                                                      StreamEvent cacheResults) {
-        StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.
-                metaStateEvent);
-        return executeSelectorAndReturnStreamEvent(cacheResults, compiledSelectionWithCache.querySelector,
-                stateEventFactory, compiledSelectionWithCache.getStoreEventIndex());
+                                                      StreamEvent cacheResults, StreamEvent streamEvent) {
+        StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.metaStateEvent);
+        return executeSelectorAndReturnStreamEvent(stateEventFactory, streamEvent, cacheResults,
+                compiledSelectionWithCache.getStoreEventIndex(), compiledSelectionWithCache.querySelector);
     }
 
     /**
@@ -888,7 +889,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
 
             compiledSelectionWithCache = new CompiledSelectionWithCache(recordStoreCompiledSelection, querySelector,
-                    metaStateEventForCacheSelection, matchingMetaInfoHolder.getStoreEventIndex());
+                    metaStateEventForCacheSelection, matchingMetaInfoHolder.getStoreEventIndex(),
+                    variableExpressionExecutorsForQuerySelector);
             return compiledSelectionWithCache;
         } else {
             return  new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
@@ -952,18 +954,21 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      * class to hold both store compile selection and cache compile selection wrapped
      */
     public class CompiledSelectionWithCache implements CompiledSelection {
-        QuerySelector querySelector;
-        MetaStateEvent metaStateEvent;
-        RecordStoreCompiledSelection recordStoreCompiledSelection;
-        int storeEventIndex;
+        private QuerySelector querySelector;
+        private MetaStateEvent metaStateEvent;
+        private RecordStoreCompiledSelection recordStoreCompiledSelection;
+        private int storeEventIndex;
+        private List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector;
 
         public CompiledSelectionWithCache(RecordStoreCompiledSelection recordStoreCompiledSelection,
-                                          QuerySelector querySelector,
-                                          MetaStateEvent metaStateEvent, int storeEventIndex) {
+                                          QuerySelector querySelector, MetaStateEvent metaStateEvent,
+                                          int storeEventIndex,
+                                          List<VariableExpressionExecutor> variableExpressionExecutors) {
             this.recordStoreCompiledSelection = recordStoreCompiledSelection;
             this.querySelector = querySelector;
             this.metaStateEvent = metaStateEvent;
             this.storeEventIndex = storeEventIndex;
+            this.variableExpressionExecutorsForQuerySelector = variableExpressionExecutors;
         }
 
         public RecordStoreCompiledSelection getRecordStoreCompiledSelection() {
@@ -980,6 +985,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         public int getStoreEventIndex() {
             return storeEventIndex;
+        }
+
+        public List<VariableExpressionExecutor> getVariableExpressionExecutorsForQuerySelector() {
+            return variableExpressionExecutorsForQuerySelector;
         }
     }
 
@@ -1111,9 +1120,4 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
         }
     }
-
-    public boolean isCacheEnabled() {
-        return this.cacheEnabled;
-    }
-
 }

@@ -124,9 +124,8 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
         if (outEvent != null) {
             compiledSelectionWithCache = (CompiledSelectionWithCache) compiledSelection;
             StateEventFactory stateEventFactory = new StateEventFactory(compiledSelectionWithCache.getMetaStateEvent());
-            Event[] cacheResultsAfterSelection = executeSelector(outEvent,
-                    compiledSelectionWithCache.getQuerySelector(), stateEventFactory,
-                    compiledSelectionWithCache.getStoreEventIndex());
+            Event[] cacheResultsAfterSelection = executeSelector(stateEventFactory, null, outEvent,
+                    compiledSelectionWithCache.getStoreEventIndex(), compiledSelectionWithCache.getQuerySelector());
 
             if (compiledSelectionWithCache.getQuerySelector() !=  null &
                     compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() !=  0) {
@@ -171,7 +170,7 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
         querySelector.setEventPopulator(
                 StateEventPopulatorFactory.constructEventPopulator(metaStateEvent));
 
-        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector, metaStateEvent, 0);
+        compiledSelectionWithCache = new CompiledSelectionWithCache(null, querySelector, metaStateEvent, 0, null);
         return compiledSelectionWithCache;
     }
 

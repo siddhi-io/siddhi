@@ -265,6 +265,10 @@ public class JoinProcessor implements Processor {
         this.stateEventFactory = stateEventFactory;
     }
 
+    public CompiledSelection getCompiledSelection() {
+        return compiledSelection;
+    }
+
     /**
      * Join the given two event streams.
      *

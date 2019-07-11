@@ -155,4 +155,86 @@ public class CacheCornerCasesTest {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(dependsOnMethods = "testTableJoinQuery1")
+    public void testTableJoinQuery2() throws InterruptedException {
+        log.info("testTableJoinQuery2 - OUT 2");
+        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
+        final Logger logger = Logger.getRootLogger();
+        logger.setLevel(Level.DEBUG);
+        logger.addAppender(appender);
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "@Store(type=\"testStoreCacheEnabledOptimisation\", @Cache(size=\"2\"))\n" +
+                "@PrimaryKey('symbol') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query2') " +
+                "from CheckStockStream join StockTable as myTable " +
+                "on CheckStockStream.symbol == myTable.symbol " +
+                "select CheckStockStream.symbol as checkSymbol, myTable.symbol as symbol, " +
+                "myTable.volume as volume  " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                            case 3:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO3", "WSO3", 3L});
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(), new Object[]{"WSO2", "WSO2", 2L});
+                                break;
+                            default:
+                                Assert.assertSame(inEventCount, 2);
+                        }
+                    }
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+        siddhiAppRuntime.start();
+
+        // Three records are hard coded for lookup wso1, wso2 and wso3
+        checkStockStream.send(new Object[]{"WSO3"});
+        Thread.sleep(1000);
+        checkStockStream.send(new Object[]{"WSO2"});
+        Thread.sleep(1000);
+        checkStockStream.send(new Object[]{"WSO3"});
+        Thread.sleep(1000);
+
+        Assert.assertTrue(eventArrived, "Event arrived");
+        Assert.assertEquals(inEventCount, 3, "Number of success events");
+        Assert.assertEquals(removeEventCount, 0, "Number of remove events");
+
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            String message = String.valueOf(logEvent.getMessage());
+            if (message.contains(":")) {
+                message = message.split(": ")[1];
+            }
+            logMessages.add(message);
+        }
+        Assert.assertTrue(logMessages.contains("store table size is bigger than cache."));
+        Assert.assertTrue(logMessages.contains("sending results from cache after loading from store"));
+        Assert.assertEquals(Collections.frequency(logMessages, "cache hit. Sending results from cache"), 2);
+        siddhiAppRuntime.shutdown();
+    }
 }
