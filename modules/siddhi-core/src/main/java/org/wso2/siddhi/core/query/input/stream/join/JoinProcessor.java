@@ -108,8 +108,9 @@ public class JoinProcessor implements Processor {
                         try {
                             foundStreamEvent = query(joinStateEvent);
                         } catch (SiddhiAppRuntimeException e) {
-                            log.warn("Optimised join failed with '" + e.getMessage() + " in query '" + queryName +
-                                    "' within Siddhi app '" + siddhiAppName + "' reverting to regular join.", e);
+                            log.warn("Performing select clause in databases failed due to '" + e.getMessage() +
+                                    " in query '" + queryName + "' within Siddhi app '" + siddhiAppName +
+                                    "' hence reverting back to querying only with where clause.", e);
                             this.isOptimisedQuery = false;
                             foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
                         }
@@ -160,7 +161,7 @@ public class JoinProcessor implements Processor {
                     if (joinReturnEventChunk.isRegularJoin()) {
                         selector.process(returnEventChunk);
                     } else {
-                        selector.processOptimisedQueryEvents(returnEventChunk);
+                        selector.executePassThrough(returnEventChunk);
                     }
                     returnEventChunk.clear();
                 }

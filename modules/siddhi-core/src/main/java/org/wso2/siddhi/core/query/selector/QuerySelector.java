@@ -101,7 +101,7 @@ public class QuerySelector implements Processor {
 
     }
 
-    public void processOptimisedQueryEvents(ComplexEventChunk complexEventChunk) {
+    public void executePassThrough(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         synchronized (this) {
             while (complexEventChunk.hasNext()) {

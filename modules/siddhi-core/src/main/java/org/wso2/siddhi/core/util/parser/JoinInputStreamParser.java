@@ -256,9 +256,10 @@ public class JoinInputStreamParser {
                         );
                     } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for query: '" + queryName +
+                            log.debug("Performing select clause in databases failed for query: '" + queryName +
                                     "' within Siddhi app '" + siddhiAppContext.getName() +
-                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                                    "' hence reverting back to querying only with where clause.  " +
+                                    "Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
@@ -291,9 +292,10 @@ public class JoinInputStreamParser {
                         );
                     } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Query optimization failed for query: '" + queryName +
+                            log.debug("Performing select clause in databases failed for query: '" + queryName +
                                     "' within Siddhi app '" + siddhiAppContext.getName() +
-                                    "'. Reverting to regular join.  Reason for failure: " + e.getMessage(), e);
+                                    "' hence reverting back to querying only with where clause.  " +
+                                    "Reason for failure: " + e.getMessage(), e);
                         }
                         // Nothing to override
                     }
