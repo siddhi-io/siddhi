@@ -319,6 +319,16 @@ public class ExpressionBuilder {
                                 buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
                                         .getStoreDefinition());
                             }
+                        } else {
+                            // Having state : i.e attribute is in the select clause
+                            definition = matchingMetaInfoHolder.getMetaStateEvent().getOutputStreamDefinition();
+                            try {
+                                type = definition.getAttributeType(attributeName);
+                                buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
+                                        .getStoreDefinition());
+                            } catch (AttributeNotExistException e) {
+                                //do nothing as its not expected
+                            }
                         }
                     } else {
 
@@ -328,11 +338,19 @@ public class ExpressionBuilder {
                         try {
                             type = definition.getAttributeType(attributeName);
                         } catch (AttributeNotExistException e) {
-                            throw new SiddhiAppValidationException(e.getMessageWithOutContext() + " Input Stream: " +
-                                    definition.getId() + " with " + "reference: " +
-                                    metaStreamEvent.getInputReferenceId(), e.getQueryContextStartIndex(),
-                                    e.getQueryContextEndIndex(), siddhiAppContext.getName(),
-                                    siddhiAppContext.getSiddhiAppString());
+                            // Having state : i.e attribute is in the select clause
+                            definition = matchingMetaInfoHolder.getMetaStateEvent().getOutputStreamDefinition();
+                            try {
+                                type = definition.getAttributeType(attributeName);
+                                buildStoreVariableExecutor(variable, expressionVisitor, type, matchingMetaInfoHolder
+                                        .getStoreDefinition());
+                            } catch (AttributeNotExistException e1) {
+                                throw new SiddhiAppValidationException(e1.getMessageWithOutContext() +
+                                        " Input Stream: " + definition.getId() + " with " + "reference: " +
+                                        metaStreamEvent.getInputReferenceId(), e1.getQueryContextStartIndex(),
+                                        e1.getQueryContextEndIndex(), siddhiAppContext.getName(),
+                                        siddhiAppContext.getSiddhiAppString());
+                            }
                         }
 
                         if (matchingMetaInfoHolder.getCurrentState() == matchingMetaInfoHolder

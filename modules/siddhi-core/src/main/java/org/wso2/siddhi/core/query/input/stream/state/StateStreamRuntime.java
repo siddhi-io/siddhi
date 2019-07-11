@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceMultiProce
 import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 import java.util.List;
 
@@ -76,6 +77,11 @@ public class StateStreamRuntime implements StreamRuntime {
     @Override
     public MetaComplexEvent getMetaComplexEvent() {
         return metaStateEvent;
+    }
+
+    @Override
+    public QuerySelector getQuerySelector() {
+        return null;
     }
 
     public InnerStateRuntime getInnerStateRuntime() {

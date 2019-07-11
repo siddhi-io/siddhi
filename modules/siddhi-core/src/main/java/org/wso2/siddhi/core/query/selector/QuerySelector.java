@@ -62,6 +62,7 @@ public class QuerySelector implements Processor {
     private boolean batchingEnabled = true;
     private long limit = SiddhiConstants.UNKNOWN_STATE;
     private long offset = SiddhiConstants.UNKNOWN_STATE;
+    private StateEventPopulator eventPopulatorForOptimisedLookup;
 
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiAppContext
             siddhiAppContext) {
@@ -98,6 +99,23 @@ public class QuerySelector implements Processor {
             outputRateLimiter.process(outputComplexEventChunk);
         }
 
+    }
+
+    public void executePassThrough(ComplexEventChunk complexEventChunk) {
+        complexEventChunk.reset();
+        synchronized (this) {
+            while (complexEventChunk.hasNext()) {
+                ComplexEvent event = complexEventChunk.next();
+                if (((event.getType() != StreamEvent.Type.CURRENT || !currentOn) &&
+                        (event.getType() != StreamEvent.Type.EXPIRED || !expiredOn))) {
+                    complexEventChunk.remove();
+                }
+            }
+        }
+        complexEventChunk.reset();
+        if (complexEventChunk.hasNext()) {
+            outputRateLimiter.process(complexEventChunk);
+        }
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
@@ -518,5 +536,4 @@ public class QuerySelector implements Processor {
             }
         }
     }
-
 }

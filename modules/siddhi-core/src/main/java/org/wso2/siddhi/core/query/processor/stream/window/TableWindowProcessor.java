@@ -17,19 +17,25 @@
  */
 package org.wso2.siddhi.core.query.processor.stream.window;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.Table;
+import org.wso2.siddhi.core.table.record.AbstractQueryableRecordTable;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.List;
@@ -38,9 +44,11 @@ import java.util.Map;
 /**
  * Implementation of {@link WindowProcessor} which represent a Window operating based on {@link Table}.
  */
-public class TableWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class TableWindowProcessor extends WindowProcessor implements QueryableProcessor {
 
+    private static final Logger log = Logger.getLogger(TableWindowProcessor.class);
     private Table table;
+    private boolean isOptimisableLookup;
     private boolean outputExpectsExpiredEvents;
     private ConfigReader configReader;
 
@@ -54,6 +62,11 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+        this.isOptimisableLookup = table instanceof AbstractQueryableRecordTable;
+    }
+
+    public boolean isOptimisableLookup() {
+        return isOptimisableLookup;
     }
 
     @Override
@@ -74,6 +87,38 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
                                                Map<String, Table> tableMap, String queryName) {
         return table.compileCondition(condition, matchingMetaInfoHolder, siddhiAppContext,
                 variableExpressionExecutors, tableMap, queryName);
+    }
+
+    @Override
+    public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
+        return ((AbstractQueryableRecordTable) this.table).query(matchingEvent, compiledCondition, compiledSelection,
+                outputAttributes);    }
+
+    @Override
+    public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                             CompiledSelection compiledSelection) throws ConnectionUnavailableException {
+        // Depreciated
+        return query(matchingEvent, compiledCondition, compiledSelection, null);
+    }
+
+    @Override
+    public CompiledSelection compileSelection(Selector selector, List<Attribute> expectedOutputAttributes,
+                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
+        return ((AbstractQueryableRecordTable) this.table).compileSelection(selector, expectedOutputAttributes,
+                matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public String getTableId() {
+        return table.getTableDefinition().getId();
     }
 
     @Override

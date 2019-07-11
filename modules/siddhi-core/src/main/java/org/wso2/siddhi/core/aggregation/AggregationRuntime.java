@@ -487,7 +487,7 @@ public class AggregationRuntime implements MemoryCalculable {
                             withinTableCompiledSelection.put(durationTableEntry.getKey(), compiledSelection);
                         })
                 );
-            } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+            } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Aggregation Query optimization failed for aggregation: '" + aggregationName + "'. " +
                             "Creating table lookup query in normal mode. Reason for failure: " + e.getMessage(), e);

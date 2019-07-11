@@ -58,6 +58,7 @@ import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.AggregationInputStore;
 import org.wso2.siddhi.query.api.execution.query.input.store.ConditionInputStore;
@@ -291,7 +292,7 @@ public class StoreQueryParser {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap,
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
             //In case of error, we try to create the regular store query runtime.
-            } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
+            } catch (SiddhiAppCreationException | SiddhiAppValidationException | QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Store Query optimization failed for table: "
                             + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +

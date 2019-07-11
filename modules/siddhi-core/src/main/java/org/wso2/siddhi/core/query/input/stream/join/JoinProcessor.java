@@ -17,15 +17,23 @@
  */
 package org.wso2.siddhi.core.query.input.stream.join;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
+import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
+import org.wso2.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
+import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +42,8 @@ import java.util.List;
  * Created on 12/8/14.
  */
 public class JoinProcessor implements Processor {
+
+    private static final Logger log = Logger.getLogger(JoinProcessor.class);
     private boolean trigger;
     private boolean leftJoinProcessor = false;
     private boolean outerJoinProcessor = false;
@@ -41,16 +51,23 @@ public class JoinProcessor implements Processor {
     private boolean preJoinProcessor;
     private StateEventPool stateEventPool;
     private CompiledCondition compiledCondition;
+    private CompiledSelection compiledSelection;
+    private boolean isOptimisedQuery;
+    private Attribute[] expectedOutputAttributes;
     private FindableProcessor findableProcessor;
     private Processor nextProcessor;
     private QuerySelector selector;
+    private String siddhiAppName;
+    private String queryName;
 
     public JoinProcessor(boolean leftJoinProcessor, boolean preJoinProcessor, boolean outerJoinProcessor,
-                         int matchingStreamIndex) {
+                         int matchingStreamIndex, String siddhiAppName, String queryName) {
         this.leftJoinProcessor = leftJoinProcessor;
         this.preJoinProcessor = preJoinProcessor;
         this.outerJoinProcessor = outerJoinProcessor;
         this.matchingStreamIndex = matchingStreamIndex;
+        this.siddhiAppName = siddhiAppName;
+        this.queryName = queryName;
     }
 
     /**
@@ -61,10 +78,11 @@ public class JoinProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {
-            List<ComplexEventChunk<StateEvent>> returnEventChunkList = new LinkedList<>();
+            List<JoinReturnEventChunk> returnEventChunkList = new LinkedList<>();
             StateEvent joinStateEvent = new StateEvent(2, 0);
             StreamEvent nextEvent = (StreamEvent) complexEventChunk.getFirst();
             complexEventChunk.clear();
+            boolean isJoinEventNull = false;
             while (nextEvent != null) {
                 StreamEvent streamEvent = nextEvent;
                 nextEvent = streamEvent.getNext();
@@ -75,29 +93,44 @@ public class JoinProcessor implements Processor {
                 } else if (eventType == ComplexEvent.Type.RESET) {
                     if (!leftJoinProcessor) {
                         StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                        returnEventChunkList.add(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true));
+                        returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
+                                outputStateEvent, outputStateEvent, true), true));
                     } else {
                         StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                        returnEventChunkList.add(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true));
+                        returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
+                                outputStateEvent, outputStateEvent, true), true));
                     }
                 } else {
                     joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
-                    StreamEvent foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
+                    StreamEvent foundStreamEvent;
+
+                    if (this.isOptimisedQuery) {
+                        try {
+                            foundStreamEvent = query(joinStateEvent);
+                        } catch (SiddhiAppRuntimeException e) {
+                            log.warn("Performing select clause in databases failed due to '" + e.getMessage() +
+                                    " in query '" + queryName + "' within Siddhi app '" + siddhiAppName +
+                                    "' hence reverting back to querying only with where clause.", e);
+                            this.isOptimisedQuery = false;
+                            foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
+                        }
+                    } else {
+                        foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
+                    }
+
                     joinStateEvent.setEvent(matchingStreamIndex, null);
                     if (foundStreamEvent == null) {
                         if (outerJoinProcessor && !leftJoinProcessor) {
                             StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                            returnEventChunkList.add(new ComplexEventChunk<>(
-                                    outputStateEvent, outputStateEvent, true));
+                            returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
+                                    outputStateEvent, outputStateEvent, true), true));
                         } else if (outerJoinProcessor && leftJoinProcessor) {
                             StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                            returnEventChunkList.add(new ComplexEventChunk<>(
-                                    outputStateEvent, outputStateEvent, true));
+                            returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
+                                    outputStateEvent, outputStateEvent, true), true));
                         }
-                    } else {
-                        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<>(true);
+                    } else if (!isOptimisedQuery) {
+                        ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
                         while (foundStreamEvent != null) {
                             StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
                             foundStreamEvent.setNext(null);
@@ -108,13 +141,28 @@ public class JoinProcessor implements Processor {
                             }
                             foundStreamEvent = nextFoundStreamEvent;
                         }
-                        returnEventChunkList.add(returnEventChunk);
+                        returnEventChunkList.add(new JoinReturnEventChunk(returnEventChunk, true));
+                    } else {
+                        ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
+                        while (foundStreamEvent != null) {
+                            StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
+                            foundStreamEvent.setNext(null);
+                            foundStreamEvent.setType(eventType);
+                            returnEventChunk.add(foundStreamEvent);
+                            foundStreamEvent = nextFoundStreamEvent;
+                        }
+                        returnEventChunkList.add(new JoinReturnEventChunk(returnEventChunk, false));
                     }
                 }
             }
-            for (ComplexEventChunk<StateEvent> returnEventChunk : returnEventChunkList) {
+            for (JoinReturnEventChunk joinReturnEventChunk : returnEventChunkList) {
+                ComplexEventChunk<ComplexEvent> returnEventChunk = joinReturnEventChunk.getReturnComplexEvent();
                 if (returnEventChunk.getFirst() != null) {
-                    selector.process(returnEventChunk);
+                    if (joinReturnEventChunk.isRegularJoin()) {
+                        selector.process(returnEventChunk);
+                    } else {
+                        selector.executePassThrough(returnEventChunk);
+                    }
                     returnEventChunk.clear();
                 }
             }
@@ -123,6 +171,43 @@ public class JoinProcessor implements Processor {
                 nextProcessor.process(complexEventChunk);
             }
         }
+    }
+
+    private StreamEvent query(StateEvent joinStateEvent) throws SiddhiAppRuntimeException {
+        Table table = ((TableWindowProcessor) findableProcessor).getTable();
+        if (table.getIsConnected()) {
+            try {
+                return ((QueryableProcessor) findableProcessor).query(joinStateEvent, compiledCondition,
+                        compiledSelection, expectedOutputAttributes);
+            } catch (ConnectionUnavailableException e) {
+                table.setIsConnectedToFalse();
+                table.connectWithRetry();
+                return query(joinStateEvent);
+            }
+        } else if (table.getIsTryingToConnect()) {
+            log.warn("Error while performing query '" + queryName + "' within Siddhi app '" + siddhiAppName +
+                    "' for event '" +  joinStateEvent + "', operation busy waiting at Table '" +
+                    table.getTableDefinition().getId() + "' as its trying to reconnect!");
+            table.waitWhileConnect();
+            log.info("Table '" + table.getTableDefinition().getId() + "' has become available for query '" +
+                    queryName + "' within Siddhi app '" + siddhiAppName + "for matching event '" +
+                    joinStateEvent + "'");
+            return query(joinStateEvent);
+        } else {
+            table.connectWithRetry();
+            return query(joinStateEvent);
+        }
+    }
+
+    public void setCompiledSelection(CompiledSelection compiledSelection) {
+        if (compiledSelection != null) {
+            this.isOptimisedQuery = true;
+            this.compiledSelection = compiledSelection;
+        }
+    }
+
+    public void setExpectedOutputAttributes(List<Attribute> expectedOutputAttributes) {
+        this.expectedOutputAttributes = expectedOutputAttributes.toArray(new Attribute[0]);
     }
 
     /**
@@ -171,7 +256,7 @@ public class JoinProcessor implements Processor {
     @Override
     public Processor cloneProcessor(String key) {
         JoinProcessor joinProcessor = new JoinProcessor(leftJoinProcessor, preJoinProcessor, outerJoinProcessor,
-                matchingStreamIndex);
+                matchingStreamIndex, siddhiAppName, queryName);
         joinProcessor.setTrigger(trigger);
         if (trigger) {
             joinProcessor.setCompiledCondition(compiledCondition.cloneCompilation(key));
@@ -224,4 +309,24 @@ public class JoinProcessor implements Processor {
         }
         return returnEvent;
     }
+
+    private class JoinReturnEventChunk {
+
+        private ComplexEventChunk<ComplexEvent> returnComplexEvent;
+        private boolean isRegularJoin;
+
+        JoinReturnEventChunk(ComplexEventChunk<ComplexEvent> returnComplexEvent, boolean isRegularJoin) {
+            this.returnComplexEvent = returnComplexEvent;
+            this.isRegularJoin = isRegularJoin;
+        }
+
+        ComplexEventChunk<ComplexEvent> getReturnComplexEvent() {
+            return returnComplexEvent;
+        }
+
+        boolean isRegularJoin() {
+            return isRegularJoin;
+        }
+    }
+
 }

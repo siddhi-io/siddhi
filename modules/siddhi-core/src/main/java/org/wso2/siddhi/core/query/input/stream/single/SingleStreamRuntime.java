@@ -110,6 +110,11 @@ public class SingleStreamRuntime implements StreamRuntime {
         }
     }
 
+    @Override
+    public QuerySelector getQuerySelector() {
+        return null;
+    }
+
     public MetaComplexEvent getMetaComplexEvent() {
         return metaComplexEvent;
     }
