@@ -1,123 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/latest/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/5.1.1/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/5.1.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/5.0.2/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/5.0.1/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/5.0.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.5.11/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.5.10/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.5.9/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.5.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.4.8/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.4.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.3.19/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.3.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.2.40/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.2.20/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.2.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.1.64/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.1.46/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.1.7/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.1.0/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.0.9/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
-     <loc>None</loc>
-     <lastmod>2019-07-10</lastmod>
+     <loc>/api/4.0.0/</loc>
+     <lastmod>2019-07-12</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>/license/</loc>
+     <lastmod>2019-07-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
