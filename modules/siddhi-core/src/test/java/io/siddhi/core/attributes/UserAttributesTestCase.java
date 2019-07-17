@@ -15,7 +15,7 @@ public class UserAttributesTestCase {
     }
 
     @Test
-    public void EmptyContainerBehaviour() {
+    public void testEmptyContainerBehaviour() {
         UserAttributeKey<Integer> anIntValue = new UserAttributeKey<>("attrInt");
         UserAttributeKey<String> aString = new UserAttributeKey<>("attrString");
         AssertJUnit.assertFalse(container.contains(aString));
@@ -27,7 +27,7 @@ public class UserAttributesTestCase {
     }
 
     @Test
-    public void WithValuesBehaviour() {
+    public void testWithValuesBehaviour() {
         UserAttributeKey<Integer> anIntValue = new UserAttributeKey<>("attrInt");
         UserAttributeKey<String> aString = new UserAttributeKey<>("attrString");
         AssertJUnit.assertFalse(container.contains(aString));
@@ -50,7 +50,7 @@ public class UserAttributesTestCase {
     }
 
     @Test
-    public void DifferentKeyInstancesResolveCorrectly() {
+    public void testDifferentKeyInstancesResolveCorrectly() {
         UserAttributeKey<Object> key1 = new UserAttributeKey<>("k1");
         UserAttributeKey<Object> key2 = new UserAttributeKey<>("k1");
         Object val = new Object();

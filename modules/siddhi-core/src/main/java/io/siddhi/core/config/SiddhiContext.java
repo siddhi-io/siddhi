@@ -35,10 +35,10 @@ import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 import org.apache.log4j.Logger;
 
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.sql.DataSource;
 
 /**
  * Context information holder associated with {@link SiddhiManager}
