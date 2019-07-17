@@ -20,6 +20,8 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.attributes.ConcurrentUserAttributes;
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.exception.PersistenceStoreException;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.sink.SinkHandlerManager;
@@ -33,10 +35,10 @@ import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 import org.apache.log4j.Logger;
 
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.DataSource;
 
 /**
  * Context information holder associated with {@link SiddhiManager}
@@ -56,6 +58,7 @@ public class SiddhiContext {
     private SinkHandlerManager sinkHandlerManager = null;
     private SourceHandlerManager sourceHandlerManager = null;
     private RecordTableHandlerManager recordTableHandlerManager = null;
+    private UserAttributes userAttributes = null;
 
     public SiddhiContext() {
         SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions);
@@ -63,6 +66,7 @@ public class SiddhiContext {
         statisticsConfiguration = new StatisticsConfiguration(new SiddhiMetricsFactory());
         extensionHolderMap = new ConcurrentHashMap<Class, AbstractExtensionHolder>();
         configManager = new InMemoryConfigManager();
+        userAttributes = new ConcurrentUserAttributes();
         defaultDisrupterExceptionHandler = new ExceptionHandler<Object>() {
             @Override
             public void handleEventException(Throwable throwable, long l, Object event) {
@@ -84,6 +88,10 @@ public class SiddhiContext {
 
     public Map<String, Class> getSiddhiExtensions() {
         return siddhiExtensions;
+    }
+
+    public UserAttributes getUserAttributes() {
+        return userAttributes;
     }
 
     public synchronized PersistenceStore getPersistenceStore() {

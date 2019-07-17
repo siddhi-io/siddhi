@@ -19,6 +19,7 @@
 package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
@@ -26,23 +27,14 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.ThreadBarrier;
 import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.snapshot.SnapshotService;
-import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
-import io.siddhi.core.util.snapshot.state.SingleStateHolder;
-import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
-import io.siddhi.core.util.snapshot.state.StateFactory;
-import io.siddhi.core.util.snapshot.state.StateHolder;
+import io.siddhi.core.util.snapshot.state.*;
 import io.siddhi.core.util.statistics.StatisticsManager;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.query.api.SiddhiApp;
 
 import java.beans.ExceptionListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -118,6 +110,10 @@ public class SiddhiAppContext {
 
     public void setSiddhiContext(SiddhiContext siddhiContext) {
         this.siddhiContext = siddhiContext;
+    }
+
+    public UserAttributes getUserAttributes() {
+        return siddhiContext.getUserAttributes();
     }
 
     public String getName() {

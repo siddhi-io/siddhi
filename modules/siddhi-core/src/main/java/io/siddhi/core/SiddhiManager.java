@@ -17,6 +17,7 @@
  */
 package io.siddhi.core;
 
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.config.StatisticsConfiguration;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
@@ -33,12 +34,12 @@ import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.sql.DataSource;
 
 /**
  * This is the main interface class of Siddhi where users will interact when using Siddhi as a library.
@@ -56,6 +57,10 @@ public class SiddhiManager {
      */
     public SiddhiManager() {
         siddhiContext = new SiddhiContext();
+    }
+
+    public UserAttributes getUserAttributes() {
+        return siddhiContext.getUserAttributes();
     }
 
     public SiddhiAppRuntime createSiddhiAppRuntime(SiddhiApp siddhiApp) {

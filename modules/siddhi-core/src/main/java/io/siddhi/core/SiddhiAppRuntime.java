@@ -20,15 +20,11 @@ package io.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.aggregation.AggregationRuntime;
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
-import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
-import io.siddhi.core.exception.DefinitionNotExistException;
-import io.siddhi.core.exception.QueryNotExistException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
-import io.siddhi.core.exception.StoreQueryCreationException;
+import io.siddhi.core.exception.*;
 import io.siddhi.core.partition.PartitionRuntime;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.StoreQueryRuntime;
@@ -62,27 +58,14 @@ import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryUsageTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.window.Window;
-import io.siddhi.query.api.definition.AbstractDefinition;
-import io.siddhi.query.api.definition.AggregationDefinition;
-import io.siddhi.query.api.definition.Attribute;
-import io.siddhi.query.api.definition.StreamDefinition;
-import io.siddhi.query.api.definition.TableDefinition;
-import io.siddhi.query.api.definition.WindowDefinition;
+import io.siddhi.query.api.definition.*;
 import io.siddhi.query.api.exception.SiddhiAppContextException;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
 
 import java.beans.ExceptionListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
@@ -182,6 +165,10 @@ public class SiddhiAppRuntime {
 
     public String getName() {
         return siddhiAppContext.getName();
+    }
+
+    public UserAttributes getUserAttributes() {
+        return siddhiAppContext.getUserAttributes();
     }
 
     /**
