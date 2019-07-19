@@ -767,7 +767,7 @@
         <msf4j.version>2.1.1</msf4j.version>
         <maven.shadeplugin.version>3.2.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
-        <jackson-datatype-joda-version>2.9.9</jackson-datatype-joda-version>
+        <jackson-datatype-joda-version>2.10.0.pr1</jackson-datatype-joda-version>
         <maven.core.version>3.6.1</maven.core.version>
         <maven.plugin.api.version>3.6.1</maven.plugin.api.version>
         <maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
