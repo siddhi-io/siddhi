@@ -92,7 +92,6 @@ public class StreamJunction implements EventBufferHolder {
                     streamDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_STREAMS, null);
         }
-        this.exceptionListener = siddhiAppContext.getRuntimeExceptionListener();
         this.faultStreamJunction = faultStreamJunction;
         if (faultStreamJunction != null) {
             StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
@@ -279,6 +278,7 @@ public class StreamJunction implements EventBufferHolder {
      * Create and start disruptor based on annotations given in the streamDefinition.
      */
     public synchronized void startProcessing() {
+        this.exceptionListener = siddhiAppContext.getRuntimeExceptionListener();
         if (!receivers.isEmpty() && async) {
             for (Constructor constructor : Disruptor.class.getConstructors()) {
                 if (constructor.getParameterTypes().length == 5) {      // If new disruptor classes available
