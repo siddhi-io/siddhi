@@ -19,11 +19,14 @@
 package io.siddhi.core.util;
 
 import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiAppRuntimeImpl;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.partition.PartitionRuntime;
+import io.siddhi.core.partition.PartitionRuntimeImpl;
 import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.query.input.ProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -161,11 +164,11 @@ public class SiddhiAppRuntimeBuilder {
         aggregationMap.putIfAbsent(aggregationDefinition.getId(), aggregationRuntime);
     }
 
-    public void addPartition(PartitionRuntime partitionRuntime) {
+    public void addPartition(PartitionRuntimeImpl partitionRuntime) {
         partitionMap.put(partitionRuntime.getPartitionName(), partitionRuntime);
     }
 
-    public String addQuery(QueryRuntime queryRuntime) {
+    public String addQuery(QueryRuntimeImpl queryRuntime) {
         QueryRuntime oldQueryRuntime = queryProcessorMap.put(queryRuntime.getQueryId(), queryRuntime);
         if (oldQueryRuntime != null) {
             throw new SiddhiAppCreationException("Multiple queries with name '" + queryRuntime.getQueryId() +
@@ -279,9 +282,9 @@ public class SiddhiAppRuntimeBuilder {
     }
 
     public SiddhiAppRuntime build() {
-        return new SiddhiAppRuntime(streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+        return new SiddhiAppRuntimeImpl(streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                 aggregationDefinitionMap, inputManager, queryProcessorMap, streamJunctionMap, tableMap, windowMap,
-                aggregationMap, sourceMap, sinkMap, partitionMap,
+                aggregationMap, sourceMap, sinkMap, partitionMap, triggerMap,
                 siddhiAppContext, siddhiAppRuntimeMap);
     }
 

@@ -30,7 +30,7 @@ import io.siddhi.query.api.definition.TriggerDefinition;
 /**
  * Implementation of {@link Trigger} which will trigger events when siddhi app in started.
  */
-public class StartTrigger implements Trigger {
+public class StartTrigger extends AbstractTrigger {
     private TriggerDefinition triggerDefinition;
     private SiddhiAppContext siddhiAppContext;
     private StreamJunction streamJunction;
@@ -82,5 +82,10 @@ public class StartTrigger implements Trigger {
     @Override
     public void stop() {
 
+    }
+
+    @Override
+    public boolean isStateful() {
+        return false;
     }
 }

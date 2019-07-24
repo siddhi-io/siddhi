@@ -45,8 +45,8 @@ public class SiddhiQueryContext {
     private boolean partitioned;
     private OutputStream.OutputEventType outputEventType;
     private LatencyTracker latencyTracker;
-    private Map<String, StateHolder> stateHolderMap;
     private IdGenerator idGenerator;
+    private boolean stateful = false;
 
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName) {
         this(siddhiAppContext, queryName, SiddhiConstants.PARTITION_ID_DEFAULT);
@@ -130,12 +130,18 @@ public class SiddhiQueryContext {
 
             if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
                     !SnapshotService.getSkipStateStorageThreadLocal().get()) {
-                stateHolderMap = siddhiAppContext.getSnapshotService().getStateHolderMap(partitionId, this.getName());
+                Map<String, StateHolder> stateHolderMap =
+                        siddhiAppContext.getSnapshotService().getStateHolderMap(partitionId, this.getName());
                 stateHolderMap.put(idGenerator.createNewId() + "-" + name, stateHolder);
             }
+            stateful = true;
             return stateHolder;
         } else {
             return new EmptyStateHolder();
         }
+    }
+
+    public boolean isStateful() {
+        return stateful;
     }
 }

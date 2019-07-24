@@ -425,4 +425,9 @@ public abstract class AbstractRecordTable extends Table {
             return siddhiQueryContext;
         }
     }
+
+    @Override
+    public boolean isStateful() {
+        return false;
+    }
 }

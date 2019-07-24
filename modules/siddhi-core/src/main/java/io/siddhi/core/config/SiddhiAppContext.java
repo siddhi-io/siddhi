@@ -76,6 +76,7 @@ public class SiddhiAppContext {
     private List<Scheduler> schedulerList;
     private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
     private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
+    private SiddhiApp siddhiApp;
 
     public SiddhiAppContext() {
         this.externalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
@@ -264,6 +265,14 @@ public class SiddhiAppContext {
         this.siddhiAppString = siddhiAppString;
     }
 
+    public void setSiddhiApp(SiddhiApp siddhiApp) {
+        this.siddhiApp = siddhiApp;
+    }
+
+    public SiddhiApp getSiddhiApp() {
+        return siddhiApp;
+    }
+
     public List<String> getIncludedMetrics() {
         return includedMetrics;
     }
@@ -311,4 +320,5 @@ public class SiddhiAppContext {
             return new EmptyStateHolder();
         }
     }
+
 }

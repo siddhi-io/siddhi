@@ -33,12 +33,15 @@
 
             <class name="io.siddhi.core.managment.AsyncTestCase"/>
             <class name="io.siddhi.core.managment.EventTestCase"/>
-            <class name="io.siddhi.core.managment.PersistenceTestCase"/>
             <class name="io.siddhi.core.managment.QuerySyncTestCase"/>
             <class name="io.siddhi.core.managment.ValidateTestCase"/>
             <class name="io.siddhi.core.managment.PlaybackTestCase"/>
             <class name="io.siddhi.core.managment.LogTestCase"/>
+            <class name="io.siddhi.core.managment.StateTestCase"/>
             <class name="io.siddhi.core.managment.StatisticsTestCase"/>
+            <class name="io.siddhi.core.managment.PersistenceTestCase"/>
+            <class name="io.siddhi.core.managment.IncrementalPersistenceTestCase"/>
+            <class name="io.siddhi.core.managment.SnapshotableEventQueueTestCase"/>
 
             <class name="io.siddhi.core.query.aggregator.AndAggregatorExtensionTestCase"/>
             <class name="io.siddhi.core.query.aggregator.MaxAggregatorExtensionTestCase"/>
