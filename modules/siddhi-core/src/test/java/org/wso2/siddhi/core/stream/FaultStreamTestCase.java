@@ -641,7 +641,7 @@ public class FaultStreamTestCase {
         }
         Assert.assertTrue(eventArrived);
         Assert.assertTrue(failedCaught);
-        Assert.assertEquals(count.get(), 1);
+        Assert.assertEquals(count.get(), 2);
         Assert.assertEquals(failedCount.get(), 1);
     }
 }
