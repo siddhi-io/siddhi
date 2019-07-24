@@ -38,7 +38,7 @@ import io.siddhi.core.executor.condition.AndConditionExpressionExecutor;
 import io.siddhi.core.executor.condition.compare.greaterthan.GreaterThanCompareConditionExpressionExecutorIntInt;
 import io.siddhi.core.executor.condition.compare.lessthan.LessThanCompareConditionExpressionExecutorFloatFloat;
 import io.siddhi.core.executor.math.add.AddExpressionExecutorFloat;
-import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.sink.Sink;
@@ -277,7 +277,7 @@ public class EventTestCase {
         context.setSiddhiContext(siddhicontext);
         context.setIdGenerator(new IdGenerator());
         context.setSnapshotService(new SnapshotService(context));
-        QueryRuntime runtime = QueryParser.parse(query, context, streamDefinitionMap, tableDefinitionMap,
+        QueryRuntimeImpl runtime = QueryParser.parse(query, context, streamDefinitionMap, tableDefinitionMap,
                 windowDefinitionMap, aggregationDefinitionMap, tableMap, aggregationMap, eventWindowMap,
                 lockSynchronizer, "1", false, SiddhiConstants.PARTITION_ID_DEFAULT);
         AssertJUnit.assertNotNull(runtime);

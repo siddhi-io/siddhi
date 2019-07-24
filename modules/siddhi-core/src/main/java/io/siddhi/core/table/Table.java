@@ -498,4 +498,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         isConnected.set(false);
         isTryingToConnect.set(false);
     }
+
+    public abstract boolean isStateful();
 }

@@ -28,6 +28,7 @@ import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.partition.executor.PartitionExecutor;
 import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -48,7 +49,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     private MetaStreamEvent metaStreamEvent;
     private StreamDefinition streamDefinition;
     private SiddhiAppContext siddhiAppContext;
-    private PartitionRuntime partitionRuntime;
+    private PartitionRuntimeImpl partitionRuntime;
     private List<PartitionExecutor> partitionExecutors;
     private Map<String, StreamJunction> streamJunctionMap = new HashMap<>();
 
@@ -59,7 +60,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                                    PartitionRuntime partitionRuntime) {
         this.metaStreamEvent = metaStreamEvent;
         this.streamDefinition = streamDefinition;
-        this.partitionRuntime = partitionRuntime;
+        this.partitionRuntime = (PartitionRuntimeImpl) partitionRuntime;
         this.partitionExecutors = partitionExecutors;
         this.siddhiAppContext = siddhiAppContext;
         this.streamId = streamDefinition.getId();
@@ -298,8 +299,8 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             streamJunctionMap.put(streamId, streamJunction);
         }
         for (QueryRuntime queryRuntime : queryRuntimeList) {
-            StreamRuntime streamRuntime = queryRuntime.getStreamRuntime();
-            for (int i = 0; i < queryRuntime.getInputStreamId().size(); i++) {
+            StreamRuntime streamRuntime = ((QueryRuntimeImpl) queryRuntime).getStreamRuntime();
+            for (int i = 0; i < ((QueryRuntimeImpl) queryRuntime).getInputStreamId().size(); i++) {
                 if ((streamRuntime.getSingleStreamRuntimes().get(i)).
                         getProcessStreamReceiver().getStreamId().equals(streamId)) {
                     streamJunction.subscribe((streamRuntime.getSingleStreamRuntimes().get(i))

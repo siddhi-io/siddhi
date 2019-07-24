@@ -187,4 +187,7 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
      */
     public abstract ProcessingMode getProcessingMode();
 
+    public boolean isStateful() {
+       return siddhiQueryContext.isStateful();
+    }
 }

@@ -25,6 +25,7 @@ import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -231,5 +232,9 @@ public abstract class Source<S extends State> {
             isConnected.set(false);
             retryWithBackoff(e);
         }
+    }
+
+    public boolean isStateful() {
+        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
     }
 }

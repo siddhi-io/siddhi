@@ -43,6 +43,7 @@ import io.siddhi.core.table.InMemoryTable;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.table.record.RecordTableHandler;
 import io.siddhi.core.table.record.RecordTableHandlerManager;
+import io.siddhi.core.trigger.AbstractTrigger;
 import io.siddhi.core.trigger.CronTrigger;
 import io.siddhi.core.trigger.PeriodicTrigger;
 import io.siddhi.core.trigger.StartTrigger;
@@ -291,7 +292,7 @@ public class DefinitionParserHelper {
                                        ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                        SiddhiAppContext siddhiAppContext) {
         if (!eventTriggerMap.containsKey(triggerDefinition.getId())) {
-            Trigger trigger;
+            AbstractTrigger trigger;
             if (triggerDefinition.getAtEvery() != null) {
                 trigger = new PeriodicTrigger();
             } else if (triggerDefinition.getAt().trim().equalsIgnoreCase(SiddhiConstants.TRIGGER_START)) {

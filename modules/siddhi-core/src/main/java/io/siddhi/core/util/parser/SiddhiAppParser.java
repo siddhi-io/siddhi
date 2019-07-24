@@ -21,8 +21,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.partition.PartitionRuntime;
-import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.partition.PartitionRuntimeImpl;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.IdGenerator;
@@ -85,6 +85,7 @@ public class SiddhiAppParser {
         SiddhiAppContext siddhiAppContext = new SiddhiAppContext();
         siddhiAppContext.setSiddhiContext(siddhiContext);
         siddhiAppContext.setSiddhiAppString(siddhiAppString);
+        siddhiAppContext.setSiddhiApp(siddhiApp);
 
         try {
             Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_NAME, null,
@@ -250,7 +251,7 @@ public class SiddhiAppParser {
         for (ExecutionElement executionElement : siddhiApp.getExecutionElementList()) {
             if (executionElement instanceof Query) {
                 try {
-                    QueryRuntime queryRuntime = QueryParser.parse((Query) executionElement, siddhiAppContext,
+                    QueryRuntimeImpl queryRuntime = QueryParser.parse((Query) executionElement, siddhiAppContext,
                             siddhiAppRuntimeBuilder.getStreamDefinitionMap(),
                             siddhiAppRuntimeBuilder.getTableDefinitionMap(),
                             siddhiAppRuntimeBuilder.getWindowDefinitionMap(),
@@ -269,7 +270,7 @@ public class SiddhiAppParser {
                 }
             } else {
                 try {
-                    PartitionRuntime partitionRuntime = PartitionParser.parse(siddhiAppRuntimeBuilder,
+                    PartitionRuntimeImpl partitionRuntime = PartitionParser.parse(siddhiAppRuntimeBuilder,
                             (Partition) executionElement, siddhiAppContext, queryIndex, partitionIndex);
                     siddhiAppRuntimeBuilder.addPartition(partitionRuntime);
                     queryIndex += ((Partition) executionElement).getQueryList().size();

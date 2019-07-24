@@ -43,7 +43,7 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Implementation of {@link Trigger} which will trigger events based on a cron expression.
  */
-public class CronTrigger implements Trigger, Job {
+public class CronTrigger extends AbstractTrigger implements Job {
 
     protected static final Logger LOG = Logger.getLogger(CronTrigger.class);
 
@@ -154,5 +154,10 @@ public class CronTrigger implements Trigger, Job {
             throughputTracker.eventIn();
         }
         streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));
+    }
+
+    @Override
+    public boolean isStateful() {
+        return false;
     }
 }

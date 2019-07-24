@@ -28,6 +28,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.join.JoinProcessor;
 import io.siddhi.core.query.input.stream.join.JoinStreamRuntime;
@@ -86,7 +87,7 @@ public class QueryParser {
      * @param partitionId              The ID of the partition
      * @return queryRuntime
      */
-    public static QueryRuntime parse(Query query, SiddhiAppContext siddhiAppContext,
+    public static QueryRuntimeImpl parse(Query query, SiddhiAppContext siddhiAppContext,
                                      Map<String, AbstractDefinition> streamDefinitionMap,
                                      Map<String, AbstractDefinition> tableDefinitionMap,
                                      Map<String, AbstractDefinition> windowDefinitionMap,
@@ -96,7 +97,7 @@ public class QueryParser {
                                      LockSynchronizer lockSynchronizer,
                                      String queryIndex, boolean partitioned, String partitionId) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
-        QueryRuntime queryRuntime;
+        QueryRuntimeImpl queryRuntime;
         Element nameElement = null;
         LatencyTracker latencyTracker = null;
         LockWrapper lockWrapper = null;
@@ -253,7 +254,7 @@ public class QueryParser {
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                         .getMetaComplexEvent()));
 
-            queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
+            queryRuntime = new QueryRuntimeImpl(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {

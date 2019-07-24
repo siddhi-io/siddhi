@@ -139,7 +139,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         Snapshot snapshot4 = snapshotableStreamEventQueue.getSnapshot();
-        streamEvents = (StreamEvent) snapshot1.getState();
+        streamEvents = (StreamEvent) snapshot4.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots = new HashMap<>();
         snapshots.put(6L, toString(snapshot4));
@@ -151,7 +151,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue3.restore(snapshotStateList);
-
+        snapshotableStreamEventQueue.reset();
         Assert.assertEquals(snapshotableStreamEventQueue, snapshotableStreamEventQueue3);
     }
 

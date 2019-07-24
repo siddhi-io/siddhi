@@ -18,18 +18,17 @@
 
 package io.siddhi.core.trigger;
 
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**
- * Interface class to represent event triggers. Event triggers are used to trigger events within Siddhi itself
- * according to a user given criteria.
+ * Base class for the internal Trigger implementation
  */
-public interface Trigger extends ExternalReferencedHolder {
+public abstract class AbstractTrigger implements ExternalReferencedHolder, Trigger {
 
-    TriggerDefinition getTriggerDefinition();
+    public abstract void init(TriggerDefinition triggerDefinition, SiddhiAppContext siddhiAppContext, StreamJunction
+            streamJunction);
 
-    String getId();
-
-    boolean isStateful();
 }

@@ -139,8 +139,6 @@ public class InMemoryTable extends Table {
         }
     }
 
-
-
     @Override
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         readWriteLock.readLock().lock();
@@ -220,7 +218,7 @@ public class InMemoryTable extends Table {
         public TableState(EventHolder eventHolder) {
             this.eventHolder = eventHolder;
         }
-        
+
         public EventHolder getEventHolder() {
             return eventHolder;
         }
@@ -245,5 +243,9 @@ public class InMemoryTable extends Table {
 
     public int size() {
         return stateHolder.getState().eventHolder.size();
+    }
+
+    public boolean isStateful() {
+        return true;
     }
 }

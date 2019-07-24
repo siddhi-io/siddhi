@@ -24,7 +24,8 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.partition.PartitionRuntime;
-import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.partition.PartitionRuntimeImpl;
+import io.siddhi.core.query.QueryRuntimeImpl;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.definition.AbstractDefinition;
@@ -44,13 +45,13 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class PartitionParser {
 
-    public static PartitionRuntime parse(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder, Partition partition,
-                                         SiddhiAppContext siddhiAppContext, int queryIndex, int partitionIndex) {
+    public static PartitionRuntimeImpl parse(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder, Partition partition,
+                                             SiddhiAppContext siddhiAppContext, int queryIndex, int partitionIndex) {
         ConcurrentMap<String, AbstractDefinition> streamDefinitionMap =
                 siddhiAppRuntimeBuilder.getStreamDefinitionMap();
         ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
                 siddhiAppRuntimeBuilder.getWindowDefinitionMap();
-        PartitionRuntime partitionRuntime = new PartitionRuntime(streamDefinitionMap, windowDefinitionMap,
+        PartitionRuntimeImpl partitionRuntime = new PartitionRuntimeImpl(streamDefinitionMap, windowDefinitionMap,
                 siddhiAppRuntimeBuilder.getStreamJunctions(), partition, partitionIndex, siddhiAppContext);
         validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap, windowDefinitionMap);
         for (Query query : partition.getQueryList()) {
@@ -60,7 +61,7 @@ public class PartitionParser {
             combinedStreamMap.putAll(streamDefinitionMap);
             combinedStreamMap.putAll(windowDefinitionMap);
             combinedStreamMap.putAll(partitionRuntime.getLocalStreamDefinitionMap());
-            QueryRuntime queryRuntime = QueryParser.parse(query, siddhiAppContext, combinedStreamMap,
+            QueryRuntimeImpl queryRuntime = QueryParser.parse(query, siddhiAppContext, combinedStreamMap,
                     siddhiAppRuntimeBuilder.getTableDefinitionMap(),
                     siddhiAppRuntimeBuilder.getWindowDefinitionMap(),
                     siddhiAppRuntimeBuilder.getAggregationDefinitionMap(),

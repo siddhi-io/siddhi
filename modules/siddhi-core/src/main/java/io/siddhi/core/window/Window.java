@@ -364,4 +364,8 @@ public class Window implements FindableProcessor, MemoryCalculable {
         }
 
     }
+
+    public boolean isStateful() {
+        return internalWindowProcessor.isStateful();
+    }
 }

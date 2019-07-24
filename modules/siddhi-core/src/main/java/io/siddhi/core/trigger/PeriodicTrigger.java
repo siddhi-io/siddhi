@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Implementation of {@link Trigger} which will trigger events based on a pre-defined period.
  */
-public class PeriodicTrigger implements Trigger {
+public class PeriodicTrigger extends AbstractTrigger {
     private TriggerDefinition triggerDefinition;
     private SiddhiAppContext siddhiAppContext;
     private StreamJunction streamJunction;
@@ -93,5 +93,10 @@ public class PeriodicTrigger implements Trigger {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
         }
+    }
+
+    @Override
+    public boolean isStateful() {
+        return false;
     }
 }
