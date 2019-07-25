@@ -33,6 +33,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.EventPrinter;
 
+import java.beans.ExceptionListener;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FaultStreamTestCase {
@@ -572,5 +573,75 @@ public class FaultStreamTestCase {
 
         Assert.assertTrue(eventArrived);
         Assert.assertEquals(count.get(), 1);
+    }
+
+    @Test
+    public void faultStreamTest11() throws Exception {
+
+        log.info("faultStreamTest11-Tests capturing runtime exceptions by registering an exception " +
+                "listener to SiddhiAppRuntime");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "\n" +
+                "define stream outputStream (symbol string, price float);" +
+                "\n" +
+                "@PrimaryKey('symbol')" +
+                "define table cseStoreTable (symbol string, price float);" +
+                "\n" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select symbol, price " +
+                "insert into cseStoreTable ;" +
+                "\n" +
+                "@info(name = 'query2') " +
+                "from cseEventStream " +
+                "select symbol, price " +
+                "insert into outputStream ;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.handleRuntimeExceptionWith(new ExceptionListener() {
+            @Override
+            public void exceptionThrown(Exception e) {
+                failedCaught = true;
+                failedCount.incrementAndGet();
+            }
+        });
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                count.incrementAndGet();
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        try {
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+
+                    try {
+                        inputHandler.send(new Object[]{"IBM", 0f, 100L});
+                        inputHandler.send(new Object[]{"IBM", 1f, 200L});
+                    } catch (InterruptedException e) {
+                    }
+                }
+            };
+            thread.start();
+            Thread.sleep(500);
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception occurred when testing.", e);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+        Assert.assertTrue(eventArrived);
+        Assert.assertTrue(failedCaught);
+        Assert.assertEquals(count.get(), 2);
+        Assert.assertEquals(failedCount.get(), 1);
     }
 }
