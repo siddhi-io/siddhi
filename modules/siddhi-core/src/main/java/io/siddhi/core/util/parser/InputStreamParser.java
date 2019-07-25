@@ -58,7 +58,6 @@ public class InputStreamParser {
      * @param outputExpectsExpiredEvents is expired events sent as output
      * @param siddhiQueryContext         Siddhi query context.
      * @return StreamRuntime
-
      */
     public static StreamRuntime parse(InputStream inputStream, Query query,
                                       Map<String, AbstractDefinition> streamDefinitionMap,
@@ -84,7 +83,7 @@ public class InputStreamParser {
                     executors, streamDefinitionMap,
                     tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap, tableMap,
                     new MetaStreamEvent(), processStreamReceiver, true,
-                    outputExpectsExpiredEvents, false, siddhiQueryContext);
+                    outputExpectsExpiredEvents, false, false, siddhiQueryContext);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream),
                     query, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,

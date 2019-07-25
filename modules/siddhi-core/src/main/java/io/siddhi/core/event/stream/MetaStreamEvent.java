@@ -39,6 +39,8 @@ public class MetaStreamEvent implements MetaComplexEvent {
     private String inputReferenceId;
     private StreamDefinition outputStreamDefinition;
     private EventType eventType = EventType.DEFAULT;
+    //Event has the possibility to produce multiple values
+    private boolean multiValue = false;
 
     public List<Attribute> getBeforeWindowData() {
         return beforeWindowData;
@@ -143,6 +145,14 @@ public class MetaStreamEvent implements MetaComplexEvent {
         return inputDefinitions.get(inputDefinitions.size() - 1);
     }
 
+    public boolean isMultiValue() {
+        return multiValue;
+    }
+
+    public void setMultiValue(boolean multiValue) {
+        this.multiValue = multiValue;
+    }
+
     /**
      * Type of Meta Events
      */
@@ -162,12 +172,13 @@ public class MetaStreamEvent implements MetaComplexEvent {
         }
         metaStreamEvent.beforeWindowData = new ArrayList<>(beforeWindowData);
 
-        for (AbstractDefinition abstractDefinition: this.getInputDefinitions()) {
+        for (AbstractDefinition abstractDefinition : this.getInputDefinitions()) {
             metaStreamEvent.addInputDefinition(abstractDefinition);
         }
         metaStreamEvent.setInputReferenceId(this.getInputReferenceId());
         metaStreamEvent.setOutputDefinition(this.getOutputStreamDefinition());
         metaStreamEvent.setEventType(this.getEventType());
+        metaStreamEvent.setMultiValue(this.isMultiValue());
         return metaStreamEvent;
     }
 }
