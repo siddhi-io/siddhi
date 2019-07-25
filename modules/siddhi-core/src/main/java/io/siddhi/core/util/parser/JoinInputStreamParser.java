@@ -157,7 +157,7 @@ public class JoinInputStreamParser {
                     leftMetaStreamEvent.getEventType() != WINDOW ? null : windowDefinitionMap,
                     leftMetaStreamEvent.getEventType() != AGGREGATE ? null : aggregationDefinitionMap,
                     tableMap, leftMetaStreamEvent, leftProcessStreamReceiver, true,
-                    outputExpectsExpiredEvents, true, siddhiQueryContext);
+                    outputExpectsExpiredEvents, true, false, siddhiQueryContext);
 
             for (VariableExpressionExecutor variableExpressionExecutor : executors) {
                 variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 0;
@@ -171,7 +171,7 @@ public class JoinInputStreamParser {
                     rightMetaStreamEvent.getEventType() != WINDOW ? null : windowDefinitionMap,
                     rightMetaStreamEvent.getEventType() != AGGREGATE ? null : aggregationDefinitionMap,
                     tableMap, rightMetaStreamEvent, rightProcessStreamReceiver, true,
-                    outputExpectsExpiredEvents, true, siddhiQueryContext);
+                    outputExpectsExpiredEvents, true, false, siddhiQueryContext);
 
             for (int i = size; i < executors.size(); i++) {
                 VariableExpressionExecutor variableExpressionExecutor = executors.get(i);
