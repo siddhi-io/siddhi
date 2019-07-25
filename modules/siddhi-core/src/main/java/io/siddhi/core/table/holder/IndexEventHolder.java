@@ -26,6 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.SnapshotRequest;
 import io.siddhi.core.util.snapshot.state.Snapshot;
@@ -66,6 +67,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private final PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders;
     private final String tableName;
     private final String siddhiAppName;
+    private final transient SiddhiAppContext siddhiAppContext;
     protected String primaryKeyAttributes = null;
     private StreamEventFactory tableStreamEventFactory;
     private StreamEventConverter eventConverter;
@@ -87,6 +89,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         this.indexMetaData = indexMetaData;
         this.tableName = tableDefinition.getId();
         this.siddhiAppName = siddhiAppContext.getName();
+        this.siddhiAppContext = siddhiAppContext;
 
         if (primaryKeyReferenceHolders != null) {
             if (isPrimaryNumeric) {
@@ -184,8 +187,13 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
             existingValue = primaryKeyData.putIfAbsent(primaryKey, streamEvent);
             if (existingValue != null) {
-                log.error("Siddhi App '" + siddhiAppName + "' table '" + tableName + "' dropping event : " +
-                        streamEvent + ", as there is already an event stored with primary key '" + primaryKey + "'");
+                Exception e = new SiddhiAppRuntimeException("Siddhi App '" + siddhiAppName + "' table '" +
+                        tableName + "' dropping event : " + streamEvent + ", as there is already an event stored " +
+                        "with primary key '" + primaryKey + "'");
+                if (siddhiAppContext.getRuntimeExceptionListener() != null) {
+                    siddhiAppContext.getRuntimeExceptionListener().exceptionThrown(e);
+                }
+                log.error(e.getMessage(), e);
             }
         }
 
