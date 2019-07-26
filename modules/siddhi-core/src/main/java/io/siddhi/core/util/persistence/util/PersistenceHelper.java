@@ -20,6 +20,7 @@ package io.siddhi.core.util.persistence.util;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.PersistenceStoreException;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
 import io.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
 import io.siddhi.core.util.snapshot.IncrementalSnapshot;
@@ -36,7 +37,8 @@ import java.util.concurrent.Future;
 public final class PersistenceHelper {
 
     public static IncrementalSnapshotInfo convertRevision(String revision) {
-        String[] items = revision.split(PersistenceConstants.REVISION_SEPARATOR);
+        String[] items = revision.replaceAll(SiddhiConstants.KEY_DELIMITER_FILE, SiddhiConstants.KEY_DELIMITER).
+                split(PersistenceConstants.REVISION_SEPARATOR);
         //Note: Here we discard the (items.length == 2) scenario which is handled by the full snapshot handling
         if (items.length == 7) {
             return new IncrementalSnapshotInfo(items[1], items[2], items[4], items[5],
