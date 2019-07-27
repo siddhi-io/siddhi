@@ -56,6 +56,7 @@ public class SiddhiContext {
     private SinkHandlerManager sinkHandlerManager = null;
     private SourceHandlerManager sourceHandlerManager = null;
     private RecordTableHandlerManager recordTableHandlerManager = null;
+    private Map<String, Object> attributes;
 
     public SiddhiContext() {
         SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions);
@@ -63,6 +64,7 @@ public class SiddhiContext {
         statisticsConfiguration = new StatisticsConfiguration(new SiddhiMetricsFactory());
         extensionHolderMap = new ConcurrentHashMap<Class, AbstractExtensionHolder>();
         configManager = new InMemoryConfigManager();
+        attributes = new ConcurrentHashMap<>();
         defaultDisrupterExceptionHandler = new ExceptionHandler<Object>() {
             @Override
             public void handleEventException(Throwable throwable, long l, Object event) {
@@ -170,4 +172,19 @@ public class SiddhiContext {
         this.recordTableHandlerManager = recordTableHandlerManager;
     }
 
+    /**
+     * Attributes that are common across all the Siddhi Apps
+     *
+     * @return Attribute Map<String, Object>
+     */
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Set Attributes which can be retried by all the Siddhi Elements/Extensions via the SiddhiAppContext
+     */
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
+    }
 }

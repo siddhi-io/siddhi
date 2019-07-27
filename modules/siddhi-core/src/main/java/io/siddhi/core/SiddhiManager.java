@@ -58,6 +58,22 @@ public class SiddhiManager {
         siddhiContext = new SiddhiContext();
     }
 
+    /**
+     * Attributes that are common across all the Siddhi Apps
+     *
+     * @return Attribute Map<String, Object>
+     */
+    public Map<String, Object> getAttributes() {
+        return siddhiContext.getAttributes();
+    }
+
+    /**
+     * Set Attributes which can be retried by all the Siddhi Elements/Extensions via the SiddhiAppContext
+     */
+    public void setAttribute(String key, Object value) {
+        siddhiContext.setAttribute(key, value);
+    }
+
     public SiddhiAppRuntime createSiddhiAppRuntime(SiddhiApp siddhiApp) {
         return createSiddhiAppRuntime(siddhiApp, null);
     }
