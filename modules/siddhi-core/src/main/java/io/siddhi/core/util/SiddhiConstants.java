@@ -118,6 +118,7 @@ public final class SiddhiConstants {
     public static final String EXTENSION_SEPARATOR = ":";
 
     public static final String KEY_DELIMITER = ":-:";
+    public static final String KEY_DELIMITER_FILE = "-_-";
     public static final String TRANSPORT_CHANNEL_CREATION_IDENTIFIER = "transportChannelCreationEnabled";
 
     public static final String NAMESPACE_PURGE = "purge";

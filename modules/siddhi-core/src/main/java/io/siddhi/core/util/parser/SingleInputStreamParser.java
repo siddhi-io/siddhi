@@ -76,6 +76,7 @@ public class SingleInputStreamParser {
      * @param supportsBatchProcessing     supports batch processing
      * @param outputExpectsExpiredEvents  is expired events sent as output
      * @param findToBeExecuted            find will be executed in the steam stores
+     * @param multiValue                  event has the possibility to produce multiple values
      * @param siddhiQueryContext          @return SingleStreamRuntime
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream,
@@ -90,6 +91,7 @@ public class SingleInputStreamParser {
                                                        boolean supportsBatchProcessing,
                                                        boolean outputExpectsExpiredEvents,
                                                        boolean findToBeExecuted,
+                                                       boolean multiValue,
                                                        SiddhiQueryContext siddhiQueryContext) {
         Processor processor = null;
         EntryValveProcessor entryValveProcessor = null;
@@ -100,11 +102,11 @@ public class SingleInputStreamParser {
             metaStreamEvent = new MetaStreamEvent();
             ((MetaStateEvent) metaComplexEvent).addEvent(metaStreamEvent);
             initMetaStreamEvent(inputStream, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    aggregationDefinitionMap, metaStreamEvent);
+                    aggregationDefinitionMap, multiValue, metaStreamEvent);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
             initMetaStreamEvent(inputStream, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    aggregationDefinitionMap, metaStreamEvent);
+                    aggregationDefinitionMap, multiValue, metaStreamEvent);
         }
 
         // A window cannot be defined for a window stream
@@ -252,6 +254,7 @@ public class SingleInputStreamParser {
      * @param streamDefinitionMap      StreamDefinition Map
      * @param tableDefinitionMap       TableDefinition Map
      * @param aggregationDefinitionMap AggregationDefinition Map
+     * @param multiValue               Event has the possibility to produce multiple values
      * @param metaStreamEvent          MetaStreamEvent
      */
     private static void initMetaStreamEvent(SingleInputStream inputStream,
@@ -259,7 +262,7 @@ public class SingleInputStreamParser {
                                             Map<String, AbstractDefinition> tableDefinitionMap,
                                             Map<String, AbstractDefinition> windowDefinitionMap,
                                             Map<String, AbstractDefinition> aggregationDefinitionMap,
-                                            MetaStreamEvent metaStreamEvent) {
+                                            boolean multiValue, MetaStreamEvent metaStreamEvent) {
         String streamId = inputStream.getStreamId();
 
         if (!inputStream.isInnerStream() && windowDefinitionMap != null && windowDefinitionMap.containsKey(streamId)) {
@@ -288,6 +291,7 @@ public class SingleInputStreamParser {
                 !(inputStream.getStreamId()).equals(inputStream.getStreamReferenceId())) { //if ref id is provided
             metaStreamEvent.setInputReferenceId(inputStream.getStreamReferenceId());
         }
+        metaStreamEvent.setMultiValue(multiValue);
     }
 
 

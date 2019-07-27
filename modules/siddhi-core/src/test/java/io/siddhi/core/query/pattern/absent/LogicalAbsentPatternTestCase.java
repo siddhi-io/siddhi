@@ -1257,7 +1257,7 @@ public class LogicalAbsentPatternTestCase {
         siddhiAppRuntime.start();
 
         stream1.send(new Object[]{"WSO2", 15.0f, 100});
-        Thread.sleep(1100);
+        Thread.sleep(1200);
 
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());

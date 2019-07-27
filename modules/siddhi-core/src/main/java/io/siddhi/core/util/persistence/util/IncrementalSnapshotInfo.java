@@ -18,6 +18,8 @@
 
 package io.siddhi.core.util.persistence.util;
 
+import io.siddhi.core.util.SiddhiConstants;
+
 /**
  * Struct to store information about Incremental Snapshot
  */
@@ -42,17 +44,19 @@ public class IncrementalSnapshotInfo {
         this.time = time;
         this.type = type;
         this.partitionGroupByKey = partitionGroupByKey;
-        this.id = siddhiAppId +
+        this.id = (siddhiAppId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionGroupByKey +
                 PersistenceConstants.REVISION_SEPARATOR + queryName +
-                PersistenceConstants.REVISION_SEPARATOR + elementId;
-        this.revision = time + PersistenceConstants.REVISION_SEPARATOR + siddhiAppId +
+                PersistenceConstants.REVISION_SEPARATOR + elementId).
+                replaceAll(SiddhiConstants.KEY_DELIMITER, SiddhiConstants.KEY_DELIMITER_FILE);
+        this.revision = (time + PersistenceConstants.REVISION_SEPARATOR + siddhiAppId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionGroupByKey +
                 PersistenceConstants.REVISION_SEPARATOR + queryName +
                 PersistenceConstants.REVISION_SEPARATOR + elementId +
-                PersistenceConstants.REVISION_SEPARATOR + type;
+                PersistenceConstants.REVISION_SEPARATOR + type).
+                replaceAll(SiddhiConstants.KEY_DELIMITER, SiddhiConstants.KEY_DELIMITER_FILE);
     }
 
     public String getSiddhiAppId() {

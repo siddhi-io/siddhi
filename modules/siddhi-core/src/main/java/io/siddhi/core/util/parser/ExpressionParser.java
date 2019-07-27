@@ -26,6 +26,7 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.MultiValueVariableFunctionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.executor.condition.AndConditionExpressionExecutor;
 import io.siddhi.core.executor.condition.BoolConditionExpressionExecutor;
@@ -1299,6 +1300,7 @@ public class ExpressionParser {
             Attribute.Type type = null;
             AbstractDefinition definition = null;
             String firstInput = null;
+            boolean multiValue = false;
             if (variable.getStreamId() == null) {
                 MetaStreamEvent[] metaStreamEvents = metaStateEvent.getMetaStreamEvents();
                 if (currentState == SiddhiConstants.HAVING_STATE) {
@@ -1316,7 +1318,6 @@ public class ExpressionParser {
                         definition = metaStreamEvent.getLastInputDefinition();
                         if (type == null) {
                             try {
-
                                 type = definition.getAttributeType(attributeName);
                                 firstInput = "Input Stream: " + definition.getId() + " with " + "reference: "
                                         + metaStreamEvent.getInputReferenceId();
@@ -1369,6 +1370,9 @@ public class ExpressionParser {
                                         .equals(metaStreamEvents[currentState].getInputReferenceId())) {
                                     eventPosition[SiddhiConstants.STREAM_EVENT_INDEX_IN_CHAIN] = variable.getStreamIndex();
                                 }
+                            } else if (currentState == SiddhiConstants.UNKNOWN_STATE &&
+                                    variable.getStreamIndex() == null) {
+                                multiValue = metaStreamEvent.isMultiValue();
                             }
                             break;
                         }
@@ -1379,7 +1383,6 @@ public class ExpressionParser {
                 throw new SiddhiAppValidationException(
                         "Stream with reference : " + variable.getStreamId() + " not found");
             }
-
             VariableExpressionExecutor variableExpressionExecutor = new VariableExpressionExecutor(
                     new Attribute(attributeName, type), eventPosition[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX],
                     eventPosition[SiddhiConstants.STREAM_EVENT_INDEX_IN_CHAIN]);
@@ -1399,6 +1402,13 @@ public class ExpressionParser {
             }
             if (executorList != null) {
                 executorList.add(variableExpressionExecutor);
+            }
+            if (multiValue) {
+                FunctionExecutor functionExecutor = new MultiValueVariableFunctionExecutor();
+                ExpressionExecutor[] innerExpressionExecutors = new ExpressionExecutor[]{variableExpressionExecutor};
+                functionExecutor.initExecutor(innerExpressionExecutors,
+                        ProcessingMode.BATCH, null, false, siddhiQueryContext);
+                return functionExecutor;
             }
             return variableExpressionExecutor;
         }
