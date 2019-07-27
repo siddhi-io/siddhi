@@ -19,6 +19,7 @@
 package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
@@ -119,6 +120,10 @@ public class SiddhiAppContext {
 
     public void setSiddhiContext(SiddhiContext siddhiContext) {
         this.siddhiContext = siddhiContext;
+    }
+
+    public UserAttributes getUserAttributes() {
+        return siddhiContext.getUserAttributes();
     }
 
     public String getName() {

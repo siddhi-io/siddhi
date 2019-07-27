@@ -60,6 +60,10 @@ public interface SiddhiAppRuntime {
 
     SiddhiApp getSiddhiApp();
 
+    Map<String, Object> getOptions();
+
+    void setOption(String key, Object value);
+
     /**
      * Get the stream definition map.
      *

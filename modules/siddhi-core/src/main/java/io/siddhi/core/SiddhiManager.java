@@ -17,6 +17,7 @@
  */
 package io.siddhi.core;
 
+import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.config.StatisticsConfiguration;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
@@ -56,6 +57,10 @@ public class SiddhiManager {
      */
     public SiddhiManager() {
         siddhiContext = new SiddhiContext();
+    }
+
+    public UserAttributes getUserAttributes() {
+        return siddhiContext.getUserAttributes();
     }
 
     public SiddhiAppRuntime createSiddhiAppRuntime(SiddhiApp siddhiApp) {
