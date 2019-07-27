@@ -20,8 +20,6 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.attributes.ConcurrentUserAttributes;
-import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.exception.PersistenceStoreException;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.sink.SinkHandlerManager;
@@ -58,7 +56,7 @@ public class SiddhiContext {
     private SinkHandlerManager sinkHandlerManager = null;
     private SourceHandlerManager sourceHandlerManager = null;
     private RecordTableHandlerManager recordTableHandlerManager = null;
-    private UserAttributes userAttributes = null;
+    private Map<String, Object> attributes;
 
     public SiddhiContext() {
         SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions);
@@ -66,7 +64,7 @@ public class SiddhiContext {
         statisticsConfiguration = new StatisticsConfiguration(new SiddhiMetricsFactory());
         extensionHolderMap = new ConcurrentHashMap<Class, AbstractExtensionHolder>();
         configManager = new InMemoryConfigManager();
-        userAttributes = new ConcurrentUserAttributes();
+        attributes = new ConcurrentHashMap<>();
         defaultDisrupterExceptionHandler = new ExceptionHandler<Object>() {
             @Override
             public void handleEventException(Throwable throwable, long l, Object event) {
@@ -88,10 +86,6 @@ public class SiddhiContext {
 
     public Map<String, Class> getSiddhiExtensions() {
         return siddhiExtensions;
-    }
-
-    public UserAttributes getUserAttributes() {
-        return userAttributes;
     }
 
     public synchronized PersistenceStore getPersistenceStore() {
@@ -178,4 +172,19 @@ public class SiddhiContext {
         this.recordTableHandlerManager = recordTableHandlerManager;
     }
 
+    /**
+     * Attributes that are common across all the Siddhi Apps
+     *
+     * @return Attribute Map<String, Object>
+     */
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Set Attributes which can be retried by all the Siddhi Elements/Extensions via the SiddhiAppContext
+     */
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
+    }
 }

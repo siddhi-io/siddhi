@@ -17,7 +17,6 @@
  */
 package io.siddhi.core;
 
-import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.config.StatisticsConfiguration;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
@@ -59,8 +58,20 @@ public class SiddhiManager {
         siddhiContext = new SiddhiContext();
     }
 
-    public UserAttributes getUserAttributes() {
-        return siddhiContext.getUserAttributes();
+    /**
+     * Attributes that are common across all the Siddhi Apps
+     *
+     * @return Attribute Map<String, Object>
+     */
+    public Map<String, Object> getAttributes() {
+        return siddhiContext.getAttributes();
+    }
+
+    /**
+     * Set Attributes which can be retried by all the Siddhi Elements/Extensions via the SiddhiAppContext
+     */
+    public void setAttribute(String key, Object value) {
+        siddhiContext.setAttribute(key, value);
     }
 
     public SiddhiAppRuntime createSiddhiAppRuntime(SiddhiApp siddhiApp) {

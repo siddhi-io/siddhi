@@ -19,7 +19,6 @@
 package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
-import io.siddhi.core.attributes.UserAttributes;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
@@ -122,8 +121,13 @@ public class SiddhiAppContext {
         this.siddhiContext = siddhiContext;
     }
 
-    public UserAttributes getUserAttributes() {
-        return siddhiContext.getUserAttributes();
+    /**
+     * Attributes that are common across all the Siddhi Apps
+     *
+     * @return Attribute Map<String, Object>
+     */
+    public Map<String, Object> getAttributes() {
+        return siddhiContext.getAttributes();
     }
 
     public String getName() {
