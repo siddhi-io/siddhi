@@ -110,7 +110,8 @@ public class AggregationDefinition extends AbstractDefinition {
         if (selector != null ? !selector.equals(that.selector) : that.selector != null) {
             return false;
         }
-        if (!aggregateAttribute.equals(that.aggregateAttribute)) {
+        if (aggregateAttribute != null ? !aggregateAttribute.equals(that.aggregateAttribute) :
+                that.aggregateAttribute != null) {
             return false;
         }
         if (timePeriod != null ? !timePeriod.equals(that.timePeriod) : that.timePeriod != null) {
@@ -124,7 +125,7 @@ public class AggregationDefinition extends AbstractDefinition {
         int result = super.hashCode();
         result = 31 * result + basicSingleInputStream.hashCode();
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
-        result = 31 * result + aggregateAttribute.hashCode();
+        result = 31 * result + (aggregateAttribute != null ? aggregateAttribute.hashCode() : 0);
         result = 31 * result + (timePeriod != null ? timePeriod.hashCode() : 0);
         result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
         return result;

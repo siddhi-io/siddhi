@@ -32,6 +32,7 @@ import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -231,8 +232,8 @@ public class DefineAggregationTestCase {
     public void testDefineAggregation4() {
         SiddhiApp.siddhiApp("Test").defineAggregation(AggregationDefinition.id("stockAggregation"))
                 .defineStream(StreamDefinition.id("stockAggregation").attribute("symbol",
-                                Attribute.Type.STRING).attribute("price", Attribute.Type.INT).
-                                attribute("volume", Attribute.Type.FLOAT));
+                        Attribute.Type.STRING).attribute("price", Attribute.Type.INT).
+                        attribute("volume", Attribute.Type.FLOAT));
     }
 
     @Test
@@ -249,5 +250,43 @@ public class DefineAggregationTestCase {
                         .groupBy(Expression.variable("price").ofStream("StockStream")));
 
         AssertJUnit.assertEquals(basicSingleInputStream, aggregationDefinition.getBasicSingleInputStream().toString());
+    }
+
+    @Test
+    public void testDefineAggregation5() {
+
+        AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
+                .from(InputStream.stream("StockStream"))
+                .select(Selector.basicSelector()
+                        .select("timestamp", Expression.variable("timestamp").ofStream("StockStream"))
+                        .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
+                        .select("price", Expression.variable("price").ofStream("StockStream"))
+                        .groupBy(Expression.variable("price").ofStream("StockStream")));
+
+        Assert.assertEquals(aggregationDefinition.getAttributeNameArray(), new String[]{});
+    }
+
+    @Test
+    public void testDefineAggregation6() {
+        AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
+                .from(InputStream.stream("StockStream"))
+                .select(Selector.basicSelector()
+                        .select("timestamp", Expression.variable("timestamp").ofStream("StockStream"))
+                        .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
+                        .select("price", Expression.variable("price").ofStream("StockStream"))
+                        .groupBy(Expression.variable("price").ofStream("StockStream")));
+
+        AggregationDefinition aggregationDefinition1 = AggregationDefinition.id("StockAggregation")
+                .from(InputStream.stream("StockStream"))
+                .select(Selector.basicSelector()
+                        .select("timestamp", Expression.variable("timestamp").ofStream("StockStream"))
+                        .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
+                        .select("price", Expression.variable("price").ofStream("StockStream"))
+                        .groupBy(Expression.variable("price").ofStream("StockStream")));
+
+
+        Assert.assertEquals(aggregationDefinition, aggregationDefinition1);
+        Assert.assertEquals(aggregationDefinition.hashCode(), aggregationDefinition1.hashCode());
+        Assert.assertTrue(aggregationDefinition.equals(aggregationDefinition1));
     }
 }

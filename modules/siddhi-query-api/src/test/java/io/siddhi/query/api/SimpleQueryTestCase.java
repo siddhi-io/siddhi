@@ -936,12 +936,12 @@ public class SimpleQueryTestCase {
     public void test2() {
         String orString = "Or{leftExpression=Compare{rightExpression=DoubleConstant{value=1.02}," +
                 " operator=GREATER_THAN, leftExpression=IntConstant{value=2}}, rightExpression=Compare{" +
-                "rightExpression=IntConstant{value=3}, operator=GREATER_THAN, leftExpression=IntConstant{value=1}}} ";
+                "rightExpression=IntConstant{value=3}, operator=GREATER_THAN, leftExpression=IntConstant{value=1}}}";
         String notString = "Not{expression=Compare{rightExpression=IntConstant{value=3}, operator=GREATER_THAN, " +
-                "leftExpression=IntConstant{value=1}}} ";
+                "leftExpression=IntConstant{value=1}}}";
         String andString = "And{leftExpression=Compare{rightExpression=DoubleConstant{value=1.02}, " +
                 "operator=GREATER_THAN, leftExpression=IntConstant{value=2}}, rightExpression=Compare{rightExpression" +
-                "=IntConstant{value=3}, operator=GREATER_THAN, leftExpression=IntConstant{value=1}}} ";
+                "=IntConstant{value=3}, operator=GREATER_THAN, leftExpression=IntConstant{value=1}}}";
 
         Or or = new Or(Expression.compare(
                 Expression.value(2), Compare.Operator.GREATER_THAN, Expression.value(1.02)),
@@ -1015,11 +1015,49 @@ public class SimpleQueryTestCase {
     public void test5() {
         String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
                 "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
-                "attributeName='symbol'} }], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
+                "attributeName='symbol'}}], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
                 "offset=null}";
 
-        String selector  = Selector.selector().select(Expression.variable("symbol")).toString();
+        String selector = Selector.selector().select(Expression.variable("symbol")).toString();
 
         AssertJUnit.assertEquals(selector, selectorString);
     }
+
+
+    @Test
+    public void test6() {
+        Selector selector = new Selector();
+        selector.select("symbol", Expression.isNull(Expression.variable("symbol")));
+        selector.select("symbol1", Expression.not(Expression.variable("symbol")));
+        selector.select("symbol2", Expression.in(Expression.compare(
+                Expression.variable("symbol"), Compare.Operator.EQUAL,
+                Expression.variable("foo")), "aTable"));
+
+        Selector selector1 = new Selector();
+        selector1.select("symbol", Expression.isNull(Expression.variable("symbol")));
+        selector1.select("symbol1", Expression.not(Expression.variable("symbol")));
+        selector1.select("symbol2", Expression.in(Expression.compare(
+                Expression.variable("symbol"), Compare.Operator.EQUAL,
+                Expression.variable("foo")), "aTable"));
+
+        AssertJUnit.assertTrue(selector.equals(selector1));
+        AssertJUnit.assertEquals(selector.hashCode(), selector1.hashCode());
+
+        String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', " +
+                "expression=IsNull{streamId='null', streamIndex=null, isInnerStream=false, " +
+                "isFaultStream=false, expression=Variable{id='null', isInnerStream=false, " +
+                "streamIndex=null, functionId='null', functionIndex=null, attributeName='symbol'}}}, " +
+                "OutputAttribute{rename='symbol1', expression=Not{expression=Variable{id='null', " +
+                "isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
+                "attributeName='symbol'}}}, OutputAttribute{rename='symbol2', " +
+                "expression=In{expression=Compare{rightExpression=Variable{id='null', " +
+                "isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
+                "attributeName='foo'}, operator=EQUAL, leftExpression=Variable{id='null', " +
+                "isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
+                "attributeName='symbol'}}, sourceId='aTable'}}], groupByList=[], havingExpression=null, " +
+                "orderByList=[], limit=null, offset=null}";
+
+        AssertJUnit.assertEquals(selector.toString(), selectorString);
+    }
+
 }

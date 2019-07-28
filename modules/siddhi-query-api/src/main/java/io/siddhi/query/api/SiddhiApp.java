@@ -324,7 +324,7 @@ public class SiddhiApp implements SiddhiElement {
         return result;
     }
 
-    public void defineFunction(FunctionDefinition functionDefinition) {
+    public SiddhiApp defineFunction(FunctionDefinition functionDefinition) {
         if (functionDefinition == null) {
             throw new SiddhiAppValidationException("Function Definition should not be null");
         } else if (functionDefinition.getId() == null) {
@@ -342,6 +342,7 @@ public class SiddhiApp implements SiddhiElement {
         }
         checkDuplicateFunctionExist(functionDefinition);
         this.functionDefinitionMap.put(functionDefinition.getId(), functionDefinition);
+        return this;
     }
 
     private void checkDuplicateFunctionExist(FunctionDefinition functionDefinition) {

@@ -47,7 +47,7 @@ public class Or extends Expression {
         return "Or{" +
                 "leftExpression=" + leftExpression +
                 ", rightExpression=" + rightExpression +
-                "} ";
+                "}";
     }
 
     @Override
