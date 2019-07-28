@@ -130,7 +130,7 @@ public class AsyncTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(Math.round(Math.random()) * 1000 + 1000);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -188,7 +188,7 @@ public class AsyncTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(Math.round(Math.random()) * 1000 + 1000);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -223,7 +223,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test(dependsOnMethods = {"asyncTest4"})
+    @Test//(dependsOnMethods = {"asyncTest4"})
     public void asyncTest5() throws InterruptedException {
         log.info("async test 5");
         HashMap<String, Integer> threads = new HashMap<>();
@@ -248,7 +248,7 @@ public class AsyncTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(Math.round(Math.random()) * 1000 + 1000);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -314,7 +314,7 @@ public class AsyncTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(Math.round(Math.random()) * 1000 + 1000);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -338,6 +338,7 @@ public class AsyncTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         for (int i = 0; i < 20; i++) {
+            Thread.sleep(100);
             inputHandler.send(new Object[]{"WSO2", 115.6f, 100 + i});
         }
         SiddhiTestHelper.waitForEvents(2000, 20, count, 10000);
