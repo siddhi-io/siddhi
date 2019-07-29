@@ -51,7 +51,7 @@ public class AnonymousInputStream extends SingleInputStream {
     public String toString() {
         return "AnonymousInputStream{" +
                 "query=" + query +
-                "} ";
+                "}";
     }
 
 

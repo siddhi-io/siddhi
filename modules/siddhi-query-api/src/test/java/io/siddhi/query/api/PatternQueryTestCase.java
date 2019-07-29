@@ -27,6 +27,7 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.TimeConstant;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class PatternQueryTestCase {
@@ -769,5 +770,134 @@ public class PatternQueryTestCase {
                         )
                 )
         );
+    }
+
+    @Test
+    public void testPatternQuery18() {
+        Query query = Query.query();
+        query.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").
+                                                filter(Expression.compare
+                                                        (Expression.variable("price"),
+                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                Expression.value(30))))),
+                                State.next(
+                                        State.logicalOr(
+                                                State.stream(InputStream.stream("e2", "Stream1")
+                                                        .filter(Expression
+                                                                .compare(Expression.variable("price"),
+                                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                                        Expression.value(20)))),
+                                                State.stream(InputStream.stream("e3", "Stream2")
+                                                        .filter(Expression
+                                                                .compare(Expression.variable("price"),
+                                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                                        Expression.variable("price")
+                                                                                .ofStream("e1")))))
+                                        ,
+                                        State.next(
+                                                State.count(
+                                                        State.stream(
+                                                                InputStream.stream("e4", "Stream1")
+                                                                        .filter(
+                                                                                Expression.compare(
+                                                                                        Expression.variable("price"),
+                                                                                        Compare.Operator
+                                                                                                .GREATER_THAN_EQUAL,
+                                                                                        Expression.value(20)))),
+                                                        2, 4)
+                                                ,
+                                                State.next(
+                                                        State.logicalNot(
+                                                                State.stream(InputStream.stream("Stream1")
+                                                                        .filter(Expression
+                                                                                .compare(Expression.variable("price"),
+                                                                                        Compare.Operator
+                                                                                                .GREATER_THAN_EQUAL,
+                                                                                        Expression.value(20)))),
+                                                                Expression.Time.minute(5))
+                                                        ,
+                                                        State.stream(InputStream.stream("e6", "Stream3")
+                                                                .filter(Expression.compare
+                                                                        (Expression.variable("price"),
+                                                                                Compare.Operator.GREATER_THAN,
+                                                                                Expression.value(74)))))))
+
+                        ), Expression.Time.minute(3)
+                )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg",
+                                Expression.variable("price").ofStream("e2")))
+
+        );
+        query.insertInto("OutputStream");
+
+        Query query1 = Query.query();
+        query1.from(
+                InputStream.patternStream(
+                        State.next(
+                                State.every(
+                                        State.stream(InputStream.stream("e1", "Stream1").filter(Expression.compare
+                                                (Expression.variable("price"),
+                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                        Expression.value(30))))),
+                                State.next(
+                                        State.logicalOr(
+                                                State.stream(InputStream.stream("e2", "Stream1")
+                                                        .filter(Expression
+                                                                .compare(Expression.variable("price"),
+                                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                                        Expression.value(20)))),
+                                                State.stream(InputStream.stream("e3", "Stream2")
+                                                        .filter(Expression
+                                                                .compare(Expression.variable("price"),
+                                                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                                                        Expression.variable("price").ofStream("e1")))))
+                                        ,
+                                        State.next(
+                                                State.count(
+                                                        State.stream(InputStream.stream("e4", "Stream1")
+                                                                .filter(Expression
+                                                                        .compare(Expression.variable("price"),
+                                                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                                                Expression.value(20)))),
+                                                        2, 4)
+                                                ,
+                                                State.next(
+                                                        State.logicalNot(
+                                                                State.stream(InputStream.stream("Stream1")
+                                                                        .filter(Expression
+                                                                                .compare(Expression.variable("price"),
+                                                                                        Compare.Operator
+                                                                                                .GREATER_THAN_EQUAL,
+                                                                                        Expression.value(20)))),
+                                                                Expression.Time.minute(5))
+                                                        ,
+                                                        State.stream(InputStream.stream("e6", "Stream3")
+                                                                .filter(Expression.compare
+                                                                        (Expression.variable("price"),
+                                                                                Compare.Operator.GREATER_THAN,
+                                                                                Expression.value(74)))))))
+
+                        ), Expression.Time.minute(3)
+                )
+        );
+        query1.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg",
+                                Expression.variable("price").ofStream("e2")))
+
+        );
+        query1.insertInto("OutputStream");
+
+        Assert.assertTrue(query.equals(query1));
+        Assert.assertEquals(query.hashCode(), query1.hashCode());
     }
 }

@@ -822,7 +822,7 @@ public class SimpleQueryTestCase {
     public void test18() throws SiddhiParserException {
         String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
                 "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
-                "attributeName='symbol'} }], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
+                "attributeName='symbol'}}], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
                 "offset=null}";
         String selector  = Selector.selector().select(Expression.variable("symbol")).toString();
         AssertJUnit.assertEquals(selector, selectorString);

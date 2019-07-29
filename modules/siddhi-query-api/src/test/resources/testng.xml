@@ -27,6 +27,7 @@
             <class name="io.siddhi.query.api.DefineTableTestCase"/>
             <class name="io.siddhi.query.api.DefineTriggerTestCase"/>
             <class name="io.siddhi.query.api.DefineWindowTestCase"/>
+            <class name="io.siddhi.query.api.DefineFunctionTestCase"/>
             <class name="io.siddhi.query.api.JoinQueryTestCase"/>
             <class name="io.siddhi.query.api.OutputRateTestCase"/>
             <class name="io.siddhi.query.api.PartitionQueryTestCase"/>
@@ -35,6 +36,7 @@
             <class name="io.siddhi.query.api.SimpleQueryTestCase"/>
             <class name="io.siddhi.query.api.StoreQueryTestCase"/>
             <class name="io.siddhi.query.api.TableQueryTestCase"/>
+            <class name="io.siddhi.query.api.RetrieveMessageContextTestCase"/>
         </classes>
     </test>
 </suite>

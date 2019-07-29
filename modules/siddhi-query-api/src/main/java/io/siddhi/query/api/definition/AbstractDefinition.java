@@ -34,6 +34,8 @@ public abstract class AbstractDefinition implements SiddhiElement {
     private static final long serialVersionUID = 1L;
     protected String id;
     protected List<Attribute> attributeList = new ArrayList<Attribute>();
+    protected String[] attributeNameArray = new String[0];
+    protected boolean hasDefinitionChanged = false;
     protected List<Annotation> annotations = new ArrayList<Annotation>();
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
@@ -64,6 +66,13 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     public List<Annotation> getAnnotations() {
         return annotations;
+    }
+
+    protected AbstractDefinition attribute(String attributeName, Attribute.Type type) {
+        checkAttribute(attributeName);
+        this.attributeList.add(new Attribute(attributeName, type));
+        this.hasDefinitionChanged = true;
+        return this;
     }
 
     protected void checkAttribute(String attributeName) {
@@ -97,13 +106,18 @@ public abstract class AbstractDefinition implements SiddhiElement {
                 " in '" + id + "'; " + this.toString());
     }
 
+    // overriding the base implementation to remove hotspot on this method call
+    // iterating the attribute list only if there is a change
     public String[] getAttributeNameArray() {
-        int attributeListSize = attributeList.size();
-        String[] attributeNameArray = new String[attributeListSize];
-        for (int i = 0; i < attributeListSize; i++) {
-            attributeNameArray[i] = attributeList.get(i).getName();
+        if (hasDefinitionChanged) {
+            int attributeListSize = attributeList.size();
+            this.attributeNameArray = new String[attributeListSize];
+            for (int i = 0; i < attributeListSize; i++) {
+                this.attributeNameArray[i] = attributeList.get(i).getName();
+            }
+            hasDefinitionChanged = false;
         }
-        return attributeNameArray;
+        return this.attributeNameArray;
     }
 
     @Override

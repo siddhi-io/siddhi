@@ -26,6 +26,7 @@ import io.siddhi.query.api.exception.AttributeNotExistException;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -185,5 +186,20 @@ public class DefineStreamTestCase {
         AssertJUnit.assertEquals("query1", element.getValue());
         AssertJUnit.assertEquals(elementString, element.toString());
 
+    }
+
+    @Test
+    public void testStreamDefinition6() {
+        StreamDefinition streamDefinition = StreamDefinition.id("Foo");
+        streamDefinition.setId("StockStream");
+        streamDefinition.attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
+        StreamDefinition streamDefinition2 = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type
+                .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
+        Assert.assertEquals(streamDefinition, streamDefinition2);
+        Assert.assertEquals(streamDefinition.hashCode(), streamDefinition2.hashCode());
+        streamDefinition.annotation(Annotation.annotation("Foo"));
+        Assert.assertTrue(streamDefinition.equalsIgnoreAnnotations(streamDefinition2));
+        Assert.assertFalse(streamDefinition.equals(streamDefinition2));
     }
 }

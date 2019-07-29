@@ -25,6 +25,7 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TableQueryTestCase {
@@ -179,4 +180,121 @@ public class TableQueryTestCase {
 
     }
 
+    @Test
+    public void testQuery1() {
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query.updateOrInsertBy("StockQuote",
+                UpdateStream.updateSet().
+                        set(
+                                Expression.variable("price").ofStream("StockQuote"),
+                                Expression.variable("price")).
+                        set(
+                                Expression.variable("volume").ofStream("StockQuote"),
+                                Expression.variable("volume")),
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+
+        Query query1 = Query.query();
+        query1.from(
+                InputStream.stream("StockStream").
+                        filter(Expression.and(Expression.compare(Expression.add(Expression.value(7), Expression.value
+                                        (9.5)),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.variable("price")),
+                                Expression.compare(Expression.value(100),
+                                        Compare.Operator.GREATER_THAN_EQUAL,
+                                        Expression.variable("volume")
+                                )
+                                )
+                        ).window("length", Expression.value(50))
+        );
+        query1.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query1.updateOrInsertBy("StockQuote",
+                UpdateStream.updateSet().
+                        set(
+                                Expression.variable("price").ofStream("StockQuote"),
+                                Expression.variable("price")).
+                        set(
+                                Expression.variable("volume").ofStream("StockQuote"),
+                                Expression.variable("volume")),
+                Expression.compare(
+                        Expression.variable("symbol"),
+                        Compare.Operator.EQUAL,
+                        Expression.variable("symbol").ofStream("StockQuote")));
+        Assert.assertTrue(query.equals(query1));
+        Assert.assertEquals(query.hashCode(), query1.hashCode());
+    }
+
+    @Test
+    public void testQuery2() {
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("cseEventStream").
+                        filter(
+                                Expression.and(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price")),
+                                        Expression.compare(Expression.value(100),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.variable("volume")
+                                        )
+                                )
+                        ).window("lengthBatch", Expression.value(50))
+        );
+        query.deleteBy("StockQuote", Expression.compare(
+                Expression.variable("symbol"),
+                Compare.Operator.EQUAL,
+                Expression.variable("symbol").ofStream("StockQuote")));
+
+        Query query2 = Query.query();
+        query2.from(
+                InputStream.stream("cseEventStream").
+                        filter(
+                                Expression.and(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price")),
+                                        Expression.compare(Expression.value(100),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.variable("volume")
+                                        )
+                                )
+                        ).window("lengthBatch", Expression.value(50))
+        );
+        query2.deleteBy("StockQuote", Expression.compare(
+                Expression.variable("symbol"),
+                Compare.Operator.EQUAL,
+                Expression.variable("symbol").ofStream("StockQuote")));
+        Assert.assertTrue(query.equals(query2));
+        Assert.assertEquals(query.hashCode(), query2.hashCode());
+    }
 }

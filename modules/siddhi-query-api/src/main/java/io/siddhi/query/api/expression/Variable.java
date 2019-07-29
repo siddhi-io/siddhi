@@ -152,7 +152,7 @@ public class Variable extends Expression {
                 ", functionId='" + functionId + '\'' +
                 ", functionIndex=" + functionIndex +
                 ", attributeName='" + attributeName + '\'' +
-                "} ";
+                "}";
     }
 
     @Override

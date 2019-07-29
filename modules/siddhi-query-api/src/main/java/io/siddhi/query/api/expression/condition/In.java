@@ -47,7 +47,7 @@ public class In extends Expression {
         return "In{" +
                 "expression=" + expression +
                 ", sourceId='" + sourceId + '\'' +
-                "} ";
+                "}";
     }
 
     @Override

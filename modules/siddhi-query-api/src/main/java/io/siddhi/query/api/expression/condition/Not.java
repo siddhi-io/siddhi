@@ -40,7 +40,7 @@ public class Not extends Expression {
     public String toString() {
         return "Not{" +
                 "expression=" + expression +
-                "} ";
+                "}";
     }
 
     @Override

@@ -48,7 +48,7 @@ public class And extends Expression {
         return "And{" +
                 "leftExpression=" + leftExpression +
                 ", rightExpression=" + rightExpression +
-                "} ";
+                "}";
     }
 
     @Override
