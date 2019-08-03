@@ -51,10 +51,11 @@ public class FormatDescriptionMethod implements TemplateMethodModelEx {
         inputString = replaceNewLines(inputString);
 
         inputString = inputString.replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-        inputString = inputString.replaceAll("```([^```]*)```", "<pre>$1</pre>");
+        inputString = inputString.replaceAll("```([^```]*)```",
+                "</p><pre>$1</pre><p style=\"word-wrap: break-word;margin: 0;\">");
         inputString = inputString.replaceAll("`([^`]*)`", "<code>$1</code>");
 
-        return inputString;
+        return "<p style=\"word-wrap: break-word;margin: 0;\">" + inputString + "</p>";
     }
 
     /**
