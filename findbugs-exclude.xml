@@ -182,7 +182,7 @@
     </Match>
     <Match>
         <Class name="io.siddhi.core.table.holder.IndexEventHolder"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
+        <Bug pattern="EI_EXPOSE_REP, SE_TRANSIENT_FIELD_NOT_RESTORED"/>
     </Match>
     <Match>
         <Class name="io.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
