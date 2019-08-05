@@ -212,6 +212,10 @@
         <Class name="io.siddhi.core.util.snapshot.state.SingleSyncStateHolder"/>
         <Bug pattern="DC_DOUBLECHECK"/>
     </Match>
+    <Match>
+        <Class name="io.siddhi.doc.gen.core.utils.DocumentationUtils"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_EXCEPTION"/>
+    </Match>
 
 
     <Match>
