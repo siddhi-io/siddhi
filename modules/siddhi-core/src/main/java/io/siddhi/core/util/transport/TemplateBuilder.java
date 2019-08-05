@@ -39,6 +39,7 @@ public class TemplateBuilder {
 
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*\\}\\})|[{}]");
     private static final String SPLIT_PATTERN = "(\\{\\{|\\}\\})";
+    private int[] positionArray;
     private String[] splitTemplateArray;
     private boolean isObjectMessage = false;
     private int objectIndex = -1;
@@ -128,7 +129,7 @@ public class TemplateBuilder {
             if (i % 2 == 0) {
                 stringBuilder.append(splitTemplateArray[i]);
             } else {
-                stringBuilder.append(outputData[Integer.parseInt(splitTemplateArray[i])]);
+                stringBuilder.append(outputData[positionArray[i / 2]]);
             }
         }
         return stringBuilder.toString();
@@ -136,10 +137,12 @@ public class TemplateBuilder {
 
     private void validateTemplateArrayAttributePositions(String[] splitTemplateArray,
                                                          StreamDefinition streamDefinition) {
+        this.positionArray = new int[splitTemplateArray.length / 2];
+        int positionCount = 0;
         for (int i = 0; i < splitTemplateArray.length; i++) {
             if (i % 2 != 0) {
                 try {
-                    Integer.parseInt(splitTemplateArray[i]);
+                    positionArray[positionCount++] = Integer.parseInt(splitTemplateArray[i]);
                 } catch (NumberFormatException e) {
                     throw new SiddhiAppCreationException(String.format("Invalid mapping configuration provided in " +
                             "%s. Mapping parameter should be surrounded only with '{{' and '}}'.", streamDefinition));
