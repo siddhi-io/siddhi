@@ -998,7 +998,7 @@ public class CountPatternTestCase {
         long timeElapsed = endTime - startTime;
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         AssertJUnit.assertEquals("Event count", 400 * 3, inEventCount);
-        AssertJUnit.assertTrue("Event processing time", timeElapsed < 400);
+        AssertJUnit.assertTrue("Event processing time", timeElapsed < 1000);
         siddhiAppRuntime.shutdown();
     }
 

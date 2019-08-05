@@ -34,7 +34,9 @@
 <#else>
 ### ${extension.name} <@utils.renderLinkToExtensionTypeDocWB extensionType=extensionType/>
 </#if>
-<p style="word-wrap: break-word">${formatDescription(extension.description)}</p>
+<p></p>
+${formatDescription(extension.description)}
+<p></p>
 <#if extension.originName??>
 <p><i>Origin: ${extension.originName}:${extension.originVersion}</i></p>
 </#if>
@@ -129,7 +131,7 @@ define function <FunctionName>[${extension.name}] return <type> {
     <#items as systemParameter>
     <tr>
         <td style="vertical-align: top">${systemParameter.name}</td>
-        <td style="vertical-align: top; word-wrap: break-word">${formatDescription(systemParameter.description)}</td>
+        <td style="vertical-align: top;">${formatDescription(systemParameter.description)}</td>
         <td style="vertical-align: top">${systemParameter.defaultValue}</td>
         <td style="vertical-align: top">${systemParameter.possibleParameters?join("<br>", "")}</td>
     </tr>
@@ -149,7 +151,7 @@ define function <FunctionName>[${extension.name}] return <type> {
     <#items as returnAttribute>
     <tr>
         <td style="vertical-align: top">${returnAttribute.name}</td>
-        <td style="vertical-align: top; word-wrap: break-word">${formatDescription(returnAttribute.description)}</td>
+        <td style="vertical-align: top;">${formatDescription(returnAttribute.description)}</td>
         <td style="vertical-align: top">${returnAttribute.type?join("<br>", "")}</td>
     </tr>
     </#items>
@@ -166,8 +168,9 @@ define function <FunctionName>[${extension.name}] return <type> {
 ```
 ${example.syntax}
 ```
-<p style="word-wrap: break-word">${formatDescription(example.description)}</p>
-
+<p></p>
+${formatDescription(example.description)}
+<p></p>
 </#items>
 </#list>
 </#list>
