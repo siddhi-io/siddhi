@@ -96,7 +96,7 @@ public class TemplateBuilder {
 
             String templateString = parseTextMessage(streamDefinition, template);
             String[] templateArray = templateString.split(SPLIT_PATTERN);
-            validateTemplateArrayAttributePositions(templateArray, streamDefinition);
+            assignTemplateArrayAttributePositions(templateArray, streamDefinition);
             this.splitTemplateArray = templateArray;
         }
     }
@@ -135,7 +135,7 @@ public class TemplateBuilder {
         return stringBuilder.toString();
     }
 
-    private void validateTemplateArrayAttributePositions(String[] splitTemplateArray,
+    private void assignTemplateArrayAttributePositions(String[] splitTemplateArray,
                                                          StreamDefinition streamDefinition) {
         this.positionArray = new int[splitTemplateArray.length / 2];
         int positionCount = 0;
