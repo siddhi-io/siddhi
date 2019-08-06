@@ -23,7 +23,7 @@
     <groupId>io.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>5.1.2-SNAPSHOT</version>
+    <version>5.1.2</version>
     <name>Siddhi</name>
     <description>Siddhi, Stream Processing and Complex Event Processing Engine</description>
 
@@ -834,7 +834,7 @@
         <url>https://github.com/siddhi-io/siddhi.git</url>
         <developerConnection>scm:git:https://github.com/siddhi-io/siddhi.git</developerConnection>
         <connection>scm:git:https://github.com/siddhi-io/siddhi.git</connection>
-        <tag>HEAD</tag>
+        <tag>v5.1.2</tag>
     </scm>
 
     <repositories>
