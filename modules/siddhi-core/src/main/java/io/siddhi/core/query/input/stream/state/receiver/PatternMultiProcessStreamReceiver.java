@@ -39,9 +39,12 @@ public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamRe
         }
     }
 
-    protected void stabilizeStates() {
-        if (stateProcessorsSize != 0) {
-            for (PreStateProcessor preStateProcessor : stateProcessors) {
+    protected void stabilizeStates(long timestamp) {
+        for (int i = 0; i < allStateProcessorsSize; i++) {
+            allStateProcessors.get(i).expireEvents(timestamp);
+        }
+        if (stateProcessorsForStreamSize != 0) {
+            for (PreStateProcessor preStateProcessor : stateProcessorsForStream) {
                 preStateProcessor.updateState();
             }
         }

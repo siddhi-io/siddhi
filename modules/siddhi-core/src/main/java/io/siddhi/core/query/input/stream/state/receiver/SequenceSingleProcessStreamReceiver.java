@@ -36,7 +36,10 @@ public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamRece
         this.stateStreamRuntime = stateStreamRuntime;
     }
 
-    protected void stabilizeStates() {
+    protected void stabilizeStates(long timestamp) {
+        for (int i = 0; i < allStateProcessorsSize; i++) {
+            allStateProcessors.get(i).expireEvents(timestamp);
+        }
         stateStreamRuntime.resetAndUpdate();
     }
 

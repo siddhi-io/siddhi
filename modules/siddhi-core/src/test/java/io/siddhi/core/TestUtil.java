@@ -218,7 +218,7 @@ public class TestUtil {
 
         @Override
         public int getRemoveEventCount() {
-            throw new UnsupportedOperationException("StreamCallback does not receive remove events");
+            throw new UnsupportedOperationException("StreamCallback does not support remove events");
         }
 
         @Override

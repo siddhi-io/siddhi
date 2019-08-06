@@ -42,7 +42,10 @@ public class SequenceMultiProcessStreamReceiver extends StateMultiProcessStreamR
         }
     }
 
-    protected void stabilizeStates() {
+    protected void stabilizeStates(long timestamp) {
+        for (int i = 0; i < allStateProcessorsSize; i++) {
+            allStateProcessors.get(i).expireEvents(timestamp);
+        }
         stateStreamRuntime.resetAndUpdate();
     }
 

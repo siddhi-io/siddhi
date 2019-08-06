@@ -1302,4 +1302,450 @@ public class CountPatternTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test
+    public void testQuery22() throws InterruptedException {
+        log.info("testQuery22 - OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:playback\n" +
+                "define stream LoginFailure (id string, user string, type string);\n" +
+                "define stream LoginSuccess (id string, user string, type string);\n" +
+                "\n" +
+                "partition with (user of LoginFailure, user of LoginSuccess)\n" +
+                "begin\n" +
+                "\n" +
+                "  from every (e1=LoginFailure<3:> -> e2=LoginSuccess) \n" +
+                "  select e1[0].id as id, e2.user as user\n" +
+                "  insert into BreakIn\n" +
+                "\n" +
+                "end;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("BreakIn", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                if (events != null) {
+                    for (Event event : events) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(0), "id_1");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(0), "id_8");
+                                Assert.assertEquals(event.getData(1), "werner");
+                                break;
+                            case 3:
+                                Assert.assertEquals(event.getData(0), "id_17");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+
+        });
+
+        InputHandler failureInput = siddhiAppRuntime.getInputHandler("LoginFailure");
+        InputHandler successInput = siddhiAppRuntime.getInputHandler("LoginSuccess");
+
+        siddhiAppRuntime.start();
+        long now = System.currentTimeMillis();
+        failureInput.send(++now, new Object[]{"id_1", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_2", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_3", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_4", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_5", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_6", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_7", "hans", "success"});
+
+        failureInput.send(++now, new Object[]{"id_8", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_9", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_10", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_11", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_12", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_13", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_14", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_15", "werner", "failure"});
+        successInput.send(++now, new Object[]{"id_16", "werner", "success"});
+        now += 3 * 1000; //add 3 sec delay
+
+        failureInput.send(++now, new Object[]{"id_17", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_18", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_19", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_20", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_21", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_22", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_23", "hans", "success"});
+
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(inEventCount, 3);
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQuery23() throws InterruptedException {
+        log.info("testQuery23 - OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:playback\n" +
+                "define stream LoginFailure (id string, user string, type string);\n" +
+                "define stream LoginSuccess (id string, user string, type string);\n" +
+                "\n" +
+                "partition with (user of LoginFailure, user of LoginSuccess)\n" +
+                "begin\n" +
+                "\n" +
+                "  from every (e1=LoginFailure<3:> -> e2=LoginSuccess) \n" +
+                "  select e1[0].id as id, e2.user as user\n" +
+                "  insert into BreakIn\n" +
+                "\n" +
+                "end;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("BreakIn", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                if (events != null) {
+                    for (Event event : events) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(0), "id_1");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(0), "id_11");
+                                Assert.assertEquals(event.getData(1), "werner");
+                                break;
+                            case 3:
+                                Assert.assertEquals(event.getData(0), "id_19");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+
+        });
+
+        InputHandler failureInput = siddhiAppRuntime.getInputHandler("LoginFailure");
+        InputHandler successInput = siddhiAppRuntime.getInputHandler("LoginSuccess");
+
+        siddhiAppRuntime.start();
+        long now = System.currentTimeMillis();
+        failureInput.send(++now, new Object[]{"id_1", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_2", "hans", "failure"});
+
+        failureInput.send(++now, new Object[]{"id_11", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_12", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_13", "werner", "failure"});
+
+        failureInput.send(++now, new Object[]{"id_3", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_4", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_5", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_6", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_7", "hans", "success"});
+
+        failureInput.send(++now, new Object[]{"id_8", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_9", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_10", "werner", "failure"});
+
+        failureInput.send(++now, new Object[]{"id_19", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_20", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_21", "hans", "failure"});
+
+        failureInput.send(++now, new Object[]{"id_14", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_15", "werner", "failure"});
+        successInput.send(++now, new Object[]{"id_16", "werner", "success"});
+        now += 3 * 1000; //add 3 sec delay
+
+        failureInput.send(++now, new Object[]{"id_17", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_18", "hans", "failure"});
+
+        failureInput.send(++now, new Object[]{"id_22", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_23", "hans", "success"});
+
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(inEventCount, 3);
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQuery24() throws InterruptedException {
+        log.info("testQuery24 - OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:playback\n" +
+                "define stream LoginFailure (id string, user string, type string);\n" +
+                "define stream LoginSuccess (id string, user string, type string);\n" +
+                "\n" +
+                "  from every (e1=LoginFailure<3:> -> e2=LoginSuccess) \n" +
+                "  select e1[0].id as id, e2.user as user\n" +
+                "  insert into BreakIn\n" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("BreakIn", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                if (events != null) {
+                    for (Event event : events) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(0), "id_1");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(0), "id_8");
+                                Assert.assertEquals(event.getData(1), "werner");
+                                break;
+                            case 3:
+                                Assert.assertEquals(event.getData(0), "id_17");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+
+        });
+
+        InputHandler failureInput = siddhiAppRuntime.getInputHandler("LoginFailure");
+        InputHandler successInput = siddhiAppRuntime.getInputHandler("LoginSuccess");
+
+        siddhiAppRuntime.start();
+        long now = System.currentTimeMillis();
+        failureInput.send(++now, new Object[]{"id_1", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_2", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_3", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_4", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_5", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_6", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_7", "hans", "success"});
+        successInput.send(++now, new Object[]{"id_7_1", "hans", "success"});
+
+        failureInput.send(++now, new Object[]{"id_8", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_9", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_10", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_11", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_12", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_13", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_14", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_15", "werner", "failure"});
+        successInput.send(++now, new Object[]{"id_16", "werner", "success"});
+        now += 3 * 1000; //add 3 sec delay
+
+        failureInput.send(++now, new Object[]{"id_17", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_18", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_18_1", "hans", "success"});
+        failureInput.send(++now, new Object[]{"id_19", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_20", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_21", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_22", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_23", "hans", "success"});
+
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(inEventCount, 3);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testQuery25() throws InterruptedException {
+        log.info("testQuery25 - OUT 3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:playback\n" +
+                "define stream LoginFailure (id string, user string, type string);\n" +
+                "define stream LoginSuccess (id string, user string, type string);\n" +
+                "\n" +
+                "partition with (user of LoginFailure, user of LoginSuccess)\n" +
+                "begin\n" +
+                "\n" +
+                "  from every (e1=LoginFailure<3:> -> e2=LoginSuccess) within 2 sec  \n" +
+                "  select e1[0].id as id, e2.user as user\n" +
+                "  insert into BreakIn\n" +
+                "\n" +
+                "end;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("BreakIn", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                if (events != null) {
+                    for (Event event : events) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(0), "id_8");
+                                Assert.assertEquals(event.getData(1), "werner");
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(0), "id_17");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+
+        });
+
+        InputHandler failureInput = siddhiAppRuntime.getInputHandler("LoginFailure");
+        InputHandler successInput = siddhiAppRuntime.getInputHandler("LoginSuccess");
+
+        siddhiAppRuntime.start();
+        long now = System.currentTimeMillis();
+        failureInput.send(++now, new Object[]{"id_1", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_2", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_3", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_4", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_5", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_6", "hans", "failure"});
+//        successInput.send(++now, new Object[]{"id_7", "hans", "success"});
+
+        failureInput.send(++now, new Object[]{"id_8", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_9", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_10", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_11", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_12", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_13", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_14", "werner", "failure"});
+        failureInput.send(++now, new Object[]{"id_15", "werner", "failure"});
+        successInput.send(++now, new Object[]{"id_16", "werner", "success"});
+        now += 3 * 1000; //add 3 sec delay
+
+        failureInput.send(++now, new Object[]{"id_17", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_18", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_19", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_20", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_21", "hans", "failure"});
+        failureInput.send(++now, new Object[]{"id_22", "hans", "failure"});
+        successInput.send(++now, new Object[]{"id_23", "hans", "success"});
+
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(inEventCount, 2);
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQuery26() throws InterruptedException {
+        log.info("testQuery26 - OUT 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:playback " +
+                "define stream AuthenticationStream (id string, user string, type string);\n" +
+                "\n" +
+                "@purge(enable='true', interval='1 sec', idle.period='2 sec')\n" +
+                "partition with (user of AuthenticationStream)\n" +
+                "begin\n" +
+                "    from every (e1=AuthenticationStream[type == 'failure' ]<1:> -> \n" +
+                "                        e2=AuthenticationStream[type == 'success' ]) within  1 sec \n" +
+                "    select e1[0].id as id, e1[0].user as user, e1[3].id as id4\n" +
+                "    having not(id4 is null)\n" +
+                "    insert into BreakIn\n" +
+                "end;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("BreakIn", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                if (events != null) {
+                    for (Event event : events) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(event.getData(0), "id_8");
+                                Assert.assertEquals(event.getData(1), "werner");
+                                break;
+                            case 2:
+                                Assert.assertEquals(event.getData(0), "id_17");
+                                Assert.assertEquals(event.getData(1), "hans");
+                                break;
+                        }
+                    }
+                    eventArrived = true;
+                }
+            }
+
+
+        });
+
+        InputHandler authenticationStream = siddhiAppRuntime.getInputHandler("AuthenticationStream");
+
+        siddhiAppRuntime.start();
+        long now = System.currentTimeMillis();
+        authenticationStream.send(++now, new Object[]{"id_1", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_2", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_3", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_4", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_5", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_6", "hans", "failure"});
+
+        authenticationStream.send(++now, new Object[]{"id_8", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_9", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_10", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_11", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_12", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_13", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_14", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_15", "werner", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_16", "werner", "success"});
+        now += 3 * 1000; //add 3 sec delay
+
+        authenticationStream.send(++now, new Object[]{"id_7", "hans", "success"});
+
+        authenticationStream.send(++now, new Object[]{"id_17", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_18", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_19", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_20", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_21", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_22", "hans", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_23", "hans", "success"});
+
+        authenticationStream.send(++now, new Object[]{"id_21", "ben", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_22", "ben", "failure"});
+        authenticationStream.send(++now, new Object[]{"id_23", "ben", "success"});
+
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(inEventCount, 2);
+        siddhiAppRuntime.shutdown();
+    }
+
 }

@@ -31,9 +31,12 @@ public class PatternSingleProcessStreamReceiver extends SingleProcessStreamRecei
         super(streamId, patternSyncObject, siddhiQueryContext);
     }
 
-    protected void stabilizeStates() {
-        if (stateProcessorsSize != 0) {
-            stateProcessors.get(0).updateState();
+    protected void stabilizeStates(long timestamp) {
+        for (int i = 0; i < allStateProcessorsSize; i++) {
+            allStateProcessors.get(i).expireEvents(timestamp);
+        }
+        if (stateProcessorsForStreamSize != 0) {
+            stateProcessorsForStream.get(0).updateState();
         }
     }
 }

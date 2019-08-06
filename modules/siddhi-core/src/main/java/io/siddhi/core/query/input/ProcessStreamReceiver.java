@@ -46,14 +46,16 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected final SiddhiQueryContext siddhiQueryContext;
     protected String streamId;
     protected Processor next;
-    protected List<PreStateProcessor> stateProcessors = new ArrayList<PreStateProcessor>();
-    protected int stateProcessorsSize;
+    protected List<PreStateProcessor> stateProcessorsForStream = new ArrayList<PreStateProcessor>();
+    protected int stateProcessorsForStreamSize;
     protected LockWrapper lockWrapper;
     protected boolean batchProcessingAllowed;
     private StreamEventConverter streamEventConverter;
     private MetaStreamEvent metaStreamEvent;
     private StreamEventFactory streamEventFactory;
     private SiddhiDebugger siddhiDebugger;
+    protected List<PreStateProcessor> allStateProcessors = new ArrayList<PreStateProcessor>();
+    protected int allStateProcessorsSize;
 
     public ProcessStreamReceiver(String streamId,
                                  SiddhiQueryContext siddhiQueryContext) {
@@ -211,8 +213,14 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         streamEventConverter = StreamEventConverterFactory.constructEventConverter(metaStreamEvent);
     }
 
-    public void addStatefulProcessor(PreStateProcessor stateProcessor) {
-        stateProcessors.add(stateProcessor);
-        stateProcessorsSize = stateProcessors.size();
+    public void addStatefulProcessorForStream(PreStateProcessor stateProcessor) {
+        stateProcessorsForStream.add(stateProcessor);
+        stateProcessorsForStreamSize = stateProcessorsForStream.size();
+    }
+
+    public void setAllStatefulProcessors(List<PreStateProcessor> allStateProcessors) {
+        this.allStateProcessors = allStateProcessors;
+        this.allStateProcessorsSize = allStateProcessors.size();
+
     }
 }

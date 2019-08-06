@@ -307,4 +307,43 @@ public class AbsentWithEveryPatternTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void testQuery8() throws InterruptedException {
+        log.info("Test the query eliminate double events");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "define stream Stream1 (symbol string, price float, volume int);\n" +
+                "\n" +
+                "@purge(enable='true', interval='3 sec', idle.period='3 sec')\n" +
+                "partition with (symbol of Stream1) \n" +
+                "begin\n" +
+                "    @info(name = 'query1')\n" +
+                "    from every( e1=Stream1 ->  not Stream1 for 1 sec)\n" +
+                "    select e1.volume as volume1\n" +
+                "    insert into OutputStream ;\n" +
+                "end;" +
+                "";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+        TestUtil.TestCallback callback = TestUtil.addStreamCallback(siddhiAppRuntime, "OutputStream",
+                new Object[]{111});
+
+        siddhiAppRuntime.start();
+        stream1.send(new Object[]{"AAA", 55.6f, 100});
+        stream1.send(new Object[]{"WSO2", 55.6f, 111});
+        stream1.send(new Object[]{"AAA", 55.6f, 100});
+        Thread.sleep(2000);
+        stream1.send(new Object[]{"WSO2", 55.6f, 200});
+        stream1.send(new Object[]{"WSO2", 55.6f, 200});
+
+        callback.throwAssertionErrors();
+        AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
+        AssertJUnit.assertTrue("Event arrived", callback.isEventArrived());
+
+        siddhiAppRuntime.shutdown();
+    }
 }
