@@ -21,10 +21,10 @@ package io.siddhi.core.util.transport;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.NoSuchAttributeException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.query.api.definition.StreamDefinition;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +36,11 @@ import java.util.regex.Pattern;
  * Template builder used by {@link SinkMapper} to generate custom payload.
  */
 public class TemplateBuilder {
+
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*\\}\\})|[{}]");
-    private MessageFormat messageFormat;
+    private static final String SPLIT_PATTERN = "(\\{\\{|\\}\\})";
+    private int[] positionArray;
+    private String[] splitTemplateArray;
     private boolean isObjectMessage = false;
     private int objectIndex = -1;
 
@@ -63,12 +66,11 @@ public class TemplateBuilder {
         return mapped;
     }
 
-
     public Object build(Event event) {
         if (isObjectMessage) {
             return event.getData()[objectIndex];
         } else {
-            return messageFormat.format(event.getData());
+            return formatMessage(event.getData());
         }
 
     }
@@ -77,7 +79,7 @@ public class TemplateBuilder {
         if (isObjectMessage) {
             return complexEvent.getOutputData()[objectIndex];
         } else {
-            return messageFormat.format(complexEvent.getOutputData());
+            return formatMessage(complexEvent.getOutputData());
         }
 
     }
@@ -91,11 +93,15 @@ public class TemplateBuilder {
             if (template.matches("^`[^\\s]*`$")) {
                 template = template.replaceAll("^`|`$", "");
             }
-            this.messageFormat = parseTextMessage(streamDefinition, template);
+
+            String templateString = parseTextMessage(streamDefinition, template);
+            String[] templateArray = templateString.split(SPLIT_PATTERN);
+            assignTemplateArrayAttributePositions(templateArray, streamDefinition);
+            this.splitTemplateArray = templateArray;
         }
     }
 
-    private MessageFormat parseTextMessage(StreamDefinition streamDefinition, String template) {
+    private String parseTextMessage(StreamDefinition streamDefinition, String template) {
         // note: currently we do not support arbitrary data to be mapped with dynamic options
         List<String> attributes = Arrays.asList(streamDefinition.getAttributeNameArray());
         StringBuffer result = new StringBuffer();
@@ -104,17 +110,45 @@ public class TemplateBuilder {
             if (m.group(1) != null) {
                 int attrIndex = attributes.indexOf(m.group(1).replaceAll("\\p{Ps}", "").replaceAll("\\p{Pe}", ""));
                 if (attrIndex >= 0) {
-                    m.appendReplacement(result, String.format("{%s}", attrIndex));
+                    m.appendReplacement(result, String.format("{{%s}}", attrIndex));
                 } else {
                     throw new NoSuchAttributeException(String.format("Attribute : %s does not exist in %s.",
                             m.group(1), streamDefinition));
                 }
             } else {
-                m.appendReplacement(result, " '" + m.group() + "' ");
+                m.appendReplacement(result, m.group() + "");
             }
         }
         m.appendTail(result);
-        return new MessageFormat(result.toString());
+        return result.toString();
+    }
+
+    private String formatMessage(Object[] outputData) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < splitTemplateArray.length; i++) {
+            if (i % 2 == 0) {
+                stringBuilder.append(splitTemplateArray[i]);
+            } else {
+                stringBuilder.append(outputData[positionArray[i / 2]]);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private void assignTemplateArrayAttributePositions(String[] splitTemplateArray,
+                                                         StreamDefinition streamDefinition) {
+        this.positionArray = new int[splitTemplateArray.length / 2];
+        int positionCount = 0;
+        for (int i = 0; i < splitTemplateArray.length; i++) {
+            if (i % 2 != 0) {
+                try {
+                    positionArray[positionCount++] = Integer.parseInt(splitTemplateArray[i]);
+                } catch (NumberFormatException e) {
+                    throw new SiddhiAppCreationException(String.format("Invalid mapping configuration provided in " +
+                            "%s. Mapping parameter should be surrounded only with '{{' and '}}'.", streamDefinition));
+                }
+            }
+        }
     }
 
     public boolean isObjectMessage() {
