@@ -19,6 +19,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -98,6 +99,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     public void addEveryState(StateEvent stateEvent) {
 
         StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+        clonedEvent.setType(ComplexEvent.Type.CURRENT);
         if (clonedEvent.getStreamEvent(stateId) != null) {
             // Set the timestamp of the last arrived event
             clonedEvent.setTimestamp(clonedEvent.getStreamEvent(stateId).getTimestamp());
@@ -259,15 +261,9 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
             this.lock.lock();
             try {
-                StateEvent expiredStateEvent = null;
                 for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator();
                      iterator.hasNext(); ) {
                     StateEvent stateEvent = iterator.next();
-                    if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                        iterator.remove();
-                        expiredStateEvent = stateEvent;
-                        continue;
-                    }
                     if (logicalType == LogicalStateElement.Type.OR &&
                             stateEvent.getStreamEvent(partnerStatePreProcessor.getStateId()) != null) {
                         iterator.remove();
@@ -301,10 +297,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                                 break;
                         }
                     }
-                }
-                if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
-                    withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
-                    withinEveryPreStateProcessor.updateState();
                 }
             } finally {
                 this.lock.unlock();

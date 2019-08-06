@@ -19,6 +19,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.util.Scheduler;
@@ -106,6 +107,10 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         lock.lock();
         try {
             StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+            clonedEvent.setType(ComplexEvent.Type.CURRENT);
+            for (int i = stateId; i < clonedEvent.getStreamEvents().length; i++) {
+                clonedEvent.setEvent(i, null);
+            }
             state.getNewAndEveryStateEventList().add(clonedEvent);
             // Start the scheduler
             state.lastScheduledTime = stateEvent.getTimestamp() + waitingTime;

@@ -53,7 +53,7 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 streamEventChunk.remove();
-                stabilizeStates();
+                stabilizeStates(streamEvent.getTimestamp());
                 currentStreamEventChunk.add(streamEvent);
                 ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).
                         processAndReturn(currentStreamEventChunk);
@@ -72,7 +72,7 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         }
     }
 
-    protected void stabilizeStates() {
+    protected void stabilizeStates(long timestamp) {
 
     }
 }

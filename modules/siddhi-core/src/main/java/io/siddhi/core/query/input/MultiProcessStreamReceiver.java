@@ -98,7 +98,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             while (aComplexEvent != null) {
                 try {
                     multiProcessReturn.set(new ReturnEventHolder());
-                    stabilizeStates();
+                    stabilizeStates(aComplexEvent.getTimestamp());
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
                         StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
@@ -130,7 +130,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             try {
                 multiProcessReturn.set(new ReturnEventHolder());
 
-                stabilizeStates();
+                stabilizeStates(event.getTimestamp());
                 for (int anEventSequence : eventSequence) {
                     StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
                     StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
@@ -159,7 +159,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             for (Event event : events) {
                 try {
                     multiProcessReturn.set(new ReturnEventHolder());
-                    stabilizeStates();
+                    stabilizeStates(event.getTimestamp());
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
                         StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
@@ -189,7 +189,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             for (Event event : events) {
                 try {
                     multiProcessReturn.set(new ReturnEventHolder());
-                    stabilizeStates();
+                    stabilizeStates(event.getTimestamp());
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
                         StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
@@ -218,7 +218,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         synchronized (patternSyncObject) {
             try {
                 multiProcessReturn.set(new ReturnEventHolder());
-                stabilizeStates();
+                stabilizeStates(timestamp);
                 for (int anEventSequence : eventSequence) {
                     StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
                     StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
@@ -246,7 +246,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         nextProcessors[processIndex].process(currentStreamEventChunk);
     }
 
-    protected void stabilizeStates() {
+    protected void stabilizeStates(long timestamp) {
 
     }
 

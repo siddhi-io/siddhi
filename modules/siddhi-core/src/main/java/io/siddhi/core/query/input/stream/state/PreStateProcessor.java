@@ -47,6 +47,8 @@ public interface PreStateProcessor extends Processor {
 
     void updateState();
 
+    void expireEvents(long timestamp);
+
     StreamPostStateProcessor getThisStatePostProcessor();
 
     void resetState();

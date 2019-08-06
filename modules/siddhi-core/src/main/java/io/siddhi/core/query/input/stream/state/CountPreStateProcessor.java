@@ -19,6 +19,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -55,15 +56,9 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
         CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
         lock.lock();
-        StateEvent expiredStateEvent = null;
         try {
             for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
-                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                    iterator.remove();
-                    expiredStateEvent = stateEvent;
-                    continue;
-                }
                 if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
                     continue;
                 }
@@ -91,10 +86,6 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
                             break;
                     }
                 }
-            }
-            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
-                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
-                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();
@@ -151,9 +142,12 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         lock.lock();
         try {
             StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+            clonedEvent.setType(ComplexEvent.Type.CURRENT);
+            for (int i = stateId; i < clonedEvent.getStreamEvents().length; i++) {
+                clonedEvent.setEvent(i, null);
+            }
             StreamPreState state = stateHolder.getState();
             try {
-                clonedEvent.setEvent(stateId, null);
                 state.getNewAndEveryStateEventList().add(clonedEvent);
             } finally {
                 stateHolder.returnState(state);

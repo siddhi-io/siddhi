@@ -122,6 +122,10 @@ public class StateInputStreamParser {
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
         stateStreamRuntime.setStartupPreStateProcessors(startupPreStateProcessors);
 
+        for (ProcessStreamReceiver processStreamReceiver:processStreamReceiverMap.values()            ) {
+            processStreamReceiver.setAllStatefulProcessors(preStateProcessors);
+        }
+
         if (stateInputStream.getWithinTime() != null) {
             List<Integer> startStateIdList = new ArrayList<>();
             for (PreStateProcessor preStateProcessor : preStateProcessors) {

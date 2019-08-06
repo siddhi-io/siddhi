@@ -18,6 +18,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
@@ -31,6 +32,7 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,6 +63,12 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     protected StreamEventFactory streamEventFactory;
     protected SiddhiQueryContext siddhiQueryContext;
     protected StateHolder<StreamPreState> stateHolder;
+    protected Comparator eventTimeComparator = new Comparator<StateEvent>() {
+        @Override
+        public int compare(StateEvent o1, StateEvent o2) {
+            return Long.compare(o1.getTimestamp(), o2.getTimestamp());
+        }
+    };
 
     public StreamPreStateProcessor(StateInputStream.Type stateType) {
         this.stateType = stateType;
@@ -93,7 +101,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     }
 
     protected boolean isExpired(StateEvent pendingStateEvent, long currentTimestamp) {
-        if (!isStartState && withinTime != SiddhiConstants.UNKNOWN_STATE) {
+        if (withinTime != SiddhiConstants.UNKNOWN_STATE) {
             for (int startStateId : startStateIds) {
                 StreamEvent streamEvent = pendingStateEvent.getStreamEvent(startStateId);
                 if (streamEvent != null && Math.abs(pendingStateEvent.getStreamEvent(startStateId).getTimestamp()
@@ -208,6 +216,10 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         lock.lock();
         try {
             StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+            clonedEvent.setType(ComplexEvent.Type.CURRENT);
+            for (int i = stateId; i < clonedEvent.getStreamEvents().length; i++) {
+                clonedEvent.setEvent(i, null);
+            }
             StreamPreState state = stateHolder.getState();
             try {
                 state.newAndEveryStateEventList.add(clonedEvent);
@@ -283,6 +295,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         try {
             StreamPreState state = stateHolder.getState();
             try {
+                state.newAndEveryStateEventList.sort(eventTimeComparator);
                 state.pendingStateEventList.addAll(state.newAndEveryStateEventList);
                 state.newAndEveryStateEventList.clear();
             } finally {
@@ -295,6 +308,44 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     }
 
     @Override
+    public void expireEvents(long timestamp) {
+        StreamPreState state = stateHolder.getState();
+        lock.lock();
+        try {
+            StateEvent expiredStateEvent = null;
+            for (Iterator<StateEvent> iterator = state.pendingStateEventList.iterator(); iterator.hasNext(); ) {
+                StateEvent stateEvent = iterator.next();
+                if (isExpired(stateEvent, timestamp)) {
+                    iterator.remove();
+                    if (stateEvent.getType() != ComplexEvent.Type.EXPIRED) {
+                        stateEvent.setType(ComplexEvent.Type.EXPIRED);
+                        expiredStateEvent = stateEvent;
+                    }
+                } else {
+                    break;
+                }
+            }
+            for (Iterator<StateEvent> iterator = state.newAndEveryStateEventList.iterator(); iterator.hasNext(); ) {
+                StateEvent stateEvent = iterator.next();
+                if (isExpired(stateEvent, timestamp)) {
+                    iterator.remove();
+                    if (stateEvent.getType() != ComplexEvent.Type.EXPIRED) {
+                        stateEvent.setType(ComplexEvent.Type.EXPIRED);
+                        expiredStateEvent = stateEvent;
+                    }
+                }
+            }
+            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
+                withinEveryPreStateProcessor.updateState();
+            }
+        } finally {
+            lock.unlock();
+            stateHolder.returnState(state);
+        }
+    }
+
+    @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
@@ -302,14 +353,8 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
-            StateEvent expiredStateEvent = null;
             for (Iterator<StateEvent> iterator = state.pendingStateEventList.iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
-                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                    iterator.remove();
-                    expiredStateEvent = stateEvent;
-                    continue;
-                }
                 stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
                 process(stateEvent);
                 if (this.thisLastProcessor.isEventReturned()) {
@@ -334,10 +379,6 @@ public class StreamPreStateProcessor implements PreStateProcessor {
                             break;
                     }
                 }
-            }
-            if (expiredStateEvent != null && withinEveryPreStateProcessor != null) {
-                withinEveryPreStateProcessor.addEveryState(expiredStateEvent);
-                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();
