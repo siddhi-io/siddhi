@@ -20,7 +20,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>io.siddhi</groupId>
-        <version>5.1.2</version>
+        <version>5.1.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
