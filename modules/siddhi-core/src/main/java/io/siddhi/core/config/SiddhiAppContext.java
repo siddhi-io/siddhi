@@ -124,7 +124,7 @@ public class SiddhiAppContext {
     /**
      * Attributes that are common across all the Siddhi Apps
      *
-     * @return Attribute Map<String, Object>
+     * @return Attribute Map&lt;String, Object&gt;
      */
     public Map<String, Object> getAttributes() {
         return siddhiContext.getAttributes();
