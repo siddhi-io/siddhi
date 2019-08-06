@@ -86,8 +86,8 @@ public abstract class DistributedTransport extends Sink {
      * @param sinkAnnotation                  The annotation of the Sink
      * @param strategy                        Publishing strategy to be used by the distributed transport
      * @param supportedDynamicOptions         List of supported dynamic options
-     * @param deploymentProperties
-     * @param destinationDeploymentProperties
+     * @param deploymentProperties            Service deployment properties for distributed transport sink
+     * @param destinationDeploymentProperties Service deployment properties
      */
     public void init(StreamDefinition streamDefinition, String type, OptionHolder transportOptionHolder,
                      ConfigReader sinkConfigReader,
