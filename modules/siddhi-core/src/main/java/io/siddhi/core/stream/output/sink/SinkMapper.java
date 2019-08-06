@@ -65,6 +65,16 @@ public abstract class SinkMapper {
         this.sinkListener = sink;
         this.optionHolder = mapOptionHolder;
         this.type = type;
+        buildMapperTemplate(streamDefinition, unmappedPayloadList);
+        init(streamDefinition, mapOptionHolder, templateBuilderMap, mapperConfigReader, siddhiAppContext);
+    }
+
+    /**
+     * Method to create mapper template.
+     * @param streamDefinition Stream definition corresponding to mapper
+     * @param unmappedPayloadList mapper payload template list
+     */
+    protected void buildMapperTemplate(StreamDefinition streamDefinition, List<Element> unmappedPayloadList) {
         if (unmappedPayloadList != null && !unmappedPayloadList.isEmpty()) {
             templateBuilderMap = new HashMap<>();
             for (Element e : unmappedPayloadList) {
@@ -75,8 +85,6 @@ public abstract class SinkMapper {
                 templateBuilderMap.put(e.getKey(), templateBuilder);
             }
         }
-
-        init(streamDefinition, mapOptionHolder, templateBuilderMap, mapperConfigReader, siddhiAppContext);
     }
 
     /**
