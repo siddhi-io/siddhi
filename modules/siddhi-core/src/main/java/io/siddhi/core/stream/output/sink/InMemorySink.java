@@ -44,19 +44,21 @@ import org.apache.log4j.Logger;
 @Extension(
         name = "inMemory",
         namespace = "sink",
-        description = "In-memory transport that can communicate with other in-memory transports within the same JVM, " +
-                "it" +
-                "is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).",
-        parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Event will be delivered to all" +
-                "the subscribers of the same topic"),
+        description = "In-memory sink publishes events to In-memory sources that are subscribe to the same topic " +
+                "to which the sink publishes. This provides a way to connect multiple Siddhi Apps deployed " +
+                "under the same Siddhi Manager (JVM). " +
+                "Here both the publisher and subscriber should have the same event schema (stream definition) " +
+                "for successful data transfer.",
+        parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Event are delivered to all" +
+                "the subscribers subscribed on this topic."),
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"topic"})
         },
         examples = @Example(
-                syntax = "@sink(type='inMemory', @map(type='passThrough'))\n" +
-                        "define stream BarStream (symbol string, price float, volume long)",
-                description = "In this example BarStream uses inMemory transport which emit the Siddhi " +
-                        "events internally without using external transport and transformation."
+                syntax = "@sink(type='inMemory', topic='Stocks', @map(type='passThrough'))\n" +
+                        "define stream StocksStream (symbol string, price float, volume long);",
+                description = "Here the `StocksStream` uses inMemory sink to emit the Siddhi events to all " +
+                        "the inMemory sources deployed in the same JVM and subscribed to the topic `Stocks`."
         )
 )
 public class InMemorySink extends Sink<State> {
