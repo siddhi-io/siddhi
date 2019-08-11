@@ -1015,4 +1015,56 @@ public class TimeBatchWindowTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
+
+
+    @Test
+    public void timeWindowBatchTest22() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(1 sec, true) " +
+                "select symbol, count() as count " +
+                "having count==2 " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        Thread.sleep(1100);
+        inputHandler.send(new Event[]{
+                new Event(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 2}),
+                new Event(System.currentTimeMillis(), new Object[]{"IBM", 700f, 3}),
+                new Event(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 4})
+        });
+        Thread.sleep(1100);
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        Thread.sleep(2200);
+        AssertJUnit.assertEquals(2, inEventCount);
+        AssertJUnit.assertEquals(1, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
 }
