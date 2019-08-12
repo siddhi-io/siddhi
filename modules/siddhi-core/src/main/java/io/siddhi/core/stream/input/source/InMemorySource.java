@@ -39,20 +39,24 @@ import org.apache.log4j.Logger;
 @Extension(
         name = "inMemory",
         namespace = "source",
-        description = "In-memory source that can communicate with other in-memory sinks within the same JVM, it " +
-                "is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).",
-        parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Subscribes to sent on the "
-                + "given topic."),
+        description = "In-memory source subscribes to a topic to consume events which are published on the " +
+                "same topic by In-memory sinks. " +
+                "This provides a way to connect multiple Siddhi Apps deployed under the same Siddhi Manager (JVM). " +
+                "Here both the publisher and subscriber should have the same event schema (stream definition) " +
+                "for successful data transfer.",
+        parameters = @Parameter(name = "topic", type = DataType.STRING,
+                description = "Subscribes to the events sent on the given topic."),
         parameterOverloads = {
                 @ParameterOverload(parameterNames = {"topic"})
         },
         examples = @Example(
-                syntax = "@source(type='inMemory', @map(type='passThrough'))\n" +
-                        "define stream BarStream (symbol string, price float, volume long)",
-                description = "In this example BarStream uses inMemory transport which passes the received event " +
-                        "internally without using external transport."
+                syntax = "@source(type='inMemory', topic='Stocks', @map(type='passThrough'))\n" +
+                        "define stream StocksStream (symbol string, price float, volume long);",
+                description = "Here the `StocksStream` uses inMemory source to consume events published " +
+                        "on the topic `Stocks` by the inMemory sinks deployed in the same JVM."
         )
 )
+
 public class InMemorySource extends Source {
     private static final Logger LOG = Logger.getLogger(InMemorySource.class);
     private static final String TOPIC_KEY = "topic";
