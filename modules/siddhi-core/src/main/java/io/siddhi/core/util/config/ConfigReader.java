@@ -25,8 +25,19 @@ import java.util.Map;
  */
 public interface ConfigReader {
 
+    /**
+     * Returns the value of the system property if set else the default value is returned
+     *
+     * @param name Name of the property
+     * @param defaultValue Default value for the property
+     * @return Value of the system property
+     */
     String readConfig(String name, String defaultValue);
 
+    /**
+     * Return all the configurations in the config reader
+     * @return Hashmap of properties and values
+     */
     Map<String, String> getAllConfigs();
 
 }
