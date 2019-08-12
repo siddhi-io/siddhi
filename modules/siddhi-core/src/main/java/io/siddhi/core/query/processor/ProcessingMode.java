@@ -25,7 +25,8 @@ public enum ProcessingMode {
     BATCH,
     SLIDE,
     HOP,
-    GROUP;
+    GROUP,
+    RESET;
 
     public static ProcessingMode findUpdatedProcessingMode(
             ProcessingMode currentProcessingMode,
@@ -34,11 +35,26 @@ public enum ProcessingMode {
         switch (updatingProcessingMode) {
             case BATCH:
                 break;
+            case RESET:
+                switch (overallProcessingMode) {
+                    case SLIDE:
+                        break;
+                    case HOP:
+                        break;
+                    case GROUP:
+                        break;
+                    case RESET:
+                    case BATCH:
+                        overallProcessingMode = ProcessingMode.RESET;
+                        break;
+                }
+                break;
             case HOP:
                 switch (overallProcessingMode) {
                     case HOP:
                         break;
                     case BATCH:
+                    case RESET:
                         overallProcessingMode = ProcessingMode.HOP;
                         break;
                     case SLIDE:
@@ -52,6 +68,7 @@ public enum ProcessingMode {
                     case GROUP:
                         break;
                     case BATCH:
+                    case RESET:
                         overallProcessingMode = ProcessingMode.GROUP;
                         break;
                     case SLIDE:

@@ -232,7 +232,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
     @Override
     public ProcessingMode getProcessingMode() {
         if (isStreamCurrentEvents) {
-            return ProcessingMode.SLIDE;
+            return ProcessingMode.RESET;
         } else {
             return ProcessingMode.BATCH;
         }
