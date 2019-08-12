@@ -1,0 +1,25 @@
+# Siddhi related properties
+properties:
+  partitionById: TRUE
+  shardId: shard1
+
+# Siddhi references
+refs:
+  - ref:
+      type: source-type
+      name: source1
+      properties:
+        property1: value1
+        property2: value2
+
+# Siddi Extensions system Parameters
+extensions:
+  - extension:
+      name: rdbms
+      namespace: store
+      properties:
+        mysql.batchEnable: true
+        mysql.batchSize: 1000
+        mysql.indexCreateQuery: "CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})"
+        mysql.recordDeleteQuery: "DELETE FROM {{TABLE_NAME}} {{CONDITION}}"
+        mysql.recordExistsQuery: "SELECT 1 FROM {{TABLE_NAME}} {{CONDITION}} LIMIT 1"
