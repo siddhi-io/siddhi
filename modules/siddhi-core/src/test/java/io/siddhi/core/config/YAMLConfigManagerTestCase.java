@@ -17,10 +17,17 @@
  */
 package io.siddhi.core.config;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.config.YAMLConfigManager;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 import java.nio.file.Path;
@@ -43,9 +50,9 @@ public class YAMLConfigManagerTestCase {
         Map<String, String> testConfigs = yamlConfigManager.extractSystemConfigs("test");
         Assert.assertEquals(testConfigs.size(), 0);
 
-        Map<String, String> source1Ref = yamlConfigManager.extractSystemConfigs("source1");
+        Map<String, String> source1Ref = yamlConfigManager.extractSystemConfigs("ref1");
         Assert.assertEquals(source1Ref.size(), 3);
-        Assert.assertEquals(source1Ref.get("type"), "source-type");
+        Assert.assertEquals(source1Ref.get("type"), "testStoreContainingInMemoryTable");
         Assert.assertEquals(source1Ref.get("property1"), "value1");
         Assert.assertEquals(source1Ref.get("property2"), "value2");
         Assert.assertNull(source1Ref.get("property3"));
@@ -64,5 +71,73 @@ public class YAMLConfigManagerTestCase {
         Assert.assertEquals(configReader.readConfig("mysql.batchEnable", "test"), "true");
         Assert.assertEquals(configReader.readConfig("test", "test"), "test");
 
+    }
+
+    @Test
+    public void yamlConfigManagerTest2() throws InterruptedException {
+        log.info("YAMLConfigManagerTest2 - References test");
+
+        String baseDir = Paths.get(".").toString();
+        Path path = Paths.get(baseDir, "src", "test", "resources", "systemProperties.yaml");
+
+        YAMLConfigManager yamlConfigManager = new YAMLConfigManager(path.toAbsolutePath().toString());
+        yamlConfigManager.init();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setConfigManager(yamlConfigManager);
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(ref='ref1')\n" +
+                "define table StockTable (symbol string, volume long); ";
+
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, volume\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        Thread.sleep(1000);
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(2, events.length);
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void yamlConfigManagerTest3() {
+        log.info("YAMLConfigManagerTest2 - Undefined References test");
+
+        String baseDir = Paths.get(".").toString();
+        Path path = Paths.get(baseDir, "src", "test", "resources", "systemProperties.yaml");
+
+        YAMLConfigManager yamlConfigManager = new YAMLConfigManager(path.toAbsolutePath().toString());
+        yamlConfigManager.init();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setConfigManager(yamlConfigManager);
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@Store(ref='ref2')\n" +
+                "define table StockTable (symbol string, volume long); ";
+
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream\n" +
+                "select symbol, volume\n" +
+                "insert into StockTable ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
+        siddhiAppRuntime.start();
     }
 }

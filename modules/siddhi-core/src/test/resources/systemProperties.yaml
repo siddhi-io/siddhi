@@ -6,8 +6,8 @@ properties:
 # Siddhi references
 refs:
   - ref:
-      type: source-type
-      name: source1
+      type: testStoreContainingInMemoryTable
+      name: ref1
       properties:
         property1: value1
         property2: value2
