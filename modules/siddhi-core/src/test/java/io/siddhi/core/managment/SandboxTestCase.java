@@ -90,7 +90,7 @@ public class SandboxTestCase {
                 "select CountStockStream.symbol as symbol " +
                 "insert into CountResultsStream ;";
 
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppSandboxRuntime(app);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSandboxSiddhiAppRuntime(app);
 
         Assert.assertEquals(siddhiAppRuntime.getSources().size(), 1);
         Assert.assertEquals(siddhiAppRuntime.getSinks().size(), 1);
@@ -176,7 +176,7 @@ public class SandboxTestCase {
                 "insert into CountResultsStream ;";
 
         SiddhiApp siddhiApp = SiddhiCompiler.parse(app);
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppSandboxRuntime(siddhiApp);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSandboxSiddhiAppRuntime(siddhiApp);
 
         Assert.assertEquals(siddhiAppRuntime.getSources().size(), 1);
         Assert.assertEquals(siddhiAppRuntime.getSinks().size(), 1);

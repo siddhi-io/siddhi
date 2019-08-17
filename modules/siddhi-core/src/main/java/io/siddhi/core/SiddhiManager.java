@@ -101,7 +101,7 @@ public class SiddhiManager {
      * @param siddhiApp SiddhiApp
      * @return SiddhiAppRuntime without its Sources Sinks and Stores.
      */
-    public SiddhiAppRuntime createSiddhiAppSandboxRuntime(String siddhiApp) {
+    public SiddhiAppRuntime createSandboxSiddhiAppRuntime(String siddhiApp) {
         String updatedSiddhiApp = SiddhiCompiler.updateVariables(siddhiApp);
         return createSiddhiAppRuntime(removeSourceSinkAndStoreAnnotations(
                 SiddhiCompiler.parse(updatedSiddhiApp)), updatedSiddhiApp);
@@ -113,7 +113,7 @@ public class SiddhiManager {
      * @param siddhiApp SiddhiApp
      * @return SiddhiAppRuntime without its Sources Sinks and Stores.
      */
-    public SiddhiAppRuntime createSiddhiAppSandboxRuntime(SiddhiApp siddhiApp) {
+    public SiddhiAppRuntime createSandboxSiddhiAppRuntime(SiddhiApp siddhiApp) {
         return createSiddhiAppRuntime(removeSourceSinkAndStoreAnnotations(siddhiApp), null);
     }
 
