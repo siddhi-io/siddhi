@@ -25,9 +25,28 @@ import java.util.Map;
  */
 public interface ConfigManager {
 
+    /**
+     * Generates Config reader for extensions with specific namespace and name
+     *
+     * @param namespace Namespace of the extension
+     * @param name Name of the extension
+     * @return ConfigReader
+     */
     ConfigReader generateConfigReader(String namespace, String name);
 
+    /**
+     * Generates hash map of properties for siddhi annotation reference
+     *
+     * @param name Reference Name
+     * @return Hashmap of the properties
+     */
     Map<String, String> extractSystemConfigs(String name);
 
+    /**
+     * Extracts specific siddhi property in system properties
+     *
+     * @param name Name of the property
+     * @return Value of the property
+     */
     String extractProperty(String name);
 }

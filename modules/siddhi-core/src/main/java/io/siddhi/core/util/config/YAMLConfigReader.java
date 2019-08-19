@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,23 +21,27 @@ package io.siddhi.core.util.config;
 import java.util.Map;
 
 /**
- * Siddhi Configuration Reader
+ * Extension config readers
  */
-public interface ConfigReader {
+public class YAMLConfigReader implements ConfigReader {
+    private final Map<String, String> configs;
 
-    /**
-     * Returns the value of the system property if set else the default value is returned
-     *
-     * @param name Name of the property
-     * @param defaultValue Default value for the property
-     * @return Value of the system property
-     */
-    String readConfig(String name, String defaultValue);
+    public YAMLConfigReader(Map<String, String> configs) {
+        this.configs = configs;
+    }
 
-    /**
-     * Return all the configurations in the config reader
-     * @return Hashmap of properties and values
-     */
-    Map<String, String> getAllConfigs();
+    @Override
+    public String readConfig(String name, String defaultValue) {
+        String value = configs.get(name);
+        if (value != null) {
+            return value;
+        } else {
+            return defaultValue;
+        }
+    }
 
+    @Override
+    public Map<String, String> getAllConfigs() {
+        return configs;
+    }
 }

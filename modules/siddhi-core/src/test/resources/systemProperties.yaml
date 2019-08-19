@@ -1,0 +1,34 @@
+# Siddhi related properties
+properties:
+  partitionById: TRUE
+  shardId: shard1
+
+# Siddhi references
+refs:
+  - ref:
+      name: ref1
+      type: testStoreContainingInMemoryTable
+      properties:
+        property1: value1
+        property2: value2
+
+# Siddhi Extensions system Parameters
+extensions:
+  - extension:
+      name: rdbms
+      namespace: store
+      properties:
+        mysql.batchEnable: true
+        mysql.batchSize: 1000
+        mysql.indexCreateQuery: "CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})"
+        mysql.recordDeleteQuery: "DELETE FROM {{TABLE_NAME}} {{CONDITION}}"
+        mysql.recordExistsQuery: "SELECT 1 FROM {{TABLE_NAME}} {{CONDITION}} LIMIT 1"
+  - extension:
+      name: getAllNew
+      namespace: email
+      properties:
+        append.abc: true
+
+## Test to see if the additional properties are ignored
+test:
+  test1: yes

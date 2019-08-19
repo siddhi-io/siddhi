@@ -184,6 +184,9 @@
             <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.QueryAPITestCaseForTestStore"/>
             <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateOrInsertTestStoreTestCase"/>
             <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateTestStoreTestCase"/>
+
+            <class name="io.siddhi.core.config.YAMLConfigManagerTestCase"/>
+
         </classes>
     </test>
 </suite>
