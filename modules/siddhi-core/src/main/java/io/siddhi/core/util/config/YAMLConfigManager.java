@@ -29,12 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.introspector.PropertyUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,11 +40,10 @@ import java.util.Map;
 public class YAMLConfigManager implements ConfigManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(YAMLConfigManager.class);
-    private String filePathName;
     private RootConfiguration rootConfiguration;
 
-    public YAMLConfigManager(String filePath) {
-        this.filePathName = filePath;
+    public YAMLConfigManager(String yamlContent) {
+        init(yamlContent);
     }
 
     /**
@@ -56,36 +51,19 @@ public class YAMLConfigManager implements ConfigManager {
      *
      * @throws YAMLConfigManagerException Exception is thrown if there are issues in processing thr yaml file
      */
-    public void init() throws YAMLConfigManagerException {
-
-        Path filePath = Paths.get(this.filePathName);
-        if (!filePath.toFile().exists()) {
-            throw new YAMLConfigManagerException("Error while initializing YAML config manager, " +
-                    "YAML file does not exist with path '" + filePath.toAbsolutePath().toString() + "'.");
-        }
-        if (!filePath.toString().endsWith(".yaml")) {
-            throw new YAMLConfigManagerException("Error while initializing YAML config manager, file extension " +
-                    "'yaml' expected");
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("initialize config provider instance from configuration file: " + filePath.toString());
-        }
-
-        String fileContent;
+    private void init(String yamlContent) throws YAMLConfigManagerException {
         try {
-            byte[] contentBytes = Files.readAllBytes(filePath);
-            fileContent = new String(contentBytes, StandardCharsets.UTF_8);
-            Yaml yaml = new Yaml(new CustomClassLoaderConstructor(
-                    RootConfiguration.class, RootConfiguration.class.getClassLoader()));
+            CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(
+                    RootConfiguration.class, RootConfiguration.class.getClassLoader());
+            PropertyUtils propertyUtils = new PropertyUtils();
+            propertyUtils.setSkipMissingProperties(true);
+            constructor.setPropertyUtils(propertyUtils);
+
+            Yaml yaml = new Yaml(constructor);
             yaml.setBeanAccess(BeanAccess.FIELD);
-            this.rootConfiguration = yaml.load(fileContent);
-        } catch (IOException e) {
-           throw new YAMLConfigManagerException("Unable read YAML file content of path '" +
-                   filePath.toAbsolutePath().toString() + "'.", e);
-        } catch (Exception e1) {
-            throw new YAMLConfigManagerException("Unable to parse YAML file content of path '" +
-                    filePath.toAbsolutePath().toString() + "'.", e1);
+            this.rootConfiguration = yaml.load(yamlContent);
+        } catch (Exception e) {
+            throw new YAMLConfigManagerException("Unable to parse YAML string, '" + yamlContent + "'.", e);
         }
     }
 
