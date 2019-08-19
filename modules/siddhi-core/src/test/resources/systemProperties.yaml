@@ -6,13 +6,13 @@ properties:
 # Siddhi references
 refs:
   - ref:
-      type: testStoreContainingInMemoryTable
       name: ref1
+      type: testStoreContainingInMemoryTable
       properties:
         property1: value1
         property2: value2
 
-# Siddi Extensions system Parameters
+# Siddhi Extensions system Parameters
 extensions:
   - extension:
       name: rdbms
@@ -23,3 +23,12 @@ extensions:
         mysql.indexCreateQuery: "CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})"
         mysql.recordDeleteQuery: "DELETE FROM {{TABLE_NAME}} {{CONDITION}}"
         mysql.recordExistsQuery: "SELECT 1 FROM {{TABLE_NAME}} {{CONDITION}} LIMIT 1"
+  - extension:
+      name: getAllNew
+      namespace: email
+      properties:
+        append.abc: true
+
+## Test to see if the additional properties are ignored
+test:
+  test1: yes
