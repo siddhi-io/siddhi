@@ -43,7 +43,7 @@ public class FileReader {
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("initialize config provider instance from configuration file: " + filePath.toString());
+            LOG.debug("Initialize config provider instance from configuration file: " + filePath.toString());
         }
         try {
             return readContent(filePath);
