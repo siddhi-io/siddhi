@@ -38,6 +38,7 @@
             <class name="io.siddhi.core.managment.PlaybackTestCase"/>
             <class name="io.siddhi.core.managment.LogTestCase"/>
             <class name="io.siddhi.core.managment.StateTestCase"/>
+            <class name="io.siddhi.core.managment.SandboxTestCase"/>
             <class name="io.siddhi.core.managment.StatisticsTestCase"/>
             <class name="io.siddhi.core.managment.PersistenceTestCase"/>
             <class name="io.siddhi.core.managment.IncrementalPersistenceTestCase"/>

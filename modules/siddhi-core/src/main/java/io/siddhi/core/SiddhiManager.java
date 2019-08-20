@@ -24,12 +24,15 @@ import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.sink.SinkHandlerManager;
 import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.query.api.SiddhiApp;
+import io.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
 
@@ -90,6 +93,42 @@ public class SiddhiManager {
     public SiddhiAppRuntime createSiddhiAppRuntime(String siddhiApp) {
         String updatedSiddhiApp = SiddhiCompiler.updateVariables(siddhiApp);
         return createSiddhiAppRuntime(SiddhiCompiler.parse(updatedSiddhiApp), updatedSiddhiApp);
+    }
+
+    /**
+     * Create a SiddhiApp Sandbox Runtime that runs without their Sources Sinks and Stores.
+     *
+     * @param siddhiApp SiddhiApp
+     * @return SiddhiAppRuntime without its Sources Sinks and Stores.
+     */
+    public SiddhiAppRuntime createSandboxSiddhiAppRuntime(String siddhiApp) {
+        String updatedSiddhiApp = SiddhiCompiler.updateVariables(siddhiApp);
+        return createSiddhiAppRuntime(removeSourceSinkAndStoreAnnotations(
+                SiddhiCompiler.parse(updatedSiddhiApp)), updatedSiddhiApp);
+    }
+
+    /**
+     * Create a SiddhiApp Sandbox Runtime that runs without their Sources Sinks and Stores.
+     *
+     * @param siddhiApp SiddhiApp
+     * @return SiddhiAppRuntime without its Sources Sinks and Stores.
+     */
+    public SiddhiAppRuntime createSandboxSiddhiAppRuntime(SiddhiApp siddhiApp) {
+        return createSiddhiAppRuntime(removeSourceSinkAndStoreAnnotations(siddhiApp), null);
+    }
+
+    private SiddhiApp removeSourceSinkAndStoreAnnotations(SiddhiApp siddhiApp) {
+        for (StreamDefinition streamDefinition : siddhiApp.getStreamDefinitionMap().values()) {
+            streamDefinition.getAnnotations().removeIf(annotation -> (
+                    annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_SOURCE) ||
+                            annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_SINK))
+                    && !annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE).equalsIgnoreCase("inMemory"));
+        }
+        for (TableDefinition tableDefinition : siddhiApp.getTableDefinitionMap().values()) {
+            tableDefinition.getAnnotations().removeIf(annotation ->
+                    annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_STORE));
+        }
+        return siddhiApp;
     }
 
     /**
