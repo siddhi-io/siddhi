@@ -47,7 +47,8 @@ public class SnapshotService {
     private static final ThreadLocal<Boolean> skipSnapshotableThreadLocal = new ThreadLocal<Boolean>();
 
     private final ThreadBarrier threadBarrier;
-    private ConcurrentHashMap<String, Map<String, Snapshotable>> snapshotableMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, Snapshotable>> snapshotableMap =
+            new ConcurrentHashMap<>();
     private SiddhiAppContext siddhiAppContext;
 
     public SnapshotService(SiddhiAppContext siddhiAppContext) {
@@ -59,18 +60,18 @@ public class SnapshotService {
         return skipSnapshotableThreadLocal;
     }
 
-    public ConcurrentHashMap<String, Map<String, Snapshotable>> getSnapshotableMap() {
+    public ConcurrentHashMap<String, ConcurrentHashMap<String, Snapshotable>> getSnapshotableMap() {
         return snapshotableMap;
     }
 
     public synchronized void addSnapshotable(String snapshotableName, Snapshotable snapshotable) {
         Boolean skipSnapshotable = skipSnapshotableThreadLocal.get();
         if (skipSnapshotable == null || !skipSnapshotable) {
-            Map<String, Snapshotable> snapshotableMap = this.snapshotableMap.get(snapshotableName);
+            ConcurrentHashMap<String, Snapshotable> snapshotableMap = this.snapshotableMap.get(snapshotableName);
 
             // If List does not exist create it.
             if (snapshotableMap == null) {
-                snapshotableMap = new HashMap<String, Snapshotable>();
+                snapshotableMap = new ConcurrentHashMap<String, Snapshotable>();
                 snapshotableMap.put(snapshotable.getElementId(), snapshotable);
                 this.snapshotableMap.put(snapshotableName, snapshotableMap);
             } else {
@@ -83,9 +84,9 @@ public class SnapshotService {
     public synchronized void removeSnapshotable(String snapshotableName, Snapshotable snapshotable) {
         Boolean skipSnapshotable = skipSnapshotableThreadLocal.get();
         if (skipSnapshotable == null || !skipSnapshotable) {
-            Map<String, Snapshotable> snapshotableMap = this.snapshotableMap.get(snapshotableName);
+            ConcurrentHashMap<String, Snapshotable> snapshotableMap = this.snapshotableMap.get(snapshotableName);
             if (snapshotableMap != null) {
-                snapshotableMap = new HashMap<>();
+                snapshotableMap = new ConcurrentHashMap<String, Snapshotable>();
                 snapshotableMap.remove(snapshotable.getElementId(), snapshotable);
                 if (snapshotableMap.isEmpty()) {
                     this.snapshotableMap.remove(snapshotableName);
@@ -104,7 +105,7 @@ public class SnapshotService {
             }
             try {
                 threadBarrier.lock();
-                for (Map.Entry<String, Map<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
+                for (Map.Entry<String, ConcurrentHashMap<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
                     Map<String, Object> elementWiseFullSnapshots = new HashMap<>();
                     for (Map.Entry snapshotableEntry : entry.getValue().entrySet()) {
                         Snapshotable snapshotableObj = ((Snapshotable) snapshotableEntry.getValue());
@@ -167,7 +168,7 @@ public class SnapshotService {
             }
             try {
                 threadBarrier.lock();
-                for (Map.Entry<String, Map<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
+                for (Map.Entry<String, ConcurrentHashMap<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
                     Map<String, byte[]> elementWiseIncrementalSnapshots = new HashMap<>();
                     Map<String, byte[]> elementWiseIncrementalSnapshotsBase = new HashMap<>();
                     Map<String, byte[]> elementWisePeriodicSnapshots = new HashMap<>();
@@ -303,7 +304,7 @@ public class SnapshotService {
                 }
             }
 
-            for (Map.Entry<String, Map<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
+            for (Map.Entry<String, ConcurrentHashMap<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
                 if (!entry.getKey().equals("partition")) {
                     Map<String, Snapshotable> map = entry.getValue();
                     try {
@@ -367,7 +368,7 @@ public class SnapshotService {
                 }
             }
 
-            for (Map.Entry<String, Map<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
+            for (Map.Entry<String, ConcurrentHashMap<String, Snapshotable>> entry : snapshotableMap.entrySet()) {
                 if (!entry.getKey().equals("partition")) {
                     Map<String, Snapshotable> map = entry.getValue();
                     try {
