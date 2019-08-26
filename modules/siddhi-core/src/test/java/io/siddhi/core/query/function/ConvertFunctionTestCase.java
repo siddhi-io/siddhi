@@ -222,7 +222,6 @@ public class ConvertFunctionTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void convertFunctionTest4() throws InterruptedException {
         log.info("convert function test 4");
@@ -356,4 +355,53 @@ public class ConvertFunctionTestCase {
 
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
+
+    @Test
+    public void convertFunctionTestForThrowableAndObjectArray() throws InterruptedException {
+        log.info("convert function test for Throwable and Object Array");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "" +
+                "define stream typeStream (typeS string, typeF float, typeD double, typeI int, typeL long, typeB " +
+                "bool, errorObject object, arrayObject object) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from typeStream " +
+                "select convert(typeS,'bool') as valueB1, convert(typeF,'bool') as valueB2, convert(typeD,'bool') as " +
+                "valueB3 , convert(typeI,'bool') as valueB4 , convert(typeL,'bool') as valueB5 , convert(typeB," +
+                "'bool') as valueB6, convert(errorObject, 'string') as valueB7, " +
+                "convert(arrayObject, 'string') as valueB8 insert into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                count++;
+                AssertJUnit.assertTrue(inEvents[0].getData(0) instanceof Boolean && (Boolean) inEvents[0].getData(0));
+                AssertJUnit.assertTrue(inEvents[0].getData(1) instanceof Boolean && (Boolean) inEvents[0].getData(1));
+                AssertJUnit.assertTrue(inEvents[0].getData(2) instanceof Boolean && (Boolean) inEvents[0].getData(2));
+                AssertJUnit.assertTrue(inEvents[0].getData(3) instanceof Boolean && (Boolean) inEvents[0].getData(3));
+                AssertJUnit.assertTrue(inEvents[0].getData(4) instanceof Boolean && (Boolean) inEvents[0].getData(4));
+                AssertJUnit.assertTrue(inEvents[0].getData(5) instanceof Boolean && (Boolean) inEvents[0].getData(5));
+                AssertJUnit.assertTrue(inEvents[0].getData(6) instanceof String);
+                AssertJUnit.assertTrue(inEvents[0].getData(7) instanceof String);
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("typeStream");
+        siddhiAppRuntime.start();
+
+        Throwable throwable = new NullPointerException("NPE occurred when processing events");
+        Object[] arrayObject = new Object[2];
+        arrayObject[0] = "Mohan";
+        arrayObject[1] = 34;
+        inputHandler.send(new Object[]{"true", 1f, 1d, 1, 1L, true, throwable, arrayObject});
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(1, count);
+        siddhiAppRuntime.shutdown();
+    }
 }
+

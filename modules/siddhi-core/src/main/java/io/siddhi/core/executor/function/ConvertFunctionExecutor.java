@@ -32,6 +32,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.util.Arrays;
+
 /**
  * Executor class for convert function. Function execution logic is implemented in execute here.
  */
@@ -43,7 +45,7 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
                 @Parameter(name = "to.be.converted",
                         description = "This specifies the value to be converted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING,
-                                DataType.BOOL},
+                                DataType.BOOL, DataType.OBJECT},
                         dynamic = true),
                 @Parameter(name = "converted.to",
                         description = "A string constant parameter to which type the attribute need to be converted " +
@@ -86,12 +88,7 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
                     "converted type");
         }
         inputType = attributeExpressionExecutors[0].getReturnType();
-        if (inputType == Attribute.Type.OBJECT) {
-            throw new SiddhiAppValidationException("1st parameter of convert() cannot be 'object' as " +
-                    "it's not supported, it has to be either of (STRING, " +
-                    "INT, LONG, FLOAT, DOUBLE, BOOL), but found " +
-                    attributeExpressionExecutors[0].getReturnType());
-        }
+
         if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.STRING) {
             throw new SiddhiAppValidationException("2nd parameter of convert() must be 'string' have constant " +
                     "value either of (STRING, INT, LONG, FLOAT, DOUBLE, "
@@ -103,6 +100,7 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
                     "of (STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found "
                     + "a variable expression");
         }
+
         String type = (String) attributeExpressionExecutors[1].execute(null);
         if (Attribute.Type.STRING.toString().equalsIgnoreCase(type)) {
             returnType = Attribute.Type.STRING;
@@ -121,6 +119,12 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
                     "(STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found '" +
                     type + "'");
         }
+
+        if (inputType == Attribute.Type.OBJECT && returnType != Attribute.Type.STRING) {
+            throw new SiddhiAppValidationException("2nd parameter of convert() cannot be other than 'string' if " +
+                    "1st parameter is 'object', but found " + attributeExpressionExecutors[1].getReturnType());
+        }
+
         return null;
     }
 
@@ -136,6 +140,16 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
             try {
                 switch (returnType) {
                     case STRING:
+                        if (inputType == Attribute.Type.OBJECT) {
+                            if (data instanceof Throwable) {
+                                String message = "message : " + ((Throwable) data).getMessage();
+                                String cause = "\n cause :" + ((Throwable) data).getCause();
+                                return message + cause;
+                            } else if (data instanceof Object[]) {
+                                return Arrays.deepToString((Object[]) data);
+                            }
+                            return data.toString();
+                        }
                         return data.toString();
                     case INT:
                         switch (inputType) {
