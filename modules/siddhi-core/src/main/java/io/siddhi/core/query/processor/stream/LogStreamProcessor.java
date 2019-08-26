@@ -52,7 +52,7 @@ import java.util.List;
 @Extension(
         name = "log",
         namespace = "",
-        description = "The logger logs the message on the given priority with or without processed event.",
+        description = "Logs the message on the given priority with or without the processed event.",
         parameters = {
                 @Parameter(name = "priority",
                         description = "The priority/type of this log message (INFO, DEBUG, WARN," +
@@ -79,40 +79,40 @@ import java.util.List;
         },
         examples = {
                 @Example(
-                        syntax = "from fooStream#log(\"INFO\", \"Sample Event :\", true)\n" +
+                        syntax = "from FooStream#log(\"INFO\", \"Sample Event :\", true)\n" +
                                 "select *\n" +
-                                "insert into barStream;",
-                        description = "This will log as INFO with the message \"Sample Event :\" + fooStream:events."
+                                "insert into FooStream;",
+                        description = "This will log as INFO with the message \"Sample Event :\" + FooStream:events."
                 ),
                 @Example(
-                        syntax = "from fooStream#log(\"Sample Event :\", true)\n" +
+                        syntax = "from FooStream#log(\"Sample Event :\", true)\n" +
                                 "select *\n" +
-                                "insert into barStream;",
+                                "insert into FooStream;",
                         description = "This will logs with default log level as INFO."
                 ),
                 @Example(
-                        syntax = "from fooStream#log(\"Sample Event :\", fasle)\n" +
+                        syntax = "from FooStream#log(\"Sample Event :\", fasle)\n" +
                                 "select *\n" +
-                                "insert into barStream;",
+                                "insert into FooStream;",
                         description = "This will only log message."
                 ),
                 @Example(
-                        syntax = "from fooStream#log(true)\n" +
+                        syntax = "from FooStream#log(true)\n" +
                                 "select *\n" +
-                                "insert into barStream;",
-                        description = "This will only log fooStream:events."
+                                "insert into FooStream;",
+                        description = "This will only log FooStream:events."
                 ),
                 @Example(
-                        syntax = "from fooStream#log()\n" +
+                        syntax = "from FooStream#log()\n" +
                                 "select *\n" +
-                                "insert into barStream;",
-                        description = "This will only log fooStream:events."
+                                "insert into FooStream;",
+                        description = "This will only log FooStream:events."
                 ),
                 @Example(
-                        syntax = "from fooStream#log(\"Sample Event :\")\n" +
+                        syntax = "from FooStream#log(\"Sample Event :\")\n" +
                                 "select *\n" +
-                                "insert into barStream;",
-                        description = "This will log message and fooStream:events."
+                                "insert into FooStream;",
+                        description = "This will log message and FooStream:events."
                 )
         }
 )

@@ -394,23 +394,23 @@ public class LatestAggregationTestCase {
             siddhiAppRuntime.start();
 
             // Thursday, June 1, 2017 4:05:50 AM
-            stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L});
+            stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950010L});
             stockStreamInputHandler.send(new Object[]{"WSO22", 75f, null, 40L, 10, 1496289950100L});
 
             // Thursday, June 1, 2017 4:05:52 AM
-            stockStreamInputHandler.send(new Object[]{"WSO23", 60f, 44f, 200L, 56, 1496289952000L});
-            stockStreamInputHandler.send(new Object[]{"WSO24", 100f, null, 200L, 16, 1496289952000L});
+            stockStreamInputHandler.send(new Object[]{"WSO23", 60f, 44f, 200L, 56, 1496289952010L});
+            stockStreamInputHandler.send(new Object[]{"WSO24", 100f, null, 200L, 16, 1496289952020L});
 
             // Thursday, June 1, 2017 4:05:50 AM - Out of order event
             stockStreamInputHandler.send(new Object[]{"WSO23", 70f, null, 40L, 10, 1496289950090L});
 
             // Thursday, June 1, 2017 4:05:54 AM
-            stockStreamInputHandler.send(new Object[]{"IBM", 101f, null, 200L, 26, 1496289954000L});
-            stockStreamInputHandler.send(new Object[]{"IBM1", 102f, null, 200L, 100, 1496289954000L});
+            stockStreamInputHandler.send(new Object[]{"IBM", 101f, null, 200L, 26, 1496289954010L});
+            stockStreamInputHandler.send(new Object[]{"IBM1", 102f, null, 200L, 100, 1496289954020L});
 
             // Thursday, June 1, 2017 4:05:56 AM
-            stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60, 1496289956000L});
-            stockStreamInputHandler.send(new Object[]{"IBM1", 500f, null, 200L, 7, 1496289956000L});
+            stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60, 1496289956010L});
+            stockStreamInputHandler.send(new Object[]{"IBM1", 500f, null, 200L, 7, 1496289956030L});
 
             Thread.sleep(100);
 

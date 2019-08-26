@@ -33,6 +33,7 @@ import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.SchedulingProcessor;
 import io.siddhi.core.table.Table;
@@ -227,6 +228,16 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
         return () -> new WindowState(streamEventClonerHolder, outputExpectsExpiredEvents, findToBeExecuted);
 
     }
+
+    @Override
+    public ProcessingMode getProcessingMode() {
+        if (isStreamCurrentEvents) {
+            return ProcessingMode.RESET;
+        } else {
+            return ProcessingMode.BATCH;
+        }
+    }
+
 
     private void initTimeParameter(ExpressionExecutor attributeExpressionExecutor) {
         if (attributeExpressionExecutor instanceof ConstantExpressionExecutor) {

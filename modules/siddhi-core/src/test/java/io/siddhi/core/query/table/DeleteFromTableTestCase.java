@@ -312,7 +312,6 @@ public class DeleteFromTableTestCase {
         InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
         InputHandler countStockStream = siddhiAppRuntime.getInputHandler("CountStockStream");
 
-
         siddhiAppRuntime.addCallback("CountResultsStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
