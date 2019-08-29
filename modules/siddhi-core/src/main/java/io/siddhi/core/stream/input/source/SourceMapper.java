@@ -44,22 +44,25 @@ public abstract class SourceMapper implements SourceEventListener {
     private InputEventHandler inputEventHandler;
     private StreamDefinition streamDefinition;
     private String mapType;
-    private String sourceType;
     private List<AttributeMapping> transportMappings;
     private SourceHandler sourceHandler;
     private SiddhiAppContext siddhiAppContext;
     private ThroughputTracker throughputTracker;
     private LatencyTracker mapperLatencyTracker;
+    protected String sourceType;
+    protected OptionHolder sourceOptionHolder;
 
     public final void init(StreamDefinition streamDefinition, String mapType, OptionHolder mapOptionHolder,
                            List<AttributeMapping> attributeMappings, String sourceType,
                            SourceSyncCallback sourceSyncCallback, List<AttributeMapping> transportMappings,
-                           SourceHandler sourceHandler, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+                           SourceHandler sourceHandler, OptionHolder sourceOptionHolder, ConfigReader configReader,
+                           SiddhiAppContext siddhiAppContext) {
 
         this.streamDefinition = streamDefinition;
         this.mapType = mapType;
         this.sourceType = sourceType;
         this.transportMappings = transportMappings;
+        this.sourceOptionHolder = sourceOptionHolder;
         if (sourceHandler != null) {
             sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback, streamDefinition,
                     siddhiAppContext);
