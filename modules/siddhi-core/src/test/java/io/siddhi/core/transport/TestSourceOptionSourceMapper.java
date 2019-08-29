@@ -64,14 +64,15 @@ public class TestSourceOptionSourceMapper extends SourceMapper {
     protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler) throws InterruptedException {
         if (eventObject != null) {
             if (eventObject instanceof Event) {
-                Event event=((Event) eventObject);
-                event.getData()[0]=sourceOptionHolder.validateAndGetOption("topic").getValue(event);
-                event.getData()[1]=sourceType;
+                Event event = ((Event) eventObject);
+                event.getData()[0] = sourceOptionHolder.validateAndGetOption("topic").getValue(event);
+                event.getData()[1] = sourceType;
                 inputEventHandler.sendEvent((Event) eventObject);
-            } else
+            } else {
                 throw new SiddhiAppRuntimeException("Event object must be Event " +
                         "but found " + eventObject.getClass().getCanonicalName());
             }
+        }
 
     }
 
