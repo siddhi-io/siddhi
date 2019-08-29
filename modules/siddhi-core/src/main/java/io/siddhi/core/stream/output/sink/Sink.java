@@ -69,7 +69,6 @@ public abstract class Sink<S extends State> implements SinkListener {
     private SiddhiAppContext siddhiAppContext;
     private OnErrorAction onErrorAction;
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
-    private BackoffRetryCounter backoffPublishRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private AtomicBoolean isShutdown = new AtomicBoolean(false);
     private ThreadLocal<DynamicOptions> trpDynamicOptions;
@@ -336,8 +335,25 @@ public abstract class Sink<S extends State> implements SinkListener {
                     streamJunction.handleError(dynamicOptions.getEvent(), e);
                     break;
                 case WAIT:
-                    retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
-                    backoffPublishRetryCounter.increment();
+                    LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                            ", error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
+                            "', will retry in '" + backoffRetryCounter.getTimeInterval() + "'."), e);
+                    retryWait(backoffRetryCounter.getTimeIntervalMillis());
+                    backoffRetryCounter.increment();
+                    if (!isConnected.get()) {
+                        isTryingToConnect.set(true);
+                        try {
+                            connect();
+                            setConnected(true);
+                            isTryingToConnect.set(false);
+                            if (connectionCallback != null) {
+                                connectionCallback.connectionEstablished();
+                            }
+                            backoffRetryCounter.reset();
+                        } catch (Exception ex) {
+                            onError(payload, dynamicOptions, ex);
+                        }
+                    }
                     trpDynamicOptions.set(dynamicOptions);
                     try {
                         publish(payload);

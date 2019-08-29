@@ -397,7 +397,7 @@ public class FaultStreamTestCase {
         }
     }
 
-    @Test//(dependsOnMethods = "faultStreamTest7")
+    @Test(dependsOnMethods = "faultStreamTest7")
     public void faultStreamTest8() throws InterruptedException {
         log.info("faultStreamTest8-Tests fault handling when it's set to wait. " +
                 "Thread would be waiting until Sink reconnects.");
@@ -406,7 +406,6 @@ public class FaultStreamTestCase {
             @Override
             public void onMessage(Object msg) {
                 EventPrinter.print(new Event[]{(Event) msg});
-                log.info(new Throwable());
                 count.incrementAndGet();
             }
 
@@ -437,6 +436,7 @@ public class FaultStreamTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 Assert.assertTrue(events[0].getData(0) != null);
+                countStream.incrementAndGet();
             }
         });
 
@@ -457,10 +457,15 @@ public class FaultStreamTestCase {
                 }
             };
             thread.start();
-            Thread.sleep(6000);
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            Thread.sleep(2000);
+            Assert.assertTrue(appender.getMessages().contains(
+                    "error while connecting at Sink 'inMemory' at 'outputStream', will retry in"));
+            Assert.assertEquals(count.get(), 0);
+            Assert.assertEquals(countStream.get(), 0);
             InMemoryBroker.subscribe(subscriptionIBM);
-            Thread.sleep(10000);
+            Thread.sleep(6000);
+            Assert.assertEquals(count.get(), 1);
+            Assert.assertEquals(countStream.get(), 1);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -767,18 +772,23 @@ public class FaultStreamTestCase {
                 @Override
                 public void run() {
                     try {
-                        inputHandler.send(new Object[]{"IBM", 0f, 100L});
-                        inputHandler.send(new Object[]{"IBM", 1f, 100L});
+                        inputHandler.send(new Object[]{"IBM", 10f, 100L});
+                        Thread.sleep(100);
+                        inputHandler.send(new Object[]{"IBM", 11f, 100L});
                     } catch (InterruptedException e) {
                     }
                 }
             };
             thread.start();
-            Thread.sleep(6000);
-            Assert.assertTrue(appender.getMessages().contains("error while connecting at Sink 'testAsyncInMemory'" +
-                    " at 'outputStream', will retry in"));
+            Thread.sleep(2000);
             Assert.assertEquals(countStream.get(), 1);
             Assert.assertEquals(count.get(), 0);
+            Assert.assertTrue(appender.getMessages().contains("error while connecting at Sink 'testAsyncInMemory'" +
+                    " at 'outputStream', will retry in"));
+            TestAsyncInMemory.fail = false;
+            Thread.sleep(11000);
+            Assert.assertEquals(countStream.get(), 2);
+            Assert.assertEquals(count.get(), 2);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -851,7 +861,8 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(6000);
-            Assert.assertTrue(appender.getMessages() == null);
+            Assert.assertTrue(appender.getMessages().contains("Connection unavailable during publishing, error while " +
+                    "connecting at Sink 'testAsyncInMemory' at 'outputStream', will retry"));
             Assert.assertEquals(count.get(), 2);
             Assert.assertEquals(countStream.get(), 2);
         } catch (Exception e) {
