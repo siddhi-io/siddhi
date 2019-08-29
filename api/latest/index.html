@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v512" tabindex="1" class="md-skip">
+      <a href="#api-docs-v513" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -740,6 +740,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../5.1.3/" title="5.1.3" class="md-nav__link">
+      5.1.3
+    </a>
   </li>
 
         
@@ -1497,7 +1509,7 @@
                   <a href="https://github.com/siddhi-io/siddhi/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v512">API Docs - v5.1.2</h1>
+                <h1 id="api-docs-v513">API Docs - v5.1.3</h1>
 <h2 id="core">Core</h2>
 <h3 id="and-aggregate-function">and <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#aggregate-function">(Aggregate Function)</a></em></h3>
 <p><p></p>
@@ -2122,7 +2134,7 @@ insert into barStream;
 <p style="word-wrap: break-word;margin: 0;">Converts the first input parameter according to the convertedTo parameter.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL&gt; convert(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL&gt; to.be.converted, &lt;STRING&gt; converted.to)
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL&gt; convert(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; to.be.converted, &lt;STRING&gt; converted.to)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -2139,7 +2151,7 @@ insert into barStream;
         <td style="vertical-align: top">to.be.converted</td>
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the value to be converted.</p></td>
         <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">Yes</td>
     </tr>
@@ -2901,7 +2913,7 @@ insert into outputStream ;
 
 <h3 id="log-stream-processor">log <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#stream-processor">(Stream Processor)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">The logger logs the message on the given priority with or without processed event.</p>
+<p style="word-wrap: break-word;margin: 0;">Logs the message on the given priority with or without the processed event.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>log()
@@ -2949,21 +2961,21 @@ log(&lt;STRING&gt; priority, &lt;STRING&gt; log.message, &lt;BOOL&gt; is.event.l
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<pre><code>from fooStream#log(&quot;INFO&quot;, &quot;Sample Event :&quot;, true)
+<pre><code>from FooStream#log(&quot;INFO&quot;, &quot;Sample Event :&quot;, true)
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">This will log as INFO with the message "Sample Event :" + fooStream:events.</p>
+<p style="word-wrap: break-word;margin: 0;">This will log as INFO with the message "Sample Event :" + FooStream:events.</p>
 
 <p></p>
 
 <p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
-<pre><code>from fooStream#log(&quot;Sample Event :&quot;, true)
+<pre><code>from FooStream#log(&quot;Sample Event :&quot;, true)
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
@@ -2973,9 +2985,9 @@ insert into barStream;
 <p></p>
 
 <p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
-<pre><code>from fooStream#log(&quot;Sample Event :&quot;, fasle)
+<pre><code>from FooStream#log(&quot;Sample Event :&quot;, fasle)
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
@@ -2985,38 +2997,38 @@ insert into barStream;
 <p></p>
 
 <p><span id="example-4" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 4</span></p>
-<pre><code>from fooStream#log(true)
+<pre><code>from FooStream#log(true)
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">This will only log fooStream:events.</p>
+<p style="word-wrap: break-word;margin: 0;">This will only log FooStream:events.</p>
 
 <p></p>
 
 <p><span id="example-5" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 5</span></p>
-<pre><code>from fooStream#log()
+<pre><code>from FooStream#log()
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">This will only log fooStream:events.</p>
+<p style="word-wrap: break-word;margin: 0;">This will only log FooStream:events.</p>
 
 <p></p>
 
 <p><span id="example-6" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 6</span></p>
-<pre><code>from fooStream#log(&quot;Sample Event :&quot;)
+<pre><code>from FooStream#log(&quot;Sample Event :&quot;)
 select *
-insert into barStream;
+insert into FooStream;
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">This will log message and fooStream:events.</p>
+<p style="word-wrap: break-word;margin: 0;">This will log message and FooStream:events.</p>
 
 <p></p>
 
@@ -3938,7 +3950,7 @@ insert all events into outputStream;
 <h2 id="sink">Sink</h2>
 <h3 id="inmemory-sink">inMemory <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">(Sink)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">In-memory transport that can communicate with other in-memory transports within the same JVM, itis assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
+<p style="word-wrap: break-word;margin: 0;">In-memory sink publishes events to In-memory sources that are subscribe to the same topic to which the sink publishes. This provides a way to connect multiple Siddhi Apps deployed under the same Siddhi Manager (JVM). Here both the publisher and subscriber should have the same event schema (stream definition) for successful data transfer.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@sink(type=&quot;inMemory&quot;, topic=&quot;&lt;STRING&gt;&quot;, @map(...)))
@@ -3956,7 +3968,7 @@ insert all events into outputStream;
     </tr>
     <tr>
         <td style="vertical-align: top">topic</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Event will be delivered to allthe subscribers of the same topic</p></td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Event are delivered to allthe subscribers subscribed on this topic.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -3965,13 +3977,13 @@ insert all events into outputStream;
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<pre><code>@sink(type='inMemory', @map(type='passThrough'))
-define stream BarStream (symbol string, price float, volume long)
+<pre><code>@sink(type='inMemory', topic='Stocks', @map(type='passThrough'))
+define stream StocksStream (symbol string, price float, volume long);
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">In this example BarStream uses inMemory transport which emit the Siddhi events internally without using external transport and transformation.</p>
+<p style="word-wrap: break-word;margin: 0;">Here the <code>StocksStream</code> uses inMemory sink to emit the Siddhi events to all the inMemory sources deployed in the same JVM and subscribed to the topic <code>Stocks</code>.</p>
 
 <p></p>
 
@@ -4079,7 +4091,7 @@ define stream BarStream (symbol string, price float, volume long);
 <h2 id="source">Source</h2>
 <h3 id="inmemory-source">inMemory <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">In-memory source that can communicate with other in-memory sinks within the same JVM, it is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
+<p style="word-wrap: break-word;margin: 0;">In-memory source subscribes to a topic to consume events which are published on the same topic by In-memory sinks. This provides a way to connect multiple Siddhi Apps deployed under the same Siddhi Manager (JVM). Here both the publisher and subscriber should have the same event schema (stream definition) for successful data transfer.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;inMemory&quot;, topic=&quot;&lt;STRING&gt;&quot;, @map(...)))
@@ -4097,7 +4109,7 @@ define stream BarStream (symbol string, price float, volume long);
     </tr>
     <tr>
         <td style="vertical-align: top">topic</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Subscribes to sent on the given topic.</p></td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Subscribes to the events sent on the given topic.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -4106,13 +4118,13 @@ define stream BarStream (symbol string, price float, volume long);
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<pre><code>@source(type='inMemory', @map(type='passThrough'))
-define stream BarStream (symbol string, price float, volume long)
+<pre><code>@source(type='inMemory', topic='Stocks', @map(type='passThrough'))
+define stream StocksStream (symbol string, price float, volume long);
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">In this example BarStream uses inMemory transport which passes the received event internally without using external transport.</p>
+<p style="word-wrap: break-word;margin: 0;">Here the <code>StocksStream</code> uses inMemory source to consume events published on the topic <code>Stocks</code> by the inMemory sinks deployed in the same JVM.</p>
 
 <p></p>
 
@@ -4171,13 +4183,13 @@ define stream BarStream (symbol string, price float, volume long);
           </a>
         
         
-          <a href="../5.1.2/" title="5.1.2" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../5.1.3/" title="5.1.3" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                5.1.2
+                5.1.3
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
