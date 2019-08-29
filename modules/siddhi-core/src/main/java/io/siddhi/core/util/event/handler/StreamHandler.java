@@ -91,9 +91,8 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
             case LOG:
                 for (Event event : eventBuffer) {
                     log.error("Error in SiddhiApp '" + siddhiAppName +
-                            "' after consuming events from Stream " +
-                            "'" + streamName + "', " + e.getMessage() + ". Hence, dropping event '"
-                            + event.toString() + "'", e);
+                            "' after consuming events from Stream '" + streamName + "', " + e.getMessage() +
+                            ". Hence, dropping event '" + event.toString() + "'", e);
                 }
                 break;
             case STREAM:

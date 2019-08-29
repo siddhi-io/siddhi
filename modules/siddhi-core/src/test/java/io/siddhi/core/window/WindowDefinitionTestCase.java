@@ -158,7 +158,7 @@ public class WindowDefinitionTestCase {
                 "@sink(name='log')\n" +
                 "define stream AlertStream (amount double);\n" +
                 "\n" +
-                "-- @store(type='rdbms' , datasource='WSO2_CARBON_DB') \n" +
+                "-- @store(type='rdbms', datasource='WSO2_CARBON_DB') \n" +
                 "@primaryKey('name') \n" +
                 "define table SummarizedTable (name string, total double);\n" +
                 "\n" +

@@ -115,7 +115,8 @@ public class SiddhiAppRuntimeBuilder {
             throw t;
         }
         DefinitionParserHelper.addEventSource(streamDefinition, sourceMap, siddhiAppContext);
-        DefinitionParserHelper.addEventSink(streamDefinition, sinkMap, siddhiAppContext);
+        StreamJunction streamJunction = streamJunctionMap.get(streamDefinition.getId());
+        DefinitionParserHelper.addEventSink(streamDefinition, streamJunction, sinkMap, siddhiAppContext);
     }
 
     public void defineTable(TableDefinition tableDefinition) {

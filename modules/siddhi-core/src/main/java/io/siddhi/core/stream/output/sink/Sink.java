@@ -21,8 +21,8 @@ package io.siddhi.core.stream.output.sink;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -65,11 +65,13 @@ public abstract class Sink<S extends State> implements SinkListener {
     private SinkMapper mapper;
     private SinkHandler handler;
     private DistributedTransport.ConnectionCallback connectionCallback = null;
+    private StreamJunction streamJunction;
     private SiddhiAppContext siddhiAppContext;
     private OnErrorAction onErrorAction;
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
     private BackoffRetryCounter backoffPublishRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
+    private AtomicBoolean isShutdown = new AtomicBoolean(false);
     private ThreadLocal<DynamicOptions> trpDynamicOptions;
     private ScheduledExecutorService scheduledExecutorService;
     private ThroughputTracker throughputTracker;
@@ -81,9 +83,10 @@ public abstract class Sink<S extends State> implements SinkListener {
                            ConfigReader sinkConfigReader, SinkMapper sinkMapper, String mapType,
                            OptionHolder mapOptionHolder, SinkHandler sinkHandler, List<Element> payloadElementList,
                            ConfigReader mapperConfigReader, Map<String, String> deploymentProperties,
-                           SiddhiAppContext siddhiAppContext) {
+                           StreamJunction streamJunction, SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = streamDefinition;
         this.type = type;
+        this.streamJunction = streamJunction;
         this.siddhiAppContext = siddhiAppContext;
         this.onErrorAction = OnErrorAction.valueOf(transportOptionHolder
                 .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
@@ -103,7 +106,7 @@ public abstract class Sink<S extends State> implements SinkListener {
                 this.getClass().getName(), stateFactory);
         if (sinkMapper != null) {
             sinkMapper.init(streamDefinition, mapType, mapOptionHolder, payloadElementList, this,
-                    mapperConfigReader, mapperLatencyTracker, siddhiAppContext);
+                    mapperConfigReader, mapperLatencyTracker, transportOptionHolder, siddhiAppContext);
             this.mapper = sinkMapper;
         }
         if (sinkHandler != null) {
@@ -173,10 +176,10 @@ public abstract class Sink<S extends State> implements SinkListener {
         if (mapperLatencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             mapperLatencyTracker.markOut();
         }
+        DynamicOptions dynamicOptions = trpDynamicOptions.get();
         if (isConnected()) {
             S state = stateHolder.getState();
             try {
-                DynamicOptions dynamicOptions = trpDynamicOptions.get();
                 publish(payload, dynamicOptions, state);
                 if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
@@ -195,9 +198,10 @@ public abstract class Sink<S extends State> implements SinkListener {
                 stateHolder.returnState(state);
             }
         } else if (isTryingToConnect.get()) {
-            onError(payload, new SiddhiAppRuntimeException("Connection unavailable at Sink '" + type + "' at '"
-                    + streamDefinition.getId() + "'. Connection retrying is in progress from a different thread."));
-        } else {
+            onError(payload, dynamicOptions, new ConnectionUnavailableException("Connection unavailable at Sink '"
+                    + type + "' at '" + streamDefinition.getId() + "'. Connection retrying is in progress " +
+                    "from a different thread."));
+        } else if (!isShutdown.get()) {
             connectWithRetry();
             publish(payload);
         }
@@ -257,7 +261,7 @@ public abstract class Sink<S extends State> implements SinkListener {
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                        " Error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
+                        ", error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
                         "', will retry in '" + backoffRetryCounter.getTimeInterval() + "'."), e);
                 scheduledExecutorService.schedule(new Runnable() {
                     @Override
@@ -268,7 +272,7 @@ public abstract class Sink<S extends State> implements SinkListener {
                 backoffRetryCounter.increment();
             } catch (RuntimeException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
-                        " Error while connecting at Sink '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
+                        ", error while connecting at Sink '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
                         StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
                 throw e;
             }
@@ -276,6 +280,7 @@ public abstract class Sink<S extends State> implements SinkListener {
     }
 
     public void shutdown() {
+        isShutdown.set(true);
         disconnect();
         destroy();
         setConnected(false);
@@ -301,23 +306,56 @@ public abstract class Sink<S extends State> implements SinkListener {
         isConnected.set(connected);
     }
 
+    @Deprecated
     void onError(Object payload, Exception e) {
-        switch (onErrorAction) {
-            case STREAM:
-                throw new SiddhiAppRuntimeException("Dropping event at Sink '"
-                        + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
-                        + "event dropped '" + payload + "'", e);
-            case WAIT:
-                retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
-                backoffPublishRetryCounter.increment();
-                publish(payload);
-                break;
-            case LOG:
-            default:
-                LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
-                        + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
-                        + "events dropped '" + payload + "'");
-                break;
+        DynamicOptions dynamicOptions = trpDynamicOptions.get();
+        if (dynamicOptions == null && onErrorAction == OnErrorAction.WAIT) {
+            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                    + type + "' at '" + streamDefinition.getId() + "' as its does not support 'WAIT' "
+                    + "as it uses deprecated onError(Object payload, Exception e) method!, "
+                    + "events dropped '" + payload + "'");
+        } else {
+            onError(payload, dynamicOptions, e);
+        }
+    }
+
+    public void onError(Object payload, DynamicOptions dynamicOptions, Exception e) {
+        OnErrorAction errorAction = onErrorAction;
+        if (e instanceof ConnectionUnavailableException) {
+            setConnected(false);
+        } else if (errorAction == OnErrorAction.WAIT) {
+            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                    + type + "' at '" + streamDefinition.getId() + "' as on.error='wait' does not handle " +
+                    "'" + e.getClass().getName() + "' error: '" + e.getMessage() + "', events dropped '" +
+                    payload + "'", e);
+            return;
+        }
+        try {
+            switch (errorAction) {
+                case STREAM:
+                    streamJunction.handleError(dynamicOptions.getEvent(), e);
+                    break;
+                case WAIT:
+                    retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
+                    backoffPublishRetryCounter.increment();
+                    trpDynamicOptions.set(dynamicOptions);
+                    try {
+                        publish(payload);
+                    } finally {
+                        trpDynamicOptions.remove();
+                    }
+                    break;
+                case LOG:
+                default:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                            + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
+                            + "events dropped '" + payload + "'");
+                    break;
+            }
+        } catch (Throwable t) {
+            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                    + type + "' at '" + streamDefinition.getId() + "' as there is an issue when " +
+                    "handling the error: '" + t.getMessage() + "', events dropped '" + payload + "'", e);
         }
     }
 

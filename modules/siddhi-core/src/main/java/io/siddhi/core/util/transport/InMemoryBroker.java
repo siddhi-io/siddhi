@@ -110,7 +110,7 @@ public class InMemoryBroker {
                     subscriber.onMessage(msg);
                 }
             } else {
-                throw new SubscriberUnAvailableException("Subscriber for topic '" + topic + "' is unavailable.");
+                throw new SubscriberUnAvailableException("Subscriber for topic '" + topic + "' is unavailable");
             }
         }
 
