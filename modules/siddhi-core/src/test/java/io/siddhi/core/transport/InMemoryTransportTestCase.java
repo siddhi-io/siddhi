@@ -1222,10 +1222,10 @@ public class InMemoryTransportTestCase {
                 for (Event event : events) {
                     switch (wso2Count.incrementAndGet()) {
                         case 1:
-                            Assert.assertEquals( event.getData(),new Object[]{"WSO2", "inMemory", 100l});
+                            Assert.assertEquals(event.getData(), new Object[]{"WSO2", "inMemory", 100L});
                             break;
                         case 2:
-                            Assert.assertEquals( event.getData(),new Object[]{"WSO2", "inMemory", 101l});
+                            Assert.assertEquals(event.getData(), new Object[]{"WSO2", "inMemory", 101L});
                             break;
                         default:
                             org.testng.AssertJUnit.fail();
