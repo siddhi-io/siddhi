@@ -433,6 +433,7 @@ public class DefinitionParserHelper {
     }
 
     public static void addEventSink(StreamDefinition streamDefinition,
+                                    StreamJunction streamJunction,
                                     ConcurrentMap<String, List<Sink>> eventSinkMap,
                                     SiddhiAppContext siddhiAppContext) {
         for (Annotation sinkAnnotation : streamDefinition.getAnnotations()) {
@@ -541,13 +542,13 @@ public class DefinitionParserHelper {
                                 ((DistributedTransport) sink).init(streamDefinition, sinkType,
                                         transportOptionHolder, sinkConfigReader, sinkMapper,
                                         mapType, mapOptionHolder, sinkHandler, payloadElementList,
-                                        mapperConfigReader, siddhiAppContext, destinationOptHolders,
+                                        mapperConfigReader, streamJunction, siddhiAppContext, destinationOptHolders,
                                         sinkAnnotation, distributionStrategy, supportedDynamicOptions,
                                         deploymentProperties, destinationDeploymentProperties);
                             } else {
                                 sink.init(streamDefinition, sinkType, transportOptionHolder, sinkConfigReader,
                                         sinkMapper, mapType, mapOptionHolder, sinkHandler, payloadElementList,
-                                        mapperConfigReader, deploymentProperties, siddhiAppContext);
+                                        mapperConfigReader, deploymentProperties, streamJunction, siddhiAppContext);
 
                             }
 

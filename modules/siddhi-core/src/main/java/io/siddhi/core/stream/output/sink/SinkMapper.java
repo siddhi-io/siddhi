@@ -51,18 +51,19 @@ public abstract class SinkMapper {
     private ThreadLocal<DynamicOptions> trpDynamicOptions = new ThreadLocal<>();
     private LatencyTracker mapperLatencyTracker;
     private SiddhiAppContext siddhiAppContext;
+    protected String sinkType;
+    protected OptionHolder sinkOptionHolder;
 
-    public final void init(StreamDefinition streamDefinition,
-                           String type,
-                           OptionHolder mapOptionHolder,
-                           List<Element> unmappedPayloadList,
-                           Sink sink, ConfigReader mapperConfigReader,
-                           LatencyTracker mapperLatencyTracker,
+    public final void init(StreamDefinition streamDefinition, String type, OptionHolder mapOptionHolder,
+                           List<Element> unmappedPayloadList, Sink sink, ConfigReader mapperConfigReader,
+                           LatencyTracker mapperLatencyTracker, OptionHolder sinkOptionHolder,
                            SiddhiAppContext siddhiAppContext) {
         this.mapperLatencyTracker = mapperLatencyTracker;
         this.siddhiAppContext = siddhiAppContext;
         sink.setTrpDynamicOptions(trpDynamicOptions);
         this.sinkListener = sink;
+        this.sinkType = sink.getType();
+        this.sinkOptionHolder = sinkOptionHolder;
         this.optionHolder = mapOptionHolder;
         this.type = type;
         buildMapperTemplate(streamDefinition, unmappedPayloadList);
@@ -71,7 +72,8 @@ public abstract class SinkMapper {
 
     /**
      * Method to create mapper template.
-     * @param streamDefinition Stream definition corresponding to mapper
+     *
+     * @param streamDefinition    Stream definition corresponding to mapper
      * @param unmappedPayloadList mapper payload template list
      */
     protected void buildMapperTemplate(StreamDefinition streamDefinition, List<Element> unmappedPayloadList) {

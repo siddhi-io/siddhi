@@ -1905,7 +1905,7 @@ public class LogicalAbsentPatternTestCase {
 
 
         callback.throwAssertionErrors();
-        AssertJUnit.assertEquals("Number of success events", 2, callback.getInEventCount());
+        AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
         AssertJUnit.assertTrue("Event arrived", callback.isEventArrived());
 

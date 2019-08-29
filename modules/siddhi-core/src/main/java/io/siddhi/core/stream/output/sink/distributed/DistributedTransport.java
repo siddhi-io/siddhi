@@ -20,6 +20,7 @@ package io.siddhi.core.stream.output.sink.distributed;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.stream.output.sink.SinkHandler;
 import io.siddhi.core.stream.output.sink.SinkMapper;
@@ -81,6 +82,7 @@ public abstract class DistributedTransport extends Sink {
      * @param sinkHandler                     Sink handler to do optional processing
      * @param payloadElementList              The template list of the payload messages
      * @param mapperConfigReader              This hold the {@link Sink} extensions configuration reader for the mapper
+     * @param streamJunction
      * @param siddhiAppContext                The siddhi app context
      * @param destinationOptionHolders        List of option holders containing the options mentioned in @destination
      * @param sinkAnnotation                  The annotation of the Sink
@@ -93,8 +95,9 @@ public abstract class DistributedTransport extends Sink {
                      ConfigReader sinkConfigReader,
                      SinkMapper sinkMapper, String mapType, OptionHolder mapOptionHolder, SinkHandler sinkHandler,
                      List<Element> payloadElementList, ConfigReader mapperConfigReader,
-                     SiddhiAppContext siddhiAppContext, List<OptionHolder> destinationOptionHolders,
-                     Annotation sinkAnnotation, DistributionStrategy strategy, String[] supportedDynamicOptions,
+                     StreamJunction streamJunction, SiddhiAppContext siddhiAppContext,
+                     List<OptionHolder> destinationOptionHolders, Annotation sinkAnnotation,
+                     DistributionStrategy strategy, String[] supportedDynamicOptions,
                      Map<String, String> deploymentProperties,
                      List<Map<String, String>> destinationDeploymentProperties) {
         this.type = type;
@@ -102,7 +105,7 @@ public abstract class DistributedTransport extends Sink {
         this.supportedDynamicOptions = supportedDynamicOptions;
         init(streamDefinition, type, transportOptionHolder, sinkConfigReader, sinkMapper, mapType, mapOptionHolder,
                 sinkHandler, payloadElementList, mapperConfigReader, new HashMap<>(),
-                siddhiAppContext);
+                streamJunction, siddhiAppContext);
         initTransport(sinkOptionHolder, destinationOptionHolders, deploymentProperties,
                 destinationDeploymentProperties, sinkAnnotation, sinkConfigReader, strategy, type, siddhiAppContext);
     }

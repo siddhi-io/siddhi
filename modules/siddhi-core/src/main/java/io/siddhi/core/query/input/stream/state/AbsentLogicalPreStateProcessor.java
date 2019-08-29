@@ -182,6 +182,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                     while (retEventChunk.hasNext()) {
                         StateEvent stateEvent = retEventChunk.next();
                         retEventChunk.remove();
+                        stateEvent.setTimestamp(currentTime);
                         sendEvent(stateEvent, state);
                     }
                     ((LogicalStreamPreState) state).lastArrivalTime = 0;

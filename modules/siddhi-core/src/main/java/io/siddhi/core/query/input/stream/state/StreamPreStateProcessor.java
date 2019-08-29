@@ -66,6 +66,15 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     protected Comparator eventTimeComparator = new Comparator<StateEvent>() {
         @Override
         public int compare(StateEvent o1, StateEvent o2) {
+            if (o1.getTimestamp() == -1) {
+                if (o2.getTimestamp() == -1) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } else if (o2.getTimestamp() == -1) {
+                return -1;
+            }
             return Long.compare(o1.getTimestamp(), o2.getTimestamp());
         }
     };

@@ -108,7 +108,7 @@ public class InMemorySink extends Sink<State> {
         try {
             InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
         } catch (SubscriberUnAvailableException e) {
-            onError(payload, e);
+            onError(payload, dynamicOptions, new ConnectionUnavailableException(e.getMessage(), e));
         }
     }
 
