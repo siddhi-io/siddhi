@@ -37,7 +37,7 @@ import java.util.Map;
  * {@link Event}s are send directly to transports.
  */
 @Extension(
-        name = "sinkOption",
+        name = "testSinkOption",
         namespace = "sinkMapper",
         description = "Pass-through mapper passed events (Event[]) through without any mapping or modifications.",
         examples = @Example(
@@ -47,10 +47,11 @@ import java.util.Map;
                         "Siddhi event directly without any transformation into sink."
         )
 )
-public class SinkOptionSinkMapper extends SinkMapper {
+public class TestSinkOptionSinkMapper extends SinkMapper {
 
     private Option topicOption;
     private String prefix;
+    private boolean mapType;
 
     @Override
     public String[] getSupportedDynamicOptions() {
@@ -62,6 +63,7 @@ public class SinkOptionSinkMapper extends SinkMapper {
             payloadTemplateBuilderMap, ConfigReader mapperConfigReader, SiddhiAppContext siddhiAppContext) {
         topicOption = sinkOptionHolder.validateAndGetOption("topic");
         prefix = sinkOptionHolder.validateAndGetStaticValue("prefix");
+        mapType = Boolean.valueOf(optionHolder.validateAndGetStaticValue("mapType", "false"));
     }
 
     @Override
@@ -74,20 +76,32 @@ public class SinkOptionSinkMapper extends SinkMapper {
                            Map<String, TemplateBuilder> payloadTemplateBuilderMap, SinkListener sinkListener) {
         for (Event event : events) {
             String topic = topicOption.getValue(event);
-            event.getData()[0] = sinkType;
-            event.getData()[1] = topic;
-            event.getData()[2] = prefix;
+            if (mapType) {
+                for (TemplateBuilder templateBuilder : payloadTemplateBuilderMap.values()) {
+                    sinkListener.publish(new Event(System.currentTimeMillis(), new Object[]{sinkType, topic,
+                            templateBuilder.isObjectMessage() + "-" + templateBuilder.getType().toString()}));
+                }
+            } else {
+                //to change the topic as topic is picked from the original event
+                event.getData()[0] = sinkType;
+                sinkListener.publish(new Event(System.currentTimeMillis(), new Object[]{sinkType, topic, prefix}));
+            }
         }
-        sinkListener.publish(events);
     }
 
     @Override
     public void mapAndSend(Event event, OptionHolder optionHolder,
                            Map<String, TemplateBuilder> payloadTemplateBuilderMap, SinkListener sinkListener) {
         String topic = topicOption.getValue(event);
-        event.getData()[0] = sinkType;
-        event.getData()[1] = topic;
-        event.getData()[2] = prefix;
-        sinkListener.publish(event);
+        if (mapType) {
+            for (TemplateBuilder templateBuilder : payloadTemplateBuilderMap.values()) {
+                sinkListener.publish(new Event(System.currentTimeMillis(), new Object[]{sinkType, topic,
+                        templateBuilder.isObjectMessage() + "-" + templateBuilder.getType().toString()}));
+            }
+        } else {
+            //to change the topic as topic is picked from the original event
+            event.getData()[0] = sinkType;
+            sinkListener.publish(new Event(System.currentTimeMillis(), new Object[]{sinkType, topic, prefix}));
+        }
     }
 }

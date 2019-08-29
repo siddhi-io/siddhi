@@ -73,7 +73,7 @@ public abstract class Source<S extends State> {
 
         sourceMapper.init(streamDefinition, mapType, mapOptionHolder, attributeMappings, sourceType,
                 (this instanceof SourceSyncCallback) ? (SourceSyncCallback) this : null, transportMappings,
-                sourceHandler, mapperConfigReader, siddhiAppContext);
+                sourceHandler, transportOptionHolder, mapperConfigReader, siddhiAppContext);
         this.mapper = sourceMapper;
         this.streamDefinition = streamDefinition;
         this.siddhiAppContext = siddhiAppContext;

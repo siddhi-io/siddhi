@@ -23,6 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.NoSuchAttributeException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.output.sink.SinkMapper;
+import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.Arrays;
@@ -43,6 +44,7 @@ public class TemplateBuilder {
     private String[] splitTemplateArray;
     private boolean isObjectMessage = false;
     private int objectIndex = -1;
+    private Attribute.Type type = Attribute.Type.STRING;
 
     public TemplateBuilder(StreamDefinition streamDefinition, String template) {
         parse(streamDefinition, template);
@@ -89,6 +91,7 @@ public class TemplateBuilder {
         if (Arrays.asList(streamDefinition.getAttributeNameArray()).contains(template.trim())) {
             this.objectIndex = streamDefinition.getAttributePosition(template.trim());
             this.isObjectMessage = true;
+            this.type = streamDefinition.getAttributeList().get(objectIndex).getType();
         } else {
             if (template.matches("^`[^\\s]*`$")) {
                 template = template.replaceAll("^`|`$", "");
@@ -136,7 +139,7 @@ public class TemplateBuilder {
     }
 
     private void assignTemplateArrayAttributePositions(String[] splitTemplateArray,
-                                                         StreamDefinition streamDefinition) {
+                                                       StreamDefinition streamDefinition) {
         this.positionArray = new int[splitTemplateArray.length / 2];
         int positionCount = 0;
         for (int i = 0; i < splitTemplateArray.length; i++) {
@@ -149,6 +152,10 @@ public class TemplateBuilder {
                 }
             }
         }
+    }
+
+    public Attribute.Type getType() {
+        return type;
     }
 
     public boolean isObjectMessage() {
