@@ -1301,7 +1301,7 @@ public class SequenceTestCase {
                 "define stream Stream1 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from every e1=Stream1[(e1[last].price is null or e1[last].price <= price)]+, " +
+                "from every e1=Stream1[(e1[last].price is null or e1[last].price <= price)]*, " +
                 "   e2=Stream1[price<e1[last].price] " +
                 "select e1.price as price, e2.price as lastPrice " +
                 "insert into OutputStream ;";
