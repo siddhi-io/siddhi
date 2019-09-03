@@ -264,10 +264,12 @@ public class ExpressionBuilder {
                         ((AttributeFunction) expression).getNamespace(),
                         ((AttributeFunction) expression).getName());
                 Expression[] expressions = ((AttributeFunction) expression).getParameters();
-                for (int i = 0; i < expressions.length; i++) {
-                    expressionVisitor.beginVisitParameterAttributeFunction(i);
-                    buildVariableExecutors(expressions[i], expressionVisitor);
-                    expressionVisitor.endVisitParameterAttributeFunction(i);
+                if (expressions != null) {
+                    for (int i = 0; i < expressions.length; i++) {
+                        expressionVisitor.beginVisitParameterAttributeFunction(i);
+                        buildVariableExecutors(expressions[i], expressionVisitor);
+                        expressionVisitor.endVisitParameterAttributeFunction(i);
+                    }
                 }
                 expressionVisitor.endVisitAttributeFunction(
                         ((AttributeFunction) expression).getNamespace(),
