@@ -1939,9 +1939,9 @@ public class LogicalAbsentPatternTestCase {
 
         Thread.sleep(1200);
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
-        Thread.sleep(1200);
+        Thread.sleep(1500);
         stream3.send(new Object[]{"IBM", 55.0f, 100});
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
 
         callback.throwAssertionErrors();
@@ -1979,7 +1979,7 @@ public class LogicalAbsentPatternTestCase {
 
         Thread.sleep(2100);
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
 
         callback.throwAssertionErrors();
