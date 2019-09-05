@@ -44,8 +44,5 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/a
 
 ## Support and Contribution
 
-* We encourage users to ask questions and get support via <a target="_blank" href="https://stackoverflow.com/questions/tagged/siddhi">StackOverflow</a>, make sure to add the `siddhi` tag to the issue for better response.
+You can reachout through Slack channel, Google mail group and etc. Please refer the community contribution [site](https://siddhi.io/community/) for more information.
 
-* If you find any issues related to the extension please report them on <a target="_blank" href="https://github.com/siddhi-io/siddhi/issues">the issue tracker</a>.
-
-* For production support and other contribution related information refer <a target="_blank" href="https://siddhi.io/community/">Siddhi Community</a> documentation.
