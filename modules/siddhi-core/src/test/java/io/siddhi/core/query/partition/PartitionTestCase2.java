@@ -1114,4 +1114,92 @@ public class PartitionTestCase2 {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test
+    public void testPartitionQuery50() throws InterruptedException {
+        log.info("Partition test50");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('PartitionTest50') " +
+                "" +
+                "" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "" +
+                "define stream cseEventStreamOne (symbol string, price float,volume int);" +
+                "define stream cseEventStreamTwo (symbol string, price float,volume int);" +
+                "" +
+                "@info(name = 'query')" +
+                "from cseEventStreamOne " +
+                "select symbol, price, volume " +
+                "insert into cseEventStream;" +
+                " " +
+                "partition with (price>=100 as 'large' or " +
+                "                price<100 and price>=50 as 'medium' or " +
+                "                price<50 as 'small' of cseEventStream, " +
+                "                symbol of cseEventStreamTwo ) " +
+                "   begin" +
+                "   @info(name = 'query1') " +
+                "   from cseEventStream " +
+                "   insert into #OutStockStream1 ; " +
+                "" +
+                "   @info(name = 'query2') " +
+                "   from cseEventStreamTwo " +
+                "   insert into #OutStockStream1 ; " +
+                " " +
+                "   @info(name = 'query3') " +
+                "   from #OutStockStream1 " +
+                "   select symbol, sum(price) as price " +
+                "   insert into #OutStockStream2 ;" +
+                " " +
+                "   @info(name = 'query4') " +
+                "   from #OutStockStream2 " +
+                "   insert into OutStockStream ;" +
+                " " +
+                "   end ; ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    count.incrementAndGet();
+                    eventArrived = true;
+                    if (count.get() == 1) {
+                        AssertJUnit.assertEquals(25.0, event.getData()[1]);
+                    } else if (count.get() == 2) {
+                        AssertJUnit.assertEquals(30.0, event.getData()[1]);
+                    } else if (count.get() == 3) {
+                        AssertJUnit.assertEquals(7005.60009765625, event.getData()[1]);
+                    } else if (count.get() == 4) {
+                        AssertJUnit.assertEquals(50.0, event.getData()[1]);
+                    } else if (count.get() == 5) {
+                        AssertJUnit.assertEquals(55.0, event.getData()[1]);
+                    } else if (count.get() == 6) {
+                        AssertJUnit.assertEquals(7000.000097751617, event.getData()[1]);
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandlerOne = siddhiAppRuntime.getInputHandler("cseEventStreamOne");
+        InputHandler inputHandlerTwo = siddhiAppRuntime.getInputHandler("cseEventStreamTwo");
+        siddhiAppRuntime.start();
+
+        inputHandlerOne.send(new Object[]{"IBM", 25f, 100});
+        inputHandlerTwo.send(new Object[]{"small", 5f, 100});
+        inputHandlerOne.send(new Object[]{"WSO2", 7005.6f, 100});
+        inputHandlerOne.send(new Object[]{"IBM", 50f, 100});
+        inputHandlerOne.send(new Object[]{"ORACLE", 25f, 100});
+        inputHandlerTwo.send(new Object[]{"large", -5.6f, 100});
+
+        SiddhiTestHelper.waitForEvents(100, 5, count, 60000);
+        AssertJUnit.assertTrue(6 >= count.get());
+        siddhiAppRuntime.shutdown();
+
+    }
+
 }
