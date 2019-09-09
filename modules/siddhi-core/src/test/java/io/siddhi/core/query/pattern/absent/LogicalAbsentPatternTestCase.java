@@ -1914,7 +1914,7 @@ public class LogicalAbsentPatternTestCase {
 
     @Test(dependsOnMethods = {"testQueryAbsent46"})
     public void testQueryAbsent47() throws InterruptedException {
-        log.info("Test the query every (not e1 for 1 sec or not e2 for 1 sec) -> e3 with two e3s");
+        log.info("Test the query every (not e1 for 2 sec or not e2 for 2 sec) -> e3 with two e3s");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1924,7 +1924,7 @@ public class LogicalAbsentPatternTestCase {
                 "define stream Stream3 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from every (not Stream1[price>10] for 1 sec or not Stream2[price>20] for 1 sec) -> " +
+                "from every (not Stream1[price>10] for 2 sec or not Stream2[price>20] for 2 sec) -> " +
                 "e3=Stream3[price>30] " +
                 "select e3.symbol as symbol " +
                 "insert into OutputStream ;";
@@ -1937,9 +1937,9 @@ public class LogicalAbsentPatternTestCase {
         InputHandler stream3 = siddhiAppRuntime.getInputHandler("Stream3");
         siddhiAppRuntime.start();
 
-        Thread.sleep(1200);
+        Thread.sleep(2200);
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
-        Thread.sleep(1500);
+        Thread.sleep(2200);
         stream3.send(new Object[]{"IBM", 55.0f, 100});
         Thread.sleep(1000);
 
