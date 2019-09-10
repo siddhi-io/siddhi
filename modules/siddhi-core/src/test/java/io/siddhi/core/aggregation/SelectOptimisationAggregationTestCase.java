@@ -1116,8 +1116,7 @@ public class SelectOptimisationAggregationTestCase {
         }
     }
 
-    @Test
-            //(dependsOnMethods = {"aggregationFunctionTestcase12"})
+    @Test(dependsOnMethods = {"aggregationFunctionTestcase12"})
     public void aggregationFunctionTestcase13() throws InterruptedException {
         LOG.info("Use stream name or reference for attributes ");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1137,11 +1136,12 @@ public class SelectOptimisationAggregationTestCase {
                 "endTime string, perValue string); " +
 
                 "@info(name = 'query1') " +
-                "from inputStream join stockAggregation " +
-                "on inputStream.symbol == stockAggregation.symbol " +
+                "from inputStream join stockAggregation as s " +
+                "on inputStream.symbol == s.symbol " +
                 "within \"2017-06-01 04:05:**\" " +
                 "per \"seconds\" " +
-                "select AGG_TIMESTAMP, avgPrice, totalPrice, lastTradeValue, count " +
+                "select s.symbol, sum(totalPrice) as totalPrice " +
+                "group by s.symbol " +
                 "order by AGG_TIMESTAMP " +
                 "insert all events into outputStream; ";
 
@@ -1191,15 +1191,12 @@ public class SelectOptimisationAggregationTestCase {
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
 
-            List<Object[]> expected = Arrays.asList(
-                    new Object[]{1496289946000L, 400.0, 400.0, 3600f, 1L},
-                    new Object[]{1496289947000L, 700.0, 1400.0, 3500f, 2L},
-                    new Object[]{1496289948000L, 100.0, 200.0, 9600f, 2L}
-            );
-            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            Object[] expected =                     new Object[]{"IBM", 2000.0};
+            SiddhiTestHelper.waitForEvents(100, 1, inEventCount, 60000);
             AssertJUnit.assertTrue("Event arrived", eventArrived);
-            AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
-            AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+            AssertJUnit.assertEquals("Number of success events", 1, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", "IBM", inEventsList.get(0)[0]);
+            AssertJUnit.assertEquals("In events matched", 2000.0, inEventsList.get(0)[1]);
         } finally {
             siddhiAppRuntime.shutdown();
         }

@@ -445,11 +445,11 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
                 for (Variable queryGroupBy : queryGroupByList) {
                     String referenceId = queryGroupBy.getStreamId();
-                    if (aggReferenceId == null) {
+                    if (referenceId == null) {
                         if (tableAttributesNameList.contains(queryGroupBy.getAttributeName())) {
                             groupByList.add(queryGroupBy);
                         }
-                    } else if (aggReferenceId.equalsIgnoreCase(referenceId)) {
+                    } else if (referenceId.equalsIgnoreCase(referenceName)) {
                         groupByList.add(queryGroupBy);
                     }
                 }
@@ -459,9 +459,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
             }
 
-            if (aggReferenceId != null) {
-                groupByList.forEach((groupBy) -> groupBy.setStreamId(aggReferenceId));
-            }
+            groupByList.forEach((groupBy) -> groupBy.setStreamId(referenceName));
+
             selector.addGroupByList(groupByList);
 
             List<OutputAttribute> selectorList;
