@@ -178,7 +178,12 @@ public class AggregationRuntime implements MemoryCalculable {
 
         additionalAttributes.forEach(attribute -> alteredStreamDef.attribute(attribute.getName(), attribute.getType()));
 
-        initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, originalMetaStreamEvent.getInputReferenceId());
+        String inputReferenceId = originalMetaStreamEvent.getInputReferenceId();
+        if (!isStoreQuery && inputReferenceId == null) {
+            alteredStreamDef.setId(originalMetaStreamEvent.getLastInputDefinition().getId());
+        }
+
+        initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, inputReferenceId);
         return originalMetaStreamEvent;
     }
 
@@ -297,8 +302,7 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
         String aggReferenceId = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId();
-        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition,
-                aggReferenceId);
+        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition, aggReferenceId);
 
         // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
         MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
@@ -394,7 +398,7 @@ public class AggregationRuntime implements MemoryCalculable {
         if (!(expression instanceof BoolConstant)) {
             AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
             AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
-                    metaStreamEventForTableLookups.getInputReferenceId(),
+                    metaStreamEventForTableLookups.getInputReferenceId(), aggReferenceId != null,
                     metaStreamEventForTableLookups.getLastInputDefinition().getAttributeList(),
                     this.tableAttributesNameList
             );
