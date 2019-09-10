@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.siddhi</groupId>
         <artifactId>siddhi</artifactId>
-        <version>5.1.4-SNAPSHOT</version>
+        <version>5.1.4</version>
         <relativePath>../..</relativePath>
     </parent>
 
