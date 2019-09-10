@@ -21,13 +21,12 @@ package io.siddhi.core.query.table;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.api.exception.AttributeNotExistException;
-import io.siddhi.query.api.exception.DuplicateAnnotationException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -2006,7 +2005,8 @@ public class IndexTableTestCase {
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long);" +
                 "@PrimaryKey('symbol') " +
-                "@Index('price','volume') " +
+                "@Index('price') " +
+                "@Index('volume') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -2072,7 +2072,8 @@ public class IndexTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long);" +
-                "@Index('symbol', 'volume') " +
+                "@Index('symbol') " +
+                "@Index('volume') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -2154,14 +2155,14 @@ public class IndexTableTestCase {
         }
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void indexTableTest31() throws InterruptedException {
         log.info("indexTableTest31");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@Index('symbol', 'symbol') " +
+                "@Index('symbol', 'volume') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -2180,7 +2181,7 @@ public class IndexTableTestCase {
         }
     }
 
-    @Test(expectedExceptions = DuplicateAnnotationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void indexTableTest32() throws InterruptedException {
         log.info("indexTableTest32");
 
@@ -2188,7 +2189,7 @@ public class IndexTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@Index('symbol') " +
-                "@Index('volume') " +
+                "@Index('symbol') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

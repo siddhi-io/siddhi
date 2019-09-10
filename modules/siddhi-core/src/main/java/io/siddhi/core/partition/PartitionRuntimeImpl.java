@@ -99,7 +99,8 @@ public class PartitionRuntimeImpl implements PartitionRuntime {
                                 Partition partition, int partitionIndex, SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         if (partition.getPartitionTypeMap().isEmpty()) {
-            throw new SiddhiAppCreationException("Partition must have at least one executor. But found none.");
+            throw new SiddhiAppCreationException("Partition must have at least one partition executor. " +
+                    "But found none.");
         }
         try {
             Element element = AnnotationHelper.getAnnotationElement("info", "name",

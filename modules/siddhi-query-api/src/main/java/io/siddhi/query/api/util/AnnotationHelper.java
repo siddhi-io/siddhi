@@ -23,6 +23,7 @@ import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.exception.DuplicateAnnotationException;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -53,6 +54,16 @@ public class AnnotationHelper {
             }
         }
         return annotation;
+    }
+
+    public static List<Annotation> getAnnotations(String annotationName, List<Annotation> annotationList) {
+        List<Annotation> annotations = new LinkedList<>();
+        for (Annotation aAnnotation : annotationList) {
+            if (annotationName.equalsIgnoreCase(aAnnotation.getName())) {
+                annotations.add(aAnnotation);
+            }
+        }
+        return annotations;
     }
 
     // TODO: 1/28/17 update helper methods to work with nested annotations.

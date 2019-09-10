@@ -51,9 +51,9 @@ public class PartitionParser {
                 siddhiAppRuntimeBuilder.getStreamDefinitionMap();
         ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
                 siddhiAppRuntimeBuilder.getWindowDefinitionMap();
+        validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap, windowDefinitionMap);
         PartitionRuntimeImpl partitionRuntime = new PartitionRuntimeImpl(streamDefinitionMap, windowDefinitionMap,
                 siddhiAppRuntimeBuilder.getStreamJunctions(), partition, partitionIndex, siddhiAppContext);
-        validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap, windowDefinitionMap);
         for (Query query : partition.getQueryList()) {
             List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
             ConcurrentMap<String, AbstractDefinition> combinedStreamMap =
@@ -93,7 +93,7 @@ public class PartitionParser {
             if ((!streamDefinitionMap.containsKey(entry.getKey())) &&
                     (!windowDefinitionMap.containsKey(entry.getKey()))) {
                 throw new SiddhiAppCreationException("Stream/window with name '" + entry.getKey() +
-                        "' does not defined!",
+                        "' is not defined!",
                         entry.getValue().getQueryContextStartIndex(),
                         entry.getValue().getQueryContextEndIndex());
             }
