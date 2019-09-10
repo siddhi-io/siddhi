@@ -1952,7 +1952,7 @@ public class LogicalAbsentPatternTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test //(dependsOnMethods = {"testQueryAbsent47"})
+    @Test(dependsOnMethods = {"testQueryAbsent47"})
     public void testQueryAbsent48() throws InterruptedException {
         log.info("Test the query every (not e1 for 2 sec or not e2 for 2 sec) -> e3 with only e3 after 4 seconds");
 
@@ -1977,7 +1977,7 @@ public class LogicalAbsentPatternTestCase {
         InputHandler stream3 = siddhiAppRuntime.getInputHandler("Stream3");
         siddhiAppRuntime.start();
 
-        Thread.sleep(4200);
+        Thread.sleep(4100);
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(1000);
 
