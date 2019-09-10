@@ -302,7 +302,9 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
         String aggReferenceId = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId();
-        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition, aggReferenceId);
+        String referenceName = aggReferenceId == null ? aggregationName : aggReferenceId;
+
+        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition, referenceName);
 
         // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
         MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
@@ -396,9 +398,10 @@ public class AggregationRuntime implements MemoryCalculable {
 
         //Check if there is no on conditions
         if (!(expression instanceof BoolConstant)) {
+            // For abstract queryable table
             AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
             AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
-                    metaStreamEventForTableLookups.getInputReferenceId(), aggReferenceId != null,
+                    metaStreamEventForTableLookups.getInputReferenceId(),
                     metaStreamEventForTableLookups.getLastInputDefinition().getAttributeList(),
                     this.tableAttributesNameList
             );
@@ -469,15 +472,14 @@ public class AggregationRuntime implements MemoryCalculable {
             } else {
                 selectorList = defaultSelectorList;
             }
-            if (aggReferenceId != null) {
-                for (OutputAttribute outputAttribute : selectorList) {
-                    if (outputAttribute.getExpression() instanceof Variable) {
-                        ((Variable) outputAttribute.getExpression()).setStreamId(aggReferenceId);
-                    } else {
-                        for (Expression parameter :
-                                ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
-                            ((Variable) parameter).setStreamId(aggReferenceId);
-                        }
+
+            for (OutputAttribute outputAttribute : selectorList) {
+                if (outputAttribute.getExpression() instanceof Variable) {
+                    ((Variable) outputAttribute.getExpression()).setStreamId(referenceName);
+                } else {
+                    for (Expression parameter :
+                            ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
+                        ((Variable) parameter).setStreamId(referenceName);
                     }
                 }
             }

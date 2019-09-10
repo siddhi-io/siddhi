@@ -1116,7 +1116,8 @@ public class SelectOptimisationAggregationTestCase {
         }
     }
 
-    @Test(dependsOnMethods = {"aggregationFunctionTestcase12"})
+    @Test
+            //(dependsOnMethods = {"aggregationFunctionTestcase12"})
     public void aggregationFunctionTestcase13() throws InterruptedException {
         LOG.info("Use stream name or reference for attributes ");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1140,7 +1141,7 @@ public class SelectOptimisationAggregationTestCase {
                 "on inputStream.symbol == stockAggregation.symbol " +
                 "within \"2017-06-01 04:05:**\" " +
                 "per \"seconds\" " +
-                "select AGG_TIMESTAMP, stockAggregation.avgPrice, totalPrice, lastTradeValue, count " +
+                "select AGG_TIMESTAMP, avgPrice, totalPrice, lastTradeValue, count " +
                 "order by AGG_TIMESTAMP " +
                 "insert all events into outputStream; ";
 

@@ -35,16 +35,14 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
 
     private Stack<Object> conditionOperands;
     private String inputStreamRefId;
-    private boolean isAggregationReferenced;
     private List<String> tableAttributesNameList;
     private List<String> allAttributesList;
 
 
-    AggregationExpressionVisitor(String inputStreamRefId, boolean isAggregationReferenced,
+    AggregationExpressionVisitor(String inputStreamRefId,
                                  List<Attribute> inputStreamAttributesList, List<String> tableAttributesNameList) {
         this.conditionOperands = new Stack<>();
         this.inputStreamRefId = inputStreamRefId;
-        this.isAggregationReferenced = isAggregationReferenced;
         this.tableAttributesNameList = tableAttributesNameList;
         this.allAttributesList = inputStreamAttributesList.stream()
                 .map(Attribute::getName)
@@ -242,12 +240,7 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
             if (streamId.equals(inputStreamRefId)) {
                 this.conditionOperands.push(expression);
             } else if (this.tableAttributesNameList.contains(variable.getAttributeName())) {
-                if (this.isAggregationReferenced) {
-                    this.conditionOperands.push(expression);
-                } else {
-                    Variable tableVariable = new Variable(((Variable) expression).getAttributeName());
-                    this.conditionOperands.push(tableVariable);
-                }
+                this.conditionOperands.push(expression);
             } else {
                 this.conditionOperands.push("true");
             }
