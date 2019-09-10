@@ -23,6 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -126,7 +127,7 @@ public class CronWindowTestCase {
         Thread.sleep(7000);
         inputHandler.send(new Object[]{"IBM43", 700f, 0});
         inputHandler.send(new Object[]{"WSO4343", 60.5f, 1});
-        Thread.sleep(7000);
+        SiddhiTestHelper.waitForEvents(7000, 4, removeEventCount, 20000);
         AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
