@@ -169,19 +169,21 @@ public class AggregationRuntime implements MemoryCalculable {
                                                         List<Attribute> additionalAttributes) {
 
         StreamDefinition alteredStreamDef = new StreamDefinition();
+        String inputReferenceId = originalMetaStreamEvent.getInputReferenceId();
 
         if (!isStoreQuery) {
             for (Attribute attribute : originalMetaStreamEvent.getLastInputDefinition().getAttributeList()) {
                 alteredStreamDef.attribute(attribute.getName(), attribute.getType());
             }
+            if (inputReferenceId == null) {
+                alteredStreamDef.setId(originalMetaStreamEvent.getLastInputDefinition().getId());
+            }
+        } else {
+            // If it is store query, no original join stream
+            alteredStreamDef.setId("storeQueryStream");
         }
 
         additionalAttributes.forEach(attribute -> alteredStreamDef.attribute(attribute.getName(), attribute.getType()));
-
-        String inputReferenceId = originalMetaStreamEvent.getInputReferenceId();
-        if (!isStoreQuery && inputReferenceId == null) {
-            alteredStreamDef.setId(originalMetaStreamEvent.getLastInputDefinition().getId());
-        }
 
         initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, inputReferenceId);
         return originalMetaStreamEvent;
