@@ -1136,12 +1136,12 @@ public class SelectOptimisationAggregationTestCase {
                 "endTime string, perValue string); " +
 
                 "@info(name = 'query1') " +
-                "from inputStream join stockAggregation as s " +
-                "on inputStream.symbol == s.symbol " +
+                "from inputStream join stockAggregation " +
+                "on inputStream.symbol == stockAggregation.symbol " +
                 "within \"2017-06-01 04:05:**\" " +
                 "per \"seconds\" " +
-                "select s.symbol, sum(totalPrice) as totalPrice " +
-                "group by s.symbol " +
+                "select stockAggregation.symbol, sum(totalPrice) as totalPrice " +
+                "group by stockAggregation.symbol " +
                 "order by AGG_TIMESTAMP " +
                 "insert all events into outputStream; ";
 
