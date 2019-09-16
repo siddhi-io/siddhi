@@ -169,16 +169,23 @@ public class AggregationRuntime implements MemoryCalculable {
                                                         List<Attribute> additionalAttributes) {
 
         StreamDefinition alteredStreamDef = new StreamDefinition();
+        String inputReferenceId = originalMetaStreamEvent.getInputReferenceId();
 
         if (!isStoreQuery) {
             for (Attribute attribute : originalMetaStreamEvent.getLastInputDefinition().getAttributeList()) {
                 alteredStreamDef.attribute(attribute.getName(), attribute.getType());
             }
+            if (inputReferenceId == null) {
+                alteredStreamDef.setId(originalMetaStreamEvent.getLastInputDefinition().getId());
+            }
+        } else {
+            // If it is store query, no original join stream
+            alteredStreamDef.setId("storeQueryStream");
         }
 
         additionalAttributes.forEach(attribute -> alteredStreamDef.attribute(attribute.getName(), attribute.getType()));
 
-        initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, originalMetaStreamEvent.getInputReferenceId());
+        initMetaStreamEvent(originalMetaStreamEvent, alteredStreamDef, inputReferenceId);
         return originalMetaStreamEvent;
     }
 
@@ -297,8 +304,9 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create new MatchingMetaInfoHolder containing newMetaStreamEventWithStartEnd and table meta event
         String aggReferenceId = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(1).getInputReferenceId();
-        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition,
-                aggReferenceId);
+        String referenceName = aggReferenceId == null ? aggregationName : aggReferenceId;
+
+        MetaStreamEvent metaStoreEventForTableLookups = createMetaStoreEvent(tableDefinition, referenceName);
 
         // Create new MatchingMetaInfoHolder containing metaStreamEventForTableLookups and table meta event
         MatchingMetaInfoHolder metaInfoHolderForTableLookups = createNewStreamTableMetaInfoHolder(
@@ -392,6 +400,7 @@ public class AggregationRuntime implements MemoryCalculable {
 
         //Check if there is no on conditions
         if (!(expression instanceof BoolConstant)) {
+            // For abstract queryable table
             AggregationExpressionBuilder aggregationExpressionBuilder = new AggregationExpressionBuilder(expression);
             AggregationExpressionVisitor expressionVisitor = new AggregationExpressionVisitor(
                     metaStreamEventForTableLookups.getInputReferenceId(),
@@ -438,11 +447,11 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
                 for (Variable queryGroupBy : queryGroupByList) {
                     String referenceId = queryGroupBy.getStreamId();
-                    if (aggReferenceId == null) {
+                    if (referenceId == null) {
                         if (tableAttributesNameList.contains(queryGroupBy.getAttributeName())) {
                             groupByList.add(queryGroupBy);
                         }
-                    } else if (aggReferenceId.equalsIgnoreCase(referenceId)) {
+                    } else if (referenceId.equalsIgnoreCase(referenceName)) {
                         groupByList.add(queryGroupBy);
                     }
                 }
@@ -452,9 +461,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
             }
 
-            if (aggReferenceId != null) {
-                groupByList.forEach((groupBy) -> groupBy.setStreamId(aggReferenceId));
-            }
+            groupByList.forEach((groupBy) -> groupBy.setStreamId(referenceName));
+
             selector.addGroupByList(groupByList);
 
             List<OutputAttribute> selectorList;
@@ -465,15 +473,14 @@ public class AggregationRuntime implements MemoryCalculable {
             } else {
                 selectorList = defaultSelectorList;
             }
-            if (aggReferenceId != null) {
-                for (OutputAttribute outputAttribute : selectorList) {
-                    if (outputAttribute.getExpression() instanceof Variable) {
-                        ((Variable) outputAttribute.getExpression()).setStreamId(aggReferenceId);
-                    } else {
-                        for (Expression parameter :
-                                ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
-                            ((Variable) parameter).setStreamId(aggReferenceId);
-                        }
+
+            for (OutputAttribute outputAttribute : selectorList) {
+                if (outputAttribute.getExpression() instanceof Variable) {
+                    ((Variable) outputAttribute.getExpression()).setStreamId(referenceName);
+                } else {
+                    for (Expression parameter :
+                            ((AttributeFunction) outputAttribute.getExpression()).getParameters()) {
+                        ((Variable) parameter).setStreamId(referenceName);
                     }
                 }
             }
