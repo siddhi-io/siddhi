@@ -101,7 +101,7 @@ import java.util.List;
                         syntax = "from FooStream#log(\"Event Arrived\", false)\n" +
                                 "select *\n" +
                                 "insert into BarStream;",
-                        description = "For each event logs a message \"Event Arrived\" on default log level INFO.";
+                        description = "For each event logs a message \"Event Arrived\" on default log level INFO."
                 ),
                 @Example(
                         syntax = "from FooStream#log(\"Sample Event :\", true)\n" +
