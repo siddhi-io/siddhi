@@ -79,40 +79,42 @@ import java.util.List;
         },
         examples = {
                 @Example(
-                        syntax = "from FooStream#log(\"INFO\", \"Sample Event :\", true)\n" +
-                                "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will log as INFO with the message \"Sample Event :\" + FooStream:events."
-                ),
-                @Example(
-                        syntax = "from FooStream#log(\"Sample Event :\", true)\n" +
-                                "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will logs with default log level as INFO."
-                ),
-                @Example(
-                        syntax = "from FooStream#log(\"Sample Event :\", fasle)\n" +
-                                "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will only log message."
-                ),
-                @Example(
-                        syntax = "from FooStream#log(true)\n" +
-                                "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will only log FooStream:events."
-                ),
-                @Example(
                         syntax = "from FooStream#log()\n" +
                                 "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will only log FooStream:events."
+                                "insert into BarStream;",
+                        description = "Logs events with SiddhiApp name message prefix on default log level INFO."
                 ),
                 @Example(
                         syntax = "from FooStream#log(\"Sample Event :\")\n" +
                                 "select *\n" +
-                                "insert into FooStream;",
-                        description = "This will log message and FooStream:events."
+                                "insert into BarStream;",
+                        description = "Logs events with the message prefix \"Sample Event :\" on default " +
+                                "log level INFO."
+                ),
+                @Example(
+                        syntax = "from FooStream#log(\"DEBUG\", \"Sample Event :\", true)\n" +
+                                "select *\n" +
+                                "insert into BarStream;",
+                        description = "Logs events with the message prefix \"Sample Event :\" on log level DEBUG."
+                ),
+                @Example(
+                        syntax = "from FooStream#log(\"Event Arrived\", false)\n" +
+                                "select *\n" +
+                                "insert into BarStream;",
+                        description = "For each event logs a message \"Event Arrived\" on default log level INFO."
+                ),
+                @Example(
+                        syntax = "from FooStream#log(\"Sample Event :\", true)\n" +
+                                "select *\n" +
+                                "insert into BarStream;",
+                        description = "Logs events with the message prefix \"Sample Event :\" on default " +
+                                "log level INFO."
+                ),
+                @Example(
+                        syntax = "from FooStream#log(true)\n" +
+                                "select *\n" +
+                                "insert into BarStream;",
+                        description = "Logs events with on default log level INFO."
                 )
         }
 )
