@@ -39,8 +39,8 @@ public class AggregationExpressionVisitor extends BaseExpressionVisitor {
     private List<String> allAttributesList;
 
 
-    AggregationExpressionVisitor(String inputStreamRefId, List<Attribute> inputStreamAttributesList,
-                                 List<String> tableAttributesNameList) {
+    AggregationExpressionVisitor(String inputStreamRefId,
+                                 List<Attribute> inputStreamAttributesList, List<String> tableAttributesNameList) {
         this.conditionOperands = new Stack<>();
         this.inputStreamRefId = inputStreamRefId;
         this.tableAttributesNameList = tableAttributesNameList;
