@@ -879,7 +879,7 @@ public class CacheLFUTestCase {
 
         Event[] events = siddhiAppRuntime.query("" +
                 "from StockTable " +
-                "on symbol == \"IBM\" AND price == \"75.6\" ");
+                "on symbol == \"IBM\" AND price == 75.6 ");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
