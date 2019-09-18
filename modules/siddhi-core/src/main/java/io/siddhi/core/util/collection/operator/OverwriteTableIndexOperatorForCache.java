@@ -19,7 +19,6 @@ package io.siddhi.core.util.collection.operator;
 
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.CacheTable;
 import io.siddhi.core.table.InMemoryCompiledUpdateSet;
 import io.siddhi.core.table.holder.IndexedEventHolder;
@@ -37,10 +36,10 @@ public class OverwriteTableIndexOperatorForCache extends IndexOperatorForCache {
     }
 
     @Override
-    public ComplexEventChunk<StreamEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
-                                                    Object storeEvents,
-                                                    InMemoryCompiledUpdateSet compiledUpdateSet,
-                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
+    public ComplexEventChunk<StateEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
+                                                   Object storeEvents,
+                                                   InMemoryCompiledUpdateSet compiledUpdateSet,
+                                                   AddingStreamEventExtractor addingStreamEventExtractor) {
 
         updatingOrAddingEventChunk.reset();
         while (updatingOrAddingEventChunk.hasNext()) {

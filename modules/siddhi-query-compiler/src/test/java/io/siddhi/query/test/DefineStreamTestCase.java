@@ -160,4 +160,29 @@ public class DefineStreamTestCase {
                         ),
                 streamDefinition);
     }
+
+    @Test
+    public void testMultilevelNestedAnnotations3() throws SiddhiParserException {
+        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition(
+                "@sink(url='http://foo.com/test/{{data}}', " +
+                        "   @map(type=\"\"\"xml\"\"\", " +
+                        "@payload(\"\"\"{ \"time\":{{time}}}\"\"\") " +
+                        "   )" +
+                        ") " +
+                        "define stream fooStream (id int, name string);"
+        );
+
+        AssertJUnit.assertEquals(
+                StreamDefinition
+                        .id("fooStream")
+                        .attribute("id", Attribute.Type.INT)
+                        .attribute("name", Attribute.Type.STRING)
+                        .annotation(Annotation.annotation("sink")
+                                .element("url", "http://foo.com/test/{{data}}")
+                                .annotation(Annotation.annotation("map")
+                                        .element("type", "xml")
+                                        .annotation(Annotation.annotation("payload")
+                                                .element("{ \"time\":{{time}}}")))),
+                streamDefinition);
+    }
 }

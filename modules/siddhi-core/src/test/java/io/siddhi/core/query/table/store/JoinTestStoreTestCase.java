@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.siddhi.core.query.table.teststorecontaininginmemorytable;
+package io.siddhi.core.query.table.store;
 
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;

@@ -179,13 +179,13 @@
             <class name="io.siddhi.core.query.table.cache.UpdateOrInsertTableWithCacheTestCase"/>
             <class name="io.siddhi.core.query.table.cache.UpdateTableWithCacheTestCase"/>
 
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.DeleteFromTestStoreTestCase"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.InsertIntoTestStoreTestCase"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.InTestStoreTestCase"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.JoinTestStoreTestCase"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.QueryAPITestCaseForTestStore"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateOrInsertTestStoreTestCase"/>
-            <class name="io.siddhi.core.query.table.teststorecontaininginmemorytable.UpdateTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.DeleteFromTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.InsertIntoTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.InTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.JoinTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.QueryAPITestCaseForTestStore"/>
+            <class name="io.siddhi.core.query.table.store.UpdateOrInsertTestStoreTestCase"/>
+            <class name="io.siddhi.core.query.table.store.UpdateTestStoreTestCase"/>
 
             <class name="io.siddhi.core.config.YAMLConfigManagerTestCase"/>
 
