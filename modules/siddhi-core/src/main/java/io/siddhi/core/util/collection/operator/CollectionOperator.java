@@ -120,12 +120,12 @@ public class CollectionOperator implements Operator {
     }
 
     @Override
-    public ComplexEventChunk<StreamEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
-                                                    Object storeEvents, InMemoryCompiledUpdateSet compiledUpdateSet,
-                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
+    public ComplexEventChunk<StateEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
+                                                   Object storeEvents, InMemoryCompiledUpdateSet compiledUpdateSet,
+                                                   AddingStreamEventExtractor addingStreamEventExtractor) {
 
         updatingOrAddingEventChunk.reset();
-        ComplexEventChunk<StreamEvent> failedEventChunk = new ComplexEventChunk<StreamEvent>
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<StateEvent>
                 (updatingOrAddingEventChunk.isBatch());
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent updateOrAddingEvent = updatingOrAddingEventChunk.next();
@@ -144,7 +144,8 @@ public class CollectionOperator implements Operator {
                     }
                 }
                 if (!updated) {
-                    failedEventChunk.add(addingStreamEventExtractor.getAddingStreamEvent(updateOrAddingEvent));
+                    updatingOrAddingEventChunk.remove();
+                    failedEventChunk.add(updateOrAddingEvent);
                 }
             } finally {
                 updateOrAddingEvent.setEvent(storeEventPosition, null);

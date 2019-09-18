@@ -28,6 +28,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.table.holder.EventHolder;
 import io.siddhi.core.table.holder.IndexEventHolderForCache;
 import io.siddhi.core.table.record.RecordTableHandler;
@@ -37,6 +38,7 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.EventHolderPasser;
+import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
@@ -150,13 +152,16 @@ public abstract class CacheTable extends InMemoryTable {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
-            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
+            InMemoryCompiledCondition inMemoryCompiledCondition = (InMemoryCompiledCondition) compiledCondition;
+            ComplexEventChunk<StateEvent> failedEvents = ((Operator) inMemoryCompiledCondition.
+                    getOperatorCompiledCondition()).tryUpdate(
                     updateOrAddingEventChunkForCache,
                     state.getEventHolder(),
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
-                state.getEventHolder().add(failedEvents);
+                state.getEventHolder().add(reduceEventsForUpdateOrInsert(
+                        addingStreamEventExtractor, inMemoryCompiledCondition, failedEvents));
             }
             if (this.size() > maxSize) {
                 this.deleteEntriesUsingCachePolicy(this.size() - maxSize);
@@ -204,15 +209,13 @@ public abstract class CacheTable extends InMemoryTable {
     protected abstract StreamEvent addRequiredFields(ComplexEvent event, SiddhiAppContext siddhiAppContext,
                                                      boolean cacheExpiryEnabled);
 
-    public CacheCompiledConditionWithRouteToCache generateCacheCompileCondition(Expression condition,
-                                                            MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
-                                                            SiddhiQueryContext siddhiQueryContext,
-                                                            List<VariableExpressionExecutor>
-                                                                    storeVariableExpressionExecutors) {
+    public CacheCompiledConditionWithRouteToCache generateCacheCompileCondition(
+            Expression condition, MatchingMetaInfoHolder storeMatchingMetaInfoHolder,
+            SiddhiQueryContext siddhiQueryContext, List<VariableExpressionExecutor> storeVariableExpressionExecutors) {
         boolean routeToCache = checkConditionToRouteToCache(condition, storeMatchingMetaInfoHolder);
         MetaStateEvent metaStateEvent = new MetaStateEvent(storeMatchingMetaInfoHolder.getMetaStateEvent().
                 getMetaStreamEvents().length);
-        for (MetaStreamEvent referenceMetaStreamEvent: storeMatchingMetaInfoHolder.getMetaStateEvent().
+        for (MetaStreamEvent referenceMetaStreamEvent : storeMatchingMetaInfoHolder.getMetaStateEvent().
                 getMetaStreamEvents()) {
             metaStateEvent.addEvent(referenceMetaStreamEvent);
         }
@@ -259,7 +262,7 @@ public abstract class CacheTable extends InMemoryTable {
             return false;
         }
         List<Element> keys = primaryKeys.getElements();
-        for (Element element: keys) {
+        for (Element element : keys) {
             primaryKeysArray.add(element.getValue());
         }
         recursivelyCheckConditionToRouteToCache(condition, primaryKeysArray, matchingMetaInfoHolder);
@@ -300,7 +303,7 @@ public abstract class CacheTable extends InMemoryTable {
             return true;
         }
 
-        for (MetaStreamEvent streamEvent: matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
+        for (MetaStreamEvent streamEvent : matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()) {
             if (streamEvent.getInputReferenceId() != null &&
                     streamEvent.getInputReferenceId().equalsIgnoreCase(variable.getStreamId())) {
                 if (streamEvent.getInputDefinitions().get(0).getId().equalsIgnoreCase(tableDefinition.getId())) {
@@ -317,8 +320,15 @@ public abstract class CacheTable extends InMemoryTable {
                                               boolean updateCachePolicyAttribute) {
         TableState state = stateHolder.getState();
         try {
-            return OperatorParser.constructOperatorForCache(state.getEventHolder(), condition, matchingMetaInfoHolder,
-                    variableExpressionExecutors, tableMap, siddhiQueryContext, updateCachePolicyAttribute, this);
+            return new InMemoryCompiledCondition(OperatorParser.constructOperatorForCache(state.getEventHolder(),
+                    condition, matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext,
+                    updateCachePolicyAttribute, this),
+                    ExpressionParser.parseExpression(condition, matchingMetaInfoHolder.getMetaStateEvent(),
+                            matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
+                            false, 0, ProcessingMode.BATCH,
+                            false, siddhiQueryContext),
+                    matchingMetaInfoHolder.getStoreEventIndex()
+            );
         } finally {
             stateHolder.returnState(state);
         }

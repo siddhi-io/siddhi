@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.siddhi.core.query.table.teststorecontaininginmemorytable;
+package io.siddhi.core.query.table.store;
 
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
@@ -787,6 +787,48 @@ public class UpdateOrInsertTestStoreTestCase {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         updateStockStream.send(new Object[]{"GOOG", 10.6F, 200L});
+        Thread.sleep(500);
+
+        Event[] events = siddhiAppRuntime.query("" +
+                "from StockTable ");
+        EventPrinter.print(events);
+        AssertJUnit.assertEquals(4, events.length);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void updateOrInsertTableTest13() throws InterruptedException, SQLException {
+        log.info("updateOrInsertTableTest12");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "@Store(type=\"testStoreContainingInMemoryTable\")\n" +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from UpdateStockStream " +
+                "update or insert into StockTable " +
+                "   on StockTable.volume == volume ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        updateStockStream.send(new Event[]{
+                        new Event(System.currentTimeMillis(), new Object[]{"GOOG", 10.6F, 200L}),
+                        new Event(System.currentTimeMillis(), new Object[]{"FB", 11.6F, 200L}),
+                }
+        );
         Thread.sleep(500);
 
         Event[] events = siddhiAppRuntime.query("" +

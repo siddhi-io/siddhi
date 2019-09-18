@@ -95,7 +95,8 @@ public class InMemoryTable extends Table {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
-            ((Operator) compiledCondition).delete(deletingEventChunk, state.eventHolder);
+            ((Operator) ((InMemoryCompiledCondition) compiledCondition).getOperatorCompiledCondition()).
+                    delete(deletingEventChunk, state.eventHolder);
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
@@ -108,8 +109,8 @@ public class InMemoryTable extends Table {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
         try {
-            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet);
+            ((Operator) ((InMemoryCompiledCondition) compiledCondition).getOperatorCompiledCondition()).
+                    update(updatingEventChunk, state.eventHolder, (InMemoryCompiledUpdateSet) compiledUpdateSet);
         } finally {
             stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
@@ -124,14 +125,16 @@ public class InMemoryTable extends Table {
                             AddingStreamEventExtractor addingStreamEventExtractor) {
         readWriteLock.writeLock().lock();
         TableState state = stateHolder.getState();
+        InMemoryCompiledCondition inMemoryCompiledCondition = (InMemoryCompiledCondition) compiledCondition;
         try {
-            ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
-                    updateOrAddingEventChunk,
-                    state.eventHolder,
-                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
-                    addingStreamEventExtractor);
+            ComplexEventChunk<StateEvent> failedEvents =
+                    ((Operator) inMemoryCompiledCondition.getOperatorCompiledCondition()).
+                            tryUpdate(updateOrAddingEventChunk, state.eventHolder,
+                                    (InMemoryCompiledUpdateSet) compiledUpdateSet,
+                                    addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
-                state.eventHolder.add(failedEvents);
+                state.eventHolder.add(reduceEventsForUpdateOrInsert(
+                        addingStreamEventExtractor, inMemoryCompiledCondition, failedEvents));
             }
         } finally {
             stateHolder.returnState(state);
@@ -139,12 +142,40 @@ public class InMemoryTable extends Table {
         }
     }
 
+    protected ComplexEventChunk<StreamEvent> reduceEventsForUpdateOrInsert(
+            AddingStreamEventExtractor addingStreamEventExtractor,
+            InMemoryCompiledCondition inMemoryCompiledCondition,
+            ComplexEventChunk<StateEvent> failedEvents) {
+        ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>(failedEvents.isBatch());
+        failedEvents.reset();
+        while (failedEvents.hasNext()) {
+            StateEvent failedEvent = failedEvents.next();
+            boolean updated = false;
+            toInsertEventChunk.reset();
+            while (toInsertEventChunk.hasNext()) {
+                StreamEvent toInsertEvent = toInsertEventChunk.next();
+                failedEvent.setEvent(inMemoryCompiledCondition.getStoreEventIndex(), toInsertEvent);
+                if ((Boolean) inMemoryCompiledCondition.
+                        getUpdateOrInsertExpressionExecutor().execute(failedEvent)) {
+                    toInsertEvent.setOutputData(addingStreamEventExtractor.
+                            getAddingStreamEvent(failedEvent).getOutputData());
+                    updated = true;
+                }
+            }
+            if (!updated) {
+                toInsertEventChunk.add(addingStreamEventExtractor.getAddingStreamEvent(failedEvent));
+            }
+        }
+        return toInsertEventChunk;
+    }
+
     @Override
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         readWriteLock.readLock().lock();
         TableState state = stateHolder.getState();
         try {
-            return ((Operator) compiledCondition).contains(matchingEvent, state.eventHolder);
+            return ((Operator) ((InMemoryCompiledCondition) compiledCondition).getOperatorCompiledCondition()).
+                    contains(matchingEvent, state.eventHolder);
         } finally {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
@@ -166,7 +197,8 @@ public class InMemoryTable extends Table {
         TableState state = stateHolder.getState();
         readWriteLock.readLock().lock();
         try {
-            return ((Operator) compiledCondition).find(matchingEvent, state.eventHolder, tableStreamEventCloner);
+            return ((Operator) ((InMemoryCompiledCondition) compiledCondition).getOperatorCompiledCondition()).
+                    find(matchingEvent, state.eventHolder, tableStreamEventCloner);
         } finally {
             stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
@@ -179,8 +211,14 @@ public class InMemoryTable extends Table {
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         TableState state = stateHolder.getState();
         try {
-            return OperatorParser.constructOperator(state.eventHolder, condition, matchingMetaInfoHolder,
-                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+            return new InMemoryCompiledCondition(OperatorParser.constructOperator(state.eventHolder, condition,
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext),
+                    ExpressionParser.parseExpression(condition, matchingMetaInfoHolder.getMetaStateEvent(),
+                            matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
+                            false, 0, ProcessingMode.BATCH,
+                            false, siddhiQueryContext),
+                    matchingMetaInfoHolder.getStoreEventIndex()
+            );
         } finally {
             stateHolder.returnState(state);
         }

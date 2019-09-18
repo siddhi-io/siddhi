@@ -89,12 +89,11 @@ public class IndexOperator implements Operator {
     }
 
     @Override
-    public ComplexEventChunk<StreamEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
-                                                    Object storeEvents,
-                                                    InMemoryCompiledUpdateSet compiledUpdateSet,
-                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
-        ComplexEventChunk<StreamEvent> failedEventChunk = new ComplexEventChunk<StreamEvent>
-                (updatingOrAddingEventChunk.isBatch());
+    public ComplexEventChunk<StateEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
+                                                   Object storeEvents,
+                                                   InMemoryCompiledUpdateSet compiledUpdateSet,
+                                                   AddingStreamEventExtractor addingStreamEventExtractor) {
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>(updatingOrAddingEventChunk.isBatch());
         updatingOrAddingEventChunk.reset();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent overwritingOrAddingEvent = updatingOrAddingEventChunk.next();
@@ -108,7 +107,8 @@ public class IndexOperator implements Operator {
                 update((IndexedEventHolder) storeEvents, compiledUpdateSet, overwritingOrAddingEvent,
                         foundEventChunk);
             } else {
-                failedEventChunk.add(addingStreamEventExtractor.getAddingStreamEvent(overwritingOrAddingEvent));
+                updatingOrAddingEventChunk.remove();
+                failedEventChunk.add(overwritingOrAddingEvent);
             }
         }
         return failedEventChunk;

@@ -143,10 +143,10 @@ public class SiddhiAppParser {
                     siddhiAppContext.setRootMetricsLevel(Level.BASIC);
                 }
             }
-            Element statStateIncludElement = AnnotationHelper.getAnnotationElement(
+            Element statStateIncludeElement = AnnotationHelper.getAnnotationElement(
                     SiddhiConstants.ANNOTATION_STATISTICS,
                     SiddhiConstants.ANNOTATION_ELEMENT_INCLUDE, siddhiApp.getAnnotations());
-            siddhiAppContext.setIncludedMetrics(io.siddhi.core.util.parser.helper.AnnotationHelper.generateIncludedMetrics(statStateIncludElement));
+            siddhiAppContext.setIncludedMetrics(io.siddhi.core.util.parser.helper.AnnotationHelper.generateIncludedMetrics(statStateIncludeElement));
 
             Element transportCreationEnabledElement = AnnotationHelper.getAnnotationElement(
                     SiddhiConstants.TRANSPORT_CHANNEL_CREATION_IDENTIFIER, null, siddhiApp.getAnnotations());

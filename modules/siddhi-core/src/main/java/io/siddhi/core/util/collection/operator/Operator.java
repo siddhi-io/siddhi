@@ -40,8 +40,8 @@ public interface Operator extends CompiledCondition {
     void update(ComplexEventChunk<StateEvent> updatingEventChunk, Object storeEvents,
                 InMemoryCompiledUpdateSet compiledUpdateSet);
 
-    ComplexEventChunk<StreamEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
-                                             Object storeEvents,
-                                             InMemoryCompiledUpdateSet compiledUpdateSet,
-                                             AddingStreamEventExtractor addingStreamEventExtractor);
+    ComplexEventChunk<StateEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
+                                            Object storeEvents,
+                                            InMemoryCompiledUpdateSet compiledUpdateSet,
+                                            AddingStreamEventExtractor addingStreamEventExtractor);
 }
