@@ -23,7 +23,6 @@ package io.siddhi.core.exception;
  */
 @Deprecated
 public abstract class StoreQueryRuntimeException extends RuntimeException {
-    boolean classLoadingIssue = false;
 
     protected StoreQueryRuntimeException() {
         super();
