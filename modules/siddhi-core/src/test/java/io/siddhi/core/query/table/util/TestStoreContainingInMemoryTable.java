@@ -62,7 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+import static io.siddhi.core.util.OnDemandQueryRuntimeUtil.executeSelector;
 
 /**
  * Custom store for testing of in memory cache for store tables.
@@ -157,7 +157,7 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
         }));
 
         CompiledSelectionWithCache compiledSelectionWithCache;
-        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent().clone();
+        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestOnDemandQuery.getMetaStateEvent().clone();
 
         ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
         int metaPosition = SiddhiConstants.UNKNOWN_STATE;
@@ -176,11 +176,11 @@ public class TestStoreContainingInMemoryTable extends AbstractQueryableRecordTab
                 }
         }
 
-        QuerySelector querySelector = SelectorParser.parse(selectorForTestStoreQuery,
+        QuerySelector querySelector = SelectorParser.parse(selectorForTestOnDemandQuery,
                 returnStream,
                 metaStateEvent, tableMap,
                 variableExpressionExecutorsForQuerySelector, metaPosition, ProcessingMode.BATCH,
-                false, siddhiQueryContextForTestStoreQuery);
+                false, siddhiQueryContextForTestOnDemandQuery);
         QueryParserHelper.updateVariablePosition(metaStateEvent,
                 variableExpressionExecutorsForQuerySelector);
         querySelector.setEventPopulator(

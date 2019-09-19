@@ -17,41 +17,28 @@
  */
 package io.siddhi.core.exception;
 
-import io.siddhi.query.api.SiddhiApp;
-
 /**
- * Exception class to be used when an error occurs while creating {@link SiddhiApp}
+ * Exception class to be used when an error occurs while executing on-demand queries.
+ * This is deprecated and use OnDemandQueryRuntimeException instead.
  */
-public class StoreQueryRuntimeException extends RuntimeException {
-    boolean classLoadingIssue = false;
+@Deprecated
+public abstract class StoreQueryRuntimeException extends RuntimeException {
 
-    public StoreQueryRuntimeException() {
+    protected StoreQueryRuntimeException() {
         super();
     }
 
-    public StoreQueryRuntimeException(String message) {
+    protected StoreQueryRuntimeException(String message) {
         super(message);
     }
 
-    public StoreQueryRuntimeException(String message, boolean isClassLoadingIssue) {
-        super(message);
-        classLoadingIssue = isClassLoadingIssue;
-    }
-
-    public StoreQueryRuntimeException(String message, Throwable throwable) {
+    protected StoreQueryRuntimeException(String message, Throwable throwable) {
         super(message, throwable);
     }
 
-    public StoreQueryRuntimeException(Throwable throwable) {
+    protected StoreQueryRuntimeException(Throwable throwable) {
         super(throwable);
     }
 
-    public StoreQueryRuntimeException(String message, Throwable throwable, boolean isClassLoadingIssue) {
-        super(message, throwable);
-        classLoadingIssue = isClassLoadingIssue;
-    }
-
-    public boolean isClassLoadingIssue() {
-        return classLoadingIssue;
-    }
+    public abstract boolean isClassLoadingIssue();
 }

@@ -55,7 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+import static io.siddhi.core.util.OnDemandQueryRuntimeUtil.executeSelector;
 
 /**
  * Custom store for testing of in memory cache for store tables.
@@ -88,10 +88,10 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
                 storeEventPool);
 
         TableDefinition testStoreContainingIMTableDefinition = TableDefinition.id(tableDefinition.getId());
-        for (Attribute attribute: tableDefinition.getAttributeList()) {
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
             testStoreContainingIMTableDefinition.attribute(attribute.getName(), attribute.getType());
         }
-        for (Annotation annotation: tableDefinition.getAnnotations()) {
+        for (Annotation annotation : tableDefinition.getAnnotations()) {
             if (!annotation.getName().equalsIgnoreCase("Store")) {
                 testStoreContainingIMTableDefinition.annotation(annotation);
             }
@@ -127,13 +127,13 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
             Event[] cacheResultsAfterSelection = executeSelector(stateEventFactory, null, outEvent,
                     compiledSelectionWithCache.getStoreEventIndex(), compiledSelectionWithCache.getQuerySelector());
 
-            if (compiledSelectionWithCache.getQuerySelector() !=  null &
-                    compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() !=  0) {
+            if (compiledSelectionWithCache.getQuerySelector() != null &
+                    compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() != 0) {
                 compiledSelectionWithCache.getQuerySelector().
                         process(generateResetComplexEventChunk(outEvent.getOutputData().length, stateEventFactory));
             }
             if (cacheResultsAfterSelection != null) {
-                for (Event event: cacheResultsAfterSelection) {
+                for (Event event : cacheResultsAfterSelection) {
                     objects.add(event.getData());
                 }
             }
@@ -148,23 +148,23 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders, Long limit,
                                                  Long offset) {
         CompiledSelectionWithCache compiledSelectionWithCache;
-        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestStoreQuery.getMetaStateEvent().clone();
+        MetaStateEvent metaStateEvent = matchingMetaInfoHolderForTestOnDemandQuery.getMetaStateEvent().clone();
 
         ReturnStream returnStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
         int metaPosition = SiddhiConstants.UNKNOWN_STATE;
         List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
 
         if (metaStateEvent.getOutputDataAttributes().size() == 0) {
-            for (Attribute outputAttribute: metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
+            for (Attribute outputAttribute : metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
                 metaStateEvent.getMetaStreamEvents()[0].addOutputData(outputAttribute);
             }
         }
 
-        QuerySelector querySelector = SelectorParser.parse(selectorForTestStoreQuery,
+        QuerySelector querySelector = SelectorParser.parse(selectorForTestOnDemandQuery,
                 returnStream,
                 metaStateEvent, tableMap,
                 variableExpressionExecutorsForQuerySelector, metaPosition, ProcessingMode.BATCH,
-                false, siddhiQueryContextForTestStoreQuery);
+                false, siddhiQueryContextForTestOnDemandQuery);
         QueryParserHelper.updateVariablePosition(metaStateEvent,
                 variableExpressionExecutorsForQuerySelector);
         querySelector.setEventPopulator(

@@ -30,9 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to hold util functions used during StoreQueryRuntime
+ * Class to hold util functions used during OnDemandQueryRuntime
  */
-public class StoreQueryRuntimeUtil {
+public class OnDemandQueryRuntimeUtil {
     public static Event[] executeSelector(StateEventFactory stateEventFactory,
                                           StreamEvent streamEvent, StreamEvent storeEvents,
                                           int storeEventIndex, QuerySelector selector) {

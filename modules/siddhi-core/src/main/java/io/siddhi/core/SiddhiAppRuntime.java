@@ -42,6 +42,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.definition.WindowDefinition;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
 
 import java.beans.ExceptionListener;
@@ -115,13 +116,22 @@ public interface SiddhiAppRuntime {
 
     void addCallback(String queryName, QueryCallback callback);
 
-    Event[] query(String storeQuery);
+    Event[] query(String onDemandQuery);
 
+    @Deprecated
     Event[] query(StoreQuery storeQuery);
 
+    Event[] query(OnDemandQuery storeQuery);
+
+    @Deprecated
     Attribute[] getStoreQueryOutputAttributes(String storeQuery);
 
+    @Deprecated
     Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery);
+
+    Attribute[] getOnDemandQueryOutputAttributes(String onDemandQuery);
+
+    Attribute[] getOnDemandQueryOutputAttributes(OnDemandQuery onDemandQuery);
 
     InputHandler getInputHandler(String streamId);
 

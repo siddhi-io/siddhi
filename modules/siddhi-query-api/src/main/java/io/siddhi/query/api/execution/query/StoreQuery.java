@@ -19,32 +19,33 @@ package io.siddhi.query.api.execution.query;
 
 import io.siddhi.query.api.SiddhiElement;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
-import io.siddhi.query.api.execution.query.output.stream.DeleteStream;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
-import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
-import io.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
-import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 
-import static io.siddhi.query.api.execution.query.output.stream.OutputStream.OutputEventType.CURRENT_EVENTS;
-
 /**
- * This class keep information of a store query.
+ * This class keep information of on-demand query.
+ * This is deprecated use OnDemandQuery instead
  */
+@Deprecated
 public class StoreQuery implements SiddhiElement {
 
-    private static final long serialVersionUID = 1L;
-    private InputStore inputStore;
-    private Selector selector = new Selector();
-    private OutputStream outputStream = new ReturnStream(CURRENT_EVENTS);
-    private int[] queryContextStartIndex;
-    private int[] queryContextEndIndex;
-    private StoreQueryType type;
+    private OnDemandQuery onDemandQuery = new OnDemandQuery();
+
+    public StoreQuery(OnDemandQuery onDemandQuery) {
+        this.onDemandQuery = onDemandQuery;
+    }
+
+    public StoreQuery() {
+    }
+
+    public OnDemandQuery getOnDemandQuery() {
+        return onDemandQuery;
+    }
 
     /**
-     * Builder method to get a new store query instance
+     * Builder method to get a new on-demand query instance
      *
      * @return a new storeQuery instance
      */
@@ -59,7 +60,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery from(InputStore inputStore) {
-        this.inputStore = inputStore;
+        onDemandQuery.from(inputStore);
         return this;
     }
 
@@ -69,7 +70,7 @@ public class StoreQuery implements SiddhiElement {
      * @return inputStore
      */
     public InputStore getInputStore() {
-        return inputStore;
+        return onDemandQuery.getInputStore();
     }
 
     /**
@@ -79,7 +80,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery select(Selector selector) {
-        this.selector = selector;
+        onDemandQuery.select(selector);
         return this;
     }
 
@@ -90,10 +91,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery outStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-        if (outputStream != null && outputStream.getOutputEventType() == null) {
-            outputStream.setOutputEventType(OutputStream.OutputEventType.CURRENT_EVENTS);
-        }
+        onDemandQuery.outStream(outputStream);
         return this;
     }
 
@@ -104,7 +102,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onDeletingExpression expression for the delete operation defined in the store query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
-        this.outputStream = new DeleteStream(outputTableId, CURRENT_EVENTS, onDeletingExpression);
+        onDemandQuery.deleteBy(outputTableId, onDeletingExpression);
     }
 
     /**
@@ -114,7 +112,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, onUpdateExpression);
+        onDemandQuery.updateBy(outputTableId, onUpdateExpression);
     }
 
     /**
@@ -125,7 +123,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, updateSetAttributes, onUpdateExpression);
+        onDemandQuery.updateBy(outputTableId, updateSetAttributes, onUpdateExpression);
     }
 
     /**
@@ -136,8 +134,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update or insert operation defined in the store query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateOrInsertStream(outputTableId, CURRENT_EVENTS,
-                updateSetAttributes, onUpdateExpression);
+        onDemandQuery.updateBy(outputTableId, updateSetAttributes, onUpdateExpression);
     }
 
     /**
@@ -146,7 +143,7 @@ public class StoreQuery implements SiddhiElement {
      * @return selector of the store query
      */
     public Selector getSelector() {
-        return selector;
+        return onDemandQuery.getSelector();
     }
 
     /**
@@ -155,66 +152,49 @@ public class StoreQuery implements SiddhiElement {
      * @return outputStream of the store query
      */
     public OutputStream getOutputStream() {
-        return outputStream;
+        return onDemandQuery.getOutputStream();
     }
 
     @Override
     public String toString() {
-        return "StoreQuery{" +
-                "inputStore=" + inputStore +
-                ", selector=" + selector +
-                ", outputStream=" + outputStream +
-                ", type=" + type +
-                '}';
+        return onDemandQuery.toString();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
+        } else if (o instanceof OnDemandQuery) {
+            return onDemandQuery.equals(o);
+        } else {
+            return o instanceof StoreQuery && onDemandQuery.equals(((StoreQuery) o).getOnDemandQuery());
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        StoreQuery that = (StoreQuery) o;
-
-        if (inputStore != null ? !inputStore.equals(that.inputStore) : that.inputStore != null) {
-            return false;
-        }
-        if (outputStream != null ? !outputStream.equals(that.outputStream) : that.outputStream != null) {
-            return false;
-        }
-        return selector != null ? selector.equals(that.selector) : that.selector == null;
     }
 
     @Override
     public int hashCode() {
-        int result = inputStore != null ? inputStore.hashCode() : 0;
-        result = 31 * result + (selector != null ? selector.hashCode() : 0);
-        result = 31 * result + (outputStream != null ? outputStream.hashCode() : 0);
-        return result;
+        return onDemandQuery.hashCode();
     }
 
 
     @Override
     public int[] getQueryContextStartIndex() {
-        return queryContextStartIndex;
+        return onDemandQuery.getQueryContextStartIndex();
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
-        queryContextStartIndex = lineAndColumn;
+        onDemandQuery.setQueryContextStartIndex(lineAndColumn);
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
-        return queryContextEndIndex;
+        return onDemandQuery.getQueryContextEndIndex();
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
-        queryContextEndIndex = lineAndColumn;
+        onDemandQuery.setQueryContextEndIndex(lineAndColumn);
     }
 
     /**
@@ -223,14 +203,48 @@ public class StoreQuery implements SiddhiElement {
      * @return type of given store query
      */
     public StoreQueryType getType() {
-        return type;
+        switch (onDemandQuery.getType()) {
+            case INSERT:
+                return StoreQueryType.INSERT;
+            case DELETE:
+                return StoreQueryType.DELETE;
+            case UPDATE:
+                return StoreQueryType.UPDATE;
+            case SELECT:
+                return StoreQueryType.SELECT;
+            case UPDATE_OR_INSERT:
+                return StoreQueryType.UPDATE_OR_INSERT;
+            case FIND:
+                return StoreQueryType.FIND;
+        }
+        return null;
     }
 
     /**
      * This method sets the type of given store query.
      */
     public void setType(StoreQueryType type) {
-        this.type = type;
+        switch (type) {
+
+            case INSERT:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.INSERT);
+                break;
+            case DELETE:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.DELETE);
+                break;
+            case UPDATE:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.UPDATE);
+                break;
+            case SELECT:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.SELECT);
+                break;
+            case UPDATE_OR_INSERT:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.UPDATE_OR_INSERT);
+                break;
+            case FIND:
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+                break;
+        }
     }
 
     /**

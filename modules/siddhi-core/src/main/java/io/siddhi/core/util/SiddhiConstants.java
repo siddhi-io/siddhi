@@ -96,7 +96,7 @@ public final class SiddhiConstants {
 
     public static final String METRIC_INFIX_SIDDHI_APPS = "SiddhiApps";
     public static final String METRIC_INFIX_STREAMS = "Streams";
-    public static final String METRIC_INFIX_STORE_QUERIES = "StoreQueries";
+    public static final String METRIC_INFIX_ON_DEMAND_QUERIES = "OnDemandQueries";
     public static final String METRIC_INFIX_TABLES = "Tables";
     public static final String METRIC_INFIX_TRIGGERS = "Trigger";
     public static final String METRIC_INFIX_SIDDHI = "Siddhi";

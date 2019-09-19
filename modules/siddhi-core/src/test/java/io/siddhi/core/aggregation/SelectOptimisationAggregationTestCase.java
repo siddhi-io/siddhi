@@ -708,7 +708,7 @@ public class SelectOptimisationAggregationTestCase {
 
     @Test(dependsOnMethods = "aggregationFunctionTestcase7")
     public void aggregationFunctionTestcase8() throws InterruptedException {
-        LOG.info("aggregationFunctionTestcase8 - count w/o group by store query");
+        LOG.info("aggregationFunctionTestcase8 - count w/o group by on-demand query");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String stockStream =
@@ -786,7 +786,7 @@ public class SelectOptimisationAggregationTestCase {
 
     @Test(dependsOnMethods = "aggregationFunctionTestcase8")
     public void aggregationFunctionTestcase9() throws InterruptedException {
-        LOG.info("aggregationFunctionTestcase4 - count with group by store query");
+        LOG.info("aggregationFunctionTestcase4 - count with group by on-demand query");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String stockStream =

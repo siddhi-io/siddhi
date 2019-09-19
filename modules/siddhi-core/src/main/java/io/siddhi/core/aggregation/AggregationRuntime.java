@@ -165,13 +165,14 @@ public class AggregationRuntime implements MemoryCalculable {
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
 
-    private static MetaStreamEvent alterMetaStreamEvent(boolean isStoreQuery, MetaStreamEvent originalMetaStreamEvent,
+    private static MetaStreamEvent alterMetaStreamEvent(boolean isOnDemandQuery,
+                                                        MetaStreamEvent originalMetaStreamEvent,
                                                         List<Attribute> additionalAttributes) {
 
         StreamDefinition alteredStreamDef = new StreamDefinition();
         String inputReferenceId = originalMetaStreamEvent.getInputReferenceId();
 
-        if (!isStoreQuery) {
+        if (!isOnDemandQuery) {
             for (Attribute attribute : originalMetaStreamEvent.getLastInputDefinition().getAttributeList()) {
                 alteredStreamDef.attribute(attribute.getName(), attribute.getType());
             }
@@ -179,8 +180,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 alteredStreamDef.setId(originalMetaStreamEvent.getLastInputDefinition().getId());
             }
         } else {
-            // If it is store query, no original join stream
-            alteredStreamDef.setId("storeQueryStream");
+            // If it is on-demand query, no original join stream
+            alteredStreamDef.setId("OnDemandQueryStream");
         }
 
         additionalAttributes.forEach(attribute -> alteredStreamDef.attribute(attribute.getName(), attribute.getType()));
@@ -196,7 +197,7 @@ public class AggregationRuntime implements MemoryCalculable {
         return metaStreamEventForTable;
     }
 
-    private static MatchingMetaInfoHolder alterMetaInfoHolderForStoreQuery(
+    private static MatchingMetaInfoHolder alterMetaInfoHolderForOnDemandQuery(
             MetaStreamEvent newMetaStreamEventWithStartEnd, MatchingMetaInfoHolder matchingMetaInfoHolder) {
 
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
@@ -286,15 +287,15 @@ public class AggregationRuntime implements MemoryCalculable {
         // Therefore it's enough to get the definition from one table.
         AbstractDefinition tableDefinition = aggregationTables.get(incrementalDurations.get(0)).getTableDefinition();
 
-        boolean isStoreQuery = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1;
+        boolean isOnDemandQuery = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1;
 
         // Alter existing meta stream event or create new one if a meta stream doesn't exist
         // After calling this method the original MatchingMetaInfoHolder's meta stream event would be altered
-        // Alter meta info holder to contain stream event and aggregate both when it's a store query
+        // Alter meta info holder to contain stream event and aggregate both when it's a on-demand query
         MetaStreamEvent metaStreamEventForTableLookups;
-        if (isStoreQuery) {
+        if (isOnDemandQuery) {
             metaStreamEventForTableLookups = alterMetaStreamEvent(true, new MetaStreamEvent(), additionalAttributes);
-            matchingMetaInfoHolder = alterMetaInfoHolderForStoreQuery(metaStreamEventForTableLookups,
+            matchingMetaInfoHolder = alterMetaInfoHolderForOnDemandQuery(metaStreamEventForTableLookups,
                     matchingMetaInfoHolder);
         } else {
             metaStreamEventForTableLookups = alterMetaStreamEvent(false,
@@ -570,7 +571,7 @@ public class AggregationRuntime implements MemoryCalculable {
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
-        return new IncrementalAggregateCompileCondition(isStoreQuery, aggregationName, isProcessingOnExternalTime,
+        return new IncrementalAggregateCompileCondition(isOnDemandQuery, aggregationName, isProcessingOnExternalTime,
                 isDistributed, incrementalDurations, aggregationTables, outputExpressionExecutors,
                 isOptimisedTableLookup, withinTableCompiledSelection, withinTableCompiledConditions,
                 withinInMemoryCompileCondition, withinTableLowerGranularityCompileCondition, onCompiledCondition,

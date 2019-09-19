@@ -26,14 +26,14 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import io.siddhi.core.exception.DefinitionNotExistException;
+import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.core.exception.QueryNotExistException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
-import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.partition.PartitionRuntime;
 import io.siddhi.core.partition.PartitionRuntimeImpl;
+import io.siddhi.core.query.OnDemandQueryRuntime;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.QueryRuntimeImpl;
-import io.siddhi.core.query.StoreQueryRuntime;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
@@ -56,7 +56,7 @@ import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
-import io.siddhi.core.util.parser.StoreQueryParser;
+import io.siddhi.core.util.parser.OnDemandQueryParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.persistence.util.PersistenceHelper;
 import io.siddhi.core.util.snapshot.PersistenceReference;
@@ -73,6 +73,7 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.definition.WindowDefinition;
 import io.siddhi.query.api.exception.SiddhiAppContextException;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import org.apache.log4j.Logger;
@@ -121,14 +122,14 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     private Map<String, Table> tableMap = new ConcurrentHashMap<String, Table>(); // Contains event tables.
     private Map<String, PartitionRuntime> partitionMap =
             new ConcurrentHashMap<String, PartitionRuntime>(); // Contains partitions.
-    private LinkedHashMap<StoreQuery, StoreQueryRuntime> storeQueryRuntimeMap =
+    private LinkedHashMap<OnDemandQuery, OnDemandQueryRuntime> onDemandQueryRuntimeMap =
             new LinkedHashMap<>(); // Contains partitions.
     private ConcurrentMap<String, Trigger> triggerMap;
     private SiddhiAppContext siddhiAppContext;
     private Map<String, SiddhiAppRuntime> siddhiAppRuntimeMap;
     private MemoryUsageTracker memoryUsageTracker;
     private BufferedEventsTracker bufferedEventsTracker;
-    private LatencyTracker storeQueryLatencyTracker;
+    private LatencyTracker onDemandQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
     private boolean runningWithoutSources = false;
@@ -171,8 +172,8 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         if (siddhiAppContext.getStatisticsManager() != null) {
             monitorQueryMemoryUsage();
             monitorBufferedEvents();
-            storeQueryLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, "query",
-                    SiddhiConstants.METRIC_INFIX_STORE_QUERIES, null);
+            onDemandQueryLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, "query",
+                    SiddhiConstants.METRIC_INFIX_ON_DEMAND_QUERIES, null);
         }
 
         for (Map.Entry<String, List<Sink>> sinkEntries : sinkMap.entrySet()) {
@@ -277,87 +278,101 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         ((QueryRuntimeImpl) queryRuntime).addCallback(callback);
     }
 
-    public Event[] query(String storeQuery) {
-        return query(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    public Event[] query(String onDemandQuery) {
+        return query(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
     }
 
+    public Event[] query(OnDemandQuery onDemandQuery) {
+        return query(onDemandQuery, null);
+    }
+
+    @Deprecated
     public Event[] query(StoreQuery storeQuery) {
-        return query(storeQuery, null);
+        return query(storeQuery.getOnDemandQuery(), null);
     }
 
-    private Event[] query(StoreQuery storeQuery, String storeQueryString) {
+    private Event[] query(OnDemandQuery onDemandQuery, String onDemandQueryString) {
         try {
             if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 &&
-                    storeQueryLatencyTracker != null) {
-                storeQueryLatencyTracker.markIn();
+                    onDemandQueryLatencyTracker != null) {
+                onDemandQueryLatencyTracker.markIn();
             }
-            StoreQueryRuntime storeQueryRuntime;
+            OnDemandQueryRuntime onDemandQueryRuntime;
             synchronized (this) {
-                storeQueryRuntime = storeQueryRuntimeMap.remove(storeQuery);
-                if (storeQueryRuntime == null) {
-                    storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
-                            aggregationMap);
+                onDemandQueryRuntime = onDemandQueryRuntimeMap.remove(onDemandQuery);
+                if (onDemandQueryRuntime == null) {
+                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext,
+                            tableMap, windowMap, aggregationMap);
                 } else {
-                    storeQueryRuntime.reset();
+                    onDemandQueryRuntime.reset();
                 }
-                storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
-                if (storeQueryRuntimeMap.size() > 50) {
-                    Iterator i = storeQueryRuntimeMap.entrySet().iterator();
+                onDemandQueryRuntimeMap.put(onDemandQuery, onDemandQueryRuntime);
+                if (onDemandQueryRuntimeMap.size() > 50) {
+                    Iterator i = onDemandQueryRuntimeMap.entrySet().iterator();
                     if (i.hasNext()) {
                         i.next();
                         i.remove();
                     }
                 }
             }
-            return storeQueryRuntime.execute();
+            return onDemandQueryRuntime.execute();
         } catch (RuntimeException e) {
             if (e instanceof SiddhiAppContextException) {
-                throw new StoreQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
+                throw new OnDemandQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
                         ((SiddhiAppContextException) e).getQueryContextStartIndex(),
-                        ((SiddhiAppContextException) e).getQueryContextEndIndex(), null, storeQueryString);
+                        ((SiddhiAppContextException) e).getQueryContextEndIndex(), null, onDemandQueryString);
             }
-            throw new StoreQueryCreationException(e.getMessage(), e);
+            throw new OnDemandQueryCreationException(e.getMessage(), e);
         } finally {
             if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 &&
-                    storeQueryLatencyTracker != null) {
-                storeQueryLatencyTracker.markOut();
+                    onDemandQueryLatencyTracker != null) {
+                onDemandQueryLatencyTracker.markOut();
             }
         }
     }
 
-    public Attribute[] getStoreQueryOutputAttributes(String storeQuery) {
-        return getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    public Attribute[] getOnDemandQueryOutputAttributes(String onDemandQuery) {
+        return getOnDemandQueryOutputAttributes(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
     }
 
+    public Attribute[] getOnDemandQueryOutputAttributes(OnDemandQuery onDemandQuery) {
+        return getOnDemandQueryOutputAttributes(onDemandQuery, null);
+    }
+
+    @Deprecated
+    public Attribute[] getStoreQueryOutputAttributes(String onDemandQuery) {
+        return getOnDemandQueryOutputAttributes(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
+    }
+
+    @Deprecated
     public Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery) {
-        return getStoreQueryOutputAttributes(storeQuery, null);
+        return getOnDemandQueryOutputAttributes(storeQuery.getOnDemandQuery(), null);
     }
-
 
     /**
-     * This method get the storeQuery and return the corresponding output and its types.
+     * This method get the onDemandQuery and return the corresponding output and its types.
      *
-     * @param storeQuery       this storeQuery is processed and get the output attributes.
-     * @param storeQueryString this passed to report errors with context if there are any.
+     * @param onDemandQuery       this onDemandQuery is processed and get the output attributes.
+     * @param onDemandQueryString this passed to report errors with context if there are any.
      * @return List of output attributes
      */
-    private Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery, String storeQueryString) {
+    private Attribute[] getOnDemandQueryOutputAttributes(OnDemandQuery onDemandQuery, String onDemandQueryString) {
         try {
-            StoreQueryRuntime storeQueryRuntime = storeQueryRuntimeMap.get(storeQuery);
-            if (storeQueryRuntime == null) {
-                storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+            OnDemandQueryRuntime onDemandQueryRuntime = onDemandQueryRuntimeMap.get(onDemandQuery);
+            if (onDemandQueryRuntime == null) {
+                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext, tableMap, windowMap,
                         aggregationMap);
-                storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
+                onDemandQueryRuntimeMap.put(onDemandQuery, onDemandQueryRuntime);
             }
-            return storeQueryRuntime.getStoreQueryOutputAttributes();
+            return onDemandQueryRuntime.getOnDemandQueryOutputAttributes();
         } catch (RuntimeException e) {
             if (e instanceof SiddhiAppContextException) {
-                throw new StoreQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
+                throw new OnDemandQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
                         ((SiddhiAppContextException) e).getQueryContextStartIndex(),
                         ((SiddhiAppContextException) e).getQueryContextEndIndex(), null, siddhiAppContext
                         .getSiddhiAppString());
             }
-            throw new StoreQueryCreationException(e.getMessage(), e);
+            throw new OnDemandQueryCreationException(e.getMessage(), e);
         }
     }
 

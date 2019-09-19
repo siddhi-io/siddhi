@@ -21,7 +21,7 @@ package io.siddhi.core.store;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.StoreQueryCreationException;
+import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Logger;
@@ -29,9 +29,9 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class StoreQueryWindowTestCase {
+public class OnDemandQueryWindowTestCase {
 
-    private static final Logger log = Logger.getLogger(StoreQueryWindowTestCase.class);
+    private static final Logger log = Logger.getLogger(OnDemandQueryWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
@@ -180,7 +180,7 @@ public class StoreQueryWindowTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = StoreQueryCreationException.class)
+    @Test(expectedExceptions = OnDemandQueryCreationException.class)
     public void test5() throws InterruptedException {
         log.info("Test5 table");
 

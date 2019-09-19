@@ -19,6 +19,7 @@
 package io.siddhi.query.test;
 
 import io.siddhi.query.api.aggregation.Within;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.selection.Selector;
@@ -69,7 +70,7 @@ public class QueryStoreTestCase {
     @Test
     public void test2() {
 
-        StoreQuery query = SiddhiCompiler.parseStoreQuery("" +
+        OnDemandQuery query = SiddhiCompiler.parseOnDemandQuery("" +
                 "from StockTable " +
                 "select symbol, price " +
                 "group by symbol " +
@@ -99,7 +100,7 @@ public class QueryStoreTestCase {
 
     @Test
     public void test3() {
-        StoreQuery query = SiddhiCompiler.parseStoreQuery("" +
+        OnDemandQuery query = SiddhiCompiler.parseOnDemandQuery("" +
                 "from StockTable " +
                 "on price > 40 " +
                 "select symbol, price " +
@@ -108,7 +109,7 @@ public class QueryStoreTestCase {
         );
         AssertJUnit.assertNotNull(query);
 
-        StoreQuery api = StoreQuery.query().
+        OnDemandQuery api = OnDemandQuery.query().
                 from(
                         InputStore.store("StockTable").
                                 on(Expression.compare(Expression.variable("price"),
@@ -143,7 +144,7 @@ public class QueryStoreTestCase {
         );
         AssertJUnit.assertNotNull(query);
 
-        StoreQuery api = StoreQuery.query().
+        OnDemandQuery api = OnDemandQuery.query().
                 from(
                         InputStore.store("StockTable").
                                 on(Expression.compare(Expression.variable("price"),

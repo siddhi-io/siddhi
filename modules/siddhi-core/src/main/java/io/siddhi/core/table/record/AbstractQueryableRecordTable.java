@@ -58,7 +58,7 @@ import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
-import io.siddhi.query.api.execution.query.StoreQuery;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
@@ -79,6 +79,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static io.siddhi.core.util.OnDemandQueryRuntimeUtil.executeSelectorAndReturnStreamEvent;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_POLICY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_PURGE_INTERVAL;
@@ -86,10 +87,9 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_CACHE_RETENTION_PER
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_QUERY_NAME;
 import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_SIZE;
-import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelectorAndReturnStreamEvent;
 import static io.siddhi.core.util.cache.CacheUtils.findEventChunkSize;
-import static io.siddhi.core.util.parser.StoreQueryParser.buildExpectedOutputAttributes;
-import static io.siddhi.core.util.parser.StoreQueryParser.generateMatchingMetaInfoHolderForCacheTable;
+import static io.siddhi.core.util.parser.OnDemandQueryParser.buildExpectedOutputAttributes;
+import static io.siddhi.core.util.parser.OnDemandQueryParser.generateMatchingMetaInfoHolderForCacheTable;
 import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 
 /**
@@ -107,9 +107,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
     protected StateEvent findMatchingEvent;
-    protected Selector selectorForTestStoreQuery;
-    protected SiddhiQueryContext siddhiQueryContextForTestStoreQuery;
-    protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestStoreQuery;
+    protected Selector selectorForTestOnDemandQuery;
+    protected SiddhiQueryContext siddhiQueryContextForTestOnDemandQuery;
+    protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestOnDemandQuery;
     protected StateEvent containsMatchingEvent;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
@@ -122,17 +122,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     @Override
     public void initCache(TableDefinition tableDefinition, SiddhiAppContext siddhiAppContext,
-                     StreamEventCloner storeEventCloner, ConfigReader configReader) {
+                          StreamEventCloner storeEventCloner, ConfigReader configReader) {
         String[] annotationNames = {ANNOTATION_STORE, ANNOTATION_CACHE};
         Annotation cacheTableAnnotation = getAnnotation(annotationNames, tableDefinition.getAnnotations());
         if (cacheTableAnnotation != null) {
             cacheEnabled = true;
             maxCacheSize = Integer.parseInt(cacheTableAnnotation.getElement(CACHE_TABLE_SIZE));
             TableDefinition cacheTableDefinition = TableDefinition.id(tableDefinition.getId());
-            for (Attribute attribute: tableDefinition.getAttributeList()) {
+            for (Attribute attribute : tableDefinition.getAttributeList()) {
                 cacheTableDefinition.attribute(attribute.getName(), attribute.getType());
             }
-            for (Annotation annotation: tableDefinition.getAnnotations()) {
+            for (Annotation annotation : tableDefinition.getAnnotations()) {
                 if (!annotation.getName().equalsIgnoreCase("Store")) {
                     cacheTableDefinition.annotation(annotation);
                 }
@@ -176,7 +176,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     CACHE_QUERY_NAME + tableDefinition.getId());
             MatchingMetaInfoHolder matchingMetaInfoHolder =
                     generateMatchingMetaInfoHolderForCacheTable(tableDefinition);
-            StoreQuery storeQuery = StoreQuery.query().
+            OnDemandQuery onDemandQuery = OnDemandQuery.query().
                     from(
                             InputStore.store(tableDefinition.getId())).
                     select(
@@ -187,10 +187,10 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
             compiledConditionForCaching = compileCondition(Expression.value(true), matchingMetaInfoHolder,
                     variableExpressionExecutors, tableMap, siddhiQueryContext);
-            List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery,
+            List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(onDemandQuery,
                     tableMap, SiddhiConstants.UNKNOWN_STATE, matchingMetaInfoHolder, siddhiQueryContext);
 
-            compiledSelectionForCaching = compileSelection(storeQuery.getSelector(), expectedOutputAttributes,
+            compiledSelectionForCaching = compileSelection(onDemandQuery.getSelector(), expectedOutputAttributes,
                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
             outputAttributesForCaching = expectedOutputAttributes.toArray(new Attribute[0]);
@@ -473,7 +473,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         CompiledUpdateSet recordTableCompiledUpdateSet = super.compileUpdateSet(updateSet,
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
         if (cacheEnabled) {
-            CompiledUpdateSet cacheCompileUpdateSet =  cacheTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
+            CompiledUpdateSet cacheCompileUpdateSet = cacheTable.compileUpdateSet(updateSet, matchingMetaInfoHolder,
                     variableExpressionExecutors, tableMap, siddhiQueryContext);
             return new CompiledUpdateSetWithCache(recordTableCompiledUpdateSet, cacheCompileUpdateSet);
         }
@@ -697,7 +697,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     private CompiledSelection generateCSForSelectAll() {
         MetaStreamEvent metaStreamEventForSelectAll = new MetaStreamEvent();
-        for (Attribute attribute: tableDefinition.getAttributeList()) {
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
             metaStreamEventForSelectAll.addOutputData(attribute);
         }
         metaStreamEventForSelectAll.addInputDefinition(tableDefinition);
@@ -764,9 +764,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        selectorForTestStoreQuery = selector;
-        siddhiQueryContextForTestStoreQuery = siddhiQueryContext;
-        matchingMetaInfoHolderForTestStoreQuery = matchingMetaInfoHolder;
+        selectorForTestOnDemandQuery = selector;
+        siddhiQueryContextForTestOnDemandQuery = siddhiQueryContext;
+        matchingMetaInfoHolderForTestOnDemandQuery = matchingMetaInfoHolder;
         List<OutputAttribute> outputAttributes = selector.getSelectionList();
         if (outputAttributes.size() == 0) {
             MetaStreamEvent metaStreamEvent = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
@@ -893,7 +893,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     variableExpressionExecutorsForQuerySelector);
             return compiledSelectionWithCache;
         } else {
-            return  new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
+            return new RecordStoreCompiledSelection(expressionExecutorMap, compiledSelection);
         }
     }
 

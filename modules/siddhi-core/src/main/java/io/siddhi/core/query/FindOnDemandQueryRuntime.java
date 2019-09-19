@@ -25,7 +25,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.exception.StoreQueryRuntimeException;
+import io.siddhi.core.exception.OnDemandQueryRuntimeException;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.window.Window;
@@ -33,12 +33,12 @@ import io.siddhi.core.window.Window;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.siddhi.core.util.StoreQueryRuntimeUtil.executeSelector;
+import static io.siddhi.core.util.OnDemandQueryRuntimeUtil.executeSelector;
 
 /**
- * Store Query Runtime holds the runtime information needed for executing the store query.
+ * on-demand query Runtime holds the runtime information needed for executing the on-demand query.
  */
-public class FindStoreQueryRuntime extends StoreQueryRuntime {
+public class FindOnDemandQueryRuntime extends OnDemandQueryRuntime {
 
     private CompiledCondition compiledCondition;
     private SiddhiQueryContext siddhiQueryContext;
@@ -47,8 +47,8 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
     private MetaStreamEvent.EventType eventType;
     private AggregationRuntime aggregation;
 
-    public FindStoreQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
-                                 MetaStreamEvent metaStreamEvent) {
+    public FindOnDemandQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
+                                    MetaStreamEvent metaStreamEvent) {
         this.table = table;
         this.compiledCondition = compiledCondition;
         this.queryName = queryName;
@@ -57,8 +57,8 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
         this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
-    public FindStoreQueryRuntime(Window window, CompiledCondition compiledCondition, String queryName,
-                                 MetaStreamEvent metaStreamEvent) {
+    public FindOnDemandQueryRuntime(Window window, CompiledCondition compiledCondition, String queryName,
+                                    MetaStreamEvent metaStreamEvent) {
         this.window = window;
         this.compiledCondition = compiledCondition;
         this.queryName = queryName;
@@ -67,8 +67,9 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
         this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
-    public FindStoreQueryRuntime(AggregationRuntime aggregation, CompiledCondition compiledCondition, String queryName,
-                                 MetaStreamEvent metaStreamEvent, SiddhiQueryContext siddhiQueryContext) {
+    public FindOnDemandQueryRuntime(AggregationRuntime aggregation, CompiledCondition compiledCondition,
+                                    String queryName, MetaStreamEvent metaStreamEvent,
+                                    SiddhiQueryContext siddhiQueryContext) {
         this.aggregation = aggregation;
         this.compiledCondition = compiledCondition;
         this.siddhiQueryContext = siddhiQueryContext;
@@ -116,7 +117,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                 }
             }
         } catch (Throwable t) {
-            throw new StoreQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
+            throw new OnDemandQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
         }
     }
 

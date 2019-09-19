@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * Interface for all processors which holds a collection of events and supports traversing and finding events from
- * that collection with different selection criteria. query() will be used by StoreQuery to get matching event in
+ * that collection with different selection criteria. query() will be used by OnDemandQuery to get matching event in
  * defined format.
  */
 public interface QueryableProcessor extends FindableProcessor {

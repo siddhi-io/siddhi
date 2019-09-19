@@ -39,6 +39,7 @@ import io.siddhi.query.api.definition.FunctionDefinition;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.partition.Partition;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.expression.constant.TimeConstant;
@@ -192,9 +193,9 @@ public class SiddhiCompiler {
         return (TimeConstant) eval.visit(tree);
     }
 
-    public static StoreQuery parseStoreQuery(String storeQuery) throws SiddhiParserException {
+    public static OnDemandQuery parseOnDemandQuery(String onDemandQuery) throws SiddhiParserException {
 
-        ANTLRInputStream input = new ANTLRInputStream(storeQuery);
+        ANTLRInputStream input = new ANTLRInputStream(onDemandQuery);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(SiddhiErrorListener.INSTANCE);
@@ -206,7 +207,12 @@ public class SiddhiCompiler {
         ParseTree tree = parser.store_query_final();
 
         SiddhiQLVisitor eval = new SiddhiQLBaseVisitorImpl();
-        return (StoreQuery) eval.visit(tree);
+        return (OnDemandQuery) eval.visit(tree);
+    }
+
+    public static StoreQuery parseStoreQuery(String storeQuery) throws SiddhiParserException {
+        OnDemandQuery onDemandQuery = parseOnDemandQuery(storeQuery);
+        return new StoreQuery(onDemandQuery);
     }
 
     public static String updateVariables(String siddhiApp) {

@@ -24,11 +24,11 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 
 /**
- * This class is used to keep the runtime information needed to execute an delete store query.
+ * This class is used to keep the runtime information needed to execute a insert on-demand query.
  */
-public class DeleteStoreQueryRuntime extends StoreQueryRuntime {
+public class InsertOnDemandQueryRuntime extends OnDemandQueryRuntime {
 
-    public DeleteStoreQueryRuntime(String queryName, MetaStreamEvent metaStreamEvent) {
+    public InsertOnDemandQueryRuntime(String queryName, MetaStreamEvent metaStreamEvent) {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
@@ -44,7 +44,7 @@ public class DeleteStoreQueryRuntime extends StoreQueryRuntime {
 
     @Override
     public TYPE getType() {
-        return TYPE.DELETE;
+        return TYPE.INSERT;
     }
 
     private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
