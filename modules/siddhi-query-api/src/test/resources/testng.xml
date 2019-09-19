@@ -34,7 +34,7 @@
             <class name="io.siddhi.query.api.PatternQueryTestCase"/>
             <class name="io.siddhi.query.api.SequenceQueryTestCase"/>
             <class name="io.siddhi.query.api.SimpleQueryTestCase"/>
-            <class name="io.siddhi.query.api.StoreQueryTestCase"/>
+            <class name="io.siddhi.query.api.OnDemandQueryTestCase"/>
             <class name="io.siddhi.query.api.TableQueryTestCase"/>
             <class name="io.siddhi.query.api.RetrieveMessageContextTestCase"/>
         </classes>

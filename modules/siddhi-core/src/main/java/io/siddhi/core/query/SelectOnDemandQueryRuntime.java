@@ -23,7 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.exception.StoreQueryRuntimeException;
+import io.siddhi.core.exception.OnDemandQueryRuntimeException;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
@@ -33,17 +33,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Store Query Runtime holds the runtime information needed for executing the store query.
+ * On-demand Query Runtime holds the runtime information needed for executing the on-demand Query.
  */
-public class SelectStoreQueryRuntime extends StoreQueryRuntime {
+public class SelectOnDemandQueryRuntime extends OnDemandQueryRuntime {
 
     private final CompiledSelection compiledSelection;
     private final CompiledCondition compiledCondition;
     private QueryableProcessor queryableProcessor;
 
-    public SelectStoreQueryRuntime(QueryableProcessor queryableProcessor, CompiledCondition compiledCondition,
-                                   CompiledSelection compiledSelection, List<Attribute> expectedOutputAttributeList,
-                                   String queryName) {
+    public SelectOnDemandQueryRuntime(QueryableProcessor queryableProcessor, CompiledCondition compiledCondition,
+                                      CompiledSelection compiledSelection, List<Attribute> expectedOutputAttributeList,
+                                      String queryName) {
         this.queryableProcessor = queryableProcessor;
 
         this.compiledCondition = compiledCondition;
@@ -68,7 +68,7 @@ public class SelectStoreQueryRuntime extends StoreQueryRuntime {
                 return events.toArray(new Event[0]);
             }
         } catch (Throwable t) {
-            throw new StoreQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
+            throw new OnDemandQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
         }
     }
 

@@ -524,7 +524,7 @@ public class QueryAPITestCaseForTableWithCache {
 
     @Test
     public void test21() throws InterruptedException {
-        log.info("Testing store query with limit");
+        log.info("Testing on-demand query with limit");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 

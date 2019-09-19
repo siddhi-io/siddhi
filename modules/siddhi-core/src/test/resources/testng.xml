@@ -144,8 +144,8 @@
             <class name="io.siddhi.core.query.SimpleQueryValidatorTestCase"/>
             <class name="io.siddhi.core.query.StringCompareTestCase"/>
 
-            <class name="io.siddhi.core.store.StoreQueryTableTestCase"/>
-            <class name="io.siddhi.core.store.StoreQueryWindowTestCase"/>
+            <class name="io.siddhi.core.store.OnDemandQueryTableTestCase"/>
+            <class name="io.siddhi.core.store.OnDemandQueryWindowTestCase"/>
 
             <class name="io.siddhi.core.stream.CallbackTestCase"/>
             <class name="io.siddhi.core.stream.ExceptionHandlerTestCase"/>

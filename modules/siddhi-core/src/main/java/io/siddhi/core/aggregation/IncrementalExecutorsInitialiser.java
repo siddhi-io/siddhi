@@ -24,13 +24,13 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
-import io.siddhi.core.query.StoreQueryRuntime;
+import io.siddhi.core.query.OnDemandQueryRuntime;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
-import io.siddhi.core.util.parser.StoreQueryParser;
+import io.siddhi.core.util.parser.OnDemandQueryParser;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.TimePeriod;
-import io.siddhi.query.api.execution.query.StoreQuery;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
@@ -99,13 +99,13 @@ public class IncrementalExecutorsInitialiser {
 
         // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery = getStoreQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
-        storeQuery.setType(StoreQuery.StoreQueryType.FIND);
-        StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
-                aggregationMap);
+        OnDemandQuery onDemandQuery = getOnDemandQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
+        onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+        OnDemandQueryRuntime onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext,
+                tableMap, windowMap, aggregationMap);
 
         // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
-        events = storeQueryRuntime.execute();
+        events = onDemandQueryRuntime.execute();
         if (events != null) {
             Long lastData = (Long) events[events.length - 1].getData(0);
             endOFLatestEventTimestamp = IncrementalTimeConverterUtil
@@ -122,11 +122,11 @@ public class IncrementalExecutorsInitialiser {
             // This lookup is filtered by endOFLatestEventTimestamp
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            storeQuery = getStoreQuery(recreateFromTable, false, endOFLatestEventTimestamp);
-            storeQuery.setType(StoreQuery.StoreQueryType.FIND);
-            storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+            onDemandQuery = getOnDemandQuery(recreateFromTable, false, endOFLatestEventTimestamp);
+            onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+            onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
-            events = storeQueryRuntime.execute();
+            events = onDemandQueryRuntime.execute();
 
             if (events != null) {
                 long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
@@ -155,7 +155,7 @@ public class IncrementalExecutorsInitialiser {
         this.isInitialised = true;
     }
 
-    private StoreQuery getStoreQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
+    private OnDemandQuery getOnDemandQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
         Selector selector = Selector.selector();
         if (isLargestGranularity) {
             selector = selector
@@ -197,6 +197,6 @@ public class IncrementalExecutorsInitialiser {
             }
         }
 
-        return StoreQuery.query().from(inputStore).select(selector);
+        return OnDemandQuery.query().from(inputStore).select(selector);
     }
 }

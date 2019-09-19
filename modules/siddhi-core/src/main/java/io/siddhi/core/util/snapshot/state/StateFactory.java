@@ -19,7 +19,7 @@
 package io.siddhi.core.util.snapshot.state;
 
 /**
- * State factory that create states that are used to store query and other states
+ * State factory that create states that are used to on-demand query and other states
  *
  * @param <S> state that hold data
  */

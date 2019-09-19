@@ -23,7 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.exception.StoreQueryRuntimeException;
+import io.siddhi.core.exception.OnDemandQueryRuntimeException;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.query.api.definition.Attribute;
 
@@ -31,9 +31,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Store Query Runtime Interface
+ * On-Demand Query Runtime Interface
  */
-public abstract class StoreQueryRuntime {
+public abstract class OnDemandQueryRuntime {
     String queryName;
     MetaStreamEvent.EventType eventType;
     QuerySelector selector;
@@ -42,7 +42,7 @@ public abstract class StoreQueryRuntime {
     Attribute[] outputAttributes;
 
     /**
-     * This method initiates the execution of store query.
+     * This method initiates the execution of on-demand Query.
      *
      * @return an array of Events.
      */
@@ -59,28 +59,28 @@ public abstract class StoreQueryRuntime {
             if (eventType == MetaStreamEvent.EventType.TABLE) {
                 selector.process(complexEventChunk);
             } else {
-                throw new StoreQueryRuntimeException("DELETE, INSERT, UPDATE and UPDATE OR INSERT store query " +
+                throw new OnDemandQueryRuntimeException("DELETE, INSERT, UPDATE and UPDATE OR INSERT on-demand Query " +
                         "operations consume only stream events of type \"TABLE\".");
             }
             return new Event[]{};
         } catch (Throwable t) {
-            throw new StoreQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
+            throw new OnDemandQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
         }
     }
 
     /**
-     * This method sets a state event pool for store query runtime.
+     * This method sets a state event pool for on-demand Query runtime.
      *
-     * @param stateEventFactory stateEventFactory for the store query runtime
+     * @param stateEventFactory stateEventFactory for the on-demand Query runtime
      */
     public void setStateEventFactory(StateEventFactory stateEventFactory) {
         this.stateEventFactory = stateEventFactory;
     }
 
     /**
-     * This method sets the output attribute list of the given store query.
+     * This method sets the output attribute list of the given on-demand Query.
      *
-     * @param outputAttributeList of the store query
+     * @param outputAttributeList of the on-demand Query
      */
     public void setOutputAttributes(List<Attribute> outputAttributeList) {
         this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
@@ -91,28 +91,29 @@ public abstract class StoreQueryRuntime {
      *
      * @return List of output attributes
      */
-    public Attribute[] getStoreQueryOutputAttributes() {
+    public Attribute[] getOnDemandQueryOutputAttributes() {
         return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 
     /**
-     * This method sets selector for the delete store query runtime.
+     * This method sets selector for the delete on-demand Query runtime.
      *
-     * @param selector for the store query
+     * @param selector for the on-demand Query
      */
     public void setSelector(QuerySelector selector) {
         this.selector = selector;
     }
 
     /**
-     * This method is used to execute a store query when there is already store query runtime for that query.
+     * This method is used to execute a on-demand Query when there is already on-demand Query runtime for that query.
      */
     public abstract void reset();
 
     /**
-     * This method will return the type of the store query runtime.
+     * This method will return the type of the on-demand Query runtime.
      *
-     * @return type of store query runtime. (one of the types DELETE, INSERT, SELECT, UPDATE, FIND or UPDATE OR INSERT)
+     * @return type of on-demand Query runtime. (one of the types DELETE, INSERT, SELECT, UPDATE,
+     * FIND or UPDATE OR INSERT)
      */
     public abstract TYPE getType();
 
@@ -121,7 +122,7 @@ public abstract class StoreQueryRuntime {
     }
 
     /**
-     * This enum contains the possible types of the store query runtimes
+     * This enum contains the possible types of the on-demand query runtimes
      */
     enum TYPE {
         DELETE,

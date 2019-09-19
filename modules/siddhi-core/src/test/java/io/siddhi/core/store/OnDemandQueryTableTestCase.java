@@ -21,7 +21,7 @@ package io.siddhi.core.store;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.StoreQueryCreationException;
+import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.definition.Attribute;
@@ -32,9 +32,9 @@ import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
-public class StoreQueryTableTestCase {
+public class OnDemandQueryTableTestCase {
 
-    private static final Logger log = Logger.getLogger(StoreQueryTableTestCase.class);
+    private static final Logger log = Logger.getLogger(OnDemandQueryTableTestCase.class);
 
     @Test
     public void test1() throws InterruptedException {
@@ -189,7 +189,7 @@ public class StoreQueryTableTestCase {
 
     }
 
-    @Test(expectedExceptions = StoreQueryCreationException.class)
+    @Test(expectedExceptions = OnDemandQueryCreationException.class)
     public void test4() throws InterruptedException {
         log.info("Test4 table");
 
@@ -226,7 +226,7 @@ public class StoreQueryTableTestCase {
         }
     }
 
-    @Test(expectedExceptions = StoreQueryCreationException.class)
+    @Test(expectedExceptions = OnDemandQueryCreationException.class)
     public void test5() throws InterruptedException {
         log.info("Test5 table");
 
@@ -380,16 +380,16 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
         Thread.sleep(500);
 
-        String storeQuery = "" +
+        String onDemandQuery = "" +
                 "from StockTable " +
                 "on volume > 10 " +
                 "select symbol, price, sum(volume) as totalVolume ";
-        Event[] events = siddhiAppRuntime.query(storeQuery);
+        Event[] events = siddhiAppRuntime.query(onDemandQuery);
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
         AssertJUnit.assertEquals(200L, events[0].getData()[2]);
 
-        events = siddhiAppRuntime.query(storeQuery);
+        events = siddhiAppRuntime.query(onDemandQuery);
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
         AssertJUnit.assertEquals(200L, events[0].getData()[2]);
@@ -421,18 +421,18 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
         Thread.sleep(500);
 
-        String storeQuery = "" +
+        String onDemandQuery = "" +
                 "from StockTable " +
                 "on volume > 10 " +
                 "select symbol, price, sum(volume) as totalVolume " +
                 "group by symbol ";
-        Event[] events = siddhiAppRuntime.query(storeQuery);
+        Event[] events = siddhiAppRuntime.query(onDemandQuery);
         EventPrinter.print(events);
         AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(100L, events[0].getData()[2]);
         AssertJUnit.assertEquals(100L, events[1].getData()[2]);
 
-        events = siddhiAppRuntime.query(storeQuery);
+        events = siddhiAppRuntime.query(onDemandQuery);
         EventPrinter.print(events);
         AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(100L, events[0].getData()[2]);
@@ -449,27 +449,27 @@ public class StoreQueryTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long);" +
                 "@PrimaryKey('symbol') " +
                 "define table StockTable (symbol string, price float, volume long); ";
-        String storeQuery = "" +
+        String onDemandQuery = "" +
                 "from StockTable " +
                 "select * ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
 
         siddhiAppRuntime.start();
-        Attribute[] actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
-                (storeQuery));
+        Attribute[] actualAttributeArray = siddhiAppRuntime.getOnDemandQueryOutputAttributes(
+                SiddhiCompiler.parseOnDemandQuery(onDemandQuery));
         Attribute symbolAttribute = new Attribute("symbol", Attribute.Type.STRING);
         Attribute priceAttribute = new Attribute("price", Attribute.Type.FLOAT);
         Attribute volumeAttribute = new Attribute("volume", Attribute.Type.LONG);
         Attribute[] expectedAttributeArray = new Attribute[]{symbolAttribute, priceAttribute, volumeAttribute};
         AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
 
-        storeQuery = "" +
+        onDemandQuery = "" +
                 "from StockTable " +
                 "select symbol, sum(volume) as totalVolume ;";
 
-        actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
-                (storeQuery));
+        actualAttributeArray = siddhiAppRuntime.getOnDemandQueryOutputAttributes(SiddhiCompiler.parseOnDemandQuery
+                (onDemandQuery));
         Attribute totalVolumeAttribute = new Attribute("totalVolume", Attribute.Type.LONG);
         expectedAttributeArray = new Attribute[]{symbolAttribute, totalVolumeAttribute};
         siddhiAppRuntime.shutdown();
@@ -489,24 +489,24 @@ public class StoreQueryTableTestCase {
                 "select symbol, price " +
                 "group by symbol " +
                 "aggregate every minutes ...year;";
-        String storeQuery = "" +
+        String onDemandQuery = "" +
                 "from StockTableAg within '2018-**-** **:**:**' per 'minutes' select symbol, price ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
 
         siddhiAppRuntime.start();
-        Attribute[] actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
-                (storeQuery));
+        Attribute[] actualAttributeArray = siddhiAppRuntime.getOnDemandQueryOutputAttributes(
+                SiddhiCompiler.parseOnDemandQuery(onDemandQuery));
         Attribute symbolAttribute = new Attribute("symbol", Attribute.Type.STRING);
         Attribute priceAttribute = new Attribute("price", Attribute.Type.FLOAT);
         Attribute[] expectedAttributeArray = new Attribute[]{symbolAttribute, priceAttribute};
         AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
 
-        storeQuery = "" +
+        onDemandQuery = "" +
                 "from StockTableAg within '2018-**-** **:**:**' per 'minutes' select symbol, sum(price) as total";
 
-        actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
-                (storeQuery));
+        actualAttributeArray = siddhiAppRuntime.getOnDemandQueryOutputAttributes(SiddhiCompiler.parseOnDemandQuery
+                (onDemandQuery));
         Attribute totalVolumeAttribute = new Attribute("total", Attribute.Type.DOUBLE);
         expectedAttributeArray = new Attribute[]{symbolAttribute, totalVolumeAttribute};
         siddhiAppRuntime.shutdown();
@@ -515,7 +515,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test14() throws InterruptedException {
-        log.info("Testing InsertOrUpdate store query : 1");
+        log.info("Testing InsertOrUpdate on-demand query : 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -538,11 +538,11 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 300L});
         Thread.sleep(500);
 
-        String storeQuery = "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
+        String onDemandQuery = "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
                 "update or insert into StockTable " +
                 "set StockTable.symbol = symbol, StockTable.price=price on StockTable.volume == 100L ";
 
-        siddhiAppRuntime.query(storeQuery);
+        siddhiAppRuntime.query(onDemandQuery);
 
         Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L;");
 
@@ -551,8 +551,8 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(events[0].getData()[1], 123.45f);
         Assert.assertEquals(events[0].getData()[2], 100L);
 
-        // submit the same store query again to test resetting the query runtime
-        siddhiAppRuntime.query(storeQuery);
+        // submit the same on-demand query again to test resetting the query runtime
+        siddhiAppRuntime.query(onDemandQuery);
 
         events = siddhiAppRuntime.query("from StockTable select * having volume == 100L;");
 
@@ -566,7 +566,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test15() throws InterruptedException {
-        log.info("Testing InsertOrUpdate store query : 2");
+        log.info("Testing InsertOrUpdate on-demand query : 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -609,7 +609,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test16() throws InterruptedException {
-        log.info("Testing delete store query : 1");
+        log.info("Testing delete on-demand query : 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -636,10 +636,10 @@ public class StoreQueryTableTestCase {
         Event[] initialEvents = siddhiAppRuntime.query("from StockTable select *;");
         Assert.assertEquals(initialEvents.length, 3);
 
-        String storeQuery = "select 100L as vol " +
+        String onDemandQuery = "select 100L as vol " +
                 "delete StockTable on StockTable.volume == vol;";
 
-        siddhiAppRuntime.query(storeQuery);
+        siddhiAppRuntime.query(onDemandQuery);
         Thread.sleep(500);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
@@ -648,8 +648,8 @@ public class StoreQueryTableTestCase {
         Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
         Assert.assertNull(events);
 
-        // submit the same store query again to test resetting the query runtime
-        siddhiAppRuntime.query(storeQuery);
+        // submit the same on-demand query again to test resetting the query runtime
+        siddhiAppRuntime.query(onDemandQuery);
 
         events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
         Assert.assertNull(events);
@@ -659,7 +659,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test17() throws InterruptedException {
-        log.info("Testing delete store query : 2");
+        log.info("Testing delete on-demand query : 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -700,7 +700,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test18() throws InterruptedException {
-        log.info("Testing insert store query : 1");
+        log.info("Testing insert on-demand query : 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -726,9 +726,9 @@ public class StoreQueryTableTestCase {
         Event[] events = siddhiAppRuntime.query("from StockTable select *;");
         Assert.assertEquals(events.length, 3);
 
-        String storeQuery = "select 10 as id, \"YAHOO\" as symbol, 400 as volume insert into StockTable;";
+        String onDemandQuery = "select 10 as id, \"YAHOO\" as symbol, 400 as volume insert into StockTable;";
 
-        siddhiAppRuntime.query(storeQuery);
+        siddhiAppRuntime.query(onDemandQuery);
         Thread.sleep(100);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
@@ -743,8 +743,8 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(data[1], "YAHOO");
         Assert.assertEquals(data[2], 400);
 
-        // submit the same store query again to test resetting the query runtime
-        siddhiAppRuntime.query(storeQuery);
+        // submit the same on-demand query again to test resetting the query runtime
+        siddhiAppRuntime.query(onDemandQuery);
 
         newEvents = siddhiAppRuntime.query("from StockTable select * having id == 10;");
         Assert.assertEquals(newEvents.length, 2);
@@ -754,7 +754,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test19() throws InterruptedException {
-        log.info("Testing update store query : 1");
+        log.info("Testing update on-demand query : 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -777,9 +777,9 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 
-        String storeQuery = "update StockTable set StockTable.symbol=\"MICROSOFT\", StockTable.volume=2000" +
+        String onDemandQuery = "update StockTable set StockTable.symbol=\"MICROSOFT\", StockTable.volume=2000" +
                 " on StockTable.id==2;";
-        siddhiAppRuntime.query(storeQuery);
+        siddhiAppRuntime.query(onDemandQuery);
         Thread.sleep(100);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
@@ -794,8 +794,8 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(data[1], "MICROSOFT");
         Assert.assertEquals(data[2], 2000);
 
-        // submit the same store query again to test resetting the query runtime
-        siddhiAppRuntime.query(storeQuery);
+        // submit the same on-demand query again to test resetting the query runtime
+        siddhiAppRuntime.query(onDemandQuery);
         updatedEvents = siddhiAppRuntime.query("from StockTable select * having id == 2");
         Assert.assertEquals(updatedEvents.length, 1);
 
@@ -811,7 +811,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test20() throws InterruptedException {
-        log.info("Testing update store query : 2");
+        log.info("Testing update on-demand query : 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 

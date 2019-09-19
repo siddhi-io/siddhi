@@ -20,7 +20,7 @@ package io.siddhi.core.aggregation;
 
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.exception.StoreQueryCreationException;
+import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
@@ -29,9 +29,9 @@ public class AggregationFindQueryValidationTestCase {
 
     private static final Logger LOG = Logger.getLogger(AggregationFindQueryValidationTestCase.class);
 
-    @Test(expectedExceptions = StoreQueryCreationException.class)
-    public void storeQueryValidationTestCase1() {
-        LOG.info("storeQueryValidationTestCase1");
+    @Test(expectedExceptions = OnDemandQueryCreationException.class)
+    public void onDemandQueryValidationTestCase1() {
+        LOG.info("onDemandQueryValidationTestCase1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream = "" +
                 " define stream stockStream (arrival long, symbol string, price float, volume int); ";
@@ -58,8 +58,8 @@ public class AggregationFindQueryValidationTestCase {
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void storeQueryValidationTestCase2() {
-        LOG.info("storeQueryValidationTestCase2");
+    public void onDemandQueryValidationTestCase2() {
+        LOG.info("onDemandQueryValidationTestCase2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String stockStream = "" +
@@ -86,8 +86,8 @@ public class AggregationFindQueryValidationTestCase {
     }
 
     @Test
-    public void storeQueryValidationTestCase3() {
-        LOG.info("storeQueryValidationTestCase3");
+    public void onDemandQueryValidationTestCase3() {
+        LOG.info("onDemandQueryValidationTestCase3");
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream = "" +
                 " define stream stockStream (arrival long, symbol string, price float, volume int); ";

@@ -181,6 +181,18 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.query.api.execution.query.StoreQuery"/>
+        <Bug pattern="EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.query.api.execution.query.OnDemandQuery"/>
+        <Bug pattern="EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.exception.OnDemandQueryCreationException"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.core.table.holder.IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP, SE_TRANSIENT_FIELD_NOT_RESTORED"/>
     </Match>

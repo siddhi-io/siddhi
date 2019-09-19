@@ -19,6 +19,7 @@ package io.siddhi.query.api;
 
 
 import io.siddhi.query.api.aggregation.Within;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
@@ -28,7 +29,7 @@ import io.siddhi.query.api.expression.condition.Compare;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
-public class StoreQueryTestCase {
+public class OnDemandQueryTestCase {
 
     @Test
     public void test1() {
@@ -147,14 +148,14 @@ public class StoreQueryTestCase {
                         set(
                                 Expression.variable("price").ofStream("StockStream"),
                                 Expression.variable("price")), Expression.compare(
-                                        Expression.variable("symbol"),
+                        Expression.variable("symbol"),
                         Compare.Operator.EQUAL,
                         Expression.variable("symbol")));
     }
 
     @Test
     public void test7() {
-        StoreQuery storeQuery = StoreQuery.query();
+        OnDemandQuery storeQuery = OnDemandQuery.query();
         storeQuery.
                 from(
                         InputStore.store("StockTable")).
@@ -170,14 +171,14 @@ public class StoreQueryTestCase {
                         set(
                                 Expression.variable("pricd").ofStream("StockStream"),
                                 Expression.variable("price")), Expression.compare(
-                                        Expression.variable("symbol"),
+                        Expression.variable("symbol"),
                         Compare.Operator.EQUAL,
                         Expression.variable("symbol")));
     }
 
     @Test
     public void test8() {
-        StoreQuery.query().
+        OnDemandQuery.query().
                 from(
                         InputStore.store("cseEventTable").
                                 on(Within.within(Expression.value("2017/01/*")), Expression.value("day"))).
