@@ -23,8 +23,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
-import java.util.HashMap;
-
 /**
  * Siddhi Manager Service which is
  *
@@ -46,7 +44,6 @@ public class SiddhiManagerComponent {
     @Activate
     protected void start(BundleContext bundleContext) throws Exception {
         ReferenceHolder.getInstance().setBundleContext(bundleContext);
-        SiddhiExtensionLoader.loadSiddhiExtensions(new HashMap<>());
         serviceRegistration = bundleContext.registerService(SiddhiComponentActivator.class.getName(),
                 new SiddhiComponentActivator(), null);
     }
