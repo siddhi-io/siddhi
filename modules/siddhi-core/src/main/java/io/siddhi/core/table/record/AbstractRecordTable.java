@@ -28,6 +28,7 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
@@ -35,6 +36,7 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
@@ -358,8 +360,15 @@ public abstract class AbstractRecordTable extends Table {
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+        ExpressionExecutor inMemoryCompiledCondition = ExpressionParser.parseExpression(condition,
+                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                variableExpressionExecutors, false, 0,
+                ProcessingMode.BATCH, false, siddhiQueryContext);
+        ExpressionBuilder expressionBuilder = new ExpressionBuilder(
+                condition, matchingMetaInfoHolder,
+                variableExpressionExecutors, tableMap,
+                new UpdateOrInsertReducer(inMemoryCompiledCondition, matchingMetaInfoHolder), null,
+                siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
         return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition, siddhiQueryContext);
@@ -372,8 +381,14 @@ public abstract class AbstractRecordTable extends Table {
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = new RecordTableCompiledUpdateSet();
         Map<String, ExpressionExecutor> parentExecutorMap = new HashMap<>();
         for (UpdateSet.SetAttribute setAttribute : updateSet.getSetAttributeList()) {
+            ExpressionExecutor inMemoryAssignmentExecutor = ExpressionParser.parseExpression(
+                    setAttribute.getAssignmentExpression(), matchingMetaInfoHolder.getMetaStateEvent(),
+                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
+                    false, 0, ProcessingMode.BATCH, false,
+                    siddhiQueryContext);
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(setAttribute.getAssignmentExpression(),
-                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, null,
+                    inMemoryAssignmentExecutor, siddhiQueryContext);
             CompiledExpression compiledExpression = compileSetAttribute(expressionBuilder);
             recordTableCompiledUpdateSet.put(setAttribute.getTableVariable().getAttributeName(), compiledExpression);
             Map<String, ExpressionExecutor> expressionExecutorMap =
@@ -411,7 +426,8 @@ public abstract class AbstractRecordTable extends Table {
         private SiddhiQueryContext siddhiQueryContext;
 
         RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
-                                     CompiledCondition compiledCondition, SiddhiQueryContext siddhiQueryContext) {
+                                     CompiledCondition compiledCondition,
+                                     SiddhiQueryContext siddhiQueryContext) {
             this.variableExpressionExecutorMap = variableExpressionExecutorMap;
             this.compiledCondition = compiledCondition;
             this.siddhiQueryContext = siddhiQueryContext;

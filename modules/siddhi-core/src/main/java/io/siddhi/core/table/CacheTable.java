@@ -161,7 +161,8 @@ public abstract class CacheTable extends InMemoryTable {
                     addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
                 state.getEventHolder().add(reduceEventsForUpdateOrInsert(
-                        addingStreamEventExtractor, inMemoryCompiledCondition, failedEvents));
+                        addingStreamEventExtractor, inMemoryCompiledCondition,
+                        (InMemoryCompiledUpdateSet) compiledUpdateSet, failedEvents));
             }
             if (this.size() > maxSize) {
                 this.deleteEntriesUsingCachePolicy(this.size() - maxSize);

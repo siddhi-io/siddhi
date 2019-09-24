@@ -68,10 +68,12 @@ import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 public class ExpressionBuilder {
     private final Map<String, ExpressionExecutor> variableExpressionExecutorMap;
     private final MatchingMetaInfoHolder matchingMetaInfoHolder;
+    private final UpdateOrInsertReducer updateOrInsertReducer;
+    private ExpressionExecutor inMemorySetExpressionExecutor;
     private final SiddhiQueryContext siddhiQueryContext;
     private final List<VariableExpressionExecutor> variableExpressionExecutors;
     private final Map<String, Table> tableMap;
-    private Expression expression;
+    private final Expression expression;
 
     public MatchingMetaInfoHolder getMatchingMetaInfoHolder() {
         return matchingMetaInfoHolder;
@@ -93,11 +95,22 @@ public class ExpressionBuilder {
         return expression;
     }
 
+    public UpdateOrInsertReducer getUpdateOrInsertReducer() {
+        return updateOrInsertReducer;
+    }
+
+    public ExpressionExecutor getInMemorySetExpressionExecutor() {
+        return inMemorySetExpressionExecutor;
+    }
+
     ExpressionBuilder(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                       List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap,
+                      UpdateOrInsertReducer updateOrInsertReducer, ExpressionExecutor inMemorySetExpressionExecutor,
                       SiddhiQueryContext siddhiQueryContext) {
         this.expression = expression;
         this.matchingMetaInfoHolder = matchingMetaInfoHolder;
+        this.updateOrInsertReducer = updateOrInsertReducer;
+        this.inMemorySetExpressionExecutor = inMemorySetExpressionExecutor;
         this.siddhiQueryContext = siddhiQueryContext;
         this.variableExpressionExecutors = variableExpressionExecutors;
         this.tableMap = tableMap;

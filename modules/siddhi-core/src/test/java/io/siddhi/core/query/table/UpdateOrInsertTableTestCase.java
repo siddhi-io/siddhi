@@ -742,7 +742,7 @@ public class UpdateOrInsertTableTestCase {
 
     @Test
     public void updateOrInsertTableTest11() throws InterruptedException, SQLException {
-        log.info("updateOrInsertTableTest13");
+        log.info("updateOrInsertTableTest11");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream UpdateStockStream (symbol string, price int, volume long); " +

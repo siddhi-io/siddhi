@@ -167,7 +167,7 @@ public class FaultStreamTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[custom:fault() > volume] " +
-                "select symbol, price , symbol as sym1 " +
+                "select symbol, price, symbol as sym1 " +
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -216,7 +216,7 @@ public class FaultStreamTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[custom:fault() > volume] " +
-                "select symbol, price , symbol as sym1 " +
+                "select symbol, price, symbol as sym1 " +
                 "insert into outputStream ;" +
                 "" +
                 "from !cseEventStream " +

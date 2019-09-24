@@ -134,7 +134,8 @@ public class InMemoryTable extends Table {
                                     addingStreamEventExtractor);
             if (failedEvents != null && failedEvents.getFirst() != null) {
                 state.eventHolder.add(reduceEventsForUpdateOrInsert(
-                        addingStreamEventExtractor, inMemoryCompiledCondition, failedEvents));
+                        addingStreamEventExtractor, inMemoryCompiledCondition,
+                        (InMemoryCompiledUpdateSet) compiledUpdateSet, failedEvents));
             }
         } finally {
             stateHolder.returnState(state);
@@ -145,7 +146,7 @@ public class InMemoryTable extends Table {
     protected ComplexEventChunk<StreamEvent> reduceEventsForUpdateOrInsert(
             AddingStreamEventExtractor addingStreamEventExtractor,
             InMemoryCompiledCondition inMemoryCompiledCondition,
-            ComplexEventChunk<StateEvent> failedEvents) {
+            InMemoryCompiledUpdateSet compiledUpdateSet, ComplexEventChunk<StateEvent> failedEvents) {
         ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>(failedEvents.isBatch());
         failedEvents.reset();
         while (failedEvents.hasNext()) {
@@ -157,8 +158,11 @@ public class InMemoryTable extends Table {
                 failedEvent.setEvent(inMemoryCompiledCondition.getStoreEventIndex(), toInsertEvent);
                 if ((Boolean) inMemoryCompiledCondition.
                         getUpdateOrInsertExpressionExecutor().execute(failedEvent)) {
-                    toInsertEvent.setOutputData(addingStreamEventExtractor.
-                            getAddingStreamEvent(failedEvent).getOutputData());
+                    for (Map.Entry<Integer, ExpressionExecutor> entry :
+                            compiledUpdateSet.getExpressionExecutorMap().entrySet()) {
+                        toInsertEvent.setOutputData(entry.getValue().
+                                execute(failedEvent), entry.getKey());
+                    }
                     updated = true;
                 }
             }

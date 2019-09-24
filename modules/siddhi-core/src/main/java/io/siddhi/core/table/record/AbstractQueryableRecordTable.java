@@ -506,8 +506,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
+        ExpressionExecutor inMemoryCompiledCondition = ExpressionParser.parseExpression(condition,
+                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                variableExpressionExecutors, false, 0,
+                ProcessingMode.BATCH, false, siddhiQueryContext);
         ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+                variableExpressionExecutors, tableMap, new UpdateOrInsertReducer(
+                inMemoryCompiledCondition, matchingMetaInfoHolder), null, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
 
@@ -716,7 +721,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
         for (OutputAttribute outputAttribute : outputAttributesAll) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(outputAttribute.getExpression(),
-                    matchingMetaInfoHolderForSlectAll, variableExpressionExecutors, tableMap, null);
+                    matchingMetaInfoHolderForSlectAll, variableExpressionExecutors, tableMap,
+                    null, null, null);
             selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder,
                     outputAttribute.getRename()));
         }
@@ -779,7 +785,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         List<SelectAttributeBuilder> selectAttributeBuilders = new ArrayList<>(outputAttributes.size());
         for (OutputAttribute outputAttribute : outputAttributes) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(outputAttribute.getExpression(),
-                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                    null, null, siddhiQueryContext);
             selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
         }
 
@@ -793,14 +800,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             groupByExpressionBuilders = new ArrayList<>(outputAttributes.size());
             for (Variable variable : selector.getGroupByList()) {
                 groupByExpressionBuilders.add(new ExpressionBuilder(variable, metaInfoHolderAfterSelect,
-                        variableExpressionExecutors, tableMap, siddhiQueryContext));
+                        variableExpressionExecutors, tableMap, null, null, siddhiQueryContext));
             }
         }
 
         ExpressionBuilder havingExpressionBuilder = null;
         if (selector.getHavingExpression() != null) {
             havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), metaInfoHolderAfterSelect,
-                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+                    variableExpressionExecutors, tableMap, null, null, siddhiQueryContext);
         }
 
         List<OrderByAttributeBuilder> orderByAttributeBuilders = null;
@@ -809,7 +816,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             for (OrderByAttribute orderByAttribute : selector.getOrderByList()) {
                 ExpressionBuilder expressionBuilder = new ExpressionBuilder(orderByAttribute.getVariable(),
                         metaInfoHolderAfterSelect, variableExpressionExecutors,
-                        tableMap, siddhiQueryContext);
+                        tableMap, null, null, siddhiQueryContext);
                 orderByAttributeBuilders.add(new OrderByAttributeBuilder(expressionBuilder,
                         orderByAttribute.getOrder()));
             }
