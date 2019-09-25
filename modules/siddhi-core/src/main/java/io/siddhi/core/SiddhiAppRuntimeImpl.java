@@ -279,16 +279,28 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     }
 
     public Event[] query(String onDemandQuery) {
-        return query(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
+        if (this.running) {
+            return query(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + onDemandQuery + "' cannot be executed.");
     }
 
     public Event[] query(OnDemandQuery onDemandQuery) {
-        return query(onDemandQuery, null);
+        if (this.running) {
+            return query(onDemandQuery, null);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + onDemandQuery.toString() + "' cannot be executed.");
     }
 
     @Deprecated
     public Event[] query(StoreQuery storeQuery) {
-        return query(storeQuery.getOnDemandQuery(), null);
+        if (this.running) {
+            return query(storeQuery.getOnDemandQuery(), null);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + storeQuery.getOnDemandQuery().toString() + "' cannot be executed.");
     }
 
     private Event[] query(OnDemandQuery onDemandQuery, String onDemandQueryString) {
