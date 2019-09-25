@@ -78,7 +78,12 @@ public class PeriodicTrigger extends AbstractTrigger {
                 if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
-                streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));
+                Event event = new Event(currentTime, new Object[]{currentTime});
+                try {
+                    streamJunction.sendEvent(event);
+                } catch (Exception e) {
+                    streamJunction.handleError(event, e);
+                }
             }
         }, triggerDefinition.getAtEvery(), triggerDefinition.getAtEvery(), TimeUnit.MILLISECONDS);
     }
