@@ -31,7 +31,6 @@ public class InputHandler {
 
     protected String streamId;
     protected int streamIndex;
-    protected InputProcessor compiledInputProcessor;
     protected InputProcessor inputProcessor;
     protected SiddhiAppContext siddhiAppContext;
     protected InputProcessor pausedInputPublisher;
@@ -40,9 +39,8 @@ public class InputHandler {
                         SiddhiAppContext siddhiAppContext) {
         this.streamId = streamId;
         this.streamIndex = streamIndex;
-        this.compiledInputProcessor = inputProcessor;
         this.siddhiAppContext = siddhiAppContext;
-        this.pausedInputPublisher = this.compiledInputProcessor;
+        this.pausedInputPublisher = inputProcessor;
     }
 
     public String getStreamId() {
@@ -98,8 +96,7 @@ public class InputHandler {
     }
 
     void connect() {
-        this.inputProcessor = this.compiledInputProcessor;
-        this.pausedInputPublisher = this.compiledInputProcessor;
+        this.inputProcessor = this.pausedInputPublisher;
     }
 
     void disconnect() {
