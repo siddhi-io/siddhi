@@ -33,22 +33,23 @@ public class PartitionSyncStateHolder implements StateHolder {
     @Override
     public synchronized State getState() {
         State state = partitionStateHolder.getState();
-        state.activeUseCount++;
+        state.increaseActiveUseCount();
         return state;
     }
 
     @Override
     public synchronized void returnState(State state) {
-        state.activeUseCount--;
+        state.decreaseActiveUseCount();
         partitionStateHolder.returnState(state);
     }
 
 
+    @Override
     public synchronized Map<String, Map<String, State>> getAllStates() {
         Map<String, Map<String, State>> states = partitionStateHolder.getAllStates();
         for (Map<String, State> groupByStates : states.values()) {
             for (State state : groupByStates.values()) {
-                state.activeUseCount++;
+                state.increaseActiveUseCount();
             }
         }
         return states;
@@ -58,7 +59,7 @@ public class PartitionSyncStateHolder implements StateHolder {
     public synchronized Map<String, State> getAllGroupByStates() {
         Map<String, State> groupByStates = partitionStateHolder.getAllGroupByStates();
         for (State state : groupByStates.values()) {
-            state.activeUseCount++;
+            state.increaseActiveUseCount();
         }
         return groupByStates;
     }
@@ -71,7 +72,7 @@ public class PartitionSyncStateHolder implements StateHolder {
     @Override
     public synchronized void returnGroupByStates(Map states) {
         for (State state : ((Map<String, State>) states).values()) {
-            state.activeUseCount--;
+            state.decreaseActiveUseCount();
         }
         partitionStateHolder.returnGroupByStates(states);
     }
@@ -80,7 +81,7 @@ public class PartitionSyncStateHolder implements StateHolder {
     public synchronized void returnAllStates(Map states) {
         for (Map<String, State> groupByStates : ((Map<String, Map<String, State>>) states).values()) {
             for (State state : groupByStates.values()) {
-                state.activeUseCount--;
+                state.decreaseActiveUseCount();
             }
         }
         partitionStateHolder.returnAllStates(states);

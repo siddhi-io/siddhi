@@ -51,7 +51,7 @@ public class PartitionStateHolder implements StateHolder {
     public void returnState(State state) {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
         String groupByFlowId = SiddhiAppContext.getGroupByFlowId();
-        if (state.activeUseCount == 0) {
+        if (state.getActiveUseCount() == 0) {
             try {
                 if (state.canDestroy()) {
                     removeState(partitionFlowId, groupByFlowId);
@@ -61,10 +61,10 @@ public class PartitionStateHolder implements StateHolder {
                         "' and the group by key '" + groupByFlowId + "', due to error! " + t.getMessage(), t);
                 removeState(partitionFlowId, groupByFlowId);
             }
-        } else if (state.activeUseCount < 0) {
+        } else if (state.getActiveUseCount() < 0) {
             throw new SiddhiAppRuntimeException("State active count has reached less then zero for partition key '" +
                     partitionFlowId + "' and the group by key '" + groupByFlowId + "', current value is " +
-                    state.activeUseCount);
+                    state.getActiveUseCount());
         }
     }
 
@@ -78,6 +78,7 @@ public class PartitionStateHolder implements StateHolder {
         }
     }
 
+    @Override
     public Map<String, Map<String, State>> getAllStates() {
         return states;
     }
@@ -106,7 +107,7 @@ public class PartitionStateHolder implements StateHolder {
              iterator.hasNext(); ) {
             Map.Entry<String, State> stateEntry = iterator.next();
             State state = stateEntry.getValue();
-            if (state.activeUseCount == 0) {
+            if (state.getActiveUseCount() == 0) {
                 try {
                     if (state.canDestroy()) {
                         iterator.remove();
@@ -116,10 +117,10 @@ public class PartitionStateHolder implements StateHolder {
                             "' and the group by key '" + stateEntry.getKey() + "', due to error! " + t.getMessage(), t);
                     iterator.remove();
                 }
-            } else if (state.activeUseCount < 0) {
+            } else if (state.getActiveUseCount() < 0) {
                 throw new SiddhiAppRuntimeException("State active count has reached less then zero for partition key '"
                         + partitionFlowId + "' and the group by key '" + stateEntry.getKey() + "', current value is " +
-                        state.activeUseCount);
+                        state.getActiveUseCount());
             }
 
         }
@@ -137,7 +138,7 @@ public class PartitionStateHolder implements StateHolder {
                  stateIterator.hasNext(); ) {
                 Map.Entry<String, State> stateEntry = stateIterator.next();
                 State state = stateEntry.getValue();
-                if (state.activeUseCount == 0) {
+                if (state.getActiveUseCount() == 0) {
                     try {
                         if (state.canDestroy()) {
                             stateIterator.remove();
@@ -148,11 +149,11 @@ public class PartitionStateHolder implements StateHolder {
                                 t.getMessage(), t);
                         stateIterator.remove();
                     }
-                } else if (state.activeUseCount < 0) {
+                } else if (state.getActiveUseCount() < 0) {
                     throw new SiddhiAppRuntimeException("State active count has reached less then zero for " +
                             "partition key '" + statesEntry.getKey() + "' and the group by key '" +
                             stateEntry.getKey() + "', current value is " +
-                            state.activeUseCount);
+                            state.getActiveUseCount());
                 }
             }
             if (statesEntry.getValue().isEmpty()) {

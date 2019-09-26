@@ -25,7 +25,33 @@ import java.util.Map;
  */
 public abstract class State {
 
-    int activeUseCount = 0;
+    private static final int INIT_ACTIVE_USE_COUNT = -0xFFFF;
+
+    /**
+     * if activeUseCount == INIT_ACTIVE_USE_COUNT, means the State object is just initialized.
+     * For just initialized state, getActiveUseCount will return 0,
+     * increaseActiveUseCount will set activeUseCount to 1,
+     * decreaseActiveUseCount will be skipped.
+     */
+    private int activeUseCount = INIT_ACTIVE_USE_COUNT;
+
+    public int getActiveUseCount() {
+        return activeUseCount == INIT_ACTIVE_USE_COUNT ? 0 : activeUseCount;
+    }
+
+    public void increaseActiveUseCount() {
+        if (activeUseCount == INIT_ACTIVE_USE_COUNT) {
+            activeUseCount = 1;
+        } else {
+            activeUseCount++;
+        }
+    }
+
+    public void decreaseActiveUseCount() {
+        if (activeUseCount != INIT_ACTIVE_USE_COUNT) {
+            activeUseCount--;
+        }
+    }
 
     public abstract boolean canDestroy();
 
