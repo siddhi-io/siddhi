@@ -462,6 +462,9 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         aggregationRuntime.startPurging();
                     }
                 }
+
+                inputManager.connect();
+
                 runningWithoutSources = true;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
