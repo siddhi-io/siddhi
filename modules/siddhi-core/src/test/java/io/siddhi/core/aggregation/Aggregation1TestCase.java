@@ -699,9 +699,6 @@ public class Aggregation1TestCase {
             logger.removeAppender(appender);
             siddhiAppRuntime.shutdown();
         }
-
-        // Thursday, June 1, 2017 4:05:50 AM
-        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "June 1, 2017 4:05:50 AM"});
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest16"})
