@@ -105,12 +105,9 @@ public class SiddhiExtensionLoader {
                 if (!siddhiExtensionAnnotation.namespace().isEmpty()) {
                     String key = siddhiExtensionAnnotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
                             siddhiExtensionAnnotation.name();
-                    Class existingValue = siddhiExtensionsMap.get(key);
-                    if (existingValue == null) {
-                        previousClass = siddhiExtensionsMap.put(key, extensionClass);
-                    }
+                    previousClass = siddhiExtensionsMap.put(key, extensionClass);
                     if (previousClass != null) {
-                        log.warn("Dropping extension '" + extensionClass + "' as '" + previousClass + "' was already " +
+                        log.warn("Dropping extension '" + previousClass + "' as '" + extensionClass + "' is " +
                                 "loaded with the same namespace and name '" +
                                 siddhiExtensionAnnotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
                                 siddhiExtensionAnnotation.name() + "'");
@@ -118,9 +115,8 @@ public class SiddhiExtensionLoader {
                 } else {
                     previousClass = siddhiExtensionsMap.put(siddhiExtensionAnnotation.name(), extensionClass);
                     if (previousClass != null) {
-                        log.warn("Dropping extension '" + extensionClass + "' as '" + previousClass + "' was already " +
-                                "loaded with the " +
-                                "same name '" + siddhiExtensionAnnotation.name() + "'");
+                        log.warn("Dropping extension '" + previousClass + "' as '" + extensionClass + "' is " +
+                                "loaded with the same name '" + siddhiExtensionAnnotation.name() + "'");
                     }
                 }
             } else {
