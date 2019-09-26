@@ -257,7 +257,8 @@ public class OnDemandQueryParser {
         return findOnDemandQueryRuntime;
     }
 
-    private static OnDemandQueryRuntime constructOnDemandQueryRuntime(AggregationRuntime aggregation, OnDemandQuery onDemandQuery,
+    private static OnDemandQueryRuntime constructOnDemandQueryRuntime(AggregationRuntime aggregation,
+                                                                      OnDemandQuery onDemandQuery,
                                                                       Map<String, Table> tableMap,
                                                                       Map<String, Window> windowMap,
                                                                       Within within, Expression per,
