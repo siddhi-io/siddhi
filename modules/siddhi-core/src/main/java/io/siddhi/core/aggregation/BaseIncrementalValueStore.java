@@ -69,7 +69,7 @@ public class BaseIncrementalValueStore {
         }
     }
 
-    public void clearValues(long startTimeOfNewAggregates, StreamEvent resetEvent) {
+    public synchronized void clearValues(long startTimeOfNewAggregates, StreamEvent resetEvent) {
         this.initialTimestamp = startTimeOfNewAggregates;
         setTimestamp(startTimeOfNewAggregates);
         setProcessed(false);
@@ -80,7 +80,7 @@ public class BaseIncrementalValueStore {
         return expressionExecutors;
     }
 
-    public boolean isProcessed() {
+    public synchronized boolean isProcessed() {
         StoreState state = this.storeStateHolder.getState();
         try {
             return state.isProcessed;
@@ -89,7 +89,7 @@ public class BaseIncrementalValueStore {
         }
     }
 
-    public void setProcessed(boolean isProcessed) {
+    private void setProcessed(boolean isProcessed) {
         StoreState state = this.storeStateHolder.getState();
         try {
             state.isProcessed = isProcessed;
@@ -116,7 +116,7 @@ public class BaseIncrementalValueStore {
         }
     }
 
-    public Map<String, StreamEvent> getGroupedByEvents() {
+    public synchronized Map<String, StreamEvent> getGroupedByEvents() {
         Map<String, StreamEvent> groupedByEvents = new HashMap<>();
 
         if (isProcessed()) {
@@ -137,7 +137,7 @@ public class BaseIncrementalValueStore {
         return groupedByEvents;
     }
 
-    public void process(StreamEvent streamEvent) {
+    public synchronized void process(StreamEvent streamEvent) {
         ValueState state = valueStateHolder.getState();
         try {
             boolean shouldUpdate = true;
@@ -158,7 +158,7 @@ public class BaseIncrementalValueStore {
         }
     }
 
-    public void process(Map<String, StreamEvent> groupedByEvents) {
+    public synchronized void process(Map<String, StreamEvent> groupedByEvents) {
         for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
             synchronized (this) {
                 SiddhiAppContext.startGroupByFlow(eventEntry.getKey() + "-" +

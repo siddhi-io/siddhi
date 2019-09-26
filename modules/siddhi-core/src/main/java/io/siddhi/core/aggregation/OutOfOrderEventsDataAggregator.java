@@ -78,23 +78,25 @@ public class OutOfOrderEventsDataAggregator {
             String groupByKey = groupByKeyGenerator.constructEventKey(streamEvent);
             groupByKeys.add(groupByKey);
             SiddhiAppContext.startGroupByFlow(groupByKey);
-            ValueState state = (ValueState) valueStateHolder.getState();
-            try {
-                boolean shouldUpdate = true;
-                if (shouldUpdateTimestamp != null) {
-                    shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), state);
-                }
-                for (int i = 0; i < baseExecutors.size(); i++) { // keeping timestamp value location as null
-                    ExpressionExecutor expressionExecutor = baseExecutors.get(i);
-                    if (shouldUpdate) {
-                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                    } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+            synchronized (this) {
+                ValueState state = (ValueState) valueStateHolder.getState();
+                try {
+                    boolean shouldUpdate = true;
+                    if (shouldUpdateTimestamp != null) {
+                        shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), state);
                     }
+                    for (int i = 0; i < baseExecutors.size(); i++) { // keeping timestamp value location as null
+                        ExpressionExecutor expressionExecutor = baseExecutors.get(i);
+                        if (shouldUpdate) {
+                            state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                        } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                            state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                        }
+                    }
+                } finally {
+                    valueStateHolder.returnState(state);
+                    SiddhiAppContext.stopGroupByFlow();
                 }
-            } finally {
-                valueStateHolder.returnState(state);
-                SiddhiAppContext.stopGroupByFlow();
             }
         }
 
@@ -122,7 +124,7 @@ public class OutOfOrderEventsDataAggregator {
     }
 
 
-    private ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
+    private synchronized ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
         ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
         Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
         try {
