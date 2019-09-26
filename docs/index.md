@@ -40,7 +40,7 @@ For more information on using Siddhi refer <a target="_blank" href="https://sidd
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.4">5.1.4</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.5">5.1.5</a>.
 
 ## Support and Contribution
 
