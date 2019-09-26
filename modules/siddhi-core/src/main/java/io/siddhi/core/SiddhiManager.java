@@ -211,7 +211,11 @@ public class SiddhiManager {
      * @param clazz Class name of the implementation
      */
     public void setExtension(String name, Class clazz) {
-        siddhiContext.getSiddhiExtensions().put(name, clazz);
+        Class previousClass = siddhiContext.getSiddhiExtensions().put(name, clazz);
+        if (previousClass != null) {
+            log.warn("Dropping extension '" + previousClass + "' as '" + clazz + "' is " +
+                    "loaded with the same namespace and name '" + name + "'");
+        }
     }
 
     /**
