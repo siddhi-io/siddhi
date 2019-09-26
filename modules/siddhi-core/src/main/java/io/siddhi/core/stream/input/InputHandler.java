@@ -31,6 +31,7 @@ public class InputHandler {
 
     protected String streamId;
     protected int streamIndex;
+    protected InputProcessor compiledInputProcessor;
     protected InputProcessor inputProcessor;
     protected SiddhiAppContext siddhiAppContext;
     protected InputProcessor pausedInputPublisher;
@@ -39,9 +40,9 @@ public class InputHandler {
                         SiddhiAppContext siddhiAppContext) {
         this.streamId = streamId;
         this.streamIndex = streamIndex;
-        this.inputProcessor = inputProcessor;
+        this.compiledInputProcessor = inputProcessor;
         this.siddhiAppContext = siddhiAppContext;
-        this.pausedInputPublisher = this.inputProcessor;
+        this.pausedInputPublisher = this.compiledInputProcessor;
     }
 
     public String getStreamId() {
@@ -51,6 +52,9 @@ public class InputHandler {
     public void send(Object[] data) throws InterruptedException {
         if (inputProcessor != null) {
             inputProcessor.send(System.currentTimeMillis(), data, streamIndex);
+        } else {
+            throw new InterruptedException("Siddhi app '" + this.siddhiAppContext.getName() + "' is not " +
+                    "running, cannot send event.");
         }
     }
 
@@ -61,6 +65,9 @@ public class InputHandler {
         }
         if (inputProcessor != null) {
             inputProcessor.send(timestamp, data, streamIndex);
+        } else {
+            throw new InterruptedException("Siddhi app '" + this.siddhiAppContext.getName() + "' is not " +
+                    "running, cannot send events.");
         }
     }
 
@@ -71,6 +78,9 @@ public class InputHandler {
         }
         if (inputProcessor != null) {
             inputProcessor.send(event, streamIndex);
+        } else {
+            throw new InterruptedException("Siddhi app '" + this.siddhiAppContext.getName() + "' is not " +
+                    "running, cannot send event.");
         }
     }
 
@@ -81,7 +91,15 @@ public class InputHandler {
         }
         if (inputProcessor != null) {
             inputProcessor.send(events, streamIndex);
+        } else {
+            throw new InterruptedException("Siddhi app '" + this.siddhiAppContext.getName() + "' is not " +
+                    "running, cannot send events");
         }
+    }
+
+    void connect() {
+        this.inputProcessor = this.compiledInputProcessor;
+        this.pausedInputPublisher = this.compiledInputProcessor;
     }
 
     void disconnect() {

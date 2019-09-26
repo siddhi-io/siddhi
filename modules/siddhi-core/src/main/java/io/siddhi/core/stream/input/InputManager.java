@@ -57,6 +57,12 @@ public class InputManager {
         }
     }
 
+    public synchronized void connect() {
+        for (InputHandler inputHandler : inputHandlerMap.values()) {
+            inputHandler.connect();
+        }
+    }
+
     public synchronized void disconnect() {
         for (InputHandler inputHandler : inputHandlerMap.values()) {
             inputHandler.disconnect();
