@@ -226,15 +226,23 @@ public class SiddhiCompiler {
                 if (value == null) {
                     value = System.getenv(key);
                     if (value == null) {
+                        int startIndex = variableMatcher.start(0);
+                        int endIndex = variableMatcher.end(0);
+                        String upToStartIndex = siddhiApp.substring(0, startIndex);
+                        int lineStartIndex = upToStartIndex.lastIndexOf("\n") + 1;
+                        int lineNumber = upToStartIndex.split("\n").length;
                         Pattern appNamePattern = Pattern.compile("@app:name\\(\\W*('|\")(\\w+)('|\")\\W*\\)");
                         Matcher appNameMatcher = appNamePattern.matcher(siddhiApp);
                         if (appNameMatcher.find()) {
                             String appName = appNameMatcher.group(2);
                             throw new SiddhiParserException("No system or environmental variable found for '${"
-                                    + key + "}', for Siddhi App '" + appName + "'");
+                                    + key + "}', for Siddhi App '" + appName + "'",
+                                    new int[]{lineNumber, startIndex - lineStartIndex},
+                                    new int[]{lineNumber, endIndex - lineStartIndex});
                         } else {
                             throw new SiddhiParserException("No system or environmental variable found for '${"
-                                    + key + "}'");
+                                    + key + "}'", new int[]{lineNumber, startIndex - lineStartIndex},
+                                    new int[]{lineNumber, endIndex - lineStartIndex});
                         }
                     }
                 }
