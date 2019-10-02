@@ -24,7 +24,6 @@ import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.stream.output.sink.SinkHandler;
 import io.siddhi.core.stream.output.sink.SinkMapper;
-import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;

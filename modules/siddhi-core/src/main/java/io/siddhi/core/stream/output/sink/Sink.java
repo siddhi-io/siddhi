@@ -372,7 +372,6 @@ public abstract class Sink<S extends State> implements SinkListener {
                     streamJunction.handleError(dynamicOptions.getEvent(), e);
                     break;
                 case WAIT:
-                    System.out.println(this.getClass().getName());
                     LOG.error(StringUtil.removeCRLFCharacters(
                             ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                                     ", error while connecting Sink '" + type + "' at '" + streamDefinition.getId() +

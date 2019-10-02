@@ -270,7 +270,6 @@ public class MultiClientDistributedSinkTestCase {
         InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
-                System.out.println(msg);
                 topic1Count.incrementAndGet();
             }
 
@@ -514,7 +513,6 @@ public class MultiClientDistributedSinkTestCase {
             public void onMessage(Object msg) {
                 if (msg instanceof Event) {
                     topic1Count.incrementAndGet();
-                    System.out.println(msg);
                     return;
                 }
                 topic1Count.addAndGet(((Event[]) msg).length);

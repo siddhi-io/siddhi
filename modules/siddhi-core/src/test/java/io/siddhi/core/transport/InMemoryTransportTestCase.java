@@ -620,7 +620,7 @@ public class InMemoryTransportTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
-        TestFailingInMemorySink.publishAlwaysFail=true;
+        TestFailingInMemorySink.publishAlwaysFail = true;
 
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
@@ -636,7 +636,7 @@ public class InMemoryTransportTestCase {
         AssertJUnit.assertEquals("Number of errors", 10, TestFailingInMemorySink.numberOfErrorOccurred);
         siddhiAppRuntime.shutdown();
 
-        TestFailingInMemorySink.publishAlwaysFail=false;
+        TestFailingInMemorySink.publishAlwaysFail = false;
 
         //unsubscribe from "inMemory" broker per topic
         InMemoryBroker.unsubscribe(subscriptionWSO2);
@@ -1272,7 +1272,7 @@ public class InMemoryTransportTestCase {
     public void inMemoryTestCase19() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemoryTestCase19");
 
-        InMemoryBroker.Subscriber subscriptionWSO2= new InMemoryBroker.Subscriber() {
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
                 wso2Count.incrementAndGet();

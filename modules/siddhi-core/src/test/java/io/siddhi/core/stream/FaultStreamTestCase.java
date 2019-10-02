@@ -861,7 +861,6 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(11000);
-            System.out.println(appender.getMessages());
             Assert.assertTrue(appender.getMessages().contains("Connection unavailable during publishing, " +
                     "error while connecting Sink 'testAsyncInMemory' at 'outputStream', will retry"));
             Assert.assertEquals(count.get(), 2);
