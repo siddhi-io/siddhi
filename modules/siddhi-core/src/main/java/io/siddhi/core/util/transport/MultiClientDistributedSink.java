@@ -57,7 +57,7 @@ public class MultiClientDistributedSink extends DistributedTransport {
         } catch (ConnectionUnavailableException e) {
             transport.setConnected(false);
             strategy.destinationFailed(destinationId);
-            log.warn("Failed to publish payload to destination ID " + destinationId);
+            log.warn("Failed to publish payload to destination ID " + destinationId + ", " + e.getMessage(), e);
             transport.connectWithRetry();
             throw e;
         }

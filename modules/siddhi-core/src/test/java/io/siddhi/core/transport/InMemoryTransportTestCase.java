@@ -565,7 +565,7 @@ public class InMemoryTransportTestCase {
         //assert event count
         AssertJUnit.assertEquals("Number of WSO2 events", 1, wso2Count.get());
         AssertJUnit.assertEquals("Number of IBM events", 2, ibmCount.get());
-        AssertJUnit.assertEquals("Number of errors", 2, TestFailingInMemorySink.numberOfErrorOccurred);
+        AssertJUnit.assertEquals("Number of errors", 3, TestFailingInMemorySink.numberOfErrorOccurred);
         siddhiAppRuntime.shutdown();
 
         //unsubscribe from "inMemory" broker per topic
@@ -574,6 +574,77 @@ public class InMemoryTransportTestCase {
     }
 
     @Test(dependsOnMethods = {"inMemoryWithFailingSink"})
+    public void inMemoryWithFailingSink1() throws InterruptedException {
+        log.info("Test failing inMemorySink1");
+
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                wso2Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        };
+
+        InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                ibmCount.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "IBM";
+            }
+        };
+
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriptionWSO2);
+        InMemoryBroker.subscribe(subscriptionIBM);
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testFailingInMemory', topic='{{symbol}}', @map(type='passThrough')) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+
+        TestFailingInMemorySink.publishAlwaysFail = true;
+
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.7f, 100L});
+        Thread.sleep(5500);
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of WSO2 events", 0, wso2Count.get());
+        AssertJUnit.assertEquals("Number of IBM events", 0, ibmCount.get());
+        AssertJUnit.assertEquals("Number of errors", 10, TestFailingInMemorySink.numberOfErrorOccurred);
+        siddhiAppRuntime.shutdown();
+
+        TestFailingInMemorySink.publishAlwaysFail = false;
+
+        //unsubscribe from "inMemory" broker per topic
+        InMemoryBroker.unsubscribe(subscriptionWSO2);
+        InMemoryBroker.unsubscribe(subscriptionIBM);
+    }
+
+
+    @Test(dependsOnMethods = {"inMemoryWithFailingSink1"})
     public void inMemoryWithFailingSource() throws InterruptedException {
         log.info("Test failing inMemorySource");
 
@@ -1201,6 +1272,18 @@ public class InMemoryTransportTestCase {
     public void inMemoryTestCase19() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemoryTestCase19");
 
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                wso2Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        };
+
         String streams = "" +
                 "@app:name('TestSiddhiApp')" +
                 "@source(type='inMemory', topic='WSO2', @map(type='testSourceOption')) " +
@@ -1243,6 +1326,8 @@ public class InMemoryTransportTestCase {
         //assert event count
         AssertJUnit.assertEquals("Number of WSO2 events", 2, wso2Count.get());
         siddhiAppRuntime.shutdown();
+
+        InMemoryBroker.unsubscribe(subscriptionWSO2);
 
     }
 

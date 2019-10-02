@@ -42,8 +42,9 @@ import io.siddhi.core.util.transport.DynamicOptions;
 )
 public class TestFailingInMemorySink extends InMemorySink {
     public static int numberOfErrorOccurred = 0;
-    public static boolean fail;
+    public static volatile boolean fail;
     public static boolean failOnce;
+    public static boolean publishAlwaysFail = false;
 
     public TestFailingInMemorySink() {
         this.failOnce = false;
@@ -64,7 +65,7 @@ public class TestFailingInMemorySink extends InMemorySink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state)
             throws ConnectionUnavailableException {
-        if (fail || failOnce) {
+        if (fail || failOnce || publishAlwaysFail) {
             failOnce = false;
             numberOfErrorOccurred++;
             throw new ConnectionUnavailableException("Connection unavailable during publishing");

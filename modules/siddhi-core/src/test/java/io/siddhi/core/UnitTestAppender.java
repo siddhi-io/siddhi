@@ -21,17 +21,22 @@ package io.siddhi.core;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
+import org.mvel2.util.StringAppender;
 
 public class UnitTestAppender extends AppenderSkeleton {
-    private String messages;
+    private StringAppender messages = new StringAppender();
 
     public String getMessages() {
-        return messages;
+        String results = messages.toString();
+        if (results.isEmpty()) {
+            return null;
+        }
+        return results;
     }
 
     @Override
     protected void append(LoggingEvent loggingEvent) {
-        messages = loggingEvent.getRenderedMessage();
+        messages.append(loggingEvent.getRenderedMessage());
     }
 
     @Override
