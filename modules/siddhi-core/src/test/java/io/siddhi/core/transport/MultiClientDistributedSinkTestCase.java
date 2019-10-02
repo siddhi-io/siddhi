@@ -120,7 +120,7 @@ public class MultiClientDistributedSinkTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"multiClientRoundRobin"})
     public void singleClientPartitioned() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 
@@ -191,7 +191,7 @@ public class MultiClientDistributedSinkTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"singleClientPartitioned"})
     public void singleClientBroadcast() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 
@@ -259,22 +259,24 @@ public class MultiClientDistributedSinkTestCase {
         //unsubscribe from "inMemory" broker per topic
         InMemoryBroker.unsubscribe(subscriptionWSO2);
         InMemoryBroker.unsubscribe(subscriptionIBM);
+        Thread.sleep(2000);
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"singleClientBroadcast"})
     public void singleClientFailingBroadcast() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 
         InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
+                System.out.println(msg);
                 topic1Count.incrementAndGet();
             }
 
             @Override
             public String getTopic() {
-                return "topic1";
+                return "topic3";
             }
         };
 
@@ -286,21 +288,17 @@ public class MultiClientDistributedSinkTestCase {
 
             @Override
             public String getTopic() {
-                return "topic2";
+                return "topic4";
             }
         };
-
-        //subscribe to "inMemory" broker per topic
-        InMemoryBroker.subscribe(subscriptionWSO2);
-        InMemoryBroker.subscribe(subscriptionIBM);
 
         String streams = "" +
                 "@app:name('TestSiddhiApp')" +
                 "define stream FooStream (symbol string, price float, volume long); " +
                 "@sink(type='testFailingInMemory', @map(type='passThrough'), " +
                 "   @distribution(strategy='broadcast'," +
-                "       @destination(topic = 'topic1'), " +
-                "       @destination(topic = 'topic2'))) " +
+                "       @destination(topic = 'topic3'), " +
+                "       @destination(topic = 'topic4'))) " +
                 "define stream BarStream (symbol string, price float, volume long); ";
 
         String query = "" +
@@ -312,6 +310,10 @@ public class MultiClientDistributedSinkTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriptionWSO2);
+        InMemoryBroker.subscribe(subscriptionIBM);
+
         siddhiAppRuntime.start();
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
@@ -319,7 +321,7 @@ public class MultiClientDistributedSinkTestCase {
         TestFailingInMemorySink.fail = true;
         stockStream.send(new Object[]{"IBM", 57.6f, 100L});
         TestFailingInMemorySink.fail = false;
-        Thread.sleep(16000);
+        Thread.sleep(6000);
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
@@ -336,7 +338,7 @@ public class MultiClientDistributedSinkTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"singleClientFailingBroadcast"})
     public void multiClientFailingBroadcast2() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 
@@ -408,7 +410,7 @@ public class MultiClientDistributedSinkTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"multiClientFailingBroadcast2"})
     public void multiClientFailingBroadcast3() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 
@@ -454,7 +456,7 @@ public class MultiClientDistributedSinkTestCase {
                 "@sink(type='testFailingInMemory2', @map(type='passThrough'), " +
                 "   @distribution(strategy='broadcast'," +
                 "       @destination(topic = 'IBM', test='1'), " +
-                "       @destination(topic = 'WSO2',  test='2'))) " +
+                "       @destination(topic = 'WSO2', test='2'))) " +
                 "define stream BarStream (symbol string, price float, volume long); ";
 
         String query = "" +
@@ -492,6 +494,102 @@ public class MultiClientDistributedSinkTestCase {
             Thread.sleep(100);
 
             //assert event count
+            AssertJUnit.assertEquals("Number of topic 1 events", 5, topic1Count.get());
+            AssertJUnit.assertEquals("Number of topic 2 events", 5, topic2Count.get());
+        } finally {
+            siddhiAppRuntime.shutdown();
+
+            //unsubscribe from "inMemory" broker per topic
+            InMemoryBroker.unsubscribe(subscriptionWSO2);
+            InMemoryBroker.unsubscribe(subscriptionIBM);
+        }
+    }
+
+    @Test(dependsOnMethods = {"multiClientFailingBroadcast3"})
+    public void multiClientFailingBroadcast4() throws InterruptedException {
+        log.info("Test inMemorySink And EventMapping With wait");
+
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                if (msg instanceof Event) {
+                    topic1Count.incrementAndGet();
+                    System.out.println(msg);
+                    return;
+                }
+                topic1Count.addAndGet(((Event[]) msg).length);
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        };
+
+        InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                if (msg instanceof Event) {
+                    topic2Count.incrementAndGet();
+                    return;
+                }
+                topic2Count.addAndGet(((Event[]) msg).length);
+            }
+
+            @Override
+            public String getTopic() {
+                return "IBM";
+            }
+        };
+
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriptionWSO2);
+        InMemoryBroker.subscribe(subscriptionIBM);
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testFailingInMemory2', on.error='wait', @map(type='passThrough'), " +
+                "   @distribution(strategy='broadcast'," +
+                "       @destination(topic = 'IBM', test='1'), " +
+                "       @destination(topic = 'WSO2', test='2'))) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        try {
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+
+            siddhiAppRuntime.start();
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        TestFailingInMemorySink2.fail = false;
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+
+            }.start();
+            TestFailingInMemorySink2.fail = true;
+            stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+            Thread.sleep(11000);
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+
+            Thread.sleep(100);
+
+            //assert event count
             AssertJUnit.assertEquals("Number of topic 1 events", 6, topic1Count.get());
             AssertJUnit.assertEquals("Number of topic 2 events", 6, topic2Count.get());
         } finally {
@@ -504,7 +602,7 @@ public class MultiClientDistributedSinkTestCase {
     }
 
 
-    @Test
+    @Test(dependsOnMethods = {"multiClientFailingBroadcast4"})
     public void singleClientBroadcastWithRef() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params with ref");
 
@@ -587,7 +685,7 @@ public class MultiClientDistributedSinkTestCase {
         }
     }
 
-    @Test
+    @Test(dependsOnMethods = {"singleClientBroadcastWithRef"})
     public void multiClientRoundRobinWithDep() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
 

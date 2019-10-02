@@ -459,7 +459,7 @@ public class FaultStreamTestCase {
             thread.start();
             Thread.sleep(2000);
             Assert.assertTrue(appender.getMessages().contains(
-                    "error while connecting at Sink 'inMemory' at 'outputStream', will retry in"));
+                    "error while connecting Sink 'inMemory' at 'outputStream', will retry every"));
             Assert.assertEquals(count.get(), 0);
             Assert.assertEquals(countStream.get(), 0);
             InMemoryBroker.subscribe(subscriptionIBM);
@@ -783,8 +783,8 @@ public class FaultStreamTestCase {
             Thread.sleep(2000);
             Assert.assertEquals(countStream.get(), 1);
             Assert.assertEquals(count.get(), 0);
-            Assert.assertTrue(appender.getMessages().contains("error while connecting at Sink 'testAsyncInMemory'" +
-                    " at 'outputStream', will retry in"));
+            Assert.assertTrue(appender.getMessages().contains("error while connecting Sink 'testAsyncInMemory'" +
+                    " at 'outputStream', will retry every"));
             TestAsyncInMemory.fail = false;
             Thread.sleep(11000);
             Assert.assertEquals(countStream.get(), 2);
@@ -860,9 +860,10 @@ public class FaultStreamTestCase {
                 }
             };
             thread.start();
-            Thread.sleep(6000);
-            Assert.assertTrue(appender.getMessages().contains("Connection unavailable during publishing, error while " +
-                    "connecting at Sink 'testAsyncInMemory' at 'outputStream', will retry"));
+            Thread.sleep(11000);
+            System.out.println(appender.getMessages());
+            Assert.assertTrue(appender.getMessages().contains("Connection unavailable during publishing, " +
+                    "error while connecting Sink 'testAsyncInMemory' at 'outputStream', will retry"));
             Assert.assertEquals(count.get(), 2);
             Assert.assertEquals(countStream.get(), 2);
         } catch (Exception e) {

@@ -62,7 +62,7 @@ public class SingleClientDistributedSink extends DistributedTransport {
         } catch (ConnectionUnavailableException e) {
             sink.setConnected(false);
             strategy.destinationFailed(destinationId);
-            log.warn("Failed to publish payload to destination ID " + destinationId + "");
+            log.warn("Failed to publish payload to destination ID " + destinationId + ".", e);
             sink.connectWithRetry();
             throw e;
         }

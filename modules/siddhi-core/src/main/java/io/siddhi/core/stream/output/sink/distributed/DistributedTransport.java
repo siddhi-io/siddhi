@@ -130,8 +130,6 @@ public abstract class DistributedTransport extends Sink {
                     errorMessages = new StringBuilder();
                 }
                 errorMessages.append("[Destination ").append(destinationId).append("]:").append(e.getMessage());
-                log.warn(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) + " Failed to publish destination ID "
-                        + destinationId);
             }
         }
 
@@ -166,26 +164,6 @@ public abstract class DistributedTransport extends Sink {
                                        List<Map<String, String>> destinationDeploymentProperties,
                                        Annotation sinkAnnotation, ConfigReader sinkConfigReader,
                                        DistributionStrategy strategy, String type, SiddhiAppContext siddhiAppContext);
-
-    public void connectWithRetry() {
-        if (!isConnected()) {
-            isTryingToConnect.set(true);
-            try {
-                connect();
-            } catch (ConnectionUnavailableException ignored) {
-
-            }
-            int retryAttempt = 0;
-            while (strategy.getActiveDestinationCount() == 0 && retryAttempt < 4) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ignored) {
-
-                }
-                retryAttempt++;
-            }
-        }
-    }
 
     /**
      * Connection callback to notify DistributionStrategy about new connection initiations and failures
