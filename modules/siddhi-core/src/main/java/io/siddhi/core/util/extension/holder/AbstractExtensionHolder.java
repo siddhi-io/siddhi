@@ -61,4 +61,17 @@ public abstract class AbstractExtensionHolder {
         }
     }
 
+    public Class getExtension(String extensionKey) {
+        if (!extensionKey.isEmpty()) {
+            return extensionMap.get(extensionKey);
+        }
+        return null;
+    }
+
+    public void addExtension(String extensionKey, Class clazz) {
+        if (!extensionKey.isEmpty()) {
+            extensionMap.put(extensionKey, clazz);
+        }
+    }
+
 }
