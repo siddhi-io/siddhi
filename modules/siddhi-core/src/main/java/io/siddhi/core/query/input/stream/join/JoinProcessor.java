@@ -35,7 +35,6 @@ import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -78,7 +77,7 @@ public class JoinProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {
-            List<JoinReturnEventChunk> returnEventChunkList = new LinkedList<>();
+            ComplexEventChunk<ComplexEvent> returnEventChunkList = new ComplexEventChunk<>(null, null, true);
             StateEvent joinStateEvent = new StateEvent(2, 0);
             StreamEvent nextEvent = (StreamEvent) complexEventChunk.getFirst();
             complexEventChunk.clear();
@@ -92,12 +91,10 @@ public class JoinProcessor implements Processor {
                 } else if (eventType == ComplexEvent.Type.RESET) {
                     if (!leftJoinProcessor) {
                         StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                        returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true), true));
+                        returnEventChunkList.add(outputStateEvent);
                     } else {
                         StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                        returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true), true));
+                        returnEventChunkList.add(outputStateEvent);
                     }
                 } else {
                     joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
@@ -121,49 +118,38 @@ public class JoinProcessor implements Processor {
                     if (foundStreamEvent == null) {
                         if (outerJoinProcessor && !leftJoinProcessor) {
                             StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                            returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
-                                    outputStateEvent, outputStateEvent, true), true));
+                            returnEventChunkList.add(outputStateEvent);
                         } else if (outerJoinProcessor && leftJoinProcessor) {
                             StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                            returnEventChunkList.add(new JoinReturnEventChunk(new ComplexEventChunk<>(
-                                    outputStateEvent, outputStateEvent, true), true));
+                            returnEventChunkList.add(outputStateEvent);
                         }
                     } else if (!isOptimisedQuery) {
-                        ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
                         while (foundStreamEvent != null) {
                             StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
                             foundStreamEvent.setNext(null);
                             if (!leftJoinProcessor) {
-                                returnEventChunk.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
+                                returnEventChunkList.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
                             } else {
-                                returnEventChunk.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
+                                returnEventChunkList.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
                             }
                             foundStreamEvent = nextFoundStreamEvent;
                         }
-                        returnEventChunkList.add(new JoinReturnEventChunk(returnEventChunk, true));
                     } else {
-                        ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
                         while (foundStreamEvent != null) {
                             StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
                             foundStreamEvent.setNext(null);
                             foundStreamEvent.setType(eventType);
-                            returnEventChunk.add(foundStreamEvent);
+                            returnEventChunkList.add(foundStreamEvent);
                             foundStreamEvent = nextFoundStreamEvent;
                         }
-                        returnEventChunkList.add(new JoinReturnEventChunk(returnEventChunk, false));
                     }
                 }
             }
-            for (JoinReturnEventChunk joinReturnEventChunk : returnEventChunkList) {
-                ComplexEventChunk<ComplexEvent> returnEventChunk = joinReturnEventChunk.getReturnComplexEvent();
-                if (returnEventChunk.getFirst() != null) {
-                    if (joinReturnEventChunk.isRegularJoin()) {
-                        selector.process(returnEventChunk);
-                    } else {
-                        selector.executePassThrough(returnEventChunk);
-                    }
-                    returnEventChunk.clear();
-                }
+
+            if (isOptimisedQuery) {
+                selector.executePassThrough(returnEventChunkList);
+            } else {
+                selector.execute(returnEventChunkList);
             }
         } else {
             if (preJoinProcessor) {
