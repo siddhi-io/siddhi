@@ -77,85 +77,96 @@ public class JoinProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {
-            ComplexEventChunk<ComplexEvent> returnEventChunkList = new ComplexEventChunk<>(null, null, true);
-            StateEvent joinStateEvent = new StateEvent(2, 0);
+            ComplexEventChunk<ComplexEvent> returnEventChunkList = new ComplexEventChunk<>(true);
             StreamEvent nextEvent = (StreamEvent) complexEventChunk.getFirst();
-            complexEventChunk.clear();
-            while (nextEvent != null) {
-                StreamEvent streamEvent = nextEvent;
-                nextEvent = streamEvent.getNext();
-                streamEvent.setNext(null);
-                ComplexEvent.Type eventType = streamEvent.getType();
-                if (eventType == ComplexEvent.Type.TIMER) {
-                    continue;
-                } else if (eventType == ComplexEvent.Type.RESET) {
-                    if (!leftJoinProcessor) {
-                        StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                        returnEventChunkList.add(outputStateEvent);
-                    } else {
-                        StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                        returnEventChunkList.add(outputStateEvent);
-                    }
-                } else {
-                    joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
-
-                    StreamEvent foundStreamEvent;
-                    if (this.isOptimisedQuery) {
-                        try {
-                            foundStreamEvent = query(joinStateEvent);
-                        } catch (SiddhiAppRuntimeException e) {
-                            log.warn("Performing select clause in databases failed due to '" + e.getMessage() +
-                                    " in query '" + queryName + "' within Siddhi app '" + siddhiAppName +
-                                    "' hence reverting back to querying only with where clause.", e);
-                            this.isOptimisedQuery = false;
-                            foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
-                        }
-                    } else {
-                        foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
-                    }
-
-                    joinStateEvent.setEvent(matchingStreamIndex, null);
-                    if (foundStreamEvent == null) {
-                        if (outerJoinProcessor && !leftJoinProcessor) {
-                            StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
-                            returnEventChunkList.add(outputStateEvent);
-                        } else if (outerJoinProcessor && leftJoinProcessor) {
-                            StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
-                            returnEventChunkList.add(outputStateEvent);
-                        }
-                    } else if (!isOptimisedQuery) {
-                        while (foundStreamEvent != null) {
-                            StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
-                            foundStreamEvent.setNext(null);
-                            if (!leftJoinProcessor) {
-                                returnEventChunkList.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
-                            } else {
-                                returnEventChunkList.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
-                            }
-                            foundStreamEvent = nextFoundStreamEvent;
-                        }
-                    } else {
-                        while (foundStreamEvent != null) {
-                            StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
-                            foundStreamEvent.setNext(null);
-                            foundStreamEvent.setType(eventType);
-                            returnEventChunkList.add(foundStreamEvent);
-                            foundStreamEvent = nextFoundStreamEvent;
-                        }
-                    }
-                }
+            boolean isJoinStateSwitched = processJoinChunk(returnEventChunkList, nextEvent);
+            if (isJoinStateSwitched) {
+                returnEventChunkList.clear();
+                processJoinChunk(returnEventChunkList, (StreamEvent) complexEventChunk.getFirst());
             }
+            complexEventChunk.clear();
 
             if (isOptimisedQuery) {
                 selector.executePassThrough(returnEventChunkList);
             } else {
-                selector.execute(returnEventChunkList);
+                selector.process(returnEventChunkList);
             }
         } else {
             if (preJoinProcessor) {
                 nextProcessor.process(complexEventChunk);
             }
         }
+    }
+
+    private boolean processJoinChunk(ComplexEventChunk<ComplexEvent> returnEventChunkList, StreamEvent nextEvent) {
+        boolean isJoinStateSwitched = false;
+        StateEvent joinStateEvent = new StateEvent(2, 0);
+
+        while (nextEvent != null) {
+            StreamEvent streamEvent = nextEvent;
+            nextEvent = streamEvent.getNext();
+            ComplexEvent.Type eventType = streamEvent.getType();
+            if (eventType == ComplexEvent.Type.TIMER) {
+                continue;
+            } else if (eventType == ComplexEvent.Type.RESET) {
+                if (!leftJoinProcessor) {
+                    StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
+                    returnEventChunkList.add(outputStateEvent);
+                } else {
+                    StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
+                    returnEventChunkList.add(outputStateEvent);
+                }
+            } else {
+                joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
+
+                StreamEvent foundStreamEvent;
+                if (this.isOptimisedQuery) {
+                    try {
+                        foundStreamEvent = query(joinStateEvent);
+                    } catch (SiddhiAppRuntimeException e) {
+                        log.warn("Performing select clause in databases failed due to '" + e.getMessage() +
+                                " in query '" + queryName + "' within Siddhi app '" + siddhiAppName +
+                                "' hence reverting back to querying only with where clause.", e);
+                        this.isOptimisedQuery = false;
+                        isJoinStateSwitched = true;
+                        break;
+                    }
+                } else {
+                    foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
+                }
+
+                joinStateEvent.setEvent(matchingStreamIndex, null);
+                if (foundStreamEvent == null) {
+                    if (outerJoinProcessor && !leftJoinProcessor) {
+                        StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
+                        returnEventChunkList.add(outputStateEvent);
+                    } else if (outerJoinProcessor && leftJoinProcessor) {
+                        StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
+                        returnEventChunkList.add(outputStateEvent);
+                    }
+                } else if (!isOptimisedQuery) {
+                    while (foundStreamEvent != null) {
+                        StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
+                        foundStreamEvent.setNext(null);
+                        if (!leftJoinProcessor) {
+                            returnEventChunkList.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
+                        } else {
+                            returnEventChunkList.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
+                        }
+                        foundStreamEvent = nextFoundStreamEvent;
+                    }
+                } else {
+                    while (foundStreamEvent != null) {
+                        StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
+                        foundStreamEvent.setNext(null);
+                        foundStreamEvent.setType(eventType);
+                        returnEventChunkList.add(foundStreamEvent);
+                        foundStreamEvent = nextFoundStreamEvent;
+                    }
+                }
+            }
+        }
+        return isJoinStateSwitched;
     }
 
     private StreamEvent query(StateEvent joinStateEvent) throws SiddhiAppRuntimeException {
