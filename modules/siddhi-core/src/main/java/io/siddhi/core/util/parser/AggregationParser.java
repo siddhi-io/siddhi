@@ -204,9 +204,9 @@ public class AggregationParser {
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
             List<Expression> finalBaseExpressions = new ArrayList<>();
-            populateFinalBaseAggregators(tableMap, incomingVariableExpressionExecutors, incomingMetaStreamEvent,
-                    incomingExpressionExecutors, incrementalAttributeAggregators, siddhiQueryContext,
-                    finalBaseExpressions);
+            boolean isOptimisedLookup = populateFinalBaseAggregators(tableMap, incomingVariableExpressionExecutors,
+                    incomingMetaStreamEvent, incomingExpressionExecutors, incrementalAttributeAggregators,
+                    siddhiQueryContext, finalBaseExpressions);
 
             StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id(aggregatorName + "_intermediate");
             incomingOutputStreamDefinition.setQueryContextStartIndex(aggregationDefinition.getQueryContextStartIndex());
@@ -340,7 +340,8 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
                     aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
 
-            boolean isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+            isOptimisedLookup = isOptimisedLookup &&
+                                aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
 
             List<String> groupByVariablesList = groupByVariableList.stream()
                     .map(Variable::getAttributeName)
@@ -509,11 +510,13 @@ public class AggregationParser {
         return processExpressionExecutors;
     }
 
-    private static void populateFinalBaseAggregators(
+    private static boolean populateFinalBaseAggregators(
             Map<String, Table> tableMap, List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
             SiddhiQueryContext siddhiQueryContext, List<Expression> finalBaseAggregators) {
+
+        boolean isOptimisedLookup = true;
 
         List<Attribute> finalBaseAttributes = new ArrayList<>();
 
@@ -521,6 +524,10 @@ public class AggregationParser {
             Attribute[] baseAttributes = incrementalAttributeAggregator.getBaseAttributes();
             Expression[] baseAttributeInitialValues = incrementalAttributeAggregator.getBaseAttributeInitialValues();
             Expression[] baseAggregators = incrementalAttributeAggregator.getBaseAggregators();
+
+            if (baseAggregators.length > 1) {
+                isOptimisedLookup = false;
+            }
 
             for (int i = 0; i < baseAttributes.length; i++) {
                 validateBaseAggregators(incrementalAttributeAggregators,
@@ -537,6 +544,7 @@ public class AggregationParser {
                 }
             }
         }
+        return isOptimisedLookup;
     }
 
     private static void populateIncomingAggregatorsAndExecutors(

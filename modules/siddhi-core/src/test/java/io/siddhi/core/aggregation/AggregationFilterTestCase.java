@@ -462,4 +462,60 @@ public class AggregationFilterTestCase {
         Thread.sleep(100);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(dependsOnMethods = {"aggregationFilterTestCase5"})
+    public void aggregationFilterTestCase6() throws InterruptedException {
+        LOG.info("AggregationFilterTestCase5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp long);";
+        String query =
+                "@purge(enable='false')" +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
+                "(price * quantity) as lastTradeValue  " +
+                "group by symbol " +
+                "aggregate every sec...min ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L});
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L});
+        Thread.sleep(2000);
+
+        stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L});
+        stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L});
+        Thread.sleep(2000);
+
+        stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
+        stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
+        Thread.sleep(5000);
+
+        LocalDate currentDate = LocalDate.now();
+        String year = String.valueOf(currentDate.getYear());
+        String month = String.valueOf(currentDate.getMonth().getValue());
+        if (month.length() == 1) {
+            month = "0".concat(month);
+        }
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "on symbol == \"WSO2\" " +
+                "within \"" + year + "-" + month + "-** **:**:** +05:30\" " +
+                "per \"seconds\" " +
+                "select avgPrice " +
+                "group by symbol; ");
+
+        EventPrinter.print(events);
+        AssertJUnit.assertNotNull(events);
+        AssertJUnit.assertEquals(1, events.length);
+
+        AssertJUnit.assertNotSame("Wrong average expected!", events[0].getData()[0], 70.0);
+        Thread.sleep(100);
+        siddhiAppRuntime.shutdown();
+    }
 }
