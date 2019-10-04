@@ -219,6 +219,26 @@ public class SiddhiExtensionLoader {
     }
 
     /**
+     * Remove extensions to Siddhi siddhiExtensionsHolderMap.
+     * @param extensionKey                     fully qualified extension name (namespace:extensionName)
+     * @param extension                        extension class (eg:HttpSource)
+     * @param extensionHolderConcurrentHashMap reference map for the Siddhi extension holder
+     */
+    private static void removeFromExtensionHolderMap(
+            String extensionKey,
+            Class extension,
+            ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderConcurrentHashMap) {
+        for (Class extensionSuperClass : extensionNameSpaceList) {
+            if (extensionSuperClass.isAssignableFrom(extension)) {
+                AbstractExtensionHolder extensionHolder = extensionHolderConcurrentHashMap.get(extensionSuperClass);
+                if (extensionHolder != null) {
+                    extensionHolder.removeExtension(extensionKey);
+                }
+            }
+        }
+    }
+
+    /**
      * Adding extensions to Siddhi siddhiExtensionsMap.
      *
      * @param fqExtensionName     fully qualified extension name (namespace:extensionName or extensionName)
@@ -278,6 +298,17 @@ public class SiddhiExtensionLoader {
             });
             bundleExtensions.entrySet().removeIf(entry -> entry.getValue() ==
                     bundle.getBundleId());
+            ClassLoader classLoader = bundle.adapt(BundleWiring.class).getClassLoader();
+            Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, classLoader);
+            for (Class extension : extensions) {
+                Extension siddhiExtensionAnnotation = (Extension) extension.getAnnotation(Extension.class);
+                if (!siddhiExtensionAnnotation.namespace().isEmpty()) {
+                    String key = siddhiExtensionAnnotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
+                            siddhiExtensionAnnotation.name();
+                    removeFromExtensionHolderMap(key, extension, extensionHolderConcurrentHashMap);
+
+                }
+            }
         }
 
         void loadAllExtensions(BundleContext bundleContext) {

@@ -74,4 +74,10 @@ public abstract class AbstractExtensionHolder {
         }
     }
 
+    public void removeExtension(String extensionKey) {
+        if (!extensionKey.isEmpty()) {
+            extensionMap.remove(extensionKey);
+        }
+    }
+
 }
