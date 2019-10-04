@@ -51,7 +51,8 @@ public class SiddhiContext {
     private IncrementalPersistenceStore incrementalPersistenceStore = null;
     private ConcurrentHashMap<String, DataSource> siddhiDataSources;
     private StatisticsConfiguration statisticsConfiguration;
-    private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap;
+    private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap
+            = new ConcurrentHashMap<Class, AbstractExtensionHolder>();
     private ConfigManager configManager = null;
     private SinkHandlerManager sinkHandlerManager = null;
     private SourceHandlerManager sourceHandlerManager = null;
@@ -59,10 +60,9 @@ public class SiddhiContext {
     private Map<String, Object> attributes;
 
     public SiddhiContext() {
-        SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions);
+        SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions, extensionHolderMap);
         siddhiDataSources = new ConcurrentHashMap<String, DataSource>();
         statisticsConfiguration = new StatisticsConfiguration(new SiddhiMetricsFactory());
-        extensionHolderMap = new ConcurrentHashMap<Class, AbstractExtensionHolder>();
         configManager = new InMemoryConfigManager();
         attributes = new ConcurrentHashMap<>();
         defaultDisrupterExceptionHandler = new ExceptionHandler<Object>() {
