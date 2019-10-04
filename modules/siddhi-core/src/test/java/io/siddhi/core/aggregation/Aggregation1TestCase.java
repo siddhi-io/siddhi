@@ -158,10 +158,10 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L});
 
         stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289952000L});
-        stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952000L});
+        stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, 1496289952500L});
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
-        stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
+        stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954500L});
 
         Thread.sleep(2000);
 
