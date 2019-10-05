@@ -105,18 +105,18 @@ public class AggregationParser {
 
         if (aggregationDefinition == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition instance is null. " +
+                    "Aggregation Definition instance is null. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'");
         }
         if (aggregationDefinition.getTimePeriod() == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition '" + aggregationDefinition.getId() + "'s timePeriod is null. " +
+                    "Aggregation Definition '" + aggregationDefinition.getId() + "'s timePeriod is null. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
         if (aggregationDefinition.getSelector() == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition '" + aggregationDefinition.getId() + "'s selection is not defined. " +
+                    "Aggregation Definition '" + aggregationDefinition.getId() + "'s selection is not defined. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
@@ -585,10 +585,9 @@ public class AggregationParser {
                         siddhiQueryContext);
             } else if (externalTimestampExecutor.getReturnType() != Attribute.Type.LONG) {
                 throw new SiddhiAppCreationException(
-                        "AggregationDefinition '" + aggregationDefinition.getId() + "'s aggregateAttribute expects " +
-                                "long or string, but found " + timestampExecutor.getReturnType() + ". " +
-                                "Hence, can't create the siddhi app '" +
-                                siddhiQueryContext.getSiddhiAppContext().getName() + "'",
+                        "Aggregation Definition '" + aggregationDefinition.getId() + "'s timestamp attribute expects " +
+                        "long or string, but found " + externalTimestampExecutor.getReturnType() + ". Hence, can't " +
+                        "create the siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() + "'",
                         externalTimestampExpression.getQueryContextStartIndex(),
                         externalTimestampExpression.getQueryContextEndIndex());
             }
