@@ -298,15 +298,17 @@ public class SiddhiExtensionLoader {
             });
             bundleExtensions.entrySet().removeIf(entry -> entry.getValue() ==
                     bundle.getBundleId());
-            ClassLoader classLoader = bundle.adapt(BundleWiring.class).getClassLoader();
-            Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, classLoader);
-            for (Class extension : extensions) {
-                Extension siddhiExtensionAnnotation = (Extension) extension.getAnnotation(Extension.class);
-                if (!siddhiExtensionAnnotation.namespace().isEmpty()) {
-                    String key = siddhiExtensionAnnotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
-                            siddhiExtensionAnnotation.name();
-                    removeFromExtensionHolderMap(key, extension, extensionHolderConcurrentHashMap);
-
+            BundleWiring bundleWiring = bundle.adapt(BundleWiring.class);
+            if (bundleWiring != null) {
+                ClassLoader classLoader = bundleWiring.getClassLoader();
+                Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, classLoader);
+                for (Class extension : extensions) {
+                    Extension siddhiExtensionAnnotation = (Extension) extension.getAnnotation(Extension.class);
+                    if (!siddhiExtensionAnnotation.namespace().isEmpty()) {
+                        String key = siddhiExtensionAnnotation.namespace() + SiddhiConstants.EXTENSION_SEPARATOR +
+                                siddhiExtensionAnnotation.name();
+                        removeFromExtensionHolderMap(key, extension, extensionHolderConcurrentHashMap);
+                    }
                 }
             }
         }
