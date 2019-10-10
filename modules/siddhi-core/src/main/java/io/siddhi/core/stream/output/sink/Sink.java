@@ -212,8 +212,8 @@ public abstract class Sink<S extends State> implements SinkListener {
     private void connectAndPublish(Object payload, DynamicOptions dynamicOptions, S state)
             throws ConnectionUnavailableException {
         connect();
-        publish(payload, dynamicOptions, state);
         setConnected(true);
+        publish(payload, dynamicOptions, state);
         if (connectionCallback != null) {
             connectionCallback.connectionEstablished();
         }

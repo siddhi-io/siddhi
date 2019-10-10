@@ -18,14 +18,25 @@
 
 package io.siddhi.core.trigger;
 
-import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**
  * Interface class to represent event triggers. Event triggers are used to trigger events within Siddhi itself
  * according to a user given criteria.
  */
-public interface Trigger extends ExternalReferencedHolder {
+public interface Trigger {
+
+    /**
+     * This will be called only once.
+     * This will be called after initializing the system.
+     */
+    void start();
+
+    /**
+     * This will be called only once.
+     * This will be called before shutting down the system.
+     */
+    void stop();
 
     TriggerDefinition getTriggerDefinition();
 

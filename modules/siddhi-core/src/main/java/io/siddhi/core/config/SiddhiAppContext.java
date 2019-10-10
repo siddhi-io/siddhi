@@ -20,6 +20,7 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.function.Script;
+import io.siddhi.core.trigger.Trigger;
 import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiConstants;
@@ -61,6 +62,7 @@ public class SiddhiAppContext {
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private List<ExternalReferencedHolder> externalReferencedHolders;
+    private List<Trigger> triggerHolders;
     private SnapshotService snapshotService;
 
     private ThreadBarrier threadBarrier = null;
@@ -80,6 +82,7 @@ public class SiddhiAppContext {
 
     public SiddhiAppContext() {
         this.externalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
+        this.triggerHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
         this.rootMetricsLevel = Level.OFF;
@@ -184,6 +187,14 @@ public class SiddhiAppContext {
 
     public List<ExternalReferencedHolder> getExternalReferencedHolders() {
         return Collections.unmodifiableList(new ArrayList<>(externalReferencedHolders));
+    }
+
+    public List<Trigger> getTriggerHolders() {
+        return Collections.unmodifiableList(new ArrayList<>(triggerHolders));
+    }
+
+    public void addTrigger(Trigger trigger) {
+        triggerHolders.add(trigger);
     }
 
     public ThreadBarrier getThreadBarrier() {
