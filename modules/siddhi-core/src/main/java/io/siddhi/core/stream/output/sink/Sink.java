@@ -368,7 +368,7 @@ public abstract class Sink<S extends State> implements SinkListener {
         try {
             switch (errorAction) {
                 case STREAM:
-                        connectWithRetry();
+                    connectWithRetry();
                     streamJunction.handleError(dynamicOptions.getEvent(), e);
                     break;
                 case WAIT:
