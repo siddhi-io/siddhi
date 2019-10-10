@@ -462,7 +462,10 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         aggregationRuntime.startPurging();
                     }
                 }
-
+                for (Trigger trigger :
+                        siddhiAppContext.getTriggerHolders()) {
+                    trigger.start();
+                }
                 inputManager.connect();
 
                 runningWithoutSources = true;

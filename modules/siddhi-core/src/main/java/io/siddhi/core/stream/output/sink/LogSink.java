@@ -169,12 +169,12 @@ public class LogSink extends Sink {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        // do nothing
+        super.setConnected(true);
     }
 
     @Override
     public void disconnect() {
-        // do nothing
+        super.setConnected(false);
     }
 
     @Override

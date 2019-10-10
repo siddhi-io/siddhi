@@ -90,12 +90,12 @@ public class InMemorySink extends Sink<State> {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        // do nothing
+        super.setConnected(true);
     }
 
     @Override
     public void disconnect() {
-        // do nothing
+        super.setConnected(false);
     }
 
     @Override

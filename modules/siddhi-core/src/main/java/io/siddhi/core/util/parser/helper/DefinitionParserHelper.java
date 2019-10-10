@@ -302,7 +302,7 @@ public class DefinitionParserHelper {
             }
             StreamJunction streamJunction = streamJunctionMap.get(triggerDefinition.getId());
             trigger.init(triggerDefinition, siddhiAppContext, streamJunction);
-            siddhiAppContext.addEternalReferencedHolder(trigger);
+            siddhiAppContext.addTrigger(trigger);
             eventTriggerMap.putIfAbsent(trigger.getId(), trigger);
         }
     }
