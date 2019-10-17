@@ -853,8 +853,8 @@ ID : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 STRING_LITERAL
     :(
-        '\'' ( ~('\u0000'..'\u001f' | '\''| '\"' ) )* '\''
-        |'"' ( ~('\u0000'..'\u001f'  |'\"') )* '"'
+        '\'' ( ~('\u0000'..'\u001f' | '\''| '"' ) )* '\''
+        |'"' ( ~('\u0000'..'\u001f'  |'"') )* '"'
      )  {setText(getText().substring(1, getText().length()-1));}
      |('"""'(.*?)'"""')  {setText(getText().substring(3, getText().length()-3));}
     ;
