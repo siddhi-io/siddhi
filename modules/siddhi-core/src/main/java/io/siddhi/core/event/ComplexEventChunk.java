@@ -107,6 +107,17 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
 
     }
 
+    public void addAll(ComplexEventChunk<E> complexEventChunk) {
+        if (complexEventChunk.first != null) {
+            if (first == null) {
+                first = complexEventChunk.first;
+            } else {
+                last.setNext(complexEventChunk.first);
+            }
+            last = complexEventChunk.last;
+        }
+    }
+
     private E getLastEvent(E complexEvents) {
         E lastEvent = complexEvents;
         while (lastEvent != null && lastEvent.getNext() != null

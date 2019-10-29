@@ -18,6 +18,7 @@
 package io.siddhi.core.query.processor;
 
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 
 /**
  * Parent interface representing Event Processors in Siddhi. Event Processors are the execution unit which will do
@@ -33,6 +34,13 @@ public interface Processor {
      * @param complexEventChunk event chunk to be processed
      */
     void process(ComplexEventChunk complexEventChunk);
+
+    /**
+     * Process the handed StreamEvent
+     *
+     * @param streamEventChunks event chunks to be processed
+     */
+    void process(ComplexEventChunkList streamEventChunks);
 
     /**
      * Get next processor element in the processor chain. Processed event should be sent to next processor

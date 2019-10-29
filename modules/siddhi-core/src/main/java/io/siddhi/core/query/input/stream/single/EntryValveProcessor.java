@@ -20,6 +20,7 @@ package io.siddhi.core.query.input.stream.single;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.ThreadBarrier;
@@ -50,6 +51,15 @@ public class EntryValveProcessor implements Processor, Schedulable {
         } finally {
             threadBarrier.exit();
         }
+    }
+
+    @Override
+    public void process(ComplexEventChunkList streamEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
+        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     /**

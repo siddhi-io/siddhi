@@ -19,6 +19,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.processor.Processor;
@@ -48,6 +49,15 @@ public class StreamPostStateProcessor implements PostStateProcessor {
             process(stateEvent, complexEventChunk);
         }
         complexEventChunk.clear();
+    }
+
+    @Override
+    public void process(ComplexEventChunkList streamEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
+        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {

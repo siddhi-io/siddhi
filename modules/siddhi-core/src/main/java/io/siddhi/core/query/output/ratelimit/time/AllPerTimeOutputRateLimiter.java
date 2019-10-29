@@ -29,7 +29,6 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,8 +60,7 @@ public class AllPerTimeOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -74,10 +72,7 @@ public class AllPerTimeOutputRateLimiter
                             ComplexEvent first = state.allComplexEventChunk.getFirst();
                             if (first != null) {
                                 state.allComplexEventChunk.clear();
-                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                        (complexEventChunk.isBatch());
                                 outputEventChunk.add(first);
-                                outputEventChunks.add(outputEventChunk);
                             }
                             state.scheduledTime = state.scheduledTime + value;
                             scheduler.notifyAt(state.scheduledTime);
@@ -92,8 +87,9 @@ public class AllPerTimeOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 

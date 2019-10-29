@@ -31,7 +31,6 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class LastGroupByPerTimeOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -72,12 +71,9 @@ public class LastGroupByPerTimeOutputRateLimiter
                     if (event.getType() == ComplexEvent.Type.TIMER) {
                         if (event.getTimestamp() >= state.scheduledTime) {
                             if (state.allGroupByKeyEvents.size() != 0) {
-                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                        (complexEventChunk.isBatch());
                                 for (ComplexEvent complexEvent : state.allGroupByKeyEvents.values()) {
                                     outputEventChunk.add(complexEvent);
                                 }
-                                outputEventChunks.add(outputEventChunk);
                                 state.allGroupByKeyEvents.clear();
                             }
                             state.scheduledTime = state.scheduledTime + value;
@@ -95,10 +91,10 @@ public class LastGroupByPerTimeOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
+            sendToCallBacks(outputEventChunk);
         }
-
     }
 
     @Override

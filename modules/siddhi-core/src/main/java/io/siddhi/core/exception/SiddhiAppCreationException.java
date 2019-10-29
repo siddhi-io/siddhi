@@ -59,6 +59,7 @@ public class SiddhiAppCreationException extends RuntimeException implements Sidd
 
     public SiddhiAppCreationException(Throwable throwable) {
         super(throwable);
+        this.message = throwable.getMessage();
     }
 
     public SiddhiAppCreationException(String message, int[] queryContextStartIndex,

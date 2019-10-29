@@ -70,7 +70,8 @@ public class FirstGroupByPerEventOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        if (outputEventChunk.getFirst() != null) {
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
             sendToCallBacks(outputEventChunk);
         }
     }

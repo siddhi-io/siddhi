@@ -21,12 +21,12 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,7 +62,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunkList outputEventChunks = new ComplexEventChunkList(complexEventChunk.isBatch());
         AggregationGroupByRateLimiterState state = (AggregationGroupByRateLimiterState) stateHolder.getState();
         try {
             synchronized (state) {
@@ -117,12 +117,11 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
-        }
+        sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(ComplexEventChunkList outputEventChunks,
+                                ComplexEvent event,
                                 AggregationGroupByRateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
             constructOutputChunk(outputEventChunks, state);
@@ -131,7 +130,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         }
     }
 
-    private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks,
+    private void constructOutputChunk(ComplexEventChunkList outputEventChunks,
                                       AggregationGroupByRateLimiterState state) {
         ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
         Set<String> outputGroupingKeys = new HashSet<>();

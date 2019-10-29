@@ -20,6 +20,7 @@ package io.siddhi.core.query.output.ratelimit;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.partition.PartitionCreationListener;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
 import io.siddhi.core.query.output.callback.OutputCallback;
@@ -113,6 +114,14 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
     }
 
     public abstract void process(ComplexEventChunk complexEventChunk);
+
+    public void process(ComplexEventChunkList complexEventChunks) {
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(complexEventChunks.isBatch());
+        for (ComplexEventChunk aComplexEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(aComplexEventChunk);
+        }
+        process(complexEventChunk);
+    }
 
     public OutputCallback getOutputCallback() {
         return outputCallback;

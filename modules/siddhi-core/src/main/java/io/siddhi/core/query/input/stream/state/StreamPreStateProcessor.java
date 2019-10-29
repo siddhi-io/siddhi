@@ -20,6 +20,7 @@ package io.siddhi.core.query.input.stream.state;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
 import io.siddhi.core.event.state.StateEventFactory;
@@ -105,6 +106,12 @@ public class StreamPreStateProcessor implements PreStateProcessor {
      */
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
+        throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. " +
+                "processAndReturn method is used for handling event chunks.");
+    }
+
+    @Override
+    public void process(ComplexEventChunkList streamEventChunks) {
         throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. " +
                 "processAndReturn method is used for handling event chunks.");
     }

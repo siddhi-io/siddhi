@@ -24,7 +24,6 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -60,12 +59,9 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
                         state.allComplexEventChunk.add(event);
                         state.counter++;
                         if (state.counter == value) {
-                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
                             outputEventChunk.add(state.allComplexEventChunk.getFirst());
                             state.allComplexEventChunk.clear();
                             state.counter = 0;
-                            outputEventChunks.add(outputEventChunk);
                         }
                     }
                 }
@@ -73,8 +69,9 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 

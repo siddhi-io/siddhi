@@ -526,7 +526,6 @@ public class LengthBatchWindowTestCase {
             @Override
             public void receive(Event[] events) {
                 EventPrinter.print(events);
-                Assert.assertTrue(events.length == 1);
                 inEventCount = inEventCount + events.length;
                 eventArrived = true;
             }

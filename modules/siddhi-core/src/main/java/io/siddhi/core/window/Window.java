@@ -20,6 +20,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -347,6 +348,15 @@ public class Window implements FindableProcessor, MemoryCalculable {
                 // Publish the events
                 outputPublisher.send(complexEventChunk.getFirst());
             }
+        }
+
+        @Override
+        public void process(ComplexEventChunkList streamEventChunks) {
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
+            for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+                complexEventChunk.addAll(streamEventChunk);
+            }
+            process(complexEventChunk);
         }
 
         public Processor getNextProcessor() {

@@ -21,6 +21,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -98,7 +99,29 @@ public class QuerySelector implements Processor {
         }
     }
 
-    public void executePassThrough(ComplexEventChunk complexEventChunk) {
+    public void process(ComplexEventChunkList complexEventChunks) {
+        ComplexEventChunkList returnEventChunks =
+                new ComplexEventChunkList(complexEventChunks.isBatch());
+        for (ComplexEventChunk complexEventChunk : complexEventChunks) {
+            if (complexEventChunk.getFirst() != null) {
+                ComplexEventChunk returnEventChunk;
+                if (complexEventChunk instanceof SelectorTypeComplexEventChunk &&
+                        ((SelectorTypeComplexEventChunk) complexEventChunk).isProcessPassThrough()) {
+                    returnEventChunk = executePassThrough(complexEventChunk);
+                } else {
+                    returnEventChunk = execute(complexEventChunk);
+                }
+                if (returnEventChunk != null) {
+                    returnEventChunks.add(returnEventChunk);
+                }
+            }
+        }
+        if (!returnEventChunks.isEmpty()) {
+            outputRateLimiter.process(returnEventChunks);
+        }
+    }
+
+    private ComplexEventChunk executePassThrough(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
@@ -111,8 +134,9 @@ public class QuerySelector implements Processor {
         }
         complexEventChunk.reset();
         if (complexEventChunk.hasNext()) {
-            outputRateLimiter.process(complexEventChunk);
+            return complexEventChunk;
         }
+        return null;
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {

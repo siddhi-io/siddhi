@@ -26,7 +26,6 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class LastGroupByPerEventOutputRateLimiter extends
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -65,14 +64,10 @@ public class LastGroupByPerEventOutputRateLimiter extends
                         if (++state.counter == value) {
                             state.counter = 0;
                             if (state.allGroupByKeyEvents.size() != 0) {
-                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                        (complexEventChunk.isBatch());
-
                                 for (ComplexEvent complexEvent : state.allGroupByKeyEvents.values()) {
                                     outputEventChunk.add(complexEvent);
                                 }
                                 state.allGroupByKeyEvents.clear();
-                                outputEventChunks.add(outputEventChunk);
                             }
                         }
                     }
@@ -81,8 +76,9 @@ public class LastGroupByPerEventOutputRateLimiter extends
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 

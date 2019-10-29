@@ -24,7 +24,6 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +46,7 @@ public class LastPerEventOutputRateLimiter extends OutputRateLimiter<LastPerEven
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -56,11 +55,8 @@ public class LastPerEventOutputRateLimiter extends OutputRateLimiter<LastPerEven
                     if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
                         if (++state.counter == value) {
                             complexEventChunk.remove();
-                            ComplexEventChunk<ComplexEvent> lastPerEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            lastPerEventChunk.add(event);
+                            outputEventChunk.add(event);
                             state.counter = 0;
-                            outputEventChunks.add(lastPerEventChunk);
                         }
                     }
                 }
@@ -68,8 +64,9 @@ public class LastPerEventOutputRateLimiter extends OutputRateLimiter<LastPerEven
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 

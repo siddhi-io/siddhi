@@ -21,6 +21,7 @@ package io.siddhi.core.aggregation;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
@@ -101,6 +102,15 @@ public class IncrementalAggregationProcessor implements Processor {
             }
         }
 
+    }
+
+    @Override
+    public void process(ComplexEventChunkList streamEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
+        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     @Override

@@ -22,15 +22,14 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,7 +59,7 @@ public class PerSnapshotOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunkList outputEventChunks = new ComplexEventChunkList(complexEventChunk.isBatch());
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -81,13 +80,10 @@ public class PerSnapshotOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
-        }
+        sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
-                                RateLimiterState state) {
+    private void tryFlushEvents(ComplexEventChunkList outputEventChunks, ComplexEvent event, RateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
             if (state.lastEvent != null) {
