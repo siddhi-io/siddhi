@@ -46,10 +46,9 @@ public class OutOfOrderEventsDataAggregator {
     private final GroupByKeyGenerator groupByKeyGenerator;
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
-    private StreamEventFactory streamEventFactory;
-
     private final List<ExpressionExecutor> baseExecutors;
     private final ExpressionExecutor shouldUpdateTimestamp;
+    private StreamEventFactory streamEventFactory;
 
     public OutOfOrderEventsDataAggregator(List<ExpressionExecutor> baseExecutors,
                                           ExpressionExecutor shouldUpdateTimestamp,
@@ -125,7 +124,7 @@ public class OutOfOrderEventsDataAggregator {
 
 
     private synchronized ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
-        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>();
         Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
         try {
             for (State aState : valueStoreMap.values()) {

@@ -20,7 +20,6 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -243,8 +242,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
                     latencyTrackerInsert.markIn();
                 }
                 // Send to the window windowProcessor
-                windowProcessor.process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent,
-                        complexEventChunk.isBatch()));
+                windowProcessor.process(new ComplexEventChunk<>(firstEvent, currentEvent));
             } finally {
                 if (throughputTrackerInsert != null &&
                         Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
@@ -299,6 +297,10 @@ public class Window implements FindableProcessor, MemoryCalculable {
         return internalWindowProcessor.getProcessingMode();
     }
 
+    public boolean isStateful() {
+        return internalWindowProcessor.isStateful();
+    }
+
     /**
      * PublisherProcessor receives events from the last window processor of Window,
      * filter them depending on user defined output type and publish them to the stream junction.
@@ -351,9 +353,9 @@ public class Window implements FindableProcessor, MemoryCalculable {
         }
 
         @Override
-        public void process(ComplexEventChunkList streamEventChunks) {
-            ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
-            for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+        public void process(List<ComplexEventChunk> complexEventChunks) {
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+            for (ComplexEventChunk streamEventChunk : complexEventChunks) {
                 complexEventChunk.addAll(streamEventChunk);
             }
             process(complexEventChunk);
@@ -373,9 +375,5 @@ public class Window implements FindableProcessor, MemoryCalculable {
             // Do nothing
         }
 
-    }
-
-    public boolean isStateful() {
-        return internalWindowProcessor.isStateful();
     }
 }

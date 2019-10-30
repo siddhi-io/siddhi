@@ -190,7 +190,7 @@ public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProce
             for (Map.Entry<String, Map<String, WindowState>> allStatesEntry : allStates.entrySet()) {
                 for (Map.Entry<String, WindowState> stateEntry : allStatesEntry.getValue().entrySet()) {
                     WindowState windowState = stateEntry.getValue();
-                    ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                    ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>();
                     synchronized (windowState) {
                         if (windowState.currentEventQueue.getFirst() != null) {
                             long currentTime = siddhiQueryContext.getSiddhiAppContext().

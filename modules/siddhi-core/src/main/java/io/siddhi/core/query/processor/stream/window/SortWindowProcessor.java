@@ -73,7 +73,7 @@ import java.util.Map;
                 @Parameter(name = "attribute",
                         description = "The attribute that should be checked for the order.",
                         type = {DataType.STRING, DataType.DOUBLE, DataType.INT, DataType.LONG, DataType.FLOAT,
-                        DataType.LONG},
+                                DataType.LONG},
                         dynamic = true,
                         defaultValue = "The concatenation of all the attributes of the event is considered."),
                 @Parameter(name = "order",

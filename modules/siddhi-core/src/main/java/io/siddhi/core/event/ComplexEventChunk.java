@@ -38,24 +38,22 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     protected E previousToLastReturned;
     protected E lastReturned;
     protected E last;
-    protected boolean isBatch = true;
 
+    //Only to maintain backward compatibility
+    @Deprecated
     public ComplexEventChunk(boolean isBatch) {
     }
 
-    //Only to maintain backward compatibility
-    @Deprecated
     public ComplexEventChunk() {
-        this.isBatch = true;
     }
 
-    //Only to maintain backward compatibility
-    @Deprecated
     public ComplexEventChunk(E first, E last) {
         this.first = first;
         this.last = last;
     }
 
+    //Only to maintain backward compatibility
+    @Deprecated
     public ComplexEventChunk(E first, E last, boolean isBatch) {
         this.first = first;
         this.last = last;
@@ -264,10 +262,14 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
         }
     }
 
+    //Only to maintain backward compatibility
+    @Deprecated
     public boolean isBatch() {
-        return isBatch;
+        return true;
     }
 
+    //Only to maintain backward compatibility
+    @Deprecated
     public void setBatch(boolean batch) {
     }
 

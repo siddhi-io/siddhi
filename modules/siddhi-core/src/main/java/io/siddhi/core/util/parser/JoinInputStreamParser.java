@@ -108,14 +108,8 @@ public class JoinInputStreamParser {
                         rightMetaStreamEvent, rightInputStreamId);
                 leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId,
                         siddhiQueryContext);
-                leftProcessStreamReceiver.setBatchProcessingAllowed(
-                        leftMetaStreamEvent.getEventType() == WINDOW);
-
                 rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId,
                         siddhiQueryContext);
-                rightProcessStreamReceiver.setBatchProcessingAllowed(
-                        rightMetaStreamEvent.getEventType() == WINDOW);
-
                 if ((leftMetaStreamEvent.getEventType() == TABLE || leftMetaStreamEvent.getEventType() == AGGREGATE) &&
                         (rightMetaStreamEvent.getEventType() == TABLE ||
                                 rightMetaStreamEvent.getEventType() == AGGREGATE)) {
@@ -138,7 +132,6 @@ public class JoinInputStreamParser {
                     rightMetaStreamEvent.setEventType(WINDOW);
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
                             joinInputStream.getAllStreamIds().get(0), 1, new Object(), siddhiQueryContext);
-                    rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(

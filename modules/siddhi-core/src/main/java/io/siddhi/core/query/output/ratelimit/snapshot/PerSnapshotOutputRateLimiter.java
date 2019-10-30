@@ -22,7 +22,6 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
@@ -30,6 +29,8 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,7 +60,7 @@ public class PerSnapshotOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunkList outputEventChunks = new ComplexEventChunkList(complexEventChunk.isBatch());
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -83,9 +84,9 @@ public class PerSnapshotOutputRateLimiter
         sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(ComplexEventChunkList outputEventChunks, ComplexEvent event, RateLimiterState state) {
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks, ComplexEvent event, RateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
             if (state.lastEvent != null) {
                 outputEventChunk.add(cloneComplexEvent(state.lastEvent));
             }
@@ -112,7 +113,7 @@ public class PerSnapshotOutputRateLimiter
     class RateLimiterState extends State {
 
         public long scheduledTime;
-        private ComplexEventChunk<ComplexEvent> eventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        private ComplexEventChunk<ComplexEvent> eventChunk = new ComplexEventChunk<>();
         private ComplexEvent lastEvent;
 
         @Override

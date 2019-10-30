@@ -103,7 +103,7 @@ public abstract class CacheTable extends InMemoryTable {
 
     public void addStreamEventUptoMaxSize(StreamEvent streamEvent) {
         int sizeAfterAdding = this.size();
-        ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> addEventsLimitCopy = new ComplexEventChunk<>();
         while (sizeAfterAdding < maxSize && streamEvent != null) {
             sizeAfterAdding++;
             addEventsLimitCopy.add((StreamEvent) generateEventWithRequiredFields(streamEvent, siddhiAppContext,
@@ -119,7 +119,7 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public void addAndTrimUptoMaxSize(ComplexEventChunk<StreamEvent> addingEventChunk) {
-        ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> addingEventChunkForCache = new ComplexEventChunk<>();
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             StreamEvent event = addingEventChunk.next();
@@ -141,7 +141,7 @@ public abstract class CacheTable extends InMemoryTable {
                                               CompiledCondition compiledCondition,
                                               CompiledUpdateSet compiledUpdateSet,
                                               AddingStreamEventExtractor addingStreamEventExtractor, int maxTableSize) {
-        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StateEvent> updateOrAddingEventChunkForCache = new ComplexEventChunk<>();
         updateOrAddingEventChunk.reset();
         while (updateOrAddingEventChunk.hasNext()) {
             StateEvent event = updateOrAddingEventChunk.next();
@@ -235,27 +235,6 @@ public abstract class CacheTable extends InMemoryTable {
                 storeVariableExpressionExecutors, tableMap, siddhiQueryContext, routeToCache), routeToCache);
     }
 
-    /**
-     * wrapper to send routeToCache bool with cache compiled condition
-     */
-    public class CacheCompiledConditionWithRouteToCache {
-        private CompiledCondition cacheCompiledCondition;
-        private boolean routeToCache;
-
-        CacheCompiledConditionWithRouteToCache(CompiledCondition cacheCompiledCondition, boolean routeToCache) {
-            this.cacheCompiledCondition = cacheCompiledCondition;
-            this.routeToCache = routeToCache;
-        }
-
-        public CompiledCondition getCacheCompiledCondition() {
-            return cacheCompiledCondition;
-        }
-
-        public boolean isRouteToCache() {
-            return routeToCache;
-        }
-    }
-
     private boolean checkConditionToRouteToCache(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder) {
         List<String> primaryKeysArray = new ArrayList<>();
         Annotation primaryKeys = getAnnotation("PrimaryKey", tableDefinition.getAnnotations());
@@ -336,4 +315,25 @@ public abstract class CacheTable extends InMemoryTable {
     }
 
     public abstract void updateCachePolicyAttribute(StreamEvent streamEvent);
+
+    /**
+     * wrapper to send routeToCache bool with cache compiled condition
+     */
+    public class CacheCompiledConditionWithRouteToCache {
+        private CompiledCondition cacheCompiledCondition;
+        private boolean routeToCache;
+
+        CacheCompiledConditionWithRouteToCache(CompiledCondition cacheCompiledCondition, boolean routeToCache) {
+            this.cacheCompiledCondition = cacheCompiledCondition;
+            this.routeToCache = routeToCache;
+        }
+
+        public CompiledCondition getCacheCompiledCondition() {
+            return cacheCompiledCondition;
+        }
+
+        public boolean isRouteToCache() {
+            return routeToCache;
+        }
+    }
 }

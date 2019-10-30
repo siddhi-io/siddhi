@@ -85,7 +85,7 @@ public class DelayWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             error = false;
             AssertJUnit.assertEquals("There is no parameterOverload for 'delay' that matches attribute types " +
-                    "'<INT, INT>'. Supported parameter overloads are (<INT|LONG|TIME> window.delay).",
+                            "'<INT, INT>'. Supported parameter overloads are (<INT|LONG|TIME> window.delay).",
                     e.getCause().getMessage());
             throw e;
         } finally {
@@ -107,7 +107,7 @@ public class DelayWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             error = false;
             AssertJUnit.assertEquals("There is no parameterOverload for 'delay' that matches attribute types " +
-                    "'<STRING>'. Supported parameter overloads are (<INT|LONG|TIME> window.delay).",
+                            "'<STRING>'. Supported parameter overloads are (<INT|LONG|TIME> window.delay).",
                     e.getCause().getMessage());
             throw e;
         } finally {

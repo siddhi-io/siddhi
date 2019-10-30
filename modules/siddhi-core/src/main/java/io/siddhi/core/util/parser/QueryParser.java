@@ -88,15 +88,15 @@ public class QueryParser {
      * @return queryRuntime
      */
     public static QueryRuntimeImpl parse(Query query, SiddhiAppContext siddhiAppContext,
-                                     Map<String, AbstractDefinition> streamDefinitionMap,
-                                     Map<String, AbstractDefinition> tableDefinitionMap,
-                                     Map<String, AbstractDefinition> windowDefinitionMap,
-                                     Map<String, AbstractDefinition> aggregationDefinitionMap,
-                                     Map<String, Table> tableMap,
-                                     Map<String, AggregationRuntime> aggregationMap, Map<String, Window> windowMap,
-                                     LockSynchronizer lockSynchronizer,
-                                     String queryIndex, boolean partitioned, String partitionId) {
-        List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
+                                         Map<String, AbstractDefinition> streamDefinitionMap,
+                                         Map<String, AbstractDefinition> tableDefinitionMap,
+                                         Map<String, AbstractDefinition> windowDefinitionMap,
+                                         Map<String, AbstractDefinition> aggregationDefinitionMap,
+                                         Map<String, Table> tableMap,
+                                         Map<String, AggregationRuntime> aggregationMap, Map<String, Window> windowMap,
+                                         LockSynchronizer lockSynchronizer,
+                                         String queryIndex, boolean partitioned, String partitionId) {
+        List<VariableExpressionExecutor> executors = new ArrayList<>();
         QueryRuntimeImpl queryRuntime;
         Element nameElement = null;
         LatencyTracker latencyTracker = null;
@@ -245,14 +245,14 @@ public class QueryParser {
                                     ((AbstractQueryableRecordTable.CompiledSelectionWithCache) compiledSelection)
                                             .getVariableExpressionExecutorsForQuerySelector();
                             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(),
-                                                variableExpressionExecutors);
+                                    variableExpressionExecutors);
                         }
                     }
                 }));
             }
 
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
-                        .getMetaComplexEvent()));
+                    .getMetaComplexEvent()));
 
             queryRuntime = new QueryRuntimeImpl(query, streamRuntime, selector, outputRateLimiter, outputCallback,
                     streamRuntime.getMetaComplexEvent(), siddhiQueryContext);

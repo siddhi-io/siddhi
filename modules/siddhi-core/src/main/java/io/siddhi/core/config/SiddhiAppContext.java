@@ -51,18 +51,18 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class SiddhiAppContext {
 
+    private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
+    private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
     private SiddhiContext siddhiContext = null;
     private String name;
     private boolean playback;
     private boolean enforceOrder;
     private Level rootMetricsLevel;
     private StatisticsManager statisticsManager = null;
-
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private List<ExternalReferencedHolder> externalReferencedHolders;
     private SnapshotService snapshotService;
-
     private ThreadBarrier threadBarrier = null;
     private TimestampGenerator timestampGenerator = null;
     private IdGenerator idGenerator;
@@ -74,8 +74,6 @@ public class SiddhiAppContext {
     private List<String> includedMetrics;
     private boolean transportChannelCreationEnabled;
     private List<Scheduler> schedulerList;
-    private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
-    private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
     private SiddhiApp siddhiApp;
 
     public SiddhiAppContext() {
@@ -274,12 +272,12 @@ public class SiddhiAppContext {
         this.siddhiAppString = siddhiAppString;
     }
 
-    public void setSiddhiApp(SiddhiApp siddhiApp) {
-        this.siddhiApp = siddhiApp;
-    }
-
     public SiddhiApp getSiddhiApp() {
         return siddhiApp;
+    }
+
+    public void setSiddhiApp(SiddhiApp siddhiApp) {
+        this.siddhiApp = siddhiApp;
     }
 
     public List<String> getIncludedMetrics() {

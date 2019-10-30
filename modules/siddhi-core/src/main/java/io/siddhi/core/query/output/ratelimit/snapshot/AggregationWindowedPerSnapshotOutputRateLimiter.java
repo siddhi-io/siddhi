@@ -21,7 +21,6 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
@@ -97,7 +96,7 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ComplexEventChunkList outputEventChunks = new ComplexEventChunkList(complexEventChunk.isBatch());
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         AggregationRateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -137,10 +136,10 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
         sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(ComplexEventChunkList outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks, ComplexEvent event,
                                 AggregationRateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
             for (ComplexEvent originalComplexEvent : state.eventList) {
                 ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent);
                 for (Integer position : aggregateAttributePositionList) {
@@ -170,9 +169,9 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
 
     class AggregationRateLimiterState extends State {
 
+        protected long scheduledTime;
         private List<ComplexEvent> eventList;
         private Map<Integer, Object> aggregateAttributeValueMap;
-        protected long scheduledTime;
 
         public AggregationRateLimiterState() {
             this.eventList = new LinkedList<>();

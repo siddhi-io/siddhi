@@ -223,6 +223,10 @@ public abstract class Source<S extends State> {
         return serviceDeploymentInfo;
     }
 
+    public boolean isStateful() {
+        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
+    }
+
     /**
      * Callback class used to pass connection exception during message retrieval
      */
@@ -232,9 +236,5 @@ public abstract class Source<S extends State> {
             isConnected.set(false);
             retryWithBackoff(e);
         }
-    }
-
-    public boolean isStateful() {
-        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
     }
 }

@@ -19,7 +19,6 @@ package io.siddhi.core.query.processor.stream;
 
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
@@ -54,7 +53,6 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     private static final Logger log = Logger.getLogger(AbstractStreamProcessor.class);
 
     protected Processor nextProcessor;
-    private List<Attribute> additionalAttributes;
     protected MetaStreamEvent metaStreamEvent;
     protected SiddhiQueryContext siddhiQueryContext;
     protected StreamEventClonerHolder streamEventClonerHolder = new StreamEventClonerHolder();
@@ -63,6 +61,7 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     protected int attributeExpressionLength;
     protected ComplexEventPopulater complexEventPopulater;
     protected StateHolder<S> stateHolder;
+    private List<Attribute> additionalAttributes;
 
     public void initProcessor(MetaStreamEvent metaStreamEvent,
                               ExpressionExecutor[] attributeExpressionExecutors,
@@ -138,9 +137,9 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     }
 
     @Override
-    public void process(ComplexEventChunkList streamEventChunks) {
-        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
-        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
             complexEventChunk.addAll(streamEventChunk);
         }
         process(complexEventChunk);
@@ -197,6 +196,6 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     public abstract ProcessingMode getProcessingMode();
 
     public boolean isStateful() {
-       return siddhiQueryContext.isStateful();
+        return siddhiQueryContext.isStateful();
     }
 }

@@ -47,7 +47,7 @@ public class UpdateOrInsertReducer {
 
     public List<Object[]> reduceEventsForInsert(List<Object[]> failedRecords,
                                                 Map<String, ExpressionExecutor> inMemorySetExecutors) {
-        ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>();
         StateEvent joinEvent = stateEventFactory.newInstance();
         for (Object[] data : failedRecords) {
             StreamEvent failedEvent = streamEventFactory.newInstance();

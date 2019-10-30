@@ -48,7 +48,7 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -83,7 +83,7 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
     class RateLimiterState extends State {
 
         private volatile int counter = 0;
-        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<>();
 
         @Override
         public boolean canDestroy() {

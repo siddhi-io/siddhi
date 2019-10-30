@@ -19,11 +19,12 @@ package io.siddhi.core.query.processor.filter;
 
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.definition.Attribute;
+
+import java.util.List;
 
 /**
  * Implementation of {@link Processor} which handles Filter expressions in Siddhi.
@@ -60,9 +61,9 @@ public class FilterProcessor implements Processor {
 
 
     @Override
-    public void process(ComplexEventChunkList streamEventChunks) {
-        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
-        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
             complexEventChunk.addAll(streamEventChunk);
         }
         process(complexEventChunk);

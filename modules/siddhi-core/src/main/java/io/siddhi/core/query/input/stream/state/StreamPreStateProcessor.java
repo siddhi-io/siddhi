@@ -20,7 +20,6 @@ package io.siddhi.core.query.input.stream.state;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
 import io.siddhi.core.event.state.StateEventFactory;
@@ -111,7 +110,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     }
 
     @Override
-    public void process(ComplexEventChunkList streamEventChunks) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
         throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. " +
                 "processAndReturn method is used for handling event chunks.");
     }
@@ -363,7 +362,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
 
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
+        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>();
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
         StreamPreState state = stateHolder.getState();
@@ -434,7 +433,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     }
 
     class StreamPreState extends State {
-        private ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>(false);
+        private ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>();
         private LinkedList<StateEvent> pendingStateEventList = new LinkedList<StateEvent>();
         private LinkedList<StateEvent> newAndEveryStateEventList = new LinkedList<StateEvent>();
         private volatile boolean stateChanged = false;

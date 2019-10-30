@@ -21,7 +21,6 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -99,9 +98,8 @@ public class QuerySelector implements Processor {
         }
     }
 
-    public void process(ComplexEventChunkList complexEventChunks) {
-        ComplexEventChunkList returnEventChunks =
-                new ComplexEventChunkList(complexEventChunks.isBatch());
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        List<ComplexEventChunk> returnEventChunks = new ArrayList<>(complexEventChunks.size());
         for (ComplexEventChunk complexEventChunk : complexEventChunks) {
             if (complexEventChunk.getFirst() != null) {
                 ComplexEventChunk returnEventChunk;
@@ -143,7 +141,7 @@ public class QuerySelector implements Processor {
         if (log.isTraceEnabled()) {
             log.trace("event is executed by selector " + id + this);
         }
-        if (complexEventChunk.isBatch() && batchingEnabled) {
+        if (batchingEnabled) {
             if (isGroupBy) {
                 return processInBatchGroupBy(complexEventChunk);
             } else if (containsAggregator) {
@@ -209,7 +207,7 @@ public class QuerySelector implements Processor {
     private ComplexEventChunk<ComplexEvent> processGroupBy(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         ComplexEventChunk<ComplexEvent> currentComplexEventChunk = new ComplexEventChunk<ComplexEvent>
-                (complexEventChunk.isBatch());
+                ();
 
         synchronized (this) {
             int limitCount = 0;
@@ -380,17 +378,17 @@ public class QuerySelector implements Processor {
         return null;    //since there is no processors after a query selector
     }
 
-    @Override
-    public void setNextProcessor(Processor processor) {
-        //this method will not be used as there is no processors after a query selector
-    }
-
     public void setNextProcessor(OutputRateLimiter outputRateLimiter) {
         if (this.outputRateLimiter == null) {
             this.outputRateLimiter = outputRateLimiter;
         } else {
             throw new SiddhiAppCreationException("outputRateLimiter is already assigned");
         }
+    }
+
+    @Override
+    public void setNextProcessor(Processor processor) {
+        //this method will not be used as there is no processors after a query selector
     }
 
     @Override
@@ -452,7 +450,7 @@ public class QuerySelector implements Processor {
     }
 
     private void orderEventChunk(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk orderingComplexEventChunk = new ComplexEventChunk(complexEventChunk.isBatch());
+        ComplexEventChunk orderingComplexEventChunk = new ComplexEventChunk();
         List<ComplexEvent> eventList = new ArrayList<>();
 
         ComplexEvent.Type currentEventType = null;

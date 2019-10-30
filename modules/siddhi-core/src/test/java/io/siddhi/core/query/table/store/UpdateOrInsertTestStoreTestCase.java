@@ -36,18 +36,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class UpdateOrInsertTestStoreTestCase {
     private static final Logger log = Logger.getLogger(UpdateOrInsertTestStoreTestCase.class);
+    private static AtomicInteger actualEventCount = new AtomicInteger(0);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    private static AtomicInteger actualEventCount = new AtomicInteger(0);
-
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-        actualEventCount.set(0);
-    }
 
     @BeforeClass
     public static void startTest() {
@@ -57,6 +49,14 @@ public class UpdateOrInsertTestStoreTestCase {
     @AfterClass
     public static void shutdown() {
         log.info("== Test Store UPDATE/INSERT tests completed ==");
+    }
+
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
+        actualEventCount.set(0);
     }
 
     @Test

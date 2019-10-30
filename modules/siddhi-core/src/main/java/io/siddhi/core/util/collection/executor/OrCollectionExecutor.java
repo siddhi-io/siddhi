@@ -57,7 +57,7 @@ public class OrCollectionExecutor implements CollectionExecutor {
             if (rightStreamEvents == null) {
                 return exhaustiveCollectionExecutor.find(matchingEvent, indexedEventHolder, storeEventCloner);
             } else {
-                ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<>();
                 for (StreamEvent resultEvent : leftStreamEvents) {
                     if (storeEventCloner != null) {
                         returnEventChunk.add(storeEventCloner.copyStreamEvent(resultEvent));

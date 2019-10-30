@@ -230,8 +230,8 @@ public class BaseIncrementalValueStore {
     }
 
     class ValueState extends State {
-        private Object[] values;
         public long lastTimestamp = 0;
+        private Object[] values;
 
         public ValueState() {
             this.values = new Object[expressionExecutors.size() + 1];

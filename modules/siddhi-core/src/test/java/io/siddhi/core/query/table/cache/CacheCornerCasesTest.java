@@ -42,12 +42,6 @@ public class CacheCornerCasesTest {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
 
     @BeforeClass
     public static void startTest() {
@@ -59,6 +53,12 @@ public class CacheCornerCasesTest {
         log.info("== Cache corner cases tests completed ==");
     }
 
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
+    }
 
     @Test
     public void testTableJoinQuery1() throws InterruptedException {

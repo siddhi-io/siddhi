@@ -82,7 +82,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     public void receive(ComplexEvent complexEvent) {
 
         if (partitionExecutors.size() == 0) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>();
             ComplexEvent aComplexEvent = complexEvent;
             while (aComplexEvent != null) {
                 StreamEvent newEvent = streamEventFactory.newInstance();
@@ -100,9 +100,9 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                     send(key, newEvent);
                 }
             } else {
-                ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+                ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>();
                 complexEventChunk.add(complexEvent);
-                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>();
                 String currentKey = null;
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent aEvent = complexEventChunk.next();

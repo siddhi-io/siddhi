@@ -19,10 +19,11 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.processor.Processor;
+
+import java.util.List;
 
 /**
  * Created on 12/17/14.
@@ -52,9 +53,9 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     }
 
     @Override
-    public void process(ComplexEventChunkList streamEventChunks) {
-        ComplexEventChunk complexEventChunk = new ComplexEventChunk(streamEventChunks.isBatch());
-        for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
             complexEventChunk.addAll(streamEventChunk);
         }
         process(complexEventChunk);

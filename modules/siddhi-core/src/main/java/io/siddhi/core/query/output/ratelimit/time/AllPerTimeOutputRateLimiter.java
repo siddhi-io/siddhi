@@ -60,7 +60,7 @@ public class AllPerTimeOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -109,7 +109,7 @@ public class AllPerTimeOutputRateLimiter
 
     class RateLimiterState extends State {
 
-        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<>(false);
+        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<>();
         private long scheduledTime;
 
         @Override

@@ -153,13 +153,6 @@ public class MetaStreamEvent implements MetaComplexEvent {
         this.multiValue = multiValue;
     }
 
-    /**
-     * Type of Meta Events
-     */
-    public enum EventType {
-        TABLE, WINDOW, AGGREGATE, DEFAULT
-    }
-
     public MetaStreamEvent clone() {
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
         if (outputData != null) {
@@ -180,5 +173,12 @@ public class MetaStreamEvent implements MetaComplexEvent {
         metaStreamEvent.setEventType(this.getEventType());
         metaStreamEvent.setMultiValue(this.isMultiValue());
         return metaStreamEvent;
+    }
+
+    /**
+     * Type of Meta Events
+     */
+    public enum EventType {
+        TABLE, WINDOW, AGGREGATE, DEFAULT
     }
 }

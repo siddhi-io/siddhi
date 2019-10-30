@@ -141,7 +141,7 @@ public class JoinPartitionTestCase {
 
         String siddhiApp = "" +
                 "define stream cseEventStream (symbol string, user string,volume int);  " +
-                "define stream twitterStream (user string, tweet string, company string);"                +
+                "define stream twitterStream (user string, tweet string, company string);" +
                 "partition with (user of cseEventStream, user of twitterStream) " +
                 "begin " +
                 "   @info(name = 'query1') " +

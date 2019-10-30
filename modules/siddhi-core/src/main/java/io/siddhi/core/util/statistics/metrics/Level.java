@@ -28,33 +28,28 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class Level implements Comparable<Level> {
 
-    private final String name;
-
-    private final int intLevel;
-
-    private static final ConcurrentMap<String, Level> levels = new ConcurrentHashMap<String, Level>();
-
     /**
      * No events will be used for metrics.
      */
     public static final Level OFF;
-
     /**
      * A metric for informational purposes.
      */
     public static final Level BASIC;
-
     /**
      * A general debugging metric.
      */
     public static final Level DETAIL;
-
+    private static final ConcurrentMap<String, Level> levels = new ConcurrentHashMap<String, Level>();
 
     static {
         OFF = new Level("OFF", 0);
         BASIC = new Level("BASIC", 400);
         DETAIL = new Level("DETAIL", 500);
     }
+
+    private final String name;
+    private final int intLevel;
 
     private Level(final String name, final int intLevel) {
         if (name == null || name.isEmpty()) {
@@ -68,6 +63,25 @@ public class Level implements Comparable<Level> {
         if (levels.putIfAbsent(name, this) != null) {
             throw new IllegalStateException("Level " + name + " has already been defined.");
         }
+    }
+
+    /**
+     * Return the Level associated with the name.
+     *
+     * @param name The name of the Level to return.
+     * @return The Level.
+     * @throws NullPointerException     if the Level name is {@code null}.
+     * @throws IllegalArgumentException if the Level name is not registered.
+     */
+    public static Level valueOf(final String name) {
+        if (name == null) {
+            throw new NullPointerException("No level name given.");
+        }
+        final String levelName = name.toUpperCase();
+        if (levels.containsKey(levelName)) {
+            return levels.get(levelName);
+        }
+        throw new IllegalArgumentException("Unknown level constant [" + levelName + "].");
     }
 
     @Override
@@ -97,24 +111,5 @@ public class Level implements Comparable<Level> {
     @Override
     public String toString() {
         return this.name;
-    }
-
-    /**
-     * Return the Level associated with the name.
-     *
-     * @param name The name of the Level to return.
-     * @return The Level.
-     * @throws NullPointerException     if the Level name is {@code null}.
-     * @throws IllegalArgumentException if the Level name is not registered.
-     */
-    public static Level valueOf(final String name) {
-        if (name == null) {
-            throw new NullPointerException("No level name given.");
-        }
-        final String levelName = name.toUpperCase();
-        if (levels.containsKey(levelName)) {
-            return levels.get(levelName);
-        }
-        throw new IllegalArgumentException("Unknown level constant [" + levelName + "].");
     }
 }

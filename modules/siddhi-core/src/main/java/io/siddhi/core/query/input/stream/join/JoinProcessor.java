@@ -19,7 +19,6 @@ package io.siddhi.core.query.input.stream.join;
 
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -37,6 +36,7 @@ import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -79,8 +79,7 @@ public class JoinProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {
-            ComplexEventChunkList returnEventChunkList =
-                    new ComplexEventChunkList(complexEventChunk.isBatch());
+            List<ComplexEventChunk> returnEventChunkList = new LinkedList<>();
             execute(complexEventChunk, returnEventChunkList);
             selector.process(returnEventChunkList);
         } else {
@@ -91,23 +90,22 @@ public class JoinProcessor implements Processor {
     }
 
     @Override
-    public void process(ComplexEventChunkList streamEventChunks) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
         if (trigger) {
-            ComplexEventChunkList returnEventChunkList =
-                    new ComplexEventChunkList(streamEventChunks.isBatch());
-            for (ComplexEventChunk streamEventChunk : streamEventChunks) {
+            List<ComplexEventChunk> returnEventChunkList = new LinkedList<>();
+            for (ComplexEventChunk streamEventChunk : complexEventChunks) {
                 execute(streamEventChunk, returnEventChunkList);
             }
             selector.process(returnEventChunkList);
         } else {
             if (preJoinProcessor) {
-                nextProcessor.process(streamEventChunks);
+                nextProcessor.process(complexEventChunks);
             }
         }
     }
 
     private void execute(ComplexEventChunk complexEventChunk,
-                         ComplexEventChunkList returnEventChunkList) {
+                         List<ComplexEventChunk> returnEventChunkList) {
         StateEvent joinStateEvent = new StateEvent(2, 0);
         StreamEvent nextEvent = (StreamEvent) complexEventChunk.getFirst();
         complexEventChunk.clear();
@@ -122,11 +120,11 @@ public class JoinProcessor implements Processor {
                 if (!leftJoinProcessor) {
                     StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
                     returnEventChunkList.add(new SelectorTypeComplexEventChunk(new ComplexEventChunk<>(
-                            outputStateEvent, outputStateEvent, true), false));
+                            outputStateEvent, outputStateEvent), false));
                 } else {
                     StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
                     returnEventChunkList.add(new SelectorTypeComplexEventChunk(new ComplexEventChunk<>(
-                            outputStateEvent, outputStateEvent, true), false));
+                            outputStateEvent, outputStateEvent), false));
                 }
             } else {
                 joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
@@ -151,14 +149,14 @@ public class JoinProcessor implements Processor {
                     if (outerJoinProcessor && !leftJoinProcessor) {
                         StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
                         returnEventChunkList.add(new SelectorTypeComplexEventChunk(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true), false));
+                                outputStateEvent, outputStateEvent), false));
                     } else if (outerJoinProcessor && leftJoinProcessor) {
                         StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
                         returnEventChunkList.add(new SelectorTypeComplexEventChunk(new ComplexEventChunk<>(
-                                outputStateEvent, outputStateEvent, true), false));
+                                outputStateEvent, outputStateEvent), false));
                     }
                 } else if (!isOptimisedQuery) {
-                    ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
+                    ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>();
                     while (foundStreamEvent != null) {
                         StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
                         foundStreamEvent.setNext(null);
@@ -171,7 +169,7 @@ public class JoinProcessor implements Processor {
                     }
                     returnEventChunkList.add(new SelectorTypeComplexEventChunk(returnEventChunk, false));
                 } else {
-                    ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>(true);
+                    ComplexEventChunk<ComplexEvent> returnEventChunk = new ComplexEventChunk<>();
                     while (foundStreamEvent != null) {
                         StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
                         StateEvent returnEvent = stateEventFactory.newInstance();
@@ -214,13 +212,6 @@ public class JoinProcessor implements Processor {
         } else {
             table.connectWithRetry();
             return query(joinStateEvent);
-        }
-    }
-
-    public void setCompiledSelection(CompiledSelection compiledSelection) {
-        if (compiledSelection != null) {
-            this.isOptimisedQuery = true;
-            this.compiledSelection = compiledSelection;
         }
     }
 
@@ -287,6 +278,13 @@ public class JoinProcessor implements Processor {
 
     public CompiledSelection getCompiledSelection() {
         return compiledSelection;
+    }
+
+    public void setCompiledSelection(CompiledSelection compiledSelection) {
+        if (compiledSelection != null) {
+            this.isOptimisedQuery = true;
+            this.compiledSelection = compiledSelection;
+        }
     }
 
     /**

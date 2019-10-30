@@ -136,7 +136,7 @@ public abstract class AbstractRecordTable extends Table {
         } else {
             records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
         }
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
@@ -417,6 +417,11 @@ public abstract class AbstractRecordTable extends Table {
      */
     protected abstract CompiledExpression compileSetAttribute(ExpressionBuilder expressionBuilder);
 
+    @Override
+    public boolean isStateful() {
+        return false;
+    }
+
     /**
      * Compiled condition of the {@link AbstractRecordTable}
      */
@@ -440,10 +445,5 @@ public abstract class AbstractRecordTable extends Table {
         public SiddhiQueryContext getSiddhiQueryContext() {
             return siddhiQueryContext;
         }
-    }
-
-    @Override
-    public boolean isStateful() {
-        return false;
     }
 }

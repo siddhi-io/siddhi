@@ -56,8 +56,7 @@ public class InsertIntoTableCallback extends OutputCallback {
                     .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
         }
         if (convertToStreamEvent) {
-            ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(complexEventChunk
-                    .isBatch());
+            ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>();
             complexEventChunk.reset();
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();

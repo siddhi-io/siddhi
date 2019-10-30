@@ -47,8 +47,8 @@ public class ServiceDeploymentInfo {
     /**
      * Service related information to the deployment
      *
-     * @param port           the port of the service
-     * @param secured        is the service protocol secured
+     * @param port    the port of the service
+     * @param secured is the service protocol secured
      */
     public ServiceDeploymentInfo(int port, boolean secured) {
         this.port = port;
@@ -71,16 +71,16 @@ public class ServiceDeploymentInfo {
         return secured;
     }
 
+    public void setSecured(boolean secured) {
+        this.secured = secured;
+    }
+
     public int getPort() {
         return port;
     }
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public void setSecured(boolean secured) {
-        this.secured = secured;
     }
 
     public boolean isPulling() {

@@ -22,7 +22,6 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
@@ -33,6 +32,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,7 +64,7 @@ public class AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunkList outputEventChunks = new ComplexEventChunkList(complexEventChunk.isBatch());
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -98,10 +99,10 @@ public class AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter
     }
 
 
-    private void tryFlushEvents(ComplexEventChunkList outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks, ComplexEvent event,
                                 RateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
             for (Iterator<Map.Entry<String, LastEventHolder>> iterator = state.groupByKeyEvents.entrySet().iterator();
                  iterator.hasNext(); ) {
                 Map.Entry<String, LastEventHolder> lastEventHolderEntry = iterator.next();

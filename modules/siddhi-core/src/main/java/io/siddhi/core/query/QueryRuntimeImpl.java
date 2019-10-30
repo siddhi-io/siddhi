@@ -91,12 +91,12 @@ public class QueryRuntimeImpl implements QueryRuntime, MemoryCalculable, Externa
         return toLocalStream;
     }
 
-    public boolean isStateful() {
-        return siddhiQueryContext.isStateful();
-    }
-
     public void setToLocalStream(boolean toLocalStream) {
         this.toLocalStream = toLocalStream;
+    }
+
+    public boolean isStateful() {
+        return siddhiQueryContext.isStateful();
     }
 
     public boolean isFromLocalStream() {

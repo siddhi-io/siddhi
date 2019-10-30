@@ -21,7 +21,6 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -33,6 +32,8 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import org.apache.log4j.Logger;
+
+import java.util.List;
 
 /**
  * Parent implementation to run the {@link Scheduler} to handle periodic snapshot rate
@@ -71,19 +72,14 @@ public abstract class SnapshotOutputRateLimiter<S extends State> implements Sche
         this.receiveStreamEvent = false;
     }
 
-    protected void sendToCallBacks(ComplexEventChunkList outputEventChunks) {
-            if (!outputEventChunks.isEmpty()) {
-                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(true);
-                for (ComplexEventChunk eventChunk : outputEventChunks) {
-                    outputEventChunk.addAll(eventChunk);
-                }
-                wrappedSnapshotOutputRateLimiter.passToCallBacks(outputEventChunk);
+    protected void sendToCallBacks(List<ComplexEventChunk> outputEventChunks) {
+        if (!outputEventChunks.isEmpty()) {
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
+            for (ComplexEventChunk eventChunk : outputEventChunks) {
+                outputEventChunk.addAll(eventChunk);
             }
-//        } else {
-//            for (ComplexEventChunk eventChunk : outputEventChunks) {
-//                wrappedSnapshotOutputRateLimiter.passToCallBacks(eventChunk);
-//            }
-//        }
+            wrappedSnapshotOutputRateLimiter.passToCallBacks(outputEventChunk);
+        }
     }
 
     /**

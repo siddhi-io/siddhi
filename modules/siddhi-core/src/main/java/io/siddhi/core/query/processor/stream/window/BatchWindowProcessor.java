@@ -123,8 +123,8 @@ public class BatchWindowProcessor extends BatchingFindableWindowProcessor<BatchW
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, WindowState state) {
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
-        ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
-         synchronized (state) {
+        ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>();
+        synchronized (state) {
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             if (outputExpectsExpiredEvents) {
                 if (state.expiredEventQueue.getFirst() != null) {
@@ -140,7 +140,7 @@ public class BatchWindowProcessor extends BatchingFindableWindowProcessor<BatchW
                 state.expiredEventQueue.clear();
             }
             //check whether the streamEventChunk has next event before add into output stream event chunk
-            ComplexEventChunk<StreamEvent> currentEventQueue = new ComplexEventChunk<>(true);
+            ComplexEventChunk<StreamEvent> currentEventQueue = new ComplexEventChunk<>();
             int count = 0;
             if (streamEventChunk.hasNext()) {
                 do {
@@ -166,7 +166,7 @@ public class BatchWindowProcessor extends BatchingFindableWindowProcessor<BatchW
                         currentEventQueue.clear();
                         if (currentEventChunk.getFirst() != null) {
                             streamEventChunks.add(currentEventChunk);
-                            currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                            currentEventChunk = new ComplexEventChunk<StreamEvent>();
                         }
                     }
                 } while (streamEventChunk.hasNext());

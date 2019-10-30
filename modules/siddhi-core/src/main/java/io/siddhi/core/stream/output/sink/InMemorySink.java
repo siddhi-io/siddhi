@@ -62,8 +62,8 @@ import org.apache.log4j.Logger;
         )
 )
 public class InMemorySink extends Sink<State> {
-    private static final Logger log = Logger.getLogger(InMemorySink.class);
     protected static final String TOPIC_KEY = "topic";
+    private static final Logger log = Logger.getLogger(InMemorySink.class);
     protected Option topicOption;
 
     @Override

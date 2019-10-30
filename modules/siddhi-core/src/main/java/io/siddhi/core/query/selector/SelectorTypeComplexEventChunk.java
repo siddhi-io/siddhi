@@ -29,7 +29,7 @@ public class SelectorTypeComplexEventChunk extends ComplexEventChunk<ComplexEven
 
     public SelectorTypeComplexEventChunk(ComplexEventChunk<ComplexEvent> complexEventChunk,
                                          boolean isProcessPassThrough) {
-        super(complexEventChunk.getFirst(), complexEventChunk.getLast(), complexEventChunk.isBatch());
+        super(complexEventChunk.getFirst(), complexEventChunk.getLast());
         this.isProcessPassThrough = isProcessPassThrough;
     }
 

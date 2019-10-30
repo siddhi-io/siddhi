@@ -48,7 +48,7 @@ public class CompareExhaustiveAndCollectionExecutor implements CollectionExecuto
             return exhaustiveCollectionExecutor.find(matchingEvent, indexedEventHolder, storeEventCloner);
         } else if (compareStreamEvents.size() > 0) {
             compareStreamEvents = exhaustiveCollectionExecutor.findEvents(matchingEvent, compareStreamEvents);
-            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
             for (StreamEvent resultEvent : compareStreamEvents) {
                 if (storeEventCloner != null) {
                     returnEventChunk.add(storeEventCloner.copyStreamEvent(resultEvent));

@@ -46,9 +46,9 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
-        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>();
         ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<>(
-                batchProcessingAllowed);
+        );
         synchronized (patternSyncObject) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
@@ -68,7 +68,7 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         while (retEventChunk.hasNext()) {
             StateEvent stateEvent = retEventChunk.next();
             retEventChunk.remove();
-            querySelector.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
+            querySelector.process(new ComplexEventChunk<>(stateEvent, stateEvent));
         }
     }
 
