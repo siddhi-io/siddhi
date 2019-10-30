@@ -53,7 +53,6 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     private static final Logger log = Logger.getLogger(AbstractStreamProcessor.class);
 
     protected Processor nextProcessor;
-    private List<Attribute> additionalAttributes;
     protected MetaStreamEvent metaStreamEvent;
     protected SiddhiQueryContext siddhiQueryContext;
     protected StreamEventClonerHolder streamEventClonerHolder = new StreamEventClonerHolder();
@@ -62,6 +61,7 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     protected int attributeExpressionLength;
     protected ComplexEventPopulater complexEventPopulater;
     protected StateHolder<S> stateHolder;
+    private List<Attribute> additionalAttributes;
 
     public void initProcessor(MetaStreamEvent metaStreamEvent,
                               ExpressionExecutor[] attributeExpressionExecutors,
@@ -134,7 +134,15 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
         } finally {
             stateHolder.returnState(state);
         }
+    }
 
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     /**
@@ -188,6 +196,6 @@ public abstract class AbstractStreamProcessor<S extends State> implements Proces
     public abstract ProcessingMode getProcessingMode();
 
     public boolean isStateful() {
-       return siddhiQueryContext.isStateful();
+        return siddhiQueryContext.isStateful();
     }
 }

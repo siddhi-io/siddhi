@@ -26,6 +26,7 @@ import io.siddhi.core.util.Scheduler;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -156,7 +157,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             }
             boolean notProcessed = true;
             long currentTime = complexEventChunk.getFirst().getTimestamp();
-            ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+            ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>();
             lock.lock();
             try {
                 // If the process method is called, it is guaranteed that the waitingTime is passed
@@ -225,9 +226,18 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         }
     }
 
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
+    }
+
     private void sendEvent(StateEvent stateEvent, LogicalStreamPreState state) {
         if (thisStatePostProcessor.nextProcessor != null) {
-            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
+            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent, stateEvent));
         }
         if (thisStatePostProcessor.nextStatePreProcessor != null) {
             thisStatePostProcessor.nextStatePreProcessor.addState(stateEvent);
@@ -248,13 +258,13 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         LogicalStreamPreState state = (LogicalStreamPreState) stateHolder.getState();
         try {
             if (!state.active) {
-                return new ComplexEventChunk<>(false);
+                return new ComplexEventChunk<>();
             }
             ComplexEventChunk<StateEvent> event = super.processAndReturn(complexEventChunk);
 
             StateEvent firstEvent = event.getFirst();
             if (firstEvent != null) {
-                event = new ComplexEventChunk<>(false);
+                event = new ComplexEventChunk<>();
             }
             // Always return an empty event
             return event;

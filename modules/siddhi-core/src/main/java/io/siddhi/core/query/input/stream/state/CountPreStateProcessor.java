@@ -51,7 +51,7 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
 
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
+        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>();
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
         CountStreamPreState state = (CountStreamPreState) stateHolder.getState();

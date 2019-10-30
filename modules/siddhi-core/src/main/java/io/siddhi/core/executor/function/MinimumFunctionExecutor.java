@@ -101,7 +101,7 @@ public class MinimumFunctionExecutor extends FunctionExecutor {
     /**
      * return maximum of arbitrary long set of Double values
      *
-     * @param data array of Double values
+     * @param data  array of Double values
      * @param state
      * @return max
      */

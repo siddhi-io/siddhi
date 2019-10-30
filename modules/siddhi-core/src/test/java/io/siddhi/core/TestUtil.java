@@ -66,6 +66,18 @@ public class TestUtil {
         return callBack;
     }
 
+    public static void waitForInEvents(long sleepTime, TestUtil.TestCallback callback, int retryCount)
+            throws InterruptedException {
+        int count = 0;
+        while (true) {
+            Thread.sleep(sleepTime);
+            count += 1;
+            if (callback.getInEventCount() == 1 || count == retryCount) {
+                break;
+            }
+        }
+    }
+
     /**
      * The API which lets the developers to get the statistics of test results.
      */
@@ -230,18 +242,6 @@ public class TestUtil {
         public void throwAssertionErrors() {
             for (AssertionError error : this.assertionErrors) {
                 throw error;
-            }
-        }
-    }
-
-    public static void waitForInEvents(long sleepTime, TestUtil.TestCallback callback, int retryCount)
-            throws InterruptedException {
-        int count = 0;
-        while (true) {
-            Thread.sleep(sleepTime);
-            count += 1;
-            if (callback.getInEventCount() == 1 || count == retryCount) {
-                break;
             }
         }
     }

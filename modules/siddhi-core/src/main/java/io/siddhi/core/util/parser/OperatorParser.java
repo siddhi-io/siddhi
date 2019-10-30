@@ -34,7 +34,16 @@ import io.siddhi.core.util.collection.expression.AndMultiPrimaryKeyCollectionExp
 import io.siddhi.core.util.collection.expression.AttributeCollectionExpression;
 import io.siddhi.core.util.collection.expression.CollectionExpression;
 import io.siddhi.core.util.collection.expression.CompareCollectionExpression;
-import io.siddhi.core.util.collection.operator.*;
+import io.siddhi.core.util.collection.operator.CollectionOperator;
+import io.siddhi.core.util.collection.operator.EventChunkOperator;
+import io.siddhi.core.util.collection.operator.IndexOperator;
+import io.siddhi.core.util.collection.operator.IndexOperatorForCache;
+import io.siddhi.core.util.collection.operator.MapOperator;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.collection.operator.Operator;
+import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
+import io.siddhi.core.util.collection.operator.OverwriteTableIndexOperatorForCache;
+import io.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;

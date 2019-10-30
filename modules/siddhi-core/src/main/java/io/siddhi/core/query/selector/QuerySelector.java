@@ -98,7 +98,28 @@ public class QuerySelector implements Processor {
         }
     }
 
-    public void executePassThrough(ComplexEventChunk complexEventChunk) {
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        List<ComplexEventChunk> returnEventChunks = new ArrayList<>(complexEventChunks.size());
+        for (ComplexEventChunk complexEventChunk : complexEventChunks) {
+            if (complexEventChunk.getFirst() != null) {
+                ComplexEventChunk returnEventChunk;
+                if (complexEventChunk instanceof SelectorTypeComplexEventChunk &&
+                        ((SelectorTypeComplexEventChunk) complexEventChunk).isProcessPassThrough()) {
+                    returnEventChunk = executePassThrough(complexEventChunk);
+                } else {
+                    returnEventChunk = execute(complexEventChunk);
+                }
+                if (returnEventChunk != null) {
+                    returnEventChunks.add(returnEventChunk);
+                }
+            }
+        }
+        if (!returnEventChunks.isEmpty()) {
+            outputRateLimiter.process(returnEventChunks);
+        }
+    }
+
+    private ComplexEventChunk executePassThrough(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
@@ -111,15 +132,16 @@ public class QuerySelector implements Processor {
         }
         complexEventChunk.reset();
         if (complexEventChunk.hasNext()) {
-            outputRateLimiter.process(complexEventChunk);
+            return complexEventChunk;
         }
+        return null;
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
         if (log.isTraceEnabled()) {
             log.trace("event is executed by selector " + id + this);
         }
-        if (complexEventChunk.isBatch() && batchingEnabled) {
+        if (batchingEnabled) {
             if (isGroupBy) {
                 return processInBatchGroupBy(complexEventChunk);
             } else if (containsAggregator) {
@@ -185,7 +207,7 @@ public class QuerySelector implements Processor {
     private ComplexEventChunk<ComplexEvent> processGroupBy(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         ComplexEventChunk<ComplexEvent> currentComplexEventChunk = new ComplexEventChunk<ComplexEvent>
-                (complexEventChunk.isBatch());
+                ();
 
         synchronized (this) {
             int limitCount = 0;
@@ -356,17 +378,17 @@ public class QuerySelector implements Processor {
         return null;    //since there is no processors after a query selector
     }
 
-    @Override
-    public void setNextProcessor(Processor processor) {
-        //this method will not be used as there is no processors after a query selector
-    }
-
     public void setNextProcessor(OutputRateLimiter outputRateLimiter) {
         if (this.outputRateLimiter == null) {
             this.outputRateLimiter = outputRateLimiter;
         } else {
             throw new SiddhiAppCreationException("outputRateLimiter is already assigned");
         }
+    }
+
+    @Override
+    public void setNextProcessor(Processor processor) {
+        //this method will not be used as there is no processors after a query selector
     }
 
     @Override
@@ -428,7 +450,7 @@ public class QuerySelector implements Processor {
     }
 
     private void orderEventChunk(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk orderingComplexEventChunk = new ComplexEventChunk(complexEventChunk.isBatch());
+        ComplexEventChunk orderingComplexEventChunk = new ComplexEventChunk();
         List<ComplexEvent> eventList = new ArrayList<>();
 
         ComplexEvent.Type currentEventType = null;

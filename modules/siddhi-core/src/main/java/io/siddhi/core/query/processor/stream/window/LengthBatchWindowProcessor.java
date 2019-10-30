@@ -153,10 +153,9 @@ public class LengthBatchWindowProcessor extends
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, WindowState state) {
-
-        List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
+        List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<>();
         synchronized (state) {
-            ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
+            ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<>();
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
@@ -178,7 +177,7 @@ public class LengthBatchWindowProcessor extends
                 }
                 if (outputStreamEventChunk.getFirst() != null) {
                     streamEventChunks.add(outputStreamEventChunk);
-                    outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                    outputStreamEventChunk = new ComplexEventChunk<>();
                 }
             }
         }

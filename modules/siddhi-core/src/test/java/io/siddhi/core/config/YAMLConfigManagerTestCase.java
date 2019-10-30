@@ -155,6 +155,7 @@ public class YAMLConfigManagerTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1);
         siddhiAppRuntime.start();
     }
+
     @Test
     public void yamlConfigManagerTest4() throws InterruptedException {
         log.info("yamlConfigManagerTest4");

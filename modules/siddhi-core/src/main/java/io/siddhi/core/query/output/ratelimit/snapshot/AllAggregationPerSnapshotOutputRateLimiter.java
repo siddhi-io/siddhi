@@ -27,8 +27,8 @@ import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public class AllAggregationPerSnapshotOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -80,16 +80,14 @@ public class AllAggregationPerSnapshotOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk<ComplexEvent> eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
-        }
+        sendToCallBacks(outputEventChunks);
     }
 
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks, ComplexEvent event,
                                 RateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>();
             if (state.lastEvent != null) {
                 outputEventChunk.add(cloneComplexEvent(state.lastEvent));
             }

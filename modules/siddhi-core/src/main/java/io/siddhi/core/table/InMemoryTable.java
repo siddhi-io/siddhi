@@ -147,7 +147,7 @@ public class InMemoryTable extends Table {
             AddingStreamEventExtractor addingStreamEventExtractor,
             InMemoryCompiledCondition inMemoryCompiledCondition,
             InMemoryCompiledUpdateSet compiledUpdateSet, ComplexEventChunk<StateEvent> failedEvents) {
-        ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>(failedEvents.isBatch());
+        ComplexEventChunk<StreamEvent> toInsertEventChunk = new ComplexEventChunk<>();
         failedEvents.reset();
         while (failedEvents.hasNext()) {
             StateEvent failedEvent = failedEvents.next();
@@ -251,6 +251,14 @@ public class InMemoryTable extends Table {
 
     }
 
+    public int size() {
+        return stateHolder.getState().eventHolder.size();
+    }
+
+    public boolean isStateful() {
+        return true;
+    }
+
     /**
      * class to store the state of table
      */
@@ -281,13 +289,5 @@ public class InMemoryTable extends Table {
         public void restore(Map<String, Object> state) {
             eventHolder.restore((SnapshotStateList) state.get("EventHolder"));
         }
-    }
-
-    public int size() {
-        return stateHolder.getState().eventHolder.size();
-    }
-
-    public boolean isStateful() {
-        return true;
     }
 }

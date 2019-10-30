@@ -599,12 +599,10 @@ public class SessionWindowProcessor extends GroupingFindableWindowProcessor<Sess
         private long aliveTimestamp;
 
         public SessionComplexEventChunk(String key) {
-            super(false);
             this.key = key;
         }
 
         public SessionComplexEventChunk() {
-            super(false);
         }
 
         public String getKey() {

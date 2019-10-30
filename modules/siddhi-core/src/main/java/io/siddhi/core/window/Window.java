@@ -242,8 +242,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
                     latencyTrackerInsert.markIn();
                 }
                 // Send to the window windowProcessor
-                windowProcessor.process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent,
-                        complexEventChunk.isBatch()));
+                windowProcessor.process(new ComplexEventChunk<>(firstEvent, currentEvent));
             } finally {
                 if (throughputTrackerInsert != null &&
                         Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
@@ -298,6 +297,10 @@ public class Window implements FindableProcessor, MemoryCalculable {
         return internalWindowProcessor.getProcessingMode();
     }
 
+    public boolean isStateful() {
+        return internalWindowProcessor.isStateful();
+    }
+
     /**
      * PublisherProcessor receives events from the last window processor of Window,
      * filter them depending on user defined output type and publish them to the stream junction.
@@ -349,6 +352,15 @@ public class Window implements FindableProcessor, MemoryCalculable {
             }
         }
 
+        @Override
+        public void process(List<ComplexEventChunk> complexEventChunks) {
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+            for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+                complexEventChunk.addAll(streamEventChunk);
+            }
+            process(complexEventChunk);
+        }
+
         public Processor getNextProcessor() {
             return null;
         }
@@ -363,9 +375,5 @@ public class Window implements FindableProcessor, MemoryCalculable {
             // Do nothing
         }
 
-    }
-
-    public boolean isStateful() {
-        return internalWindowProcessor.isStateful();
     }
 }

@@ -335,9 +335,7 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
             }
         }
         if (streamEventChunk.getFirst() != null) {
-            streamEventChunk.setBatch(true);
             nextProcessor.process(streamEventChunk);
-            streamEventChunk.setBatch(false);
         }
     }
 

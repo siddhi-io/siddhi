@@ -44,7 +44,7 @@ public class ExhaustiveCollectionExecutor implements CollectionExecutor {
 
     public StreamEvent find(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder, StreamEventCloner
             storeEventCloner) {
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
         Collection<StreamEvent> storeEvents = indexedEventHolder.getAllEvents();
 
         for (StreamEvent storeEvent : storeEvents) {

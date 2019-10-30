@@ -40,9 +40,9 @@ import java.util.List;
 public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
 
     private static ThreadLocal<ReturnEventHolder> multiProcessReturn = new ThreadLocal<>();
+    private final Object patternSyncObject;
     protected Processor[] nextProcessors;
     protected int[] eventSequence;
-    private final Object patternSyncObject;
     protected OutputRateLimiter outputRateLimiter;
     private MetaStreamEvent[] metaStreamEvents;
     private StreamEventFactory[] streamEventFactorys;
@@ -242,7 +242,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
 
     protected void processAndClear(int processIndex, StreamEvent streamEvent) {
         ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>(
-                streamEvent, streamEvent, batchProcessingAllowed);
+                streamEvent, streamEvent);
         nextProcessors[processIndex].process(currentStreamEventChunk);
     }
 
@@ -305,9 +305,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
      */
     public class ReturnEventHolder {
         ComplexEventChunk complexEventChunk;
+
         public void setReturnEvents(ComplexEventChunk complexEventChunk) {
             if (this.complexEventChunk == null) {
-                this.complexEventChunk = new ComplexEventChunk(complexEventChunk.isBatch());
+                this.complexEventChunk = new ComplexEventChunk();
             }
             this.complexEventChunk.add(complexEventChunk.getFirst());
         }

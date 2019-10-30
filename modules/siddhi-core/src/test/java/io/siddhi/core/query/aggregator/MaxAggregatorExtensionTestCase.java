@@ -91,6 +91,7 @@ public class MaxAggregatorExtensionTestCase {
         siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{36d, 36.75, 35.75});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{37.88d, 38.12, 37.62});
         Thread.sleep(2000);
 

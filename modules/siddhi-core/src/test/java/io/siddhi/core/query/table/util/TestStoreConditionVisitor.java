@@ -63,6 +63,10 @@ public class TestStoreConditionVisitor extends BaseExpressionVisitor {
         //preventing initialization
     }
 
+    public static boolean isEmpty(String field) {
+        return (field == null || field.trim().length() == 0);
+    }
+
     public String returnCondition() {
         this.parametrizeCondition();
         return this.finalCompiledCondition.trim();
@@ -286,10 +290,6 @@ public class TestStoreConditionVisitor extends BaseExpressionVisitor {
     @Override
     public void endVisitMathRightOperand(MathOperator mathOperator) {
         //Not applicable
-    }
-
-    public static boolean isEmpty(String field) {
-        return (field == null || field.trim().length() == 0);
     }
 
     @Override

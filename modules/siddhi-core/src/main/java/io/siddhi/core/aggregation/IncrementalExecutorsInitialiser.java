@@ -133,7 +133,7 @@ public class IncrementalExecutorsInitialiser {
                 endOFLatestEventTimestamp = IncrementalTimeConverterUtil
                         .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), null);
 
-                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
                 for (Event event : events) {
                     StreamEvent streamEvent = streamEventFactory.newInstance();
                     streamEvent.setOutputData(event.getData());

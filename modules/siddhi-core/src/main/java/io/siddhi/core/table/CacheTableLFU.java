@@ -92,7 +92,7 @@ public class CacheTableLFU extends CacheTable {
                     }
                 }
             }
-            for (Object deleteKey: toDelete.values()) {
+            for (Object deleteKey : toDelete.values()) {
                 if (deleteKey != null) {
                     indexEventHolder.deleteEvent(deleteKey);
                 }
@@ -114,7 +114,7 @@ public class CacheTableLFU extends CacheTable {
             outputDataForCache = new Object[numColumns];
             outputDataForCache[cachePolicyAttributePosition] = 1;
         }
-        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        System.arraycopy(outputData, 0, outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
         return eventForCache;

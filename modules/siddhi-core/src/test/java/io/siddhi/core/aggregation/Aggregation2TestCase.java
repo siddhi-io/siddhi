@@ -433,9 +433,9 @@ public class Aggregation2TestCase {
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
             AssertJUnit.assertTrue("In events matched",
-                                                    SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
+                    SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
             AssertJUnit.assertTrue("On-demand query events matched",
-                                                SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
+                    SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
         } finally {
             siddhiAppRuntime.shutdown();
         }

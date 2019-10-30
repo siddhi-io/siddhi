@@ -28,11 +28,10 @@ import java.util.Map;
  */
 public class SingleSyncStateHolder implements StateHolder {
     private static final Logger log = Logger.getLogger(SingleSyncStateHolder.class);
-
-    private final StateFactory stateFactory;
-    private State state = null;
     final Map<String, State> groupByStates = new HashMap<>(1);
     final Map<String, Map<String, State>> allStates = new HashMap<>(1);
+    private final StateFactory stateFactory;
+    private State state = null;
 
     public SingleSyncStateHolder(StateFactory stateFactory) {
         this.stateFactory = stateFactory;

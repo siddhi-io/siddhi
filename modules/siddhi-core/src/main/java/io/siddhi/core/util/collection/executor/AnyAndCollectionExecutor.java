@@ -56,7 +56,7 @@ public class AnyAndCollectionExecutor implements CollectionExecutor {
             storeEventCloner) {
 
         Collection<StreamEvent> resultEventSet = findEvents(matchingEvent, indexedEventHolder);
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
 
         if (resultEventSet != null) {
             for (StreamEvent resultEvent : resultEventSet) {

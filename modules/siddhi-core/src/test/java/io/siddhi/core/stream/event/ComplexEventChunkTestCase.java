@@ -222,7 +222,7 @@ public class ComplexEventChunkTestCase {
     public void eventChunkTest5() {
         //Test self looping events
 
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
 
         StreamEvent streamEvent1 = new StreamEvent(0, 0, 3);
         streamEvent1.setOutputData(new Object[]{"IBM", 100L, 100L});

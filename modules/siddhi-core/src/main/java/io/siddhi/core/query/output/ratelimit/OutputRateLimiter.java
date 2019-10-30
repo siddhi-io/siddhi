@@ -114,6 +114,14 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
 
     public abstract void process(ComplexEventChunk complexEventChunk);
 
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>();
+        for (ComplexEventChunk aComplexEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(aComplexEventChunk);
+        }
+        process(complexEventChunk);
+    }
+
     public OutputCallback getOutputCallback() {
         return outputCallback;
     }

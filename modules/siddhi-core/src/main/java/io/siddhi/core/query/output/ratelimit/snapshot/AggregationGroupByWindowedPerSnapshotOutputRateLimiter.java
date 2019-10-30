@@ -26,7 +26,6 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,7 +61,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         AggregationGroupByRateLimiterState state = (AggregationGroupByRateLimiterState) stateHolder.getState();
         try {
             synchronized (state) {
@@ -117,12 +116,11 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
-        }
+        sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks,
+                                ComplexEvent event,
                                 AggregationGroupByRateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
             constructOutputChunk(outputEventChunks, state);
@@ -131,9 +129,9 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         }
     }
 
-    private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks,
+    private void constructOutputChunk(List<ComplexEventChunk> outputEventChunks,
                                       AggregationGroupByRateLimiterState state) {
-        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
         Set<String> outputGroupingKeys = new HashSet<>();
         for (GroupedComplexEvent originalComplexEvent : state.eventList) {
             String currentGroupByKey = originalComplexEvent.getGroupKey();

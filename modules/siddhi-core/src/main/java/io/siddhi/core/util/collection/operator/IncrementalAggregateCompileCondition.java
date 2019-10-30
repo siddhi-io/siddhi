@@ -63,9 +63,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private final boolean isProcessingOnExternalTime;
     private final boolean isDistributed;
     private final List<TimePeriod.Duration> incrementalDurations;
+    private final StreamEventFactory streamEventFactoryForTableMeta;
+    private final StreamEventCloner tableEventCloner;
+    private final StreamEventFactory streamEventFactoryForAggregateMeta;
+    private final StreamEventCloner aggregateEventCloner;
     private Map<TimePeriod.Duration, Table> aggregationTableMap;
     private List<ExpressionExecutor> outputExpressionExecutors;
-
     private boolean isOptimisedLookup;
     private Map<TimePeriod.Duration, CompiledSelection> withinTableCompiledSelection;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions;
@@ -76,12 +79,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private ExpressionExecutor perExpressionExecutor;
     private ExpressionExecutor startTimeEndTimeExpressionExecutor;
     private List<ExpressionExecutor> timestampFilterExecutors;
-
     private MetaStreamEvent tableMetaStreamEvent;
-    private final StreamEventFactory streamEventFactoryForTableMeta;
-    private final StreamEventCloner tableEventCloner;
-    private final StreamEventFactory streamEventFactoryForAggregateMeta;
-    private final StreamEventCloner aggregateEventCloner;
     private ComplexEventPopulater complexEventPopulater;
     private MatchingMetaInfoHolder alteredMatchingMetaInfoHolder;
 
@@ -148,7 +146,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
                             ExpressionExecutor shouldUpdateTimestamp) {
 
-        ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>();
 
         //Create matching event if it is on-demand query
         int additionTimestampAttributesSize = this.timestampFilterExecutors.size() + 2;
@@ -321,7 +319,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private ComplexEventChunk<StreamEvent> createAggregateSelectionEventChunk(
             ComplexEventChunk<StreamEvent> complexEventChunkToHoldMatches,
             List<ExpressionExecutor> outputExpressionExecutors) {
-        ComplexEventChunk<StreamEvent> aggregateSelectionComplexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> aggregateSelectionComplexEventChunk = new ComplexEventChunk<>();
         StreamEvent resetEvent = streamEventFactoryForTableMeta.newInstance();
         resetEvent.setType(ComplexEvent.Type.RESET);
 

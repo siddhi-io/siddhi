@@ -66,7 +66,7 @@ public class IncrementalAggregationProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StreamEvent> streamEventChunk =
-                new ComplexEventChunk<>(complexEventChunk.isBatch());
+                new ComplexEventChunk<>();
         try {
             int noOfEvents = 0;
             if (latencyTrackerInsert != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
@@ -101,6 +101,15 @@ public class IncrementalAggregationProcessor implements Processor {
             }
         }
 
+    }
+
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     @Override

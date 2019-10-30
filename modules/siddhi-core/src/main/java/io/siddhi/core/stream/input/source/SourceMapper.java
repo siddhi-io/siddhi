@@ -41,6 +41,8 @@ public abstract class SourceMapper implements SourceEventListener {
     private static final Logger log = Logger.getLogger(SourceMapper.class);
     private final ThreadLocal<String[]> trpProperties = new ThreadLocal<>();
     private final ThreadLocal<String[]> trpSyncProperties = new ThreadLocal<>();
+    protected String sourceType;
+    protected OptionHolder sourceOptionHolder;
     private InputEventHandler inputEventHandler;
     private StreamDefinition streamDefinition;
     private String mapType;
@@ -49,8 +51,6 @@ public abstract class SourceMapper implements SourceEventListener {
     private SiddhiAppContext siddhiAppContext;
     private ThroughputTracker throughputTracker;
     private LatencyTracker mapperLatencyTracker;
-    protected String sourceType;
-    protected OptionHolder sourceOptionHolder;
 
     public final void init(StreamDefinition streamDefinition, String mapType, OptionHolder mapOptionHolder,
                            List<AttributeMapping> attributeMappings, String sourceType,

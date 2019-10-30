@@ -92,7 +92,7 @@ public class SelectOnDemandQueryRuntime extends OnDemandQueryRuntime {
         }
         stateEvent.setType(ComplexEvent.Type.RESET);
 
-        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>();
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
     }

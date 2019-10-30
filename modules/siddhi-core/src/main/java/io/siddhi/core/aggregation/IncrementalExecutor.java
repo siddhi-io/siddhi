@@ -49,19 +49,17 @@ public class IncrementalExecutor implements Executor {
     private static final Logger LOG = Logger.getLogger(IncrementalExecutor.class);
 
     private final String aggregatorName;
+    private final StreamEvent resetEvent;
+    private final ExpressionExecutor timestampExpressionExecutor;
+    private final StateHolder<ExecutorState> stateHolder;
+    private final String siddhiAppName;
     private TimePeriod.Duration duration;
     private Table table;
     private boolean isRoot;
     private boolean isProcessingExecutor;
     private Executor next;
-
-    private final StreamEvent resetEvent;
-    private final ExpressionExecutor timestampExpressionExecutor;
-    private final StateHolder<ExecutorState> stateHolder;
     private GroupByKeyGenerator groupByKeyGenerator;
     private StreamEventFactory streamEventFactory;
-
-    private final String siddhiAppName;
     private Scheduler scheduler;
     private ExecutorService executorService;
 
@@ -136,7 +134,7 @@ public class IncrementalExecutor implements Executor {
             StreamEvent timerEvent = streamEventFactory.newInstance();
             timerEvent.setType(ComplexEvent.Type.TIMER);
             timerEvent.setTimestamp(executorState.startTimeOfAggregates);
-            ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>(true);
+            ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>();
             timerStreamEventChunk.add(timerEvent);
             next.execute(timerStreamEventChunk);
         }
@@ -194,12 +192,12 @@ public class IncrementalExecutor implements Executor {
     private void dispatchEvent(long startTimeOfNewAggregates, BaseIncrementalValueStore aBaseIncrementalValueStore) {
         if (aBaseIncrementalValueStore.isProcessed()) {
             Map<String, StreamEvent> streamEventMap = aBaseIncrementalValueStore.getGroupedByEvents();
-            ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
+            ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>();
             for (StreamEvent event : streamEventMap.values()) {
                 eventChunk.add(event);
             }
             Map<String, StreamEvent> tableStreamEventMap = aBaseIncrementalValueStore.getGroupedByEvents();
-            ComplexEventChunk<StreamEvent> tableEventChunk = new ComplexEventChunk<>(true);
+            ComplexEventChunk<StreamEvent> tableEventChunk = new ComplexEventChunk<>();
             for (StreamEvent event : tableStreamEventMap.values()) {
                 tableEventChunk.add(event);
             }
@@ -217,7 +215,7 @@ public class IncrementalExecutor implements Executor {
                                         "can cause accuracy loss.", t);
                             }
                         }
-                    );
+                );
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);

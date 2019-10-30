@@ -1191,7 +1191,7 @@ public class SelectOptimisationAggregationTestCase {
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
 
-            Object[] expected =                     new Object[]{"IBM", 2000.0};
+            Object[] expected = new Object[]{"IBM", 2000.0};
             SiddhiTestHelper.waitForEvents(100, 1, inEventCount, 60000);
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 1, inEventCount.get());

@@ -89,10 +89,10 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
                 storeEventPool);
 
         TableDefinition testStoreContainingIMTableDefinition = TableDefinition.id(tableDefinition.getId());
-        for (Attribute attribute: tableDefinition.getAttributeList()) {
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
             testStoreContainingIMTableDefinition.attribute(attribute.getName(), attribute.getType());
         }
-        for (Annotation annotation: tableDefinition.getAnnotations()) {
+        for (Annotation annotation : tableDefinition.getAnnotations()) {
             if (!annotation.getName().equalsIgnoreCase("Store")) {
                 testStoreContainingIMTableDefinition.annotation(annotation);
             }
@@ -120,13 +120,13 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
             Event[] cacheResultsAfterSelection = executeSelector(stateEventFactory, null, outEvent,
                     compiledSelectionWithCache.getStoreEventIndex(), compiledSelectionWithCache.getQuerySelector());
 
-            if (compiledSelectionWithCache.getQuerySelector() !=  null &
-                    compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() !=  0) {
+            if (compiledSelectionWithCache.getQuerySelector() != null &
+                    compiledSelectionWithCache.getQuerySelector().getAttributeProcessorList().size() != 0) {
                 compiledSelectionWithCache.getQuerySelector().
                         process(generateResetComplexEventChunk(outEvent.getOutputData().length, stateEventFactory));
             }
             if (cacheResultsAfterSelection != null) {
-                for (Event event: cacheResultsAfterSelection) {
+                for (Event event : cacheResultsAfterSelection) {
                     objects.add(event.getData());
                 }
             }
@@ -158,7 +158,7 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
         List<VariableExpressionExecutor> variableExpressionExecutorsForQuerySelector = new ArrayList<>();
 
         if (metaStateEvent.getOutputDataAttributes().size() == 0) {
-            for (Attribute outputAttribute: metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
+            for (Attribute outputAttribute : metaStateEvent.getMetaStreamEvents()[0].getOnAfterWindowData()) {
                 metaStateEvent.getMetaStreamEvents()[0].addOutputData(outputAttribute);
             }
         }
@@ -183,8 +183,8 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
     }
 
     private ComplexEventChunk<StreamEvent> objectListToComplexEventChunk(List<Object[]> records) {
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-        for (Object[] record: records) {
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
+        for (Object[] record : records) {
             StreamEvent event = storeEventPool.newInstance();
             event.setOutputData(record);
             complexEventChunk.add(event);
@@ -234,9 +234,9 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
         inMemoryTable.add(convForDelete(deleteConditionParameterMaps));
     }
 
-    private ComplexEventChunk<StreamEvent> convForDelete (List<Map<String, Object>> deleteConditionParameterMaps) {
+    private ComplexEventChunk<StreamEvent> convForDelete(List<Map<String, Object>> deleteConditionParameterMaps) {
         List<Object[]> objectList = new LinkedList<>();
-        for (Map<String, Object> parameterMap: deleteConditionParameterMaps) {
+        for (Map<String, Object> parameterMap : deleteConditionParameterMaps) {
             List<Object> outputData = new ArrayList<>();
             List<Attribute> attributeList = inMemoryTable.getTableDefinition().getAttributeList();
 
@@ -250,8 +250,8 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
             objectList.add(outputData.toArray());
         }
 
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-        for (Object[] record: objectList) {
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
+        for (Object[] record : objectList) {
             StreamEvent event = new StreamEvent(0, 0, record.length);
 //            StateEvent stateEvent = new StateEvent(2, record.length);
             event.setOutputData(record);
@@ -302,7 +302,7 @@ public class TestStoreForCacheMiss extends AbstractQueryableRecordTable {
         stateEvent.addEvent(0, streamEvent);
         stateEvent.setType(ComplexEvent.Type.RESET);
 
-        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>();
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
     }

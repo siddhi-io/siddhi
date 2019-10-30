@@ -73,12 +73,8 @@ public class InputStreamParser {
 
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             SingleInputStream singleInputStream = (SingleInputStream) inputStream;
-            Window window = windowMap.get(singleInputStream.getStreamId());
-            boolean batchProcessingAllowed = window != null;      // If stream is from window, allow batch
-            // processing
             ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(),
                     siddhiQueryContext);
-            processStreamReceiver.setBatchProcessingAllowed(batchProcessingAllowed);
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
                     executors, streamDefinitionMap,
                     tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap, tableMap,

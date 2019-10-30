@@ -252,7 +252,7 @@ public class TestStoreForCachePreLoading extends AbstractQueryableRecordTable {
         stateEvent.addEvent(0, streamEvent);
         stateEvent.setType(ComplexEvent.Type.RESET);
 
-        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>();
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
     }

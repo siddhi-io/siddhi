@@ -42,6 +42,7 @@ public class CacheFIFOTestCase {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
+
     @BeforeMethod
     public void init() {
         inEventCount = 0;

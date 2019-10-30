@@ -35,14 +35,12 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
     private StreamEventFactory streamEventFactory;
 
     public ConversionStreamEventChunk(MetaStreamEvent metaStreamEvent, StreamEventFactory streamEventFactory) {
-        super(false);
         this.streamEventFactory = streamEventFactory;
         streamEventConverter = StreamEventConverterFactory.constructEventConverter(metaStreamEvent);
     }
 
     public ConversionStreamEventChunk(StreamEventConverter streamEventConverter,
                                       StreamEventFactory streamEventFactory) {
-        super(false);
         this.streamEventConverter = streamEventConverter;
         this.streamEventFactory = streamEventFactory;
     }

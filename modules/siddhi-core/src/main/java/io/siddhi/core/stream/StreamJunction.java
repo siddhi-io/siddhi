@@ -359,14 +359,6 @@ public class StreamJunction implements EventBufferHolder {
         return (!receivers.isEmpty() && async);
     }
 
-    /**
-     * Different Type of On Error Actions
-     */
-    public enum OnErrorAction {
-        LOG,
-        STREAM
-    }
-
     public void handleError(Object event, Exception e) {
         if (exceptionListener != null) {
             exceptionListener.exceptionThrown(e);
@@ -429,6 +421,14 @@ public class StreamJunction implements EventBufferHolder {
             default:
                 break;
         }
+    }
+
+    /**
+     * Different Type of On Error Actions
+     */
+    public enum OnErrorAction {
+        LOG,
+        STREAM
     }
 
     /**

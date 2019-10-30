@@ -24,6 +24,8 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.ThreadBarrier;
 
+import java.util.List;
+
 /**
  * Entry Valve Siddhi processor chain.
  */
@@ -50,6 +52,15 @@ public class EntryValveProcessor implements Processor, Schedulable {
         } finally {
             threadBarrier.exit();
         }
+    }
+
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     /**

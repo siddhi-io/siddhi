@@ -98,6 +98,12 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
     private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
+    public static ThreadLocal<Boolean> queryStoreWithoutCheckingCache = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    protected StateEvent findMatchingEvent;
+    protected Selector selectorForTestOnDemandQuery;
+    protected SiddhiQueryContext siddhiQueryContextForTestOnDemandQuery;
+    protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestOnDemandQuery;
+    protected StateEvent containsMatchingEvent;
     private int maxCacheSize;
     private long purgeInterval;
     private boolean cacheEnabled = false;
@@ -106,17 +112,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     private CompiledCondition compiledConditionForCaching;
     private CompiledSelection compiledSelectionForCaching;
     private Attribute[] outputAttributesForCaching;
-    protected StateEvent findMatchingEvent;
-    protected Selector selectorForTestOnDemandQuery;
-    protected SiddhiQueryContext siddhiQueryContextForTestOnDemandQuery;
-    protected MatchingMetaInfoHolder matchingMetaInfoHolderForTestOnDemandQuery;
-    protected StateEvent containsMatchingEvent;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private long storeSizeLastCheckedTime;
     private long storeSizeCheckInterval;
     private long retentionPeriod;
     private long cacheLastReloadTime;
-    public static ThreadLocal<Boolean> queryStoreWithoutCheckingCache = ThreadLocal.withInitial(() -> Boolean.FALSE);
     private CompiledSelection compiledSelectionForSelectAll;
     private int storeTableSize = -1;
 
@@ -480,28 +480,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         return recordTableCompiledUpdateSet;
     }
 
-    /**
-     * Class to wrap store compile update set and cache compile update set
-     */
-    private class CompiledUpdateSetWithCache implements CompiledUpdateSet {
-        CompiledUpdateSet storeCompiledUpdateSet;
-        CompiledUpdateSet cacheCompiledUpdateSet;
-
-        public CompiledUpdateSetWithCache(CompiledUpdateSet storeCompiledUpdateSet,
-                                          CompiledUpdateSet cacheCompiledUpdateSet) {
-            this.storeCompiledUpdateSet = storeCompiledUpdateSet;
-            this.cacheCompiledUpdateSet = cacheCompiledUpdateSet;
-        }
-
-        public CompiledUpdateSet getStoreCompiledUpdateSet() {
-            return storeCompiledUpdateSet;
-        }
-
-        public CompiledUpdateSet getCacheCompiledUpdateSet() {
-            return cacheCompiledUpdateSet;
-        }
-    }
-
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
@@ -559,7 +537,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         updateStoreTableSize();
 
         // handle condition type convs
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordStoreCompiledSelection recordStoreCompiledSelection;
         CompiledConditionWithCache compiledConditionWithCache = null;
@@ -921,6 +899,103 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                                                           List<OrderByAttributeBuilder> orderByAttributeBuilders,
                                                           Long limit, Long offset);
 
+    public void handleCacheExpiry(CompiledCondition cacheExpiryCompiledCondition,
+                                  ComplexEventChunk<StateEvent> deleteEventChunk) {
+        if (log.isDebugEnabled()) {
+            log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
+        }
+        StateEvent stateEventForCaching = new StateEvent(1, 0);
+        StreamEvent loadedDataFromStore;
+
+        readWriteLock.writeLock().lock();
+        try {
+            if (storeTableSize != -1 && storeSizeLastCheckedTime >
+                    siddhiAppContext.getTimestampGenerator().currentTime() - retentionPeriod * 10) {
+                if (log.isDebugEnabled()) {
+                    log.debug(siddhiAppContext.getName() + ": checking size of store table");
+                }
+                try {
+                    if (storeTableSize <= maxCacheSize) {
+                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                        try {
+                            if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
+                                    retentionPeriod) {
+                                loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
+                                        compiledSelectionForCaching, outputAttributesForCaching);
+                                clearCacheAndReload(loadedDataFromStore);
+                                cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                            }
+                        } finally {
+                            AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                        }
+                    } else {
+                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
+                    }
+                } catch (ConnectionUnavailableException e) {
+                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+                }
+            } else {
+
+                try {
+                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
+                    try {
+                        loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
+                                compiledSelectionForCaching, outputAttributesForCaching);
+                        storeTableSize = findEventChunkSize(loadedDataFromStore);
+                        storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                    } finally {
+                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
+                    }
+                    if (storeTableSize <= maxCacheSize) {
+                        if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
+                                retentionPeriod) {
+                            clearCacheAndReload(loadedDataFromStore);
+                            cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                        }
+                    } else {
+                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
+                    }
+                } catch (Exception e) {
+                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
+            }
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
+    }
+
+    private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
+        ((CacheTable) cacheTable).deleteAll();
+        if (loadedDataFromStore != null) {
+            ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
+        }
+    }
+
+    /**
+     * Class to wrap store compile update set and cache compile update set
+     */
+    private class CompiledUpdateSetWithCache implements CompiledUpdateSet {
+        CompiledUpdateSet storeCompiledUpdateSet;
+        CompiledUpdateSet cacheCompiledUpdateSet;
+
+        public CompiledUpdateSetWithCache(CompiledUpdateSet storeCompiledUpdateSet,
+                                          CompiledUpdateSet cacheCompiledUpdateSet) {
+            this.storeCompiledUpdateSet = storeCompiledUpdateSet;
+            this.cacheCompiledUpdateSet = cacheCompiledUpdateSet;
+        }
+
+        public CompiledUpdateSet getStoreCompiledUpdateSet() {
+            return storeCompiledUpdateSet;
+        }
+
+        public CompiledUpdateSet getCacheCompiledUpdateSet() {
+            return cacheCompiledUpdateSet;
+        }
+    }
+
     /**
      * Class to hold store compile condition and cache compile condition wrapped
      */
@@ -1050,81 +1125,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
         public OrderByAttribute.Order getOrder() {
             return order;
-        }
-    }
-
-    public void handleCacheExpiry(CompiledCondition cacheExpiryCompiledCondition,
-                                  ComplexEventChunk<StateEvent> deleteEventChunk) {
-        if (log.isDebugEnabled()) {
-            log.debug(siddhiAppContext.getName() + ": CacheExpirer started");
-        }
-        StateEvent stateEventForCaching = new StateEvent(1, 0);
-        StreamEvent loadedDataFromStore;
-
-        readWriteLock.writeLock().lock();
-        try {
-            if (storeTableSize != -1 && storeSizeLastCheckedTime >
-                    siddhiAppContext.getTimestampGenerator().currentTime() - retentionPeriod * 10) {
-                if (log.isDebugEnabled()) {
-                    log.debug(siddhiAppContext.getName() + ": checking size of store table");
-                }
-                try {
-                    if (storeTableSize <= maxCacheSize) {
-                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-                        try {
-                            if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
-                                    retentionPeriod) {
-                                loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
-                                        compiledSelectionForCaching, outputAttributesForCaching);
-                                clearCacheAndReload(loadedDataFromStore);
-                                cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
-                            }
-                        } finally {
-                            AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
-                        }
-                    } else {
-                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
-                    }
-                } catch (ConnectionUnavailableException e) {
-                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
-                }
-            } else {
-
-                try {
-                    AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.TRUE);
-                    try {
-                        loadedDataFromStore = query(stateEventForCaching, compiledConditionForCaching,
-                                compiledSelectionForCaching, outputAttributesForCaching);
-                        storeTableSize = findEventChunkSize(loadedDataFromStore);
-                        storeSizeLastCheckedTime = siddhiAppContext.getTimestampGenerator().currentTime();
-                    } finally {
-                        AbstractQueryableRecordTable.queryStoreWithoutCheckingCache.set(Boolean.FALSE);
-                    }
-                    if (storeTableSize <= maxCacheSize) {
-                        if (cacheLastReloadTime < siddhiAppContext.getTimestampGenerator().currentTime() +
-                                retentionPeriod) {
-                            clearCacheAndReload(loadedDataFromStore);
-                            cacheLastReloadTime = siddhiAppContext.getTimestampGenerator().currentTime();
-                        }
-                    } else {
-                        cacheTable.delete(deleteEventChunk, cacheExpiryCompiledCondition);
-                    }
-                } catch (Exception e) {
-                    throw new SiddhiAppRuntimeException(siddhiAppContext.getName() + ": " + e.getMessage());
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug(siddhiAppContext.getName() + ": CacheExpirer ended");
-            }
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-    private void clearCacheAndReload(StreamEvent loadedDataFromStore) {
-        ((CacheTable) cacheTable).deleteAll();
-        if (loadedDataFromStore != null) {
-            ((CacheTable) cacheTable).addStreamEventUptoMaxSize(loadedDataFromStore);
         }
     }
 }

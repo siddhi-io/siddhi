@@ -458,6 +458,10 @@ public abstract class Sink<S extends State> implements SinkListener {
         }
     }
 
+    public boolean isStateful() {
+        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
+    }
+
     /**
      * Different Type of On Error Actions
      */
@@ -465,9 +469,5 @@ public abstract class Sink<S extends State> implements SinkListener {
         LOG,
         WAIT,
         STREAM
-    }
-
-    public boolean isStateful() {
-        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
     }
 }

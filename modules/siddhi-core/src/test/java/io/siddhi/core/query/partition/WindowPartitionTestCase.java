@@ -199,11 +199,14 @@ public class WindowPartitionTestCase {
         InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
         executionRuntime.start();
         inputHandler.send(new Object[]{"IBM", 70f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"WSO2", 700f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 100f, 200});
 
         Thread.sleep(3000);
         inputHandler.send(new Object[]{"IBM", 200f, 300});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"WSO2", 1000f, 100});
 
         Thread.sleep(2000);
@@ -254,8 +257,6 @@ public class WindowPartitionTestCase {
                             AssertJUnit.assertEquals(1500.0, event.getData()[1]);
                         }
                     }
-
-
                     eventArrived = true;
                 }
             }
@@ -264,11 +265,17 @@ public class WindowPartitionTestCase {
         InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
         executionRuntime.start();
         inputHandler.send(new Object[]{"IBM", 70f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"WSO2", 700f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 100f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 200f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"ORACLE", 75.6f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"WSO2", 1000f, 100});
+        Thread.sleep(100);
         inputHandler.send(new Object[]{"WSO2", 500f, 100});
 
         Thread.sleep(1000);

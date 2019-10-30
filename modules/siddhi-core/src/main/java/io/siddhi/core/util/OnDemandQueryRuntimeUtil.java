@@ -55,7 +55,7 @@ public class OnDemandQueryRuntimeUtil {
     private static ComplexEventChunk executeSelectorAndReturnChunk(StateEventFactory stateEventFactory,
                                                                    StreamEvent streamEvent, StreamEvent storeEvents,
                                                                    int storeEventIndex, QuerySelector selector) {
-        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>(true);
+        ComplexEventChunk<StateEvent> complexEventChunk = new ComplexEventChunk<>();
         while (storeEvents != null) {
 
             StreamEvent storeEvent = storeEvents;

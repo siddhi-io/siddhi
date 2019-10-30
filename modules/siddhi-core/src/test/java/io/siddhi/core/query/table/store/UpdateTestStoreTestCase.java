@@ -38,13 +38,6 @@ public class UpdateTestStoreTestCase {
     private int removeEventCount;
     private boolean eventArrived;
 
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
-
     @BeforeClass
     public static void startTest() {
         log.info("== Test Store UPDATE tests started ==");
@@ -53,6 +46,13 @@ public class UpdateTestStoreTestCase {
     @AfterClass
     public static void shutdown() {
         log.info("== Test Store UPDATE tests completed ==");
+    }
+
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
     }
 
     @Test

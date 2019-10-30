@@ -2536,9 +2536,9 @@ public class PartitionTestCase1 {
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
-           @Override
-           public void receive(Event[] events) {
-               EventPrinter.print(events);
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
                 count.addAndGet(events.length);
                 eventArrived = true;
             }
