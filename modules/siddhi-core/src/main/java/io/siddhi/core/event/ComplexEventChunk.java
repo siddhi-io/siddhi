@@ -38,10 +38,9 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     protected E previousToLastReturned;
     protected E lastReturned;
     protected E last;
-    protected boolean isBatch = false;
+    protected boolean isBatch = true;
 
     public ComplexEventChunk(boolean isBatch) {
-        this.isBatch = isBatch;
     }
 
     //Only to maintain backward compatibility
@@ -55,13 +54,11 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     public ComplexEventChunk(E first, E last) {
         this.first = first;
         this.last = last;
-        this.isBatch = true;
     }
 
     public ComplexEventChunk(E first, E last, boolean isBatch) {
         this.first = first;
         this.last = last;
-        this.isBatch = isBatch;
     }
 
     public void insertBeforeCurrent(E events) {
@@ -272,7 +269,6 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     }
 
     public void setBatch(boolean batch) {
-        isBatch = batch;
     }
 
     @Override

@@ -596,10 +596,9 @@ public class JoinTableTestCase {
 
     }
 
-
     @Test
     public void testTableJoinQuery9() throws InterruptedException {
-        log.info("testTableJoinQuery9 - OUT 1");
+        log.info("testTableJoinQuery9 - OUT 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 

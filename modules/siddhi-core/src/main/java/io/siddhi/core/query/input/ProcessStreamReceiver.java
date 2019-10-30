@@ -49,7 +49,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected List<PreStateProcessor> stateProcessorsForStream = new ArrayList<PreStateProcessor>();
     protected int stateProcessorsForStreamSize;
     protected LockWrapper lockWrapper;
-    protected boolean batchProcessingAllowed;
+    protected boolean batchProcessingAllowed = true;
     private StreamEventConverter streamEventConverter;
     private MetaStreamEvent metaStreamEvent;
     private StreamEventFactory streamEventFactory;
@@ -194,7 +194,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     }
 
     public void setBatchProcessingAllowed(boolean batchProcessingAllowed) {
-        this.batchProcessingAllowed = batchProcessingAllowed;
+//        this.batchProcessingAllowed = batchProcessingAllowed;
     }
 
     public void setNext(Processor next) {

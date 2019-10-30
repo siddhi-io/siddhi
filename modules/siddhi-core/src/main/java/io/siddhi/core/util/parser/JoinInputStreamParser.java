@@ -36,8 +36,8 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.AggregateWindowProcessor;
+import io.siddhi.core.query.processor.stream.window.EmptyWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
-import io.siddhi.core.query.processor.stream.window.LengthBatchWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
@@ -415,7 +415,7 @@ public class JoinInputStreamParser {
 
         if (lastProcessor == null) {
             try {
-                WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
+                WindowProcessor windowProcessor = new EmptyWindowProcessor();
                 ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
                 ConfigReader configReader = siddhiQueryContext.getSiddhiContext()

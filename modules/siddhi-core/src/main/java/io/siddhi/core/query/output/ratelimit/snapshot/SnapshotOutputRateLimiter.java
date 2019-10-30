@@ -72,7 +72,6 @@ public abstract class SnapshotOutputRateLimiter<S extends State> implements Sche
     }
 
     protected void sendToCallBacks(ComplexEventChunkList outputEventChunks) {
-        if (outputEventChunks.isBatch()) {
             if (!outputEventChunks.isEmpty()) {
                 ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(true);
                 for (ComplexEventChunk eventChunk : outputEventChunks) {
@@ -80,11 +79,11 @@ public abstract class SnapshotOutputRateLimiter<S extends State> implements Sche
                 }
                 wrappedSnapshotOutputRateLimiter.passToCallBacks(outputEventChunk);
             }
-        } else {
-            for (ComplexEventChunk eventChunk : outputEventChunks) {
-                wrappedSnapshotOutputRateLimiter.passToCallBacks(eventChunk);
-            }
-        }
+//        } else {
+//            for (ComplexEventChunk eventChunk : outputEventChunks) {
+//                wrappedSnapshotOutputRateLimiter.passToCallBacks(eventChunk);
+//            }
+//        }
     }
 
     /**

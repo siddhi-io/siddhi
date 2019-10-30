@@ -25,7 +25,6 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.ComplexEventChunkList;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
@@ -47,6 +46,7 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,9 +153,7 @@ public class LengthBatchWindowProcessor extends
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, WindowState state) {
-
-        ComplexEventChunkList streamEventChunks =
-                new ComplexEventChunkList(streamEventChunk.isBatch());
+        List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
         synchronized (state) {
             ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
@@ -183,7 +181,9 @@ public class LengthBatchWindowProcessor extends
                 }
             }
         }
-        nextProcessor.process(streamEventChunks);
+        for (ComplexEventChunk<StreamEvent> outputStreamEventChunk : streamEventChunks) {
+            nextProcessor.process(outputStreamEventChunk);
+        }
     }
 
     private void processLengthZeroBatch(StreamEvent streamEvent,

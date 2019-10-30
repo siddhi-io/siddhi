@@ -261,6 +261,7 @@ public class DelayWindowTestCase {
         siddhiAppRuntime.start();
         try {
             inputHandler.send(new Object[]{1000});
+            Thread.sleep(100);
             inputHandler.send(new Object[]{1500});
 
             SiddhiTestHelper.waitForEvents(100, 2, count, 3000);
