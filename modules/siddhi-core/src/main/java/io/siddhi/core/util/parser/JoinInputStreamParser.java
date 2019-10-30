@@ -399,14 +399,19 @@ public class JoinInputStreamParser {
 
         Processor lastProcessor = streamRuntime.getProcessorChain();
         Processor prevLastProcessor = null;
+        boolean containFindable = false;
         if (lastProcessor != null) {
+            containFindable = lastProcessor instanceof FindableProcessor;
             while (lastProcessor.getNextProcessor() != null) {
                 prevLastProcessor = lastProcessor;
                 lastProcessor = lastProcessor.getNextProcessor();
+                if (!containFindable) {
+                    containFindable = lastProcessor instanceof FindableProcessor;
+                }
             }
         }
 
-        if (lastProcessor == null) {
+        if (!containFindable) {
             try {
                 WindowProcessor windowProcessor = new EmptyWindowProcessor();
                 ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
