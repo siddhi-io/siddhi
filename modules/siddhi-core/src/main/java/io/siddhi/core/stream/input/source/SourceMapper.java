@@ -133,7 +133,8 @@ public abstract class SourceMapper implements SourceEventListener {
         Object[] transportPropertyObjects = null;
         if (transportProperties != null) {
             transportPropertyObjects = new Object[transportProperties.length];
-            for (int i = 0, transportPropertiesLength = transportProperties.length; i < transportPropertiesLength; i++) {
+            for (int i = 0, transportPropertiesLength = transportProperties.length;
+                 i < transportPropertiesLength; i++) {
                 String transportProperty = transportProperties[i];
                 transportPropertyObjects[i] = transportProperty;
             }
