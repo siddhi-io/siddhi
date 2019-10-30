@@ -824,11 +824,11 @@ public class InMemoryTransportTestCase {
 
         String streams = "" +
                 "@app:name('TestSiddhiApp')" +
-                "@source(type='testTrpInMemory', topic='Foo', prop1='hi', prop2='test', " +
+                "@source(type='testTrpInMemory', topic='Foo', prop1='hi', prop2='7.5', " +
                 "   @map(type='testTrp', @attributes(symbol='trp:symbol'," +
                 "        volume='2',price='trp:price'))) " +
-                "define stream FooStream (symbol string, price string, volume long); " +
-                "define stream BarStream (symbol string, price string, volume long); ";
+                "define stream FooStream (symbol string, price double, volume long); " +
+                "define stream BarStream (symbol string, price double, volume long); ";
 
         String query = "" +
                 "from FooStream " +
@@ -844,14 +844,14 @@ public class InMemoryTransportTestCase {
                 EventPrinter.print(events);
                 wso2Count.incrementAndGet();
                 for (Event event : events) {
-                    AssertJUnit.assertArrayEquals(event.getData(), new Object[]{"hi", "test", 100L});
+                    AssertJUnit.assertArrayEquals(event.getData(), new Object[]{"hi", 7.5, 100L});
                 }
             }
         });
         siddhiAppRuntime.start();
-        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", "in", 100L}));
-        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"IBM", "in", 100L}));
-        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", "in", 100L}));
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 5.5, 100L}));
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"IBM", 5.5, 100L}));
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 5.5, 100L}));
         Thread.sleep(100);
 
         //assert event count

@@ -39,7 +39,7 @@ import java.util.List;
 public abstract class SourceMapper implements SourceEventListener {
 
     private static final Logger log = Logger.getLogger(SourceMapper.class);
-    private final ThreadLocal<String[]> trpProperties = new ThreadLocal<>();
+    private final ThreadLocal<Object[]> trpProperties = new ThreadLocal<>();
     private final ThreadLocal<String[]> trpSyncProperties = new ThreadLocal<>();
     protected String sourceType;
     protected OptionHolder sourceOptionHolder;
@@ -115,15 +115,37 @@ public abstract class SourceMapper implements SourceEventListener {
     }
 
     public final void onEvent(Object eventObject, String[] transportProperties) {
+        Object[] transportPropertyObjects = convertToObjectArray(transportProperties);
+        onEvent(eventObject, transportPropertyObjects, null);
+    }
+
+    public final void onEvent(Object eventObject, Object[] transportProperties) {
         onEvent(eventObject, transportProperties, null);
     }
 
     public final void onEvent(Object eventObject, String[] transportProperties, String[] transportSyncProperties) {
+        Object[] transportPropertyObjects = convertToObjectArray(transportProperties);
+        onEvent(eventObject, transportPropertyObjects, transportSyncProperties);
 
+    }
+
+    private Object[] convertToObjectArray(String[] transportProperties) {
+        Object[] transportPropertyObjects = null;
+        if (transportProperties != null) {
+            transportPropertyObjects = new Object[transportProperties.length];
+            for (int i = 0, transportPropertiesLength = transportProperties.length; i < transportPropertiesLength; i++) {
+                String transportProperty = transportProperties[i];
+                transportPropertyObjects[i] = transportProperty;
+            }
+        }
+        return transportPropertyObjects;
+    }
+
+    public final void onEvent(Object eventObject, Object[] transportProperties, String[] transportSyncProperties) {
         try {
             if (eventObject != null) {
                 if (!allowNullInTransportProperties() && transportProperties != null) {
-                    for (String property : transportProperties) {
+                    for (Object property : transportProperties) {
                         if (property == null) {
                             log.error("Dropping event " + eventObject.toString() + " belonging to stream " +
                                     sourceHandler.getInputHandler().getStreamId()

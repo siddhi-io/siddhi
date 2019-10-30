@@ -18,6 +18,8 @@
 
 package io.siddhi.core.stream.input.source;
 
+import io.siddhi.query.api.definition.Attribute;
+
 /**
  * Holder object to store mapping information for a given Siddhi Attribute
  * {@link io.siddhi.query.api.definition.Attribute}
@@ -25,12 +27,14 @@ package io.siddhi.core.stream.input.source;
 public class AttributeMapping {
     protected String name;
     protected int position;
+    protected Attribute.Type type;
     private String mapping = null;
 
-    public AttributeMapping(String name, int position, String mapping) {
+    public AttributeMapping(String name, int position, String mapping, Attribute.Type type) {
         this.name = name;
         this.position = position;
         this.mapping = mapping;
+        this.type = type;
     }
 
     public String getMapping() {
@@ -45,11 +49,17 @@ public class AttributeMapping {
         return position;
     }
 
+    public Attribute.Type getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return "AttributeMapping{" +
                 "name='" + name + '\'' +
+                ", position=" + position +
                 ", mapping='" + mapping + '\'' +
+                ", type=" + type +
                 '}';
     }
 
@@ -58,7 +68,7 @@ public class AttributeMapping {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof AttributeMapping)) {
             return false;
         }
 
@@ -70,7 +80,10 @@ public class AttributeMapping {
         if (name != null ? !name.equals(that.name) : that.name != null) {
             return false;
         }
-        return mapping != null ? mapping.equals(that.mapping) : that.mapping == null;
+        if (mapping != null ? !mapping.equals(that.mapping) : that.mapping != null) {
+            return false;
+        }
+        return type == that.type;
     }
 
     @Override
@@ -78,6 +91,7 @@ public class AttributeMapping {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + position;
         result = 31 * result + (mapping != null ? mapping.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
     }
 }

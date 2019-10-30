@@ -35,7 +35,7 @@ public class AttributeConverter {
      * @param attributeType the desired data type
      * @return the converted object
      */
-    public Object getPropertyValue(String propertyValue, Attribute.Type attributeType) {
+    public static Object getPropertyValue(String propertyValue, Attribute.Type attributeType) {
         switch (attributeType) {
             case BOOL:
                 return Boolean.parseBoolean(propertyValue);
@@ -48,6 +48,82 @@ public class AttributeConverter {
             case LONG:
                 return Long.parseLong(propertyValue);
             case STRING:
+                return propertyValue;
+            case OBJECT:
+                return propertyValue;
+            default:
+                throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                        "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                        attributeType + "'.");
+        }
+    }
+
+    /**
+     * Convert the given object to the given type.
+     *
+     * @param propertyValue the actual object
+     * @param attributeType the desired data type
+     * @return the converted object
+     */
+    public static Object getPropertyValue(Object propertyValue, Attribute.Type attributeType) {
+        switch (attributeType) {
+            case BOOL:
+                if (propertyValue instanceof Boolean) {
+                    return propertyValue;
+                } else if (propertyValue instanceof String) {
+                    return Boolean.parseBoolean((String) propertyValue);
+                } else {
+                    throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                            "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                            attributeType + "'.");
+                }
+            case DOUBLE:
+                if (propertyValue instanceof Double) {
+                    return propertyValue;
+                } else if (propertyValue instanceof Float) {
+                    return new Double((Float) propertyValue);
+                } else if (propertyValue instanceof String) {
+                    return Double.parseDouble((String) propertyValue);
+                } else {
+                    throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                            "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                            attributeType + "'.");
+                }
+            case FLOAT:
+                if (propertyValue instanceof Float) {
+                    return propertyValue;
+                } else if (propertyValue instanceof String) {
+                    return Float.parseFloat((String) propertyValue);
+                } else {
+                    throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                            "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                            attributeType + "'.");
+                }
+            case INT:
+                if (propertyValue instanceof Integer) {
+                    return propertyValue;
+                } else if (propertyValue instanceof String) {
+                    return Integer.parseInt((String) propertyValue);
+                } else {
+                    throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                            "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                            attributeType + "'.");
+                }
+            case LONG:
+                if (propertyValue instanceof Integer) {
+                    return new Long((Integer) propertyValue);
+                } else if (propertyValue instanceof Long) {
+                    return propertyValue;
+                } else if (propertyValue instanceof String) {
+                    return Long.parseLong((String) propertyValue);
+                } else {
+                    throw new SiddhiAppRuntimeException("No supported mapping for '" + propertyValue +
+                            "' with class '" + propertyValue.getClass().getName() + "' to attribute type '" +
+                            attributeType + "'.");
+                }
+            case STRING:
+                return propertyValue.toString();
+            case OBJECT:
                 return propertyValue;
             default:
                 throw new SiddhiAppRuntimeException("Attribute type: " + attributeType + " not supported by XML " +
