@@ -36,6 +36,7 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1328,6 +1329,237 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.shutdown();
 
         InMemoryBroker.unsubscribe(subscriptionWSO2);
+
+    }
+
+    @Test(dependsOnMethods = {"inMemoryTestCase19"})
+    public void inMemoryTestCase20() throws InterruptedException, SubscriberUnAvailableException {
+        log.info("Test inMemoryTestCase20");
+
+        InMemoryBroker.Subscriber subscription = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                if (msg instanceof Event[]) {
+                    for (Event event : (Event[]) msg) {
+                        wso2Count.incrementAndGet();
+                    }
+                } else {
+                    wso2Count.incrementAndGet();
+                }
+                ibmCount.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "out";
+            }
+        };
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream StockStream (symbol1 string, price1 float, volume1 long); " +
+                "@source(type='inMemory', topic='in', @map(type='passThrough')) " +
+                "define stream CheckStockStream (symbol1 string, price1 float, volume1 long); " +
+                "@sink(type='inMemory', topic='out', @map(type='passThrough')) " +
+                "define stream OutputStream (symbol1 string, total double); " +
+                "define table StockTable (symbol1 string, price1 float, volume1 long); " +
+                "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from CheckStockStream as a join StockTable as b " +
+                "select b.symbol1, sum(b.price1) as total " +
+                "group by b.symbol1 " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertEquals(events.length, 4);
+                Assert.assertEquals(events[0].getData(1), 120.0);
+                Assert.assertEquals(events[1].getData(1), 4.0);
+                Assert.assertEquals(events[2].getData(1), 120.0);
+                Assert.assertEquals(events[3].getData(1), 4.0);
+
+            }
+
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                if (inEvents != null) {
+//                    for (Event event : inEvents) {
+//                        inEventCount++;
+//                        switch (inEventCount) {
+//                            case 1:
+//                                AssertJUnit.assertArrayEquals(new Object[]{"WSO2"}, event.getData());
+//                                break;
+//                            default:
+//                                AssertJUnit.assertSame(1, inEventCount);
+//                        }
+//                    }
+//                    eventArrived = true;
+//                }
+//                if (removeEvents != null) {
+//                    removeEventCount = removeEventCount + removeEvents.length;
+//                }
+//                eventArrived = true;
+//            }
+
+        });
+
+        InMemoryBroker.subscribe(subscription);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"IBM", 50.0f, 100L});
+        stockStream.send(new Object[]{"IBM", 70.0f, 10L});
+        stockStream.send(new Object[]{"WSO2", 1f, 10L});
+        stockStream.send(new Object[]{"WSO2", 1f, 10L});
+        stockStream.send(new Object[]{"WSO2", 2f, 10L});
+
+
+        InMemoryBroker.publish("in",
+                new Event[]{
+                        new Event(System.currentTimeMillis(), new Object[]{"Foo", 55.6f, 200L}),
+                        new Event(System.currentTimeMillis(), new Object[]{"Foo", 55.6f, 200L})});
+        InMemoryBroker.publish("in",
+                new Event[]{
+                        new Event(System.currentTimeMillis(), new Object[]{"Foo", 55.6f, 200L}),
+                        new Event(System.currentTimeMillis(), new Object[]{"Foo", 55.6f, 200L})});
+        Thread.sleep(100);
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of events", 8, wso2Count.get());
+        AssertJUnit.assertEquals("Number of events sets", 2, ibmCount.get());
+
+        InMemoryBroker.unsubscribe(subscription);
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test(dependsOnMethods = {"inMemoryTestCase20"})
+    public void inMemoryTestCase21() throws InterruptedException, SubscriberUnAvailableException {
+        log.info("Test inMemoryTestCase21");
+
+        InMemoryBroker.Subscriber subscription = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                if (msg instanceof Event[]) {
+                    for (Event event : (Event[]) msg) {
+                        wso2Count.incrementAndGet();
+                    }
+                } else {
+                    wso2Count.incrementAndGet();
+                }
+                ibmCount.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "out";
+            }
+        };
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "define stream StockStream (symbol1 string, price1 float, volume1 long); " +
+                "@source(type='inMemory', topic='in', @map(type='passThrough')) " +
+                "define stream CheckStockStream (startTime string, perValue string); " +
+                "@sink(type='inMemory', topic='out', @map(type='passThrough')) " +
+                "define stream OutputStream (symbol1 string, totalPrice double); " +
+                "" +
+                "define aggregation StockAggregation " +
+                "from StockStream " +
+                "select symbol1, avg(price1) as avgPrice, sum(price1) as totalPrice " +
+                "group by symbol1 " +
+                "aggregate every sec...year; " +
+                "" +
+                "@info(name = 'query2') " +
+                "from CheckStockStream as a join StockAggregation as b " +
+                "within startTime " +
+                "per perValue " +
+                "select b.symbol1, b.totalPrice " +
+                "group by b.symbol1 " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertEquals(events.length, 4);
+                Assert.assertEquals(events[0].getData(1), 4.0);
+                Assert.assertEquals(events[1].getData(1), 120.0);
+                Assert.assertEquals(events[2].getData(1), 4.0);
+                Assert.assertEquals(events[3].getData(1), 120.0);
+
+            }
+
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                if (inEvents != null) {
+//                    for (Event event : inEvents) {
+//                        inEventCount++;
+//                        switch (inEventCount) {
+//                            case 1:
+//                                AssertJUnit.assertArrayEquals(new Object[]{"WSO2"}, event.getData());
+//                                break;
+//                            default:
+//                                AssertJUnit.assertSame(1, inEventCount);
+//                        }
+//                    }
+//                    eventArrived = true;
+//                }
+//                if (removeEvents != null) {
+//                    removeEventCount = removeEventCount + removeEvents.length;
+//                }
+//                eventArrived = true;
+//            }
+
+        });
+
+        InMemoryBroker.subscribe(subscription);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"IBM", 50.0f, 100L});
+        stockStream.send(new Object[]{"IBM", 70.0f, 10L});
+        stockStream.send(new Object[]{"WSO2", 1f, 10L});
+        stockStream.send(new Object[]{"WSO2", 1f, 10L});
+        stockStream.send(new Object[]{"WSO2", 2f, 10L});
+
+        LocalDate currentDate = LocalDate.now();
+        String year = String.valueOf(currentDate.getYear());
+
+        InMemoryBroker.publish("in",
+                new Event[]{
+                        new Event(System.currentTimeMillis(), new Object[]{year + "-**-** **:**:**", "days"}),
+                        new Event(System.currentTimeMillis(), new Object[]{year + "-**-** **:**:**", "days"})});
+        InMemoryBroker.publish("in",
+                new Event[]{
+                        new Event(System.currentTimeMillis(), new Object[]{year + "-**-** **:**:**", "days"}),
+                        new Event(System.currentTimeMillis(), new Object[]{year + "-**-** **:**:**", "days"})});
+        Thread.sleep(100);
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of events", 8, wso2Count.get());
+        AssertJUnit.assertEquals("Number of events sets", 2, ibmCount.get());
+
+        InMemoryBroker.unsubscribe(subscription);
+
+        siddhiAppRuntime.shutdown();
 
     }
 
