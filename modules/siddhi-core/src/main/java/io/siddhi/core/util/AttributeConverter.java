@@ -81,7 +81,7 @@ public class AttributeConverter {
                 if (propertyValue instanceof Double) {
                     return propertyValue;
                 } else if (propertyValue instanceof Float) {
-                    return new Double((Float) propertyValue);
+                    return Double.valueOf((Float) propertyValue);
                 } else if (propertyValue instanceof String) {
                     return Double.parseDouble((String) propertyValue);
                 } else {
@@ -111,7 +111,7 @@ public class AttributeConverter {
                 }
             case LONG:
                 if (propertyValue instanceof Integer) {
-                    return new Long((Integer) propertyValue);
+                    return Long.valueOf((Integer) propertyValue);
                 } else if (propertyValue instanceof Long) {
                     return propertyValue;
                 } else if (propertyValue instanceof String) {

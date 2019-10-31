@@ -1489,6 +1489,7 @@ public class InMemoryTransportTestCase {
                 "per perValue " +
                 "select b.symbol1, b.totalPrice " +
                 "group by b.symbol1 " +
+                "order by b.symbol1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
@@ -1498,10 +1499,10 @@ public class InMemoryTransportTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 Assert.assertEquals(events.length, 4);
-                Assert.assertEquals(events[0].getData(1), 4.0);
-                Assert.assertEquals(events[1].getData(1), 120.0);
-                Assert.assertEquals(events[2].getData(1), 4.0);
-                Assert.assertEquals(events[3].getData(1), 120.0);
+                Assert.assertEquals(events[0].getData(1), 120.0);
+                Assert.assertEquals(events[1].getData(1), 4.0);
+                Assert.assertEquals(events[2].getData(1), 120.0);
+                Assert.assertEquals(events[3].getData(1), 4.0);
 
             }
 
