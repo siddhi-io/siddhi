@@ -107,7 +107,8 @@ public class InputEventHandler {
                 }
                 for (int i = 0; i < transportMapping.size(); i++) {
                     AttributeMapping attributeMapping = transportMapping.get(i);
-                    event.getData()[attributeMapping.getPosition()] = transportProperties[i];
+                    event.getData()[attributeMapping.getPosition()] = AttributeConverter.getPropertyValue(
+                            transportProperties[i], attributeMapping.getType());
                 }
             }
             inputEventHandlerCallback.sendEvents(events, transportSyncProperties);

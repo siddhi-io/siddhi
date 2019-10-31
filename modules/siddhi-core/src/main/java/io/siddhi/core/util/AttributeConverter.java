@@ -27,7 +27,6 @@ import io.siddhi.query.api.definition.Attribute;
  */
 public class AttributeConverter {
 
-
     /**
      * Convert the given object to the given type.
      *
@@ -35,7 +34,7 @@ public class AttributeConverter {
      * @param attributeType the desired data type
      * @return the converted object
      */
-    public static Object getPropertyValue(String propertyValue, Attribute.Type attributeType) {
+    public Object getPropertyValue(String propertyValue, Attribute.Type attributeType) {
         switch (attributeType) {
             case BOOL:
                 return Boolean.parseBoolean(propertyValue);
