@@ -827,7 +827,7 @@
         <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
         <maven.javadoc.plugin.version>3.1.1</maven.javadoc.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
-        <maven.wagon.ssh.version>3.3.3</maven.wagon.ssh.version>
+        <maven.wagon.ssh.version>3.3.4</maven.wagon.ssh.version>
     </properties>
 
     <scm>
