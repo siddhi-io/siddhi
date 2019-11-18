@@ -422,7 +422,13 @@ public class JoinInputStreamParser {
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
                         expressionExecutors, configReader, outputExpectsExpiredEvents,
                         true, false, inputStream, siddhiQueryContext);
-                lastProcessor = windowProcessor;
+                if (lastProcessor != null) {
+                    prevLastProcessor = lastProcessor;
+                    prevLastProcessor.setNextProcessor(windowProcessor);
+                    lastProcessor = windowProcessor;
+                } else {
+                    lastProcessor = windowProcessor;
+                }
             } catch (Throwable t) {
                 throw new SiddhiAppCreationException(t);
             }
