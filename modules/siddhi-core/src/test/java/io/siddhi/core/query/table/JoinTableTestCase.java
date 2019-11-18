@@ -742,6 +742,7 @@ public class JoinTableTestCase {
         stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
         stockStream.send(new Object[]{"IBM", 75.6f, 10L});
         checkStockStream.send(new Object[]{"WSO2"});
+        checkStockStream.send(new Object[]{"IBM"});
 
         Thread.sleep(500);
 
