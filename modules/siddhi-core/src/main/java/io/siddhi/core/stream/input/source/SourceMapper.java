@@ -149,7 +149,7 @@ public abstract class SourceMapper implements SourceEventListener {
                     for (Object property : transportProperties) {
                         if (property == null) {
                             log.error("Dropping event " + eventObject.toString() + " belonging to stream " +
-                                    sourceHandler.getInputHandler().getStreamId()
+                                    streamDefinition.getId()
                                     + " as it contains null transport properties and system "
                                     + "is configured to not allow null transport properties. You can "
                                     + "configure it via source mapper if the respective "
