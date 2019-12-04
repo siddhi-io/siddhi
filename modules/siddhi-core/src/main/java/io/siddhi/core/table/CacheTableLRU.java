@@ -25,7 +25,6 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import org.apache.log4j.Logger;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
