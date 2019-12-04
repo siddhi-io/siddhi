@@ -78,7 +78,7 @@ public class CacheTableLFU extends CacheTable {
             indexEventHolder.deleteAll();
         } else {
             Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
-            Map<Integer, Object> toDelete = new TreeMap<>();
+            TreeMap<Integer, Object> toDelete = new TreeMap<>();
             for (Object key : keys) {
                 if (toDelete.size() < numRowsToDelete) {
                     toDelete.put((Integer) indexEventHolder.getEvent(key).getOutputData()[cachePolicyAttributePosition],
@@ -86,7 +86,7 @@ public class CacheTableLFU extends CacheTable {
                 } else {
                     Integer count = (Integer) indexEventHolder.getEvent(key).
                             getOutputData()[cachePolicyAttributePosition];
-                    Integer firstKey = (Integer) ((TreeMap) toDelete).firstKey();
+                    Integer firstKey = toDelete.firstKey();
                     if (count < firstKey) {
                         toDelete.remove(firstKey);
                         toDelete.put(count, key);
