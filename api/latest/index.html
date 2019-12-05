@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v518" tabindex="1" class="md-skip">
+      <a href="#api-docs-v519" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -740,6 +740,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../5.1.9/" title="5.1.9" class="md-nav__link">
+      5.1.9
+    </a>
   </li>
 
         
@@ -1569,7 +1581,7 @@
                   <a href="https://github.com/siddhi-io/siddhi/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v518">API Docs - v5.1.8</h1>
+                <h1 id="api-docs-v519">API Docs - v5.1.9</h1>
 <h2 id="core">Core</h2>
 <h3 id="and-aggregate-function">and <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#aggregate-function">(Aggregate Function)</a></em></h3>
 <p><p></p>
@@ -3689,12 +3701,12 @@ insert all events into PotentialFraud;
 
 <h3 id="session-window">session <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#window">(Window)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">This is a session window that holds events that belong to a specific session. The events that belong to a specific session are identified by a grouping attribute (i.e., a session key). A session gap period is specified to determine the time period after which the session is considered to be expired. A new event that arrives with a specific value for the session key is matched with the session window with the same session key.<br>&nbsp;There can be out of order and late arrival of events, these events can arrive after the session is expired, to include those events to the matching session key specify a latency time period that is less than the session gap period.To have aggregate functions with session windows, the events need to be grouped by the session key via a 'group by' clause.</p>
+<p style="word-wrap: break-word;margin: 0;">Holds events that belong to a session. Events belong to a specific session are identified by a session key, and a session gap is determines the time period after which the session is considered to be expired. To have meaningful aggregation on session windows, the events need to be aggregated based on session key via a <code>group by</code> clause.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>session(&lt;INT|LONG|TIME&gt; window.session)
-session(&lt;INT|LONG|TIME&gt; window.session, &lt;STRING&gt; window.key)
-session(&lt;INT|LONG|TIME&gt; window.session, &lt;STRING&gt; window.key, &lt;INT|LONG|TIME&gt; window.allowed.latency)
+<pre><code>session(&lt;INT|LONG|TIME&gt; session.gap)
+session(&lt;INT|LONG|TIME&gt; session.gap, &lt;STRING&gt; session.key)
+session(&lt;INT|LONG|TIME&gt; session.gap, &lt;STRING&gt; session.key, &lt;INT|LONG|TIME&gt; allowed.latency)
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -3708,24 +3720,24 @@ session(&lt;INT|LONG|TIME&gt; window.session, &lt;STRING&gt; window.key, &lt;INT
         <th>Dynamic</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.session</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The time period for which the session considered is valid. This is specified in seconds, minutes, or milliseconds (i.e., 'min', 'sec', or 'ms'.</p></td>
+        <td style="vertical-align: top">session.gap</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The time period after which the session is considered to be expired.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.key</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The grouping attribute for events.</p></td>
+        <td style="vertical-align: top">session.key</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The session identification attribute. Used to group events belonging to a specific session.</p></td>
         <td style="vertical-align: top">default-key</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.allowed.latency</td>
-        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">This specifies the time period for which the session window is valid after the expiration of the session. The time period specified here should be less than the session time gap (which is specified via the 'window.session' parameter).</p></td>
+        <td style="vertical-align: top">allowed.latency</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The time period for which the session window is valid after the expiration of the session, to accept late event arrivals. This time period should be less than the <code>session.gap</code> parameter.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
         <td style="vertical-align: top">Yes</td>
@@ -3736,15 +3748,32 @@ session(&lt;INT|LONG|TIME&gt; window.session, &lt;STRING&gt; window.key, &lt;INT
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
 <pre><code>define stream PurchaseEventStream (user string, item_number int, price float, quantity int);
 
-@info(name='query0) 
-from PurchaseEventStream#window.session(5 sec, user, 2 sec) 
-select * 
-insert all events into OutputStream;
+@info(name='query1) 
+from PurchaseEventStream#window.session(5 sec, user) 
+select user, sum(quantity) as totalQuantity, sum(price) as totalPrice 
+group by user 
+insert into OutputStream;
 </code></pre>
 
 <p></p>
 
-<p style="word-wrap: break-word;margin: 0;">This query processes events that arrive at the PurchaseEvent input stream. The 'user' attribute is the session key, and the session gap is 5 seconds. '2 sec' is specified as the allowed latency. Therefore, events with the matching user name that arrive 2 seconds after the expiration of the session are also considered when performing aggregations for the session identified by the given user name.</p>
+<p style="word-wrap: break-word;margin: 0;">From the events arriving at the PurchaseEventStream, a session window with 5 seconds session gap is processed based on 'user' attribute as the session group identification key. All events falling into the same session are aggregated based on <code>user</code> attribute, and outputted to the OutputStream.</p>
+
+<p></p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>define stream PurchaseEventStream (user string, item_number int, price float, quantity int);
+
+@info(name='query2) 
+from PurchaseEventStream#window.session(5 sec, user, 2 sec) 
+select user, sum(quantity) as totalQuantity, sum(price) as totalPrice 
+group by user 
+insert into OutputStream;
+</code></pre>
+
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">From the events arriving at the PurchaseEventStream, a session window with 5 seconds session gap is processed based on 'user' attribute as the session group identification key. This session window is kept active for 2 seconds after the session expiry to capture late (out of order) event arrivals. If the event timestamp falls in to the last session the session is reactivated. Then all events falling into the same session are aggregated based on <code>user</code> attribute, and outputted to the OutputStream.</p>
 
 <p></p>
 
@@ -4243,13 +4272,13 @@ define stream BarStream (symbol string, price float, volume long);
           </a>
         
         
-          <a href="../5.1.8/" title="5.1.8" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../5.1.9/" title="5.1.9" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                5.1.8
+                5.1.9
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
