@@ -89,9 +89,9 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
                     "'<LONG, STRING, LONG, INT>'. Supported parameter overloads are " +
-                    "(<INT|LONG|TIME> window.session), " +
-                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
-                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
+                    "(<INT|LONG|TIME> session.gap), " +
+                    "(<INT|LONG|TIME> session.gap, <STRING> session.key), (<INT|LONG|TIME> session.gap, " +
+                    "<STRING> session.key, <INT|LONG|TIME> allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -120,7 +120,7 @@ public class SessionWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(purchaseEventStream + query);
 
         } catch (SiddhiAppCreationException e) {
-            AssertJUnit.assertEquals("The 'session' expects input parameter 'window.session' at position '0' " +
+            AssertJUnit.assertEquals("The 'session' expects input parameter 'session.gap' at position '0' " +
                     "to be static, but found a dynamic attribute.", e.getCause().getMessage());
             throw e;
         } finally {
@@ -153,9 +153,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'<STRING, STRING, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
-                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
-                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
+                    "'<STRING, STRING, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> session.gap), " +
+                    "(<INT|LONG|TIME> session.gap, <STRING> session.key), (<INT|LONG|TIME> session.gap, " +
+                    "<STRING> session.key, <INT|LONG|TIME> allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -220,9 +220,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'<LONG, INT, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
-                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
-                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
+                    "'<LONG, INT, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> session.gap), " +
+                    "(<INT|LONG|TIME> session.gap, <STRING> session.key), (<INT|LONG|TIME> session.gap, " +
+                    "<STRING> session.key, <INT|LONG|TIME> allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -253,7 +253,7 @@ public class SessionWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(purchaseEventStream + query);
 
         } catch (SiddhiAppCreationException e) {
-            AssertJUnit.assertEquals("The 'session' expects input parameter 'window.allowed.latency' at position " +
+            AssertJUnit.assertEquals("The 'session' expects input parameter 'allowed.latency' at position " +
                     "'2' to be static, but found a dynamic attribute.", e.getCause().getMessage());
             throw e;
         } finally {
@@ -287,10 +287,10 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute " +
                             "types '<LONG, STRING, STRING>'. Supported parameter overloads are " +
-                            "(<INT|LONG|TIME> window.session), " +
-                            "(<INT|LONG|TIME> window.session, <STRING> window.key), " +
-                            "(<INT|LONG|TIME> window.session, <STRING> window.key, " +
-                            "<INT|LONG|TIME> window.allowed.latency).",
+                            "(<INT|LONG|TIME> session.gap), " +
+                            "(<INT|LONG|TIME> session.gap, <STRING> session.key), " +
+                            "(<INT|LONG|TIME> session.gap, <STRING> session.key, " +
+                            "<INT|LONG|TIME> allowed.latency).",
                     e.getCause().getMessage());
             throw e;
         } finally {
@@ -324,9 +324,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types" +
-                    " '<LONG, INT>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
-                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
-                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
+                    " '<LONG, INT>'. Supported parameter overloads are (<INT|LONG|TIME> session.gap), " +
+                    "(<INT|LONG|TIME> session.gap, <STRING> session.key), (<INT|LONG|TIME> session.gap, " +
+                    "<STRING> session.key, <INT|LONG|TIME> allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -391,9 +391,9 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("There is no parameterOverload for 'session' that matches attribute types " +
-                    "'<LONG, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> window.session), " +
-                    "(<INT|LONG|TIME> window.session, <STRING> window.key), (<INT|LONG|TIME> window.session, " +
-                    "<STRING> window.key, <INT|LONG|TIME> window.allowed.latency).", e.getCause().getMessage());
+                    "'<LONG, LONG>'. Supported parameter overloads are (<INT|LONG|TIME> session.gap), " +
+                    "(<INT|LONG|TIME> session.gap, <STRING> session.key), (<INT|LONG|TIME> session.gap, " +
+                    "<STRING> session.key, <INT|LONG|TIME> allowed.latency).", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
