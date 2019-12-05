@@ -136,6 +136,8 @@
                                 <exclude>**/SiddhiQLBaseVisitor.class</exclude>
                                 <exclude>**/SiddhiQLParser*</exclude>
                                 <exclude>**/SiddhiQLLexer*</exclude>
+                                <exclude>**/SiddhiQLLSVisitorImpl*</exclude>
+                                <exclude>**/LanguageServerParserErrorStrategy/*</exclude>
                             </excludes>
                             <dataFile>${basedir}/target/jacoco.exec</dataFile>
                             <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>

@@ -46,10 +46,14 @@ import io.siddhi.query.api.expression.constant.TimeConstant;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
 import io.siddhi.query.compiler.internal.SiddhiErrorListener;
 import io.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl;
+import io.siddhi.query.compiler.langserver.LanguageServerParserErrorStrategy;
+import io.siddhi.query.compiler.langserver.SiddhiQLLSVisitorImpl;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,14 +63,7 @@ import java.util.regex.Pattern;
 public class SiddhiCompiler {
 
     public static SiddhiApp parse(String source) {
-
-        ANTLRInputStream input = new ANTLRInputStream(source);
-        SiddhiQLLexer lexer = new SiddhiQLLexer(input);
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(SiddhiErrorListener.INSTANCE);
-
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SiddhiQLParser parser = new SiddhiQLParser(tokens);
+        SiddhiQLParser parser = initParser(source);
         //            parser.setErrorHandler(new BailErrorStrategy());
         parser.removeErrorListeners();
         parser.addErrorListener(SiddhiErrorListener.INSTANCE);
@@ -74,6 +71,43 @@ public class SiddhiCompiler {
 
         SiddhiQLVisitor eval = new SiddhiQLBaseVisitorImpl();
         return (SiddhiApp) eval.visit(tree);
+    }
+
+    /**
+     * Used at the Siddhi Language server to parse source content and obtain a parseTreeMap.
+     *
+     * @param source
+     * @param goalPosition
+     * @return
+     * @throws RecognitionException
+     */
+    public static Map<String, ParseTree> parse(String source, int[] goalPosition)
+            throws RecognitionException {
+        SiddhiQLParser parser = initParser(source);
+        parser.setErrorHandler(new LanguageServerParserErrorStrategy());
+        parser.removeErrorListeners();
+        parser.addErrorListener(SiddhiErrorListener.INSTANCE);
+        try {
+            ParseTree parseTree = parser.parse();
+            SiddhiQLLSVisitorImpl visitor = new SiddhiQLLSVisitorImpl(goalPosition);
+            parseTree.accept(visitor);
+            return visitor.getParseTreeMap();
+        } catch (SiddhiParserException ignored) {
+            //todo: e has been ignored until it will be written to a log file.
+            return ((LanguageServerParserErrorStrategy)
+                    parser.getErrorHandler()).getParseTreeMap();
+
+        }
+    }
+
+    private static SiddhiQLParser initParser(String source) {
+        ANTLRInputStream input = new ANTLRInputStream(source);
+        SiddhiQLLexer lexer = new SiddhiQLLexer(input);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(SiddhiErrorListener.INSTANCE);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        SiddhiQLParser parser = new SiddhiQLParser(tokens);
+        return parser;
     }
 
     public static StreamDefinition parseStreamDefinition(String source) {
