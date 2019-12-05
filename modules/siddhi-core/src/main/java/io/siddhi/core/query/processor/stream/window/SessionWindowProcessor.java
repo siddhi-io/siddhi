@@ -69,8 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
                 "session key via a `group by` clause.",
         parameters = {
                 @Parameter(name = "session.gap",
-                        description = "The time period after which the session considered to be expired. " +
-                                "This is specified in seconds, minutes, or milliseconds (i.e., 'min', 'sec', or 'ms').",
+                        description = "The time period after which the session is considered to be expired.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
                 @Parameter(name = "session.key",
                         description = "The session identification attribute. Used to group events belonging to a " +
@@ -94,18 +93,32 @@ import java.util.concurrent.ConcurrentHashMap;
                         syntax = "define stream PurchaseEventStream "
                                 + "(user string, item_number int, price float, quantity int);\n"
                                 + "\n"
-                                + "@info(name='query0) \n"
+                                + "@info(name='query1) \n"
+                                + "from PurchaseEventStream#window.session(5 sec, user) \n"
+                                + "select user, sum(quantity) as totalQuantity, sum(price) as totalPrice \n"
+                                + "group by user \n"
+                                + "insert into OutputStream;",
+                        description = "From the events arriving at the PurchaseEventStream, " +
+                                "a session window with 5 seconds session gap is processed based on 'user' attribute " +
+                                "as the session group identification key. All events falling into the same session " +
+                                "are aggregated based on `user` attribute, and outputted to the OutputStream."
+                ),
+                @Example(
+                        syntax = "define stream PurchaseEventStream "
+                                + "(user string, item_number int, price float, quantity int);\n"
+                                + "\n"
+                                + "@info(name='query2) \n"
                                 + "from PurchaseEventStream#window.session(5 sec, user, 2 sec) \n"
-                                + "select * \n"
-                                + "insert all events into OutputStream;",
-                        description = "This query processes events that arrive at the PurchaseEventStream. " +
-                                "The 'user' attribute is the session key, and the session gap is 5 " +
-                                "seconds. '2 sec' is specified as the allowed latency. Therefore, events with the " +
-                                "matching `user` attribute that arrive 2 seconds after the expiration of the last " +
-                                "session which are suppose to arrive before the 2 seconds allowed latency " +
-                                "(late arrival of events), are also considered as part of the last session when " +
-                                "performing aggregations. Based on the late arrival of the events the session will" +
-                                "also be readjusted."
+                                + "select user, sum(quantity) as totalQuantity, sum(price) as totalPrice \n"
+                                + "group by user \n"
+                                + "insert into OutputStream;",
+                        description = "From the events arriving at the PurchaseEventStream, " +
+                                "a session window with 5 seconds session gap is processed based on 'user' attribute " +
+                                "as the session group identification key. This session window is kept active for " +
+                                "2 seconds after the session expiry to capture late (out of order) event arrivals. " +
+                                "If the event timestamp falls in to the last session the session is reactivated. " +
+                                "Then all events falling into the same session " +
+                                "are aggregated based on `user` attribute, and outputted to the OutputStream."
                 )
         }
 )
