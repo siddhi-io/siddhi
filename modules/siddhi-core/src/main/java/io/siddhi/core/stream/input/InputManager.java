@@ -73,6 +73,7 @@ public class InputManager {
         for (InputHandler inputHandler : inputHandlerMap.values()) {
             inputHandler.disconnect();
         }
+        inputDistributor.clear();
         inputHandlerMap.clear();
         this.isConnected = false;
     }
