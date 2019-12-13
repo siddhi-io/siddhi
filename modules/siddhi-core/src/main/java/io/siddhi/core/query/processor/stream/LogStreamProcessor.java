@@ -24,7 +24,6 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
-import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -221,52 +220,54 @@ public class LogStreamProcessor extends StreamProcessor<State> {
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
                            State state) {
         while (streamEventChunk.hasNext()) {
-            ComplexEvent complexEvent = streamEventChunk.next();
+            StreamEvent streamEvent = streamEventChunk.next();
             switch (attributeExpressionLength) {
                 case 0:
-                    log.info(logPrefix + complexEvent);
+                    log.info(logPrefix + streamEvent.toString(1));
                     break;
                 case 1:
                     if (isLogEventExpressionExecutor != null) {
-                        if ((Boolean) isLogEventExpressionExecutor.execute(complexEvent)) {
-                            log.info(logPrefix + complexEvent);
+                        if ((Boolean) isLogEventExpressionExecutor.execute(streamEvent)) {
+                            log.info(logPrefix + streamEvent.toString(1));
                         } else {
                             log.info(logPrefix + "Event Arrived");
                         }
                     } else {
-                        log.info(logPrefix + logMessageExpressionExecutor.execute(complexEvent) + ", " + complexEvent);
+                        log.info(logPrefix + logMessageExpressionExecutor.execute(streamEvent) + ", " +
+                                streamEvent.toString(1));
                     }
                     break;
                 case 2:
                     if (isLogEventExpressionExecutor != null) {
-                        if ((Boolean) isLogEventExpressionExecutor.execute(complexEvent)) {
-                            log.info(logPrefix + logMessageExpressionExecutor.execute(complexEvent) + ", " +
-                                    complexEvent);
+                        if ((Boolean) isLogEventExpressionExecutor.execute(streamEvent)) {
+                            log.info(logPrefix + logMessageExpressionExecutor.execute(streamEvent) + ", " +
+                                    streamEvent.toString(1));
                         } else {
-                            log.info(logPrefix + logMessageExpressionExecutor.execute(complexEvent));
+                            log.info(logPrefix + logMessageExpressionExecutor.execute(streamEvent));
                         }
                     } else {
                         LogPriority tempLogPriority = logPriority;
                         if (logPriorityExpressionExecutor != null) {
-                            tempLogPriority = LogPriority.valueOf((String) logPriorityExpressionExecutor.execute
-                                    (complexEvent));
+                            tempLogPriority = LogPriority.valueOf((String) logPriorityExpressionExecutor.
+                                    execute(streamEvent));
                         }
-                        String message = logPrefix + logMessageExpressionExecutor.execute(complexEvent) + ", " +
-                                complexEvent;
+                        String message = logPrefix + logMessageExpressionExecutor.execute(streamEvent) + ", " +
+                                streamEvent.toString(1);
                         logMessage(tempLogPriority, message);
                     }
                     break;
                 default:
                     String message;
-                    if ((Boolean) isLogEventExpressionExecutor.execute(complexEvent)) {
-                        message = logPrefix + logMessageExpressionExecutor.execute(complexEvent) + ", " + complexEvent;
+                    if ((Boolean) isLogEventExpressionExecutor.execute(streamEvent)) {
+                        message = logPrefix + logMessageExpressionExecutor.execute(streamEvent) + ", " +
+                                streamEvent.toString(1);
                     } else {
-                        message = logPrefix + logMessageExpressionExecutor.execute(complexEvent);
+                        message = logPrefix + logMessageExpressionExecutor.execute(streamEvent);
                     }
                     LogPriority tempLogPriority = logPriority;
                     if (logPriorityExpressionExecutor != null) {
-                        tempLogPriority = LogPriority.valueOf((String) logPriorityExpressionExecutor.execute
-                                (complexEvent));
+                        tempLogPriority = LogPriority.valueOf((String) logPriorityExpressionExecutor.
+                                execute(streamEvent));
                     }
                     logMessage(tempLogPriority, message);
             }

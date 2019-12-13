@@ -53,4 +53,8 @@ public class InputDistributor implements InputProcessor {
         inputProcessors.add(inputProcessor);
 
     }
+
+    public void clear() {
+        inputProcessors.clear();
+    }
 }

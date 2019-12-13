@@ -33,6 +33,7 @@
 
             <class name="io.siddhi.core.managment.AsyncTestCase"/>
             <class name="io.siddhi.core.managment.EventTestCase"/>
+            <class name="io.siddhi.core.managment.StartStopTestCase"/>
             <class name="io.siddhi.core.managment.QuerySyncTestCase"/>
             <class name="io.siddhi.core.managment.ValidateTestCase"/>
             <class name="io.siddhi.core.managment.PlaybackTestCase"/>
