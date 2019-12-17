@@ -120,6 +120,7 @@ public class OnDemandQueryParser {
                 Expression per = null;
                 queryName = "store_select_query_" + onDemandQuery.getInputStore().getStoreId();
                 siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext.setOnDemandQuery(onDemandQuery.getOnDemandQueryString());
                 InputStore inputStore = onDemandQuery.getInputStore();
                 try {
                     onCondition = Expression.value(true);
@@ -180,6 +181,7 @@ public class OnDemandQueryParser {
                 InsertIntoStream inserIntoStreamt = (InsertIntoStream) onDemandQuery.getOutputStream();
                 queryName = "store_insert_query_" + inserIntoStreamt.getId();
                 siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext.setOnDemandQuery(onDemandQuery.getOnDemandQueryString());
                 onCondition = Expression.value(true);
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -188,6 +190,7 @@ public class OnDemandQueryParser {
                 DeleteStream deleteStream = (DeleteStream) onDemandQuery.getOutputStream();
                 queryName = "store_delete_query_" + deleteStream.getId();
                 siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext.setOnDemandQuery(onDemandQuery.getOnDemandQueryString());
                 onCondition = deleteStream.getOnDeleteExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -196,6 +199,7 @@ public class OnDemandQueryParser {
                 UpdateStream outputStream = (UpdateStream) onDemandQuery.getOutputStream();
                 queryName = "store_update_query_" + outputStream.getId();
                 siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext.setOnDemandQuery(onDemandQuery.getOnDemandQueryString());
                 onCondition = outputStream.getOnUpdateExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -204,6 +208,7 @@ public class OnDemandQueryParser {
                 UpdateOrInsertStream onDemandQueryOutputStream = (UpdateOrInsertStream) onDemandQuery.getOutputStream();
                 queryName = "store_update_or_insert_query_" + onDemandQueryOutputStream.getId();
                 siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext.setOnDemandQuery(onDemandQuery.getOnDemandQueryString());
                 onCondition = onDemandQueryOutputStream.getOnUpdateExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,

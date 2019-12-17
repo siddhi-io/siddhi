@@ -229,7 +229,8 @@ public class SingleInputStreamParser {
                     return abstractStreamProcessor;
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
-                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext());
+                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext(),
+                                siddhiQueryContext.getOnDemandQuery());
                         throw e;
                     }
                 }

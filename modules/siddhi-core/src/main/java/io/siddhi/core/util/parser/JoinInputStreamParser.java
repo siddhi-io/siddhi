@@ -309,7 +309,8 @@ public class JoinInputStreamParser {
             joinStreamRuntime.setQuerySelector(querySelector);
             return joinStreamRuntime;
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext());
+            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext(),
+                    siddhiQueryContext.getOnDemandQuery());
             throw t;
         }
     }

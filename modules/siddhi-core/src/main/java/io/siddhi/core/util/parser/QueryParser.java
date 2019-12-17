@@ -275,7 +275,7 @@ public class QueryParser {
                         e.getQueryContextEndIndex(), siddhiAppContext.getName(), siddhiAppContext.getSiddhiAppString());
             }
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, query, siddhiAppContext);
+            ExceptionUtil.populateQueryContext(t, query, siddhiAppContext, null);
             throw t;
         }
         return queryRuntime;

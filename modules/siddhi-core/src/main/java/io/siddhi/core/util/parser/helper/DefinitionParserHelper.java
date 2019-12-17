@@ -252,7 +252,7 @@ public class DefinitionParserHelper {
             script.init(functionDefinition.getId(), functionDefinition.getBody(), configReader);
             siddhiAppContext.getScriptFunctionMap().put(functionDefinition.getId(), script);
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, functionDefinition, siddhiAppContext);
+            ExceptionUtil.populateQueryContext(t, functionDefinition, siddhiAppContext, null);
             throw t;
         }
     }
@@ -385,7 +385,7 @@ public class DefinitionParserHelper {
                         eventSources.add(source);
                     }
                 } catch (Throwable t) {
-                    ExceptionUtil.populateQueryContext(t, sourceAnnotation, siddhiAppContext);
+                    ExceptionUtil.populateQueryContext(t, sourceAnnotation, siddhiAppContext, null);
                     throw t;
                 }
             }
@@ -585,7 +585,7 @@ public class DefinitionParserHelper {
                                 sinkAnnotation.getQueryContextStartIndex(), sinkAnnotation.getQueryContextEndIndex());
                     }
                 } catch (Throwable t) {
-                    ExceptionUtil.populateQueryContext(t, sinkAnnotation, siddhiAppContext);
+                    ExceptionUtil.populateQueryContext(t, sinkAnnotation, siddhiAppContext, null);
                     throw t;
                 }
             }

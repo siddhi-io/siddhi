@@ -193,9 +193,9 @@ public class SiddhiCompiler {
         return (TimeConstant) eval.visit(tree);
     }
 
-    public static OnDemandQuery parseOnDemandQuery(String onDemandQuery) throws SiddhiParserException {
+    public static OnDemandQuery parseOnDemandQuery(String onDemandQueryString) throws SiddhiParserException {
 
-        ANTLRInputStream input = new ANTLRInputStream(onDemandQuery);
+        ANTLRInputStream input = new ANTLRInputStream(onDemandQueryString);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(SiddhiErrorListener.INSTANCE);
@@ -207,7 +207,9 @@ public class SiddhiCompiler {
         ParseTree tree = parser.store_query_final();
 
         SiddhiQLVisitor eval = new SiddhiQLBaseVisitorImpl();
-        return (OnDemandQuery) eval.visit(tree);
+        OnDemandQuery onDemandQuery = (OnDemandQuery) eval.visit(tree);
+        onDemandQuery.setOnDemandQueryString(onDemandQueryString);
+        return onDemandQuery;
     }
 
     public static StoreQuery parseStoreQuery(String storeQuery) throws SiddhiParserException {

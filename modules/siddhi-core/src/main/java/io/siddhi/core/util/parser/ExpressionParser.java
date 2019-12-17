@@ -550,7 +550,8 @@ public class ExpressionParser {
             }
             throw new UnsupportedOperationException(expression.toString() + " not supported!");
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext());
+            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext(),
+                    siddhiQueryContext.getOnDemandQuery());
             throw t;
         }
     }

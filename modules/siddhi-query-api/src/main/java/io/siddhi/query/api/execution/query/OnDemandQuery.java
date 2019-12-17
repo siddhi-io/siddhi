@@ -42,6 +42,7 @@ public class OnDemandQuery implements SiddhiElement {
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
     private OnDemandQueryType type;
+    private String onDemandQueryString;
 
     /**
      * Builder method to get a new on-demand query instance
@@ -256,5 +257,13 @@ public class OnDemandQuery implements SiddhiElement {
         SELECT,
         UPDATE_OR_INSERT,
         FIND
+    }
+
+    public String getOnDemandQueryString() {
+        return onDemandQueryString;
+    }
+
+    public void setOnDemandQueryString(String onDemandQueryString) {
+        this.onDemandQueryString = onDemandQueryString;
     }
 }

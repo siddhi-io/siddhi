@@ -404,7 +404,7 @@ public class AggregationParser {
             return aggregationRuntime;
 
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, aggregationDefinition, siddhiAppContext);
+            ExceptionUtil.populateQueryContext(t, aggregationDefinition, siddhiAppContext, null);
             throw t;
         }
     }
@@ -818,7 +818,7 @@ public class AggregationParser {
             }
             return sortedDurations(durations);
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, timePeriod, null);
+            ExceptionUtil.populateQueryContext(t, timePeriod, null, null);
             throw t;
         }
     }

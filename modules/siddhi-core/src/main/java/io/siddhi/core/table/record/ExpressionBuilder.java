@@ -426,7 +426,8 @@ public class ExpressionBuilder {
                 }
             }
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext());
+            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext(),
+                    siddhiQueryContext.getOnDemandQuery());
             throw t;
         }
     }
