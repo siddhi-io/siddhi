@@ -208,7 +208,6 @@ public class SiddhiCompiler {
 
         SiddhiQLVisitor eval = new SiddhiQLBaseVisitorImpl();
         OnDemandQuery onDemandQuery = (OnDemandQuery) eval.visit(tree);
-        onDemandQuery.setOnDemandQueryString(onDemandQueryString);
         return onDemandQuery;
     }
 

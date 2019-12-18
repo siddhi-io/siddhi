@@ -242,7 +242,7 @@ public class SiddhiAppParser {
                         window.getWindowDefinition().getId(),
                         findExecutedElements.contains(window.getWindowDefinition().getId()));
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, window.getWindowDefinition(), siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, window.getWindowDefinition(), siddhiAppContext);
                 throw t;
             }
         }
@@ -265,7 +265,7 @@ public class SiddhiAppParser {
                     siddhiAppContext.addEternalReferencedHolder(queryRuntime);
                     queryIndex++;
                 } catch (Throwable t) {
-                    ExceptionUtil.populateQueryContext(t, (Query) executionElement, siddhiAppContext, null);
+                    ExceptionUtil.populateQueryContext(t, (Query) executionElement, siddhiAppContext);
                     throw t;
                 }
             } else {
@@ -276,7 +276,7 @@ public class SiddhiAppParser {
                     queryIndex += ((Partition) executionElement).getQueryList().size();
                     partitionIndex++;
                 } catch (Throwable t) {
-                    ExceptionUtil.populateQueryContext(t, (Partition) executionElement, siddhiAppContext, null);
+                    ExceptionUtil.populateQueryContext(t, (Partition) executionElement, siddhiAppContext);
                     throw t;
                 }
             }
@@ -337,7 +337,7 @@ public class SiddhiAppParser {
             try {
                 siddhiAppRuntimeBuilder.defineTrigger(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
@@ -350,7 +350,7 @@ public class SiddhiAppParser {
             try {
                 siddhiAppRuntimeBuilder.defineFunction(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
@@ -373,7 +373,7 @@ public class SiddhiAppParser {
                 }
                 siddhiAppRuntimeBuilder.defineStream(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
@@ -401,7 +401,7 @@ public class SiddhiAppParser {
             try {
                 siddhiAppRuntimeBuilder.defineTable(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
@@ -414,7 +414,7 @@ public class SiddhiAppParser {
             try {
                 siddhiAppRuntimeBuilder.defineWindow(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
@@ -427,7 +427,7 @@ public class SiddhiAppParser {
             try {
                 siddhiAppRuntimeBuilder.defineAggregation(definition);
             } catch (Throwable t) {
-                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext, null);
+                ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }

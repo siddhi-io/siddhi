@@ -47,7 +47,6 @@ public class SiddhiQueryContext {
     private LatencyTracker latencyTracker;
     private IdGenerator idGenerator;
     private boolean stateful = false;
-    private String onDemandQuery = null;
 
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName) {
         this(siddhiAppContext, queryName, SiddhiConstants.PARTITION_ID_DEFAULT);
@@ -56,7 +55,11 @@ public class SiddhiQueryContext {
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName, String partitionId) {
         this.siddhiAppContext = siddhiAppContext;
         this.name = queryName;
-        this.partitionId = partitionId;
+        if (partitionId == null) {
+            this.partitionId = SiddhiConstants.PARTITION_ID_DEFAULT;
+        } else {
+            this.partitionId = partitionId;
+        }
         this.idGenerator = new IdGenerator();
     }
 
@@ -78,14 +81,6 @@ public class SiddhiQueryContext {
 
     public SiddhiContext getSiddhiContext() {
         return siddhiAppContext.getSiddhiContext();
-    }
-
-    public String getOnDemandQuery() {
-        return onDemandQuery;
-    }
-
-    public void setOnDemandQuery(String onDemandQuery) {
-        this.onDemandQuery = onDemandQuery;
     }
 
     public OutputStream.OutputEventType getOutputEventType() {

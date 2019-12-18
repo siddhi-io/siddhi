@@ -230,7 +230,7 @@ public class SingleInputStreamParser {
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
                         ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext(),
-                                siddhiQueryContext.getOnDemandQuery());
+                                siddhiQueryContext);
                         throw e;
                     }
                 }
