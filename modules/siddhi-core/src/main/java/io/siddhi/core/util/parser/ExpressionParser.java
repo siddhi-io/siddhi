@@ -212,7 +212,7 @@ public class ExpressionParser {
      * @param metaEvent                  Meta Event
      * @param currentState               Current state number
      * @param tableMap                   Event Table Map
-     * @param executorList               List to hold VariableExpressionExecutors to update after query parsing @return
+     * @param executorList               List to hold VariableExpressionExecutors to update after query parsing
      * @param groupBy                    is for groupBy expression
      * @param defaultStreamEventIndex    Default StreamEvent Index
      * @param processingMode             processing mode of the query
@@ -550,7 +550,8 @@ public class ExpressionParser {
             }
             throw new UnsupportedOperationException(expression.toString() + " not supported!");
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext());
+            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext(),
+                    siddhiQueryContext);
             throw t;
         }
     }

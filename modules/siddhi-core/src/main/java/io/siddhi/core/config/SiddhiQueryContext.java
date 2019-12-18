@@ -55,7 +55,11 @@ public class SiddhiQueryContext {
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName, String partitionId) {
         this.siddhiAppContext = siddhiAppContext;
         this.name = queryName;
-        this.partitionId = partitionId;
+        if (partitionId == null) {
+            this.partitionId = SiddhiConstants.PARTITION_ID_DEFAULT;
+        } else {
+            this.partitionId = partitionId;
+        }
         this.idGenerator = new IdGenerator();
     }
 

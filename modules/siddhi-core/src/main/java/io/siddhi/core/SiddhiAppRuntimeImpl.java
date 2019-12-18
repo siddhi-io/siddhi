@@ -313,8 +313,8 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
             synchronized (this) {
                 onDemandQueryRuntime = onDemandQueryRuntimeMap.remove(onDemandQuery);
                 if (onDemandQueryRuntime == null) {
-                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext,
-                            tableMap, windowMap, aggregationMap);
+                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, onDemandQueryString,
+                            siddhiAppContext, tableMap, windowMap, aggregationMap);
                 } else {
                     onDemandQueryRuntime.reset();
                 }
@@ -372,8 +372,8 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         try {
             OnDemandQueryRuntime onDemandQueryRuntime = onDemandQueryRuntimeMap.get(onDemandQuery);
             if (onDemandQueryRuntime == null) {
-                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext, tableMap, windowMap,
-                        aggregationMap);
+                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, onDemandQueryString,
+                        siddhiAppContext, tableMap, windowMap, aggregationMap);
                 onDemandQueryRuntimeMap.put(onDemandQuery, onDemandQueryRuntime);
             }
             return onDemandQueryRuntime.getOnDemandQueryOutputAttributes();

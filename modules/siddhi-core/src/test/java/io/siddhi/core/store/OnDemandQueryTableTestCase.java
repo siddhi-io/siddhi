@@ -854,4 +854,36 @@ public class OnDemandQueryTableTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void test21() throws InterruptedException {
+        log.info("Testing update on-demand query parser failure");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp long);";
+        String query = "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, sum(price) as totalPrice, avg(price) as avgPrice " +
+                "group by symbol " +
+                "aggregate by timestamp every sec...year ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+
+        try {
+            siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
+                "'minutes' select AGG_TIMESTAMP2, symbol, totalPrice, avgPrice ");
+            Thread.sleep(100);
+            Assert.fail("Expected OnDemandQueryCreationException exception");
+        } catch (OnDemandQueryCreationException e) {
+            String expectedCauseBy = "@ Line: 1. Position: 83, near 'AGG_TIMESTAMP2'. " +
+                    "Stream with reference : null not found";
+            Assert.assertTrue(e.getCause().getMessage().endsWith(expectedCauseBy));
+        }
+
+        siddhiAppRuntime.shutdown();
+    }
 }
