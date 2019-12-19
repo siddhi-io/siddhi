@@ -520,14 +520,18 @@ public class AggregationRuntime implements MemoryCalculable {
             withinExpressionTable = withinExpression;
         }
 
+        List<Variable> queryGroupByListCopy = new ArrayList<>(queryGroupByList);
+
         Variable timestampVariable = new Variable(AGG_START_TIMESTAMP_COL);
-        List<String> queryGroupByNamesList = queryGroupByList.stream()
+        List<String> queryGroupByNamesList = queryGroupByListCopy.stream()
                 .map(Variable::getAttributeName)
                 .collect(Collectors.toList());
         boolean queryGroupByContainsTimestamp = queryGroupByNamesList.remove(AGG_START_TIMESTAMP_COL);
 
-        boolean isQueryGroupBySameAsAggGroupBy = queryGroupByList.isEmpty() ||
-                (queryGroupByList.contains(timestampVariable) && queryGroupByNamesList.equals(groupByVariablesList));
+        boolean isQueryGroupBySameAsAggGroupBy =
+                queryGroupByListCopy.isEmpty() ||
+                    (queryGroupByListCopy.contains(timestampVariable) &&
+                            queryGroupByNamesList.equals(groupByVariablesList));
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
 
@@ -544,9 +548,9 @@ public class AggregationRuntime implements MemoryCalculable {
                         groupByList.add(new Variable(AGG_START_TIMESTAMP_COL));
                     }
                     //Remove timestamp to process the rest
-                    queryGroupByList.remove(timestampVariable);
+                    queryGroupByListCopy.remove(timestampVariable);
                 }
-                for (Variable queryGroupBy : queryGroupByList) {
+                for (Variable queryGroupBy : queryGroupByListCopy) {
                     String referenceId = queryGroupBy.getStreamId();
                     if (referenceId == null) {
                         if (tableAttributesNameList.contains(queryGroupBy.getAttributeName())) {
