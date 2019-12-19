@@ -27,6 +27,7 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -221,6 +222,41 @@ public class CallbackTestCase {
         AssertJUnit.assertTrue(eventArrived);
         AssertJUnit.assertTrue(eventArrived2);
 
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void callbackTest5() throws InterruptedException {
+        log.info("callback test5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select symbol, price , symbol as sym1 " +
+                "insert into OutputStream ;";
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events != null) {
+                    count += events.length;
+                }
+            }
+        };
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("OutputStream", streamCallback);
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 0f, 100L});
+        siddhiAppRuntime.removeCallback(streamCallback);
+        inputHandler.send(new Object[]{"WSO2", 0f, 100L});
+        SiddhiTestHelper.waitForEvents(10, count, 1, 100);
+        AssertJUnit.assertEquals(1, count);
+        AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
 

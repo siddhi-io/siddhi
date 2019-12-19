@@ -112,6 +112,15 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
         hasCallBack = true;
     }
 
+    public void removeQueryCallback(QueryCallback callback) {
+        List<QueryCallback> newQueryCallbacks = new ArrayList<>(queryCallbacks);
+        newQueryCallbacks.remove(callback);
+        queryCallbacks = newQueryCallbacks;
+        if (queryCallbacks.size() == 0) {
+            hasCallBack = false;
+        }
+    }
+
     public abstract void process(ComplexEventChunk complexEventChunk);
 
     public void process(List<ComplexEventChunk> complexEventChunks) {

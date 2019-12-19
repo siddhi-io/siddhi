@@ -338,6 +338,12 @@ public class StreamJunction implements EventBufferHolder {
         }
     }
 
+    public void unsubscribe(StreamCallback streamCallback) {
+        List<Receiver> newReceivers = new LinkedList<>(receivers);
+        newReceivers.remove(streamCallback);
+        receivers = newReceivers;
+    }
+
     public String getStreamId() {
         return streamDefinition.getId();
     }

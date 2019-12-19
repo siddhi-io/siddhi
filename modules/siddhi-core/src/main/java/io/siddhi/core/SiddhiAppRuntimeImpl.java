@@ -269,6 +269,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     }
 
     public void addCallback(String queryName, QueryCallback callback) {
+        callback.setQueryName(queryName);
         callback.setContext(siddhiAppContext);
         QueryRuntime queryRuntime = queryProcessorMap.get(queryName);
         if (queryRuntime == null) {
@@ -276,6 +277,28 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         }
         callback.setQuery(queryRuntime.getQuery());
         ((QueryRuntimeImpl) queryRuntime).addCallback(callback);
+    }
+
+    public void removeCallback(StreamCallback streamCallback) {
+        if (streamCallback.getStreamId() == null) {
+            throw new SiddhiAppRuntimeException("Cannot find streamID in the streamCallback");
+        }
+        String streamId = streamCallback.getStreamId();
+        StreamJunction streamJunction = streamJunctionMap.get(streamId);
+        if (streamJunction != null) {
+            streamJunction.unsubscribe(streamCallback);
+        }
+    }
+
+    public void removeCallback(QueryCallback callback) {
+        if (callback.getQueryName() == null) {
+            throw new SiddhiAppRuntimeException("Cannot find QueryName in the queryCallback");
+        }
+        String queryName = callback.getQueryName();
+        QueryRuntime queryRuntime = queryProcessorMap.get(queryName);
+        if (queryRuntime != null) {
+            ((QueryRuntimeImpl) queryRuntime).removeCallback(callback);
+        }
     }
 
     public Event[] query(String onDemandQuery) {
