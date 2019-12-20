@@ -16,5 +16,5 @@
 # under the License.
 #
 
-org.wso2.siddhi.annotation.processor.SiddhiAnnotationProcessor
+io.siddhi.annotation.processor.SiddhiAnnotationProcessor
 org.atteo.classindex.processor.ClassIndexProcessor

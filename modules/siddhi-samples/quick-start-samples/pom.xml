@@ -20,8 +20,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-samples</artifactId>
-        <groupId>org.wso2.siddhi</groupId>
-        <version>4.2.1-SNAPSHOT</version>
+        <groupId>io.siddhi</groupId>
+        <version>5.1.12-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,22 +31,22 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-compiler</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j.wso2</groupId>
+            <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <scope>compile</scope>
         </dependency>

@@ -1,0 +1,14 @@
+codecov:
+  ci:
+    - travis
+    - !appveyor                # ignore CI builds by AppVeyor
+
+coverage:
+  precision: 2
+  round: down
+  range: "50...90"
+  status:
+    project:
+      default:
+        threshold: 2%
+    patch: false

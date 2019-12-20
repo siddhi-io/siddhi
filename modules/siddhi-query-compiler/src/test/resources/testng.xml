@@ -20,15 +20,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Siddhi-Compiler-Test-Suite">
-    <test name="siddhi-compiler-tests" enabled="true" preserve-order="true">
+    <test name="siddhi-compiler-tests" enabled="true" parallel="classes">
         <classes>
-            <class name="org.wso2.siddhi.query.test.AbsentPatternTestCase"/>
-            <class name="org.wso2.siddhi.query.test.DefineAggregationTestCase"/>
-            <class name="org.wso2.siddhi.query.test.DefinePartitionTestCase"/>
-            <class name="org.wso2.siddhi.query.test.DefineStreamTestCase"/>
-            <class name="org.wso2.siddhi.query.test.DefineTableTestCase"/>
-            <class name="org.wso2.siddhi.query.test.QueryStoreTestCase"/>
-            <class name="org.wso2.siddhi.query.test.SimpleQueryTestCase"/>
+            <class name="io.siddhi.query.test.AbsentPatternTestCase"/>
+            <class name="io.siddhi.query.test.DefineAggregationTestCase"/>
+            <class name="io.siddhi.query.test.DefinePartitionTestCase"/>
+            <class name="io.siddhi.query.test.DefineStreamTestCase"/>
+            <class name="io.siddhi.query.test.DefineTableTestCase"/>
+            <class name="io.siddhi.query.test.QueryStoreTestCase"/>
+            <class name="io.siddhi.query.test.SimpleQueryTestCase"/>
+            <class name="io.siddhi.query.test.VariableUpdateTestCase"/>
         </classes>
     </test>
 </suite>

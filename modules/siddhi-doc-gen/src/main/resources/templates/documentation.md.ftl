@@ -18,24 +18,54 @@
 <#import "utils.ftl" as utils>
 # API Docs - v${latestDocumentationVersion}
 
+<#if siddhiVersion??>
+!!! Info "Tested Siddhi Core version: *<a target="_blank" href="${CONSTANTS.FREEMARKER_SIDDHI_HOME_PAGE}/en/${siddhiDocVersion}/docs/query-guide/">${siddhiVersion}</a>*"
+    It could also support other Siddhi Core minor versions.
+
+</#if>
 <#list metaData as namespace>
 ## ${namespace.name?capitalize}
 
 <#list namespace.extensionMap as extensionType, extensionsList>
 <#list extensionsList as extension>
-### ${extension.name} *<@utils.renderLinkToExtensionTypeDoc extensionType=extensionType/>*
-
-<p style="word-wrap: break-word">${formatDescription(extension.description)}</p>
-
+<#if extension.deprecated>
+### <s>${extension.name} <@utils.renderLinkToExtensionTypeDocWB extensionType=extensionType/></s>
+<p><i>Deprecated</i></p>
+<#else>
+### ${extension.name} <@utils.renderLinkToExtensionTypeDocWB extensionType=extensionType/>
+</#if>
+<p></p>
+${formatDescription(extension.description)}
+<p></p>
+<#if extension.originName??>
+<p><i>Origin: ${extension.originName}:${extension.originVersion}</i></p>
+</#if>
 <@utils.renderHeadingFourWithStylesOnly heading="Syntax"/>
+
 
 <#if [EXTENSION_TYPE.FUNCTION, EXTENSION_TYPE.ATTRIBUTE_AGGREGATOR]?seq_index_of(extensionType) != -1>
 ```
+<#if extension.parameterOverloads??>
+    <#list extension.parameterOverloads>
+        <#items as parameterOverload>
+<#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if><#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list parameterOverload.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+        </#items>
+    </#list>
+<#else>
 <#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if><#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list extension.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+</#if>
 ```
 <#elseif [EXTENSION_TYPE.STREAM_PROCESSOR, EXTENSION_TYPE.STREAM_FUNCTION, EXTENSION_TYPE.WINDOW]?seq_index_of(extensionType) != -1>
 ```
+<#if extension.parameterOverloads??>
+    <#list extension.parameterOverloads>
+        <#items as parameterOverload>
+<#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list parameterOverload.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+        </#items>
+    </#list>
+<#else>
 <#if namespace.name != CONSTANTS.CORE_NAMESPACE>${namespace.name}:</#if>${extension.name}(<#list extension.parameters><#items as parameter><${parameter.type?join("|", "")}> ${parameter.name}<#sep>, </#items></#list>)
+</#if>
 ```
 <#elseif [EXTENSION_TYPE.SOURCE, EXTENSION_TYPE.SINK]?seq_index_of(extensionType) != -1>
 ```
@@ -101,7 +131,7 @@ define function <FunctionName>[${extension.name}] return <type> {
     <#items as systemParameter>
     <tr>
         <td style="vertical-align: top">${systemParameter.name}</td>
-        <td style="vertical-align: top; word-wrap: break-word">${formatDescription(systemParameter.description)}</td>
+        <td style="vertical-align: top;">${formatDescription(systemParameter.description)}</td>
         <td style="vertical-align: top">${systemParameter.defaultValue}</td>
         <td style="vertical-align: top">${systemParameter.possibleParameters?join("<br>", "")}</td>
     </tr>
@@ -121,7 +151,7 @@ define function <FunctionName>[${extension.name}] return <type> {
     <#items as returnAttribute>
     <tr>
         <td style="vertical-align: top">${returnAttribute.name}</td>
-        <td style="vertical-align: top; word-wrap: break-word">${formatDescription(returnAttribute.description)}</td>
+        <td style="vertical-align: top;">${formatDescription(returnAttribute.description)}</td>
         <td style="vertical-align: top">${returnAttribute.type?join("<br>", "")}</td>
     </tr>
     </#items>
@@ -138,8 +168,9 @@ define function <FunctionName>[${extension.name}] return <type> {
 ```
 ${example.syntax}
 ```
-<p style="word-wrap: break-word">${formatDescription(example.description)}</p>
-
+<p></p>
+${formatDescription(example.description)}
+<p></p>
 </#items>
 </#list>
 </#list>

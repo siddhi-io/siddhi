@@ -1,0 +1,22 @@
+{
+  "siddhi-gpl-execution-r": {
+    "lastModifiedDateTime": "Thu, 18 Oct 2018 12:54:08 GMT",
+    "description": "The siddhi-gpl-execution-r extension is an extension to Siddhi that can be used to process events with R scripts."
+  },
+  "siddhi-gpl-execution-pmml": {
+    "lastModifiedDateTime": "Tue, 30 Apr 2019 18:04:13 GMT",
+    "description": "The siddhi-gpl-execution-pmml extension is an extension to Siddhi that can be used to process texts based on a PMML processing model."
+  },
+  "siddhi-gpl-execution-geo": {
+    "lastModifiedDateTime": "Wed, 01 May 2019 01:57:10 GMT",
+    "description": "The siddhi-gpl-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc."
+  },
+  "siddhi-gpl-execution-streamingml": {
+    "lastModifiedDateTime": "Wed, 01 May 2019 02:08:02 GMT",
+    "description": "The siddhi-execution-streamingml is an extension to Siddhi that performs streaming machine learning on event streams."
+  },
+  "siddhi-gpl-execution-nlp": {
+    "lastModifiedDateTime": "Thu, 02 May 2019 14:27:13 GMT",
+    "description": "The siddhi-gpl-execution-nlp extension is an extension to Siddhi that can be used to process natural language."
+  }
+}
