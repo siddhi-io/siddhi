@@ -431,7 +431,10 @@ public abstract class Sink<S extends State> implements SinkListener {
                     connectWithRetry();
                     LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
                             + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
-                            + "events dropped '" + payload + "'", e);
+                            + "events dropped '" + payload + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
                     break;
             }
         } catch (Throwable t) {
