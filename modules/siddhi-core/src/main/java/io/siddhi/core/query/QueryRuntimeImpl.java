@@ -75,6 +75,10 @@ public class QueryRuntimeImpl implements QueryRuntime, MemoryCalculable, Externa
         outputRateLimiter.addQueryCallback(callback);
     }
 
+    public void removeCallback(QueryCallback callback) {
+        outputRateLimiter.removeQueryCallback(callback);
+    }
+
     public OutputRateLimiter getOutputRateManager() {
         return outputRateLimiter;
     }

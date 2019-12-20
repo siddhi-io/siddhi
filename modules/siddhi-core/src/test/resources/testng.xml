@@ -137,6 +137,7 @@
             <class name="io.siddhi.core.window.DelayWindowTestCase"/>
 
             <class name="io.siddhi.core.query.BooleanCompareTestCase"/>
+            <class name="io.siddhi.core.query.CallbackTestCase"/>
             <class name="io.siddhi.core.query.FilterTestCase1"/>
             <class name="io.siddhi.core.query.FilterTestCase2"/>
             <class name="io.siddhi.core.query.IsNullTestCase"/>
