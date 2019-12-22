@@ -66,6 +66,11 @@ public abstract class SlidingWindowProcessor<S extends State> extends WindowProc
                                      StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
                                      S state) {
         streamEventChunk.reset();
+        while (streamEventChunk.hasNext()) {
+            StreamEvent streamEvent = streamEventChunk.next();
+            streamEvent.setBeforeWindowData(null);
+        }
+        streamEventChunk.reset();
         process(streamEventChunk, nextProcessor, streamEventCloner, state);
     }
 

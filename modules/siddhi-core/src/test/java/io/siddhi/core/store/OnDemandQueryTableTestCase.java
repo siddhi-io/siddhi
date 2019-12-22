@@ -880,7 +880,7 @@ public class OnDemandQueryTableTestCase {
             Assert.fail("Expected OnDemandQueryCreationException exception");
         } catch (OnDemandQueryCreationException e) {
             String expectedCauseBy = "@ Line: 1. Position: 83, near 'AGG_TIMESTAMP2'. " +
-                    "Stream with reference : null not found";
+                    "No matching stream reference found for attribute 'AGG_TIMESTAMP2'";
             Assert.assertTrue(e.getCause().getMessage().endsWith(expectedCauseBy));
         }
 

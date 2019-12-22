@@ -151,7 +151,7 @@ public class AggregationParser {
             // Example format: AGG_TIMESTAMP, groupByAttribute1, groupByAttribute2, AGG_incAttribute1, AGG_incAttribute2
             // AGG_incAttribute1, AGG_incAttribute2 would have the same attribute names as in
             // finalListOfIncrementalAttributes
-            incomingMetaStreamEvent.initializeAfterWindowData(); // To enter data as onAfterWindowData
+            incomingMetaStreamEvent.initializeOnAfterWindowData(); // To enter data as onAfterWindowData
 
 
             List<TimePeriod.Duration> incrementalDurations = getSortedPeriods(aggregationDefinition.getTimePeriod());

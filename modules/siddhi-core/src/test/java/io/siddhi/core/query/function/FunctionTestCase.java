@@ -300,6 +300,83 @@ public class FunctionTestCase {
         siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
+    @Test
+    public void testFunctionQuery7_1() throws InterruptedException {
+        log.info("eventTimestamp Test1_1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String appName = "" +
+                "@app:name('eventTimestamp') " +
+                "" +
+                "define stream fooStream (symbol string, time string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from fooStream " +
+                "select symbol as name, eventTimestamp() as eventTimestamp " +
+                "insert into barStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(appName);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    AssertJUnit.assertEquals(10, inEvent.getTimestamp());
+                }
+            }
+
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("fooStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(10, new Object[]{"WSO2", 50f, 60f, 60L, 6});
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(1, count);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery7_2() throws InterruptedException {
+        log.info("eventTimestamp Test1_2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String app = "" +
+                "@app:name('eventTimestamp')" +
+                "" +
+                "define stream fooStream (symbol string, time string);" +
+                "define table fooTable (symbol string, time string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from fooStream as f full outer join fooTable as t " +
+                "select f.symbol as name, eventTimestamp(f) as eventTimestamp " +
+                "insert into barStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(app);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    AssertJUnit.assertEquals(10, inEvent.getTimestamp());
+                }
+            }
+
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("fooStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(10, new Object[]{"WSO2", 50f, 60f, 60L, 6});
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(1, count);
+        siddhiAppRuntime.shutdown();
+    }
+
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testFunctionQuery8() throws InterruptedException {
 

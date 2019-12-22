@@ -572,7 +572,7 @@ public class OnDemandQueryParser {
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {
         metaStreamEvent.addInputDefinition(inputDefinition);
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
 

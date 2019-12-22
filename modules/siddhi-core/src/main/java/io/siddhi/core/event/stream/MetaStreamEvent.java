@@ -62,6 +62,13 @@ public class MetaStreamEvent implements MetaComplexEvent {
         }
     }
 
+    public void initializeOnAfterWindowData() {
+        if (onAfterWindowData == null) {
+            onAfterWindowData = new ArrayList<Attribute>();
+        }
+    }
+
+    @Deprecated
     public void initializeAfterWindowData() {
         if (onAfterWindowData == null) {
             onAfterWindowData = new ArrayList<Attribute>();

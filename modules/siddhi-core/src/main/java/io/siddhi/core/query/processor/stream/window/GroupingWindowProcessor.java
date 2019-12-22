@@ -80,6 +80,12 @@ public abstract class GroupingWindowProcessor<S extends State> extends WindowPro
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                                      StreamEventCloner streamEventCloner,
                                      ComplexEventPopulater complexEventPopulater, S state) {
+        streamEventChunk.reset();
+        while (streamEventChunk.hasNext()) {
+            StreamEvent streamEvent = streamEventChunk.next();
+            streamEvent.setBeforeWindowData(null);
+        }
+        streamEventChunk.reset();
         processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, groupingKeyPopulator, state);
     }
 

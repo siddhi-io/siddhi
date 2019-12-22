@@ -81,6 +81,12 @@ public abstract class HopingWindowProcessor<S extends State> extends WindowProce
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                                      StreamEventCloner streamEventCloner,
                                      ComplexEventPopulater complexEventPopulater, S state) {
+        streamEventChunk.reset();
+        while (streamEventChunk.hasNext()) {
+            StreamEvent streamEvent = streamEventChunk.next();
+            streamEvent.setBeforeWindowData(null);
+        }
+        streamEventChunk.reset();
         processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, hopingTimestampPopulator);
     }
 
