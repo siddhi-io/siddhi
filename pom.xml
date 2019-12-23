@@ -797,7 +797,7 @@
         <maven.scm.plugin.version>1.11.2</maven.scm.plugin.version>
         <maven.scm.publish.plugin.version>3.0.0</maven.scm.publish.plugin.version>
         <maven.site.plugin.version>3.8.2</maven.site.plugin.version>
-        <maven.source.plugin.version>3.2.0</maven.source.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
         <apache.rat.plugin.version>0.13</apache.rat.plugin.version>
         <maven.scr.plugin.version>1.26.4</maven.scr.plugin.version>
 
