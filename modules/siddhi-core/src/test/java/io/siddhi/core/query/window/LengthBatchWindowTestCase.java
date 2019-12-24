@@ -1110,35 +1110,30 @@ public class LengthBatchWindowTestCase {
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ", true) " +
-                "select symbol, price " +
+                "select symbol, price, count() as total " +
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-            }
+            public void receive(Event[] events) {
 
-//            @Override
-//            public void receive(Event[] events) {
-//
-//                EventPrinter.print(events);
-//                eventArrived = true;
-//                if (events.length == 1) {
-//                    inEventCount++;
-//                } else {
-//                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
-//                            false);
-//                }
-//                for (Event event : events) {
-//                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2) == 1
-//                            || (Long) event.getData(2) == 2 || ((Long) event.getData(2)) == 3));
-//                    count++;
-//                }
-//            }
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2) == 1
+                            || (Long) event.getData(2) == 2 || ((Long) event.getData(2)) == 3));
+                    count++;
+                }
+            }
         });
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
