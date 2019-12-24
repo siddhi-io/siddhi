@@ -40,6 +40,14 @@
         <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.core.query.processor.stream.window.ExpressionWindowProcessor$MetaStreamEventWrapper"/>
+        <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.query.processor.stream.window.ExpressionBatchWindowProcessor$MetaStreamEventWrapper"/>
+        <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.query.api.definition.StreamDefinition"/>
         <Bug pattern="CN_IMPLEMENTS_CLONE_BUT_NOT_CLONEABLE"/>
     </Match>
