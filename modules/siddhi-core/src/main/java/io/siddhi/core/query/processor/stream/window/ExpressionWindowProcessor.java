@@ -67,7 +67,8 @@ import java.util.Map;
 @Extension(
         name = "expression",
         namespace = "",
-        description = "A sliding window that holds events that satisfy the given `expression`, when they aren't, " +
+        description = "A sliding window that dynamically shrink and grow based on the `expression`, " +
+                "it holds events that satisfies the given `expression`, when they aren't, " +
                 "they are evaluated from the `first` (oldest) to the `last` (latest/current) and expired " +
                 "from the oldest until the `expression` is satisfied.\n" +
                 "**Note**: All the events in window are reevaluated only when the given `expression` is changed.",
@@ -84,7 +85,7 @@ import java.util.Map;
         examples = {
                 @Example(
                         syntax = "@info(name = 'query1')\n" +
-                                "from StockEventWindow#window.expression('count()>20')\n" +
+                                "from StockEventWindow#window.expression('count()<=20')\n" +
                                 "select symbol, sum(price) as price\n" +
                                 "insert into OutputStream ;",
                         description = "This will retain last 20 events in a sliding manner."
@@ -152,7 +153,7 @@ public class ExpressionWindowProcessor extends SlidingFindableWindowProcessor<Ex
                     String expressionStringNew = (String) expressionStringExecutor.execute(streamEvent);
                     if (!expressionStringNew.equals(expressionString)) {
                         expressionString = expressionStringNew;
-                        processAllExpiredEvents(streamEventChunk, streamEventCloner, state, currentTime);
+                        processAllExpiredEvents(streamEventChunk, state, currentTime);
                     }
                 }
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
@@ -180,14 +181,13 @@ public class ExpressionWindowProcessor extends SlidingFindableWindowProcessor<Ex
                 0, new HashMap<>(), variableExpressionExecutors, false,
                 0, ProcessingMode.SLIDE, true, exprQueryContext);
         if (expressionExecutor.getReturnType() != Attribute.Type.BOOL) {
-            throw new SiddhiAppRuntimeException("Expression (" + expressionString + ") does not return Bool");
+            throw new SiddhiAppRuntimeException("Expression ('" + expressionString + "') does not return Bool");
         }
         return metaStateEvent;
     }
 
     private void processAllExpiredEvents(ComplexEventChunk<StreamEvent> streamEventChunk,
-                                         StreamEventCloner streamEventCloner, WindowState state,
-                                         long currentTime) {
+                                         WindowState state, long currentTime) {
         MetaStateEvent metaStateEvent = constructExpression(metaStreamEvent, siddhiQueryContext);
         QueryParserHelper.updateVariablePosition(metaStateEvent, variableExpressionExecutors);
         StreamEvent expiredEvent = state.expiredEventQueue.getFirst();

@@ -111,6 +111,7 @@
 
             <class name="io.siddhi.core.query.window.CronWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExpressionWindowTestCase"/>
+            <class name="io.siddhi.core.query.window.ExpressionBatchWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExternalTimeBatchWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExternalTimeWindowTestCase"/>
             <class name="io.siddhi.core.query.window.FrequentWindowTestCase"/>
