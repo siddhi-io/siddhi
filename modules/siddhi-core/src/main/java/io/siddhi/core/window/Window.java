@@ -152,7 +152,6 @@ public class Window implements FindableProcessor, MemoryCalculable {
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
         metaStreamEvent.addInputDefinition(windowDefinition);
         metaStreamEvent.setEventType(MetaStreamEvent.EventType.WINDOW);
-        metaStreamEvent.initializeAfterWindowData();
         for (Attribute attribute : windowDefinition.getAttributeList()) {
             metaStreamEvent.addOutputData(attribute);
         }

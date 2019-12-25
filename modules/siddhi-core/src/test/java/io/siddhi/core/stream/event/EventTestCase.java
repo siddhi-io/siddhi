@@ -150,7 +150,7 @@ public class EventTestCase {
 
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
         metaStreamEvent.addData(volume);
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         metaStreamEvent.addData(price);
         metaStreamEvent.addOutputData(symbol);
         metaStreamEvent.addOutputData(null);        //complex attribute
@@ -299,7 +299,7 @@ public class EventTestCase {
         metaStreamEvent.addData(volume);
         metaStreamEvent.addData(price);
         metaStreamEvent.addData(symbol);
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         metaStreamEvent.addData(price);
         metaStreamEvent.addOutputData(symbol);
         metaStreamEvent.addOutputData(null);

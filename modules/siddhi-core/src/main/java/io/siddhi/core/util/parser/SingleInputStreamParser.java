@@ -152,7 +152,7 @@ public class SingleInputStreamParser {
             }
         }
 
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         return new SingleStreamRuntime(processStreamReceiver, processor, processingMode, metaComplexEvent);
 
     }
@@ -171,6 +171,10 @@ public class SingleInputStreamParser {
             metaStreamEvent = ((MetaStateEvent) metaEvent).getMetaStreamEvent(stateIndex);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaEvent;
+        }
+
+        if (streamHandler instanceof Window) {
+            metaStreamEvent.initializeOnAfterWindowData();
         }
 
         ExpressionExecutor[] attributeExpressionExecutors;

@@ -161,7 +161,7 @@ public class AggregationRuntime implements MemoryCalculable {
                                             String inputReferenceId) {
         metaStreamEvent.addInputDefinition(inputDefinition);
         metaStreamEvent.setInputReferenceId(inputReferenceId);
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
 
