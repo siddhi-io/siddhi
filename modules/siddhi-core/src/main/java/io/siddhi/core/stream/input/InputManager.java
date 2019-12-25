@@ -64,7 +64,7 @@ public class InputManager {
         inputHandlerMap.clear();
     }
 
-    public InputHandler constructInputHandler(String streamId) {
+    public synchronized InputHandler constructInputHandler(String streamId) {
         InputHandler inputHandler = new InputHandler(streamId, inputHandlerMap.size(),
                 inputEntryValve, siddhiAppContext);
         StreamJunction streamJunction = streamJunctionMap.get(streamId);
