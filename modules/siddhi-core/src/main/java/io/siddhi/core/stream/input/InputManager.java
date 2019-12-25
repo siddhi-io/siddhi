@@ -52,9 +52,9 @@ public class InputManager {
     public InputHandler getInputHandler(String streamId) {
         InputHandler inputHandler = inputHandlerMap.get(streamId);
         if (inputHandler == null) {
-            synchronized(this) {
+            synchronized (this) {
                 inputHandler = inputHandlerMap.get(streamId);
-                if(inputHandler == null) {
+                if (inputHandler == null) {
                     InputHandler newInputHandler = constructInputHandler(streamId);
                     if (this.isConnected) {
                         newInputHandler.connect();
