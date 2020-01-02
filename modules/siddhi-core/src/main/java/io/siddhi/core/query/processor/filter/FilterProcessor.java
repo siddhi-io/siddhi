@@ -24,6 +24,8 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.definition.Attribute;
 
+import java.util.List;
+
 /**
  * Implementation of {@link Processor} which handles Filter expressions in Siddhi.
  */
@@ -55,6 +57,16 @@ public class FilterProcessor implements Processor {
         if (complexEventChunk.getFirst() != null) {
             this.next.process(complexEventChunk);
         }
+    }
+
+
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     @Override

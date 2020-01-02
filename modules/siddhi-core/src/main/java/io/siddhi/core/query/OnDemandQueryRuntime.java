@@ -54,7 +54,7 @@ public abstract class OnDemandQueryRuntime {
                     metaStreamEvent.getOutputData().size());
             stateEvent.addEvent(0, streamEvent);
 
-            ComplexEventChunk complexEventChunk = new ComplexEventChunk(stateEvent, stateEvent, true);
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk(stateEvent, stateEvent);
 
             if (eventType == MetaStreamEvent.EventType.TABLE) {
                 selector.process(complexEventChunk);

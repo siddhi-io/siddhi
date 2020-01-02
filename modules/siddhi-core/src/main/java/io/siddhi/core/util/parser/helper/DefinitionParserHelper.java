@@ -302,7 +302,7 @@ public class DefinitionParserHelper {
             }
             StreamJunction streamJunction = streamJunctionMap.get(triggerDefinition.getId());
             trigger.init(triggerDefinition, siddhiAppContext, streamJunction);
-            siddhiAppContext.addEternalReferencedHolder(trigger);
+            siddhiAppContext.addTrigger(trigger);
             eventTriggerMap.putIfAbsent(trigger.getId(), trigger);
         }
     }
@@ -753,9 +753,10 @@ public class DefinitionParserHelper {
         String mapping = elementMap.get(attribute.getName()).trim();
         if (mapping.startsWith("trp:")) {
             attributesHolder.transportMappings.add(new AttributeMapping(attribute.getName(), i, mapping
-                    .substring(4)));
+                    .substring(4), attribute.getType()));
         } else {
-            attributesHolder.payloadMappings.add(new AttributeMapping(attribute.getName(), i, mapping));
+            attributesHolder.payloadMappings.add(new AttributeMapping(attribute.getName(), i, mapping,
+                    attribute.getType()));
         }
     }
 

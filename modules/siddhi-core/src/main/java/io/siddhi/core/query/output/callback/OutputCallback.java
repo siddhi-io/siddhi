@@ -58,8 +58,7 @@ public abstract class OutputCallback {
             StateEventFactory stateEventFactory,
             int matchingStreamIndex, StreamEventFactory streamEventFactory,
             StreamEventConverter streamEventConverter) {
-        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<StateEvent>(
-                matchingComplexEventChunk.isBatch());
+        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<>();
         while (matchingComplexEventChunk.hasNext()) {
             ComplexEvent matchingComplexEvent = matchingComplexEventChunk.next();
             matchingComplexEventChunk.remove();

@@ -27,7 +27,6 @@ import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -97,7 +96,7 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        List<ComplexEventChunk> outputEventChunks = new LinkedList<>();
         AggregationRateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -134,15 +133,13 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
-        }
+        sendToCallBacks(outputEventChunks);
     }
 
-    private void tryFlushEvents(ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+    private void tryFlushEvents(List<ComplexEventChunk> outputEventChunks, ComplexEvent event,
                                 AggregationRateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
-            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
             for (ComplexEvent originalComplexEvent : state.eventList) {
                 ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent);
                 for (Integer position : aggregateAttributePositionList) {
@@ -172,9 +169,9 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
 
     class AggregationRateLimiterState extends State {
 
+        protected long scheduledTime;
         private List<ComplexEvent> eventList;
         private Map<Integer, Object> aggregateAttributeValueMap;
-        protected long scheduledTime;
 
         public AggregationRateLimiterState() {
             this.eventList = new LinkedList<>();

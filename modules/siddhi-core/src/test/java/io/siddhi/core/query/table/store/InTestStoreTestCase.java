@@ -33,16 +33,10 @@ import org.testng.annotations.Test;
 import java.sql.SQLException;
 
 public class InTestStoreTestCase {
+    private static final Logger log = Logger.getLogger(InTestStoreTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
-    private static final Logger log = Logger.getLogger(InTestStoreTestCase.class);
 
     @BeforeClass
     public static void startTest() {
@@ -52,6 +46,13 @@ public class InTestStoreTestCase {
     @AfterClass
     public static void shutdown() {
         log.info("== Test Store IN tests completed ==");
+    }
+
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
     }
 
     @Test

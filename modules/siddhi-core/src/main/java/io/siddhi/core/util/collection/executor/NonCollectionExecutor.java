@@ -44,7 +44,7 @@ public class NonCollectionExecutor implements CollectionExecutor {
 
         if ((Boolean) expressionExecutor.execute(matchingEvent)) {
 
-            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
             Collection<StreamEvent> storeEvents = indexedEventHolder.getAllEvents();
 
             for (StreamEvent storeEvent : storeEvents) {

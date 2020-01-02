@@ -55,7 +55,11 @@ public class SiddhiQueryContext {
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName, String partitionId) {
         this.siddhiAppContext = siddhiAppContext;
         this.name = queryName;
-        this.partitionId = partitionId;
+        if (partitionId == null) {
+            this.partitionId = SiddhiConstants.PARTITION_ID_DEFAULT;
+        } else {
+            this.partitionId = partitionId;
+        }
         this.idGenerator = new IdGenerator();
     }
 
@@ -71,28 +75,28 @@ public class SiddhiQueryContext {
         return siddhiAppContext;
     }
 
-    public SiddhiContext getSiddhiContext() {
-        return siddhiAppContext.getSiddhiContext();
-    }
-
     public void setSiddhiAppContext(SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
     }
 
-    public void setOutputEventType(OutputStream.OutputEventType outputEventType) {
-        this.outputEventType = outputEventType;
+    public SiddhiContext getSiddhiContext() {
+        return siddhiAppContext.getSiddhiContext();
     }
 
     public OutputStream.OutputEventType getOutputEventType() {
         return outputEventType;
     }
 
-    public void setLatencyTracker(LatencyTracker latencyTracker) {
-        this.latencyTracker = latencyTracker;
+    public void setOutputEventType(OutputStream.OutputEventType outputEventType) {
+        this.outputEventType = outputEventType;
     }
 
     public LatencyTracker getLatencyTracker() {
         return latencyTracker;
+    }
+
+    public void setLatencyTracker(LatencyTracker latencyTracker) {
+        this.latencyTracker = latencyTracker;
     }
 
     public boolean isPartitioned() {

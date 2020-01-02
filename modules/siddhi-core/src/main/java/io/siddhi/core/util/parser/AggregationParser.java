@@ -105,18 +105,18 @@ public class AggregationParser {
 
         if (aggregationDefinition == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition instance is null. " +
+                    "Aggregation Definition instance is null. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'");
         }
         if (aggregationDefinition.getTimePeriod() == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition '" + aggregationDefinition.getId() + "'s timePeriod is null. " +
+                    "Aggregation Definition '" + aggregationDefinition.getId() + "'s timePeriod is null. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
         if (aggregationDefinition.getSelector() == null) {
             throw new SiddhiAppCreationException(
-                    "AggregationDefinition '" + aggregationDefinition.getId() + "'s selection is not defined. " +
+                    "Aggregation Definition '" + aggregationDefinition.getId() + "'s selection is not defined. " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
@@ -151,7 +151,7 @@ public class AggregationParser {
             // Example format: AGG_TIMESTAMP, groupByAttribute1, groupByAttribute2, AGG_incAttribute1, AGG_incAttribute2
             // AGG_incAttribute1, AGG_incAttribute2 would have the same attribute names as in
             // finalListOfIncrementalAttributes
-            incomingMetaStreamEvent.initializeAfterWindowData(); // To enter data as onAfterWindowData
+            incomingMetaStreamEvent.initializeOnAfterWindowData(); // To enter data as onAfterWindowData
 
 
             List<TimePeriod.Duration> incrementalDurations = getSortedPeriods(aggregationDefinition.getTimePeriod());
@@ -204,9 +204,9 @@ public class AggregationParser {
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
             List<Expression> finalBaseExpressions = new ArrayList<>();
-            populateFinalBaseAggregators(tableMap, incomingVariableExpressionExecutors, incomingMetaStreamEvent,
-                    incomingExpressionExecutors, incrementalAttributeAggregators, siddhiQueryContext,
-                    finalBaseExpressions);
+            boolean isOptimisedLookup = populateFinalBaseAggregators(tableMap, incomingVariableExpressionExecutors,
+                    incomingMetaStreamEvent, incomingExpressionExecutors, incrementalAttributeAggregators,
+                    siddhiQueryContext, finalBaseExpressions);
 
             StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id(aggregatorName + "_intermediate");
             incomingOutputStreamDefinition.setQueryContextStartIndex(aggregationDefinition.getQueryContextStartIndex());
@@ -340,7 +340,8 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
                     aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
 
-            boolean isOptimisedLookup = aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
+            isOptimisedLookup = isOptimisedLookup &&
+                                aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
 
             List<String> groupByVariablesList = groupByVariableList.stream()
                     .map(Variable::getAttributeName)
@@ -509,11 +510,13 @@ public class AggregationParser {
         return processExpressionExecutors;
     }
 
-    private static void populateFinalBaseAggregators(
+    private static boolean populateFinalBaseAggregators(
             Map<String, Table> tableMap, List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
             SiddhiQueryContext siddhiQueryContext, List<Expression> finalBaseAggregators) {
+
+        boolean isOptimisedLookup = true;
 
         List<Attribute> finalBaseAttributes = new ArrayList<>();
 
@@ -521,6 +524,10 @@ public class AggregationParser {
             Attribute[] baseAttributes = incrementalAttributeAggregator.getBaseAttributes();
             Expression[] baseAttributeInitialValues = incrementalAttributeAggregator.getBaseAttributeInitialValues();
             Expression[] baseAggregators = incrementalAttributeAggregator.getBaseAggregators();
+
+            if (baseAggregators.length > 1) {
+                isOptimisedLookup = false;
+            }
 
             for (int i = 0; i < baseAttributes.length; i++) {
                 validateBaseAggregators(incrementalAttributeAggregators,
@@ -537,6 +544,7 @@ public class AggregationParser {
                 }
             }
         }
+        return isOptimisedLookup;
     }
 
     private static void populateIncomingAggregatorsAndExecutors(
@@ -577,10 +585,9 @@ public class AggregationParser {
                         siddhiQueryContext);
             } else if (externalTimestampExecutor.getReturnType() != Attribute.Type.LONG) {
                 throw new SiddhiAppCreationException(
-                        "AggregationDefinition '" + aggregationDefinition.getId() + "'s aggregateAttribute expects " +
-                                "long or string, but found " + timestampExecutor.getReturnType() + ". " +
-                                "Hence, can't create the siddhi app '" +
-                                siddhiQueryContext.getSiddhiAppContext().getName() + "'",
+                        "Aggregation Definition '" + aggregationDefinition.getId() + "'s timestamp attribute expects " +
+                        "long or string, but found " + externalTimestampExecutor.getReturnType() + ". Hence, can't " +
+                        "create the siddhi app '" + siddhiQueryContext.getSiddhiAppContext().getName() + "'",
                         externalTimestampExpression.getQueryContextStartIndex(),
                         externalTimestampExpression.getQueryContextEndIndex());
             }

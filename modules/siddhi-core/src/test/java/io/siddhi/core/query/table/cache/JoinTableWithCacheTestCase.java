@@ -37,12 +37,6 @@ public class JoinTableWithCacheTestCase {
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
 
     @BeforeClass
     public static void startTest() {
@@ -52,6 +46,13 @@ public class JoinTableWithCacheTestCase {
     @AfterClass
     public static void shutdown() {
         log.info("== Table with cache JOIN tests completed ==");
+    }
+
+    @BeforeMethod
+    public void init() {
+        inEventCount = 0;
+        removeEventCount = 0;
+        eventArrived = false;
     }
 
     @Test

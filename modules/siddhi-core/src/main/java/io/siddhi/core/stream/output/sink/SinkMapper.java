@@ -42,6 +42,8 @@ import java.util.Map;
  * abstract implementation.
  */
 public abstract class SinkMapper {
+    protected String sinkType;
+    protected OptionHolder sinkOptionHolder;
     private String type;
     private SinkListener sinkListener;
     private OptionHolder optionHolder;
@@ -51,8 +53,6 @@ public abstract class SinkMapper {
     private ThreadLocal<DynamicOptions> trpDynamicOptions = new ThreadLocal<>();
     private LatencyTracker mapperLatencyTracker;
     private SiddhiAppContext siddhiAppContext;
-    protected String sinkType;
-    protected OptionHolder sinkOptionHolder;
 
     public final void init(StreamDefinition streamDefinition, String type, OptionHolder mapOptionHolder,
                            List<Element> unmappedPayloadList, Sink sink, ConfigReader mapperConfigReader,

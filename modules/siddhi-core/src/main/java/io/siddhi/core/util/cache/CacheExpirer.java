@@ -124,7 +124,7 @@ public class CacheExpirer {
 
     public Runnable generateCacheExpirer() {
         class CheckAndExpireCache implements Runnable {
-            
+
             public CheckAndExpireCache() {
             }
 

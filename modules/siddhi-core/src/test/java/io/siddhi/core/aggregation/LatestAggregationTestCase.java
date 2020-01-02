@@ -140,13 +140,13 @@ public class LatestAggregationTestCase {
             AssertJUnit.assertTrue("Event arrived", eventArrived);
             AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertTrue("In events matched",
-                                                SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+                    SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
 
             AssertJUnit.assertEquals("Number of remove events", 4, removeEventCount.get());
             AssertJUnit.assertTrue("Remove events matched",
-                                                SiddhiTestHelper.isUnsortedEventsMatch(removeEventsList, expected));
+                    SiddhiTestHelper.isUnsortedEventsMatch(removeEventsList, expected));
 
-             } finally {
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }

@@ -188,21 +188,47 @@ public abstract class Sink<S extends State> implements SinkListener {
                 if (connectionCallback != null) {
                     connectionCallback.connectionFailed();
                 }
-                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                        " Connection unavailable at Sink '" + type + "' at '" + streamDefinition.getId() +
-                        "', will retry connection immediately.", e);
-                connectWithRetry();
-                publish(payload);
+                if (!isTryingToConnect.getAndSet(true)) {
+                    try {
+                        connectAndPublish(payload, dynamicOptions, state);
+                        isTryingToConnect.set(false);
+                    } catch (ConnectionUnavailableException e1) {
+                        isTryingToConnect.set(false);
+                        onError(payload, dynamicOptions, e);
+                    }
+                } else {
+                    onError(payload, dynamicOptions, e);
+                }
             } finally {
                 stateHolder.returnState(state);
             }
-        } else if (isTryingToConnect.get()) {
-            onError(payload, dynamicOptions, new ConnectionUnavailableException("Connection unavailable at Sink '"
-                    + type + "' at '" + streamDefinition.getId() + "'. Connection retrying is in progress " +
-                    "from a different thread."));
         } else if (!isShutdown.get()) {
-            connectWithRetry();
-            publish(payload);
+            onError(payload, dynamicOptions, new ConnectionUnavailableException(
+                    "Connection unavailable at Sink '" + type + "' at '" + streamDefinition.getId() +
+                            "'. Connection retrying is in progress from a different thread"));
+        }
+    }
+
+    private void connectAndPublish(Object payload, DynamicOptions dynamicOptions, S state)
+            throws ConnectionUnavailableException {
+        connect();
+        setConnected(true);
+        publish(payload, dynamicOptions, state);
+        if (connectionCallback != null) {
+            connectionCallback.connectionEstablished();
+        }
+    }
+
+    protected void retryPublish(Object payload) throws ConnectionUnavailableException {
+        DynamicOptions dynamicOptions = trpDynamicOptions.get();
+        S state = stateHolder.getState();
+        try {
+            publish(payload, dynamicOptions, state);
+            if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                throughputTracker.eventIn();
+            }
+        } finally {
+            stateHolder.returnState(state);
         }
     }
 
@@ -248,32 +274,39 @@ public abstract class Sink<S extends State> implements SinkListener {
     }
 
     public void connectWithRetry() {
+        connectWithRetry(false);
+    }
+
+    private void connectWithRetry(boolean forceConnect) {
         if (!isConnected.get()) {
-            isTryingToConnect.set(true);
-            try {
-                connect();
-                setConnected(true);
-                isTryingToConnect.set(false);
-                if (connectionCallback != null) {
-                    connectionCallback.connectionEstablished();
-                }
-                backoffRetryCounter.reset();
-            } catch (ConnectionUnavailableException e) {
-                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                        ", error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
-                        "', will retry in '" + backoffRetryCounter.getTimeInterval() + "'."), e);
-                scheduledExecutorService.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectWithRetry();
+            if (!isTryingToConnect.getAndSet(true) || forceConnect) {
+                try {
+                    connect();
+                    setConnected(true);
+                    isTryingToConnect.set(false);
+                    if (connectionCallback != null) {
+                        connectionCallback.connectionEstablished();
                     }
-                }, backoffRetryCounter.getTimeIntervalMillis(), TimeUnit.MILLISECONDS);
-                backoffRetryCounter.increment();
-            } catch (RuntimeException e) {
-                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
-                        ", error while connecting at Sink '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
-                        StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
-                throw e;
+                    backoffRetryCounter.reset();
+                } catch (ConnectionUnavailableException e) {
+                    LOG.error(StringUtil.removeCRLFCharacters(
+                            ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                                    ", error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
+                                    "', will retry in '" + backoffRetryCounter.getTimeInterval() + "'."), e);
+                    scheduledExecutorService.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            connectWithRetry(true);
+                        }
+                    }, backoffRetryCounter.getTimeIntervalMillis(), TimeUnit.MILLISECONDS);
+                    backoffRetryCounter.increment();
+                } catch (RuntimeException e) {
+                    LOG.error(StringUtil.removeCRLFCharacters(
+                            ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
+                            ", error while connecting at Sink '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
+                            StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
+                    throw e;
+                }
             }
         }
     }
@@ -322,6 +355,9 @@ public abstract class Sink<S extends State> implements SinkListener {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             setConnected(false);
+            if (connectionCallback != null) {
+                connectionCallback.connectionFailed();
+            }
         } else if (errorAction == OnErrorAction.WAIT) {
             LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
                     + type + "' at '" + streamDefinition.getId() + "' as on.error='wait' does not handle " +
@@ -332,40 +368,73 @@ public abstract class Sink<S extends State> implements SinkListener {
         try {
             switch (errorAction) {
                 case STREAM:
+                    connectWithRetry();
                     streamJunction.handleError(dynamicOptions.getEvent(), e);
                     break;
                 case WAIT:
-                    LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                            ", error while connecting at Sink '" + type + "' at '" + streamDefinition.getId() +
-                            "', will retry in '" + backoffRetryCounter.getTimeInterval() + "'."), e);
-                    retryWait(backoffRetryCounter.getTimeIntervalMillis());
-                    backoffRetryCounter.increment();
-                    if (!isConnected.get()) {
-                        isTryingToConnect.set(true);
-                        try {
-                            connect();
-                            setConnected(true);
+                    LOG.error(StringUtil.removeCRLFCharacters(
+                            ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                                    ", error while connecting Sink '" + type + "' at '" + streamDefinition.getId() +
+                                    "', will retry every '5 sec'."), e);
+                    int count = 0;
+                    while (!isConnected.get()) {
+                        if (isShutdown.get()) {
                             isTryingToConnect.set(false);
-                            if (connectionCallback != null) {
-                                connectionCallback.connectionEstablished();
+                            return;
+                        }
+                        retryWait(5000);
+                        count++;
+                        if (!isConnected.get() && !isTryingToConnect.getAndSet(true)) {
+                            while (!isConnected.get()) {
+                                if (isShutdown.get()) {
+                                    isTryingToConnect.set(false);
+                                    return;
+                                }
+                                S state = stateHolder.getState();
+                                try {
+                                    connectAndPublish(payload, dynamicOptions, state);
+                                    isTryingToConnect.set(false);
+                                    return;
+                                } catch (ConnectionUnavailableException ignore) {
+                                } finally {
+                                    stateHolder.returnState(state);
+                                }
+                                if (count % 12 == 0) {
+                                    LOG.warn(StringUtil.removeCRLFCharacters(
+                                            ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                                                    ", still waiting to connect Sink '" + type +
+                                                    "' at '" + streamDefinition.getId() +
+                                                    "' retrying every '5 sec'."), e);
+                                }
+                                retryWait(5000);
+                                count++;
                             }
-                            backoffRetryCounter.reset();
-                        } catch (Exception ex) {
-                            onError(payload, dynamicOptions, ex);
+                        }
+                        if (count % 12 == 0) {
+                            LOG.warn(StringUtil.removeCRLFCharacters(
+                                    ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                                            ", still waiting to connect Sink '" + type +
+                                            "' at '" + streamDefinition.getId() + "."), e);
                         }
                     }
-                    trpDynamicOptions.set(dynamicOptions);
+                    S state = stateHolder.getState();
                     try {
-                        publish(payload);
+                        publish(payload, dynamicOptions, state);
+                    } catch (ConnectionUnavailableException ignore) {
+                        onError(payload, dynamicOptions, e);
                     } finally {
-                        trpDynamicOptions.remove();
+                        stateHolder.returnState(state);
                     }
                     break;
                 case LOG:
                 default:
+                    connectWithRetry();
                     LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
                             + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
                             + "events dropped '" + payload + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
                     break;
             }
         } catch (Throwable t) {
@@ -392,6 +461,10 @@ public abstract class Sink<S extends State> implements SinkListener {
         }
     }
 
+    public boolean isStateful() {
+        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
+    }
+
     /**
      * Different Type of On Error Actions
      */
@@ -399,9 +472,5 @@ public abstract class Sink<S extends State> implements SinkListener {
         LOG,
         WAIT,
         STREAM
-    }
-
-    public boolean isStateful() {
-        return stateHolder != null && !(stateHolder instanceof EmptyStateHolder);
     }
 }

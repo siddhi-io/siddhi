@@ -20,6 +20,7 @@ package io.siddhi.core.executor.function;
 
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ParameterOverload;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
@@ -30,7 +31,6 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
-import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 /**
  * Executor class for Siddhi cast function. Converts the given parameter according to the castTo parameter.
@@ -39,38 +39,55 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
 @Extension(
         name = "eventTimestamp",
         namespace = "",
-        description = "Returns the timestamp of the processed event.",
-        parameters = {},
+        description = "Returns the timestamp of the processed/passed event.",
+        parameters = {
+                @Parameter(name = "event",
+                        description = "Event reference.",
+                        type = {DataType.OBJECT},
+                        dynamic = true,
+                        optional = true,
+                        defaultValue = "Current Event")
+        },
         parameterOverloads = {
-                @ParameterOverload()
+                @ParameterOverload(),
+                @ParameterOverload(parameterNames = {"event"})
         },
         returnAttributes = @ReturnAttribute(
-                description = "timestamp of the event.",
+                description = "Timestamp of the event.",
                 type = DataType.LONG),
         examples = {
                 @Example(
-                        syntax = "from fooStream\n" +
+                        syntax = "from FooStream\n" +
                                 "select symbol as name, eventTimestamp() as eventTimestamp \n" +
-                                "insert into barStream;",
-                        description = "This will extract current events timestamp.")
+                                "insert into BarStream;",
+                        description = "Extracts current event's timestamp."),
+                @Example(
+                        syntax = "from FooStream as f join FooBarTable as fb\n" +
+                                "select fb.symbol as name, eventTimestamp(f) as eventTimestamp \n" +
+                                "insert into BarStream;",
+                        description = "Extracts FooStream event's timestamp.")
         }
 )
 public class EventTimestampFunctionExecutor extends FunctionExecutor {
 
+    private boolean expectEventObject;
+
     @Override
     protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                 SiddhiQueryContext siddhiQueryContext) {
-        if (attributeExpressionExecutors.length != 0) {
-            throw new SiddhiAppValidationException("Invalid no of arguments passed to eventTimestamp() function, " +
-                    "required 0 parameters, but found " +
-                    attributeExpressionExecutors.length);
+        if (attributeExpressionExecutors.length == 1) {
+            expectEventObject = true;
         }
         return null;
     }
 
     @Override
     public Object execute(ComplexEvent event) {
-        return event.getTimestamp();
+        if (expectEventObject) {
+            return ((ComplexEvent) attributeExpressionExecutors[0].execute(event)).getTimestamp();
+        } else {
+            return event.getTimestamp();
+        }
     }
 
     @Override

@@ -51,7 +51,7 @@ public class FirstPerTimeOutputRateLimiter
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
@@ -68,7 +68,8 @@ public class FirstPerTimeOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        if (outputEventChunk.getFirst() != null) {
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
             sendToCallBacks(outputEventChunk);
         }
     }

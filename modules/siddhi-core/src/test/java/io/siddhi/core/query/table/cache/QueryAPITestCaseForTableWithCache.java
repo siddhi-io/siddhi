@@ -542,7 +542,7 @@ public class QueryAPITestCaseForTableWithCache {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{1, "WSO2", 100});
-        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{2, "IBM", 200});
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 

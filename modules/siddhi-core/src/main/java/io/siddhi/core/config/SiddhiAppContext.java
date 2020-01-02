@@ -20,6 +20,7 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.function.Script;
+import io.siddhi.core.trigger.Trigger;
 import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiConstants;
@@ -51,18 +52,19 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class SiddhiAppContext {
 
+    private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
+    private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
     private SiddhiContext siddhiContext = null;
     private String name;
     private boolean playback;
     private boolean enforceOrder;
     private Level rootMetricsLevel;
     private StatisticsManager statisticsManager = null;
-
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private List<ExternalReferencedHolder> externalReferencedHolders;
+    private List<Trigger> triggerHolders;
     private SnapshotService snapshotService;
-
     private ThreadBarrier threadBarrier = null;
     private TimestampGenerator timestampGenerator = null;
     private IdGenerator idGenerator;
@@ -74,12 +76,11 @@ public class SiddhiAppContext {
     private List<String> includedMetrics;
     private boolean transportChannelCreationEnabled;
     private List<Scheduler> schedulerList;
-    private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
-    private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
     private SiddhiApp siddhiApp;
 
     public SiddhiAppContext() {
         this.externalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
+        this.triggerHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
         this.rootMetricsLevel = Level.OFF;
@@ -186,6 +187,14 @@ public class SiddhiAppContext {
         return Collections.unmodifiableList(new ArrayList<>(externalReferencedHolders));
     }
 
+    public List<Trigger> getTriggerHolders() {
+        return Collections.unmodifiableList(new ArrayList<>(triggerHolders));
+    }
+
+    public void addTrigger(Trigger trigger) {
+        triggerHolders.add(trigger);
+    }
+
     public ThreadBarrier getThreadBarrier() {
         return threadBarrier;
     }
@@ -274,12 +283,12 @@ public class SiddhiAppContext {
         this.siddhiAppString = siddhiAppString;
     }
 
-    public void setSiddhiApp(SiddhiApp siddhiApp) {
-        this.siddhiApp = siddhiApp;
-    }
-
     public SiddhiApp getSiddhiApp() {
         return siddhiApp;
+    }
+
+    public void setSiddhiApp(SiddhiApp siddhiApp) {
+        this.siddhiApp = siddhiApp;
     }
 
     public List<String> getIncludedMetrics() {

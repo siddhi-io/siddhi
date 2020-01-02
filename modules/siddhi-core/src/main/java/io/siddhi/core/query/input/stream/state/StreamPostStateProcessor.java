@@ -23,6 +23,8 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.processor.Processor;
 
+import java.util.List;
+
 /**
  * Created on 12/17/14.
  */
@@ -48,6 +50,15 @@ public class StreamPostStateProcessor implements PostStateProcessor {
             process(stateEvent, complexEventChunk);
         }
         complexEventChunk.clear();
+    }
+
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        for (ComplexEventChunk streamEventChunk : complexEventChunks) {
+            complexEventChunk.addAll(streamEventChunk);
+        }
+        process(complexEventChunk);
     }
 
     protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {

@@ -85,6 +85,10 @@ public class TestAsyncInMemory extends InMemorySink {
         siddhiAppContext.getExecutorService().execute(new Publisher(payload, dynamicOptions, state, this));
     }
 
+    private void send(Object payload, DynamicOptions dynamicOptions, State state)
+            throws Throwable {
+        super.publish(payload, dynamicOptions, state);
+    }
 
     class Publisher implements Runnable {
 
@@ -117,10 +121,5 @@ public class TestAsyncInMemory extends InMemorySink {
                 }
             }
         }
-    }
-
-    private void send(Object payload, DynamicOptions dynamicOptions, State state)
-            throws Throwable {
-        super.publish(payload, dynamicOptions, state);
     }
 }

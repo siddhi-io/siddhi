@@ -337,7 +337,7 @@ public class ExternalTimeBatchWindowProcessor
                                     List<ComplexEventChunk<StreamEvent>> complexEventChunks,
                                     long currentTime, boolean preserveCurrentEvents, WindowState state) {
 
-        ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>(true);
+        ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<>();
         if (outputExpectsExpiredEvents) {
             if (state.expiredEventChunk.getFirst() != null) {
                 // mark the timestamp for the expiredType event
@@ -385,8 +385,8 @@ public class ExternalTimeBatchWindowProcessor
     private void appendToOutputChunk(StreamEventCloner streamEventCloner,
                                      List<ComplexEventChunk<StreamEvent>> complexEventChunks,
                                      long currentTime, boolean preserveCurrentEvents, WindowState state) {
-        ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>(true);
-        ComplexEventChunk<StreamEvent> sentEventChunk = new ComplexEventChunk<StreamEvent>(true);
+        ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<>();
+        ComplexEventChunk<StreamEvent> sentEventChunk = new ComplexEventChunk<>();
         if (state.currentEventChunk.getFirst() != null) {
             if (state.expiredEventChunk != null && state.expiredEventChunk.getFirst() != null) {
                 // mark the timestamp for the expiredType event
@@ -494,7 +494,7 @@ public class ExternalTimeBatchWindowProcessor
 
     class WindowState extends State {
 
-        private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<>();
         private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
         private StreamEvent resetEvent = null;
         private long endTime = -1;
@@ -507,11 +507,11 @@ public class ExternalTimeBatchWindowProcessor
         public WindowState(boolean outputExpectsExpiredEvents, long schedulerTimeout, long startTime) {
             this.startTime = startTime;
             if (outputExpectsExpiredEvents || findToBeExecuted) {
-                this.expiredEventChunk = new ComplexEventChunk<>(false);
+                this.expiredEventChunk = new ComplexEventChunk<>();
             }
             if (schedulerTimeout > 0) {
                 if (expiredEventChunk == null) {
-                    this.expiredEventChunk = new ComplexEventChunk<>(false);
+                    this.expiredEventChunk = new ComplexEventChunk<>();
                 }
             }
         }
@@ -551,10 +551,10 @@ public class ExternalTimeBatchWindowProcessor
                 expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
             } else {
                 if (outputExpectsExpiredEvents || findToBeExecuted) {
-                    expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                    expiredEventChunk = new ComplexEventChunk<>();
                 }
                 if (schedulerTimeout > 0) {
-                    expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                    expiredEventChunk = new ComplexEventChunk<>();
                 }
             }
             resetEvent = (StreamEvent) state.get("ResetEvent");

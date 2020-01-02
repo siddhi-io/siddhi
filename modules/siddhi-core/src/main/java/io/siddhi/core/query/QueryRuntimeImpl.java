@@ -75,6 +75,10 @@ public class QueryRuntimeImpl implements QueryRuntime, MemoryCalculable, Externa
         outputRateLimiter.addQueryCallback(callback);
     }
 
+    public void removeCallback(QueryCallback callback) {
+        outputRateLimiter.removeQueryCallback(callback);
+    }
+
     public OutputRateLimiter getOutputRateManager() {
         return outputRateLimiter;
     }
@@ -91,12 +95,12 @@ public class QueryRuntimeImpl implements QueryRuntime, MemoryCalculable, Externa
         return toLocalStream;
     }
 
-    public boolean isStateful() {
-        return siddhiQueryContext.isStateful();
-    }
-
     public void setToLocalStream(boolean toLocalStream) {
         this.toLocalStream = toLocalStream;
+    }
+
+    public boolean isStateful() {
+        return siddhiQueryContext.isStateful();
     }
 
     public boolean isFromLocalStream() {

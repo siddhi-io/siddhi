@@ -338,6 +338,12 @@ public class StreamJunction implements EventBufferHolder {
         }
     }
 
+    public void unsubscribe(StreamCallback streamCallback) {
+        List<Receiver> newReceivers = new LinkedList<>(receivers);
+        newReceivers.remove(streamCallback);
+        receivers = newReceivers;
+    }
+
     public String getStreamId() {
         return streamDefinition.getId();
     }
@@ -357,14 +363,6 @@ public class StreamJunction implements EventBufferHolder {
     @Override
     public boolean containsBufferedEvents() {
         return (!receivers.isEmpty() && async);
-    }
-
-    /**
-     * Different Type of On Error Actions
-     */
-    public enum OnErrorAction {
-        LOG,
-        STREAM
     }
 
     public void handleError(Object event, Exception e) {
@@ -429,6 +427,14 @@ public class StreamJunction implements EventBufferHolder {
             default:
                 break;
         }
+    }
+
+    /**
+     * Different Type of On Error Actions
+     */
+    public enum OnErrorAction {
+        LOG,
+        STREAM
     }
 
     /**

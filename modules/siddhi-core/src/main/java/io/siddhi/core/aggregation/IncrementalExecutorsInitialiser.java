@@ -101,8 +101,8 @@ public class IncrementalExecutorsInitialiser {
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
         OnDemandQuery onDemandQuery = getOnDemandQuery(tableForMaxDuration, true, endOFLatestEventTimestamp);
         onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
-        OnDemandQueryRuntime onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext,
-                tableMap, windowMap, aggregationMap);
+        OnDemandQueryRuntime onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
+                siddhiAppContext, tableMap, windowMap, aggregationMap);
 
         // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
         events = onDemandQueryRuntime.execute();
@@ -124,7 +124,8 @@ public class IncrementalExecutorsInitialiser {
 
             onDemandQuery = getOnDemandQuery(recreateFromTable, false, endOFLatestEventTimestamp);
             onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
-            onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext, tableMap, windowMap,
+            onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null, siddhiAppContext,
+                    tableMap, windowMap,
                     aggregationMap);
             events = onDemandQueryRuntime.execute();
 
@@ -133,7 +134,7 @@ public class IncrementalExecutorsInitialiser {
                 endOFLatestEventTimestamp = IncrementalTimeConverterUtil
                         .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), null);
 
-                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
                 for (Event event : events) {
                     StreamEvent streamEvent = streamEventFactory.newInstance();
                     streamEvent.setOutputData(event.getData());

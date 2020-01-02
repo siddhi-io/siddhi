@@ -116,6 +116,10 @@ public interface SiddhiAppRuntime {
 
     void addCallback(String queryName, QueryCallback callback);
 
+    void removeCallback(StreamCallback streamCallback);
+
+    void removeCallback(QueryCallback streamCallback);
+
     Event[] query(String onDemandQuery);
 
     @Deprecated

@@ -152,7 +152,7 @@ public class SingleInputStreamParser {
             }
         }
 
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         return new SingleStreamRuntime(processStreamReceiver, processor, processingMode, metaComplexEvent);
 
     }
@@ -171,6 +171,10 @@ public class SingleInputStreamParser {
             metaStreamEvent = ((MetaStateEvent) metaEvent).getMetaStreamEvent(stateIndex);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaEvent;
+        }
+
+        if (streamHandler instanceof Window) {
+            metaStreamEvent.initializeOnAfterWindowData();
         }
 
         ExpressionExecutor[] attributeExpressionExecutors;
@@ -229,7 +233,8 @@ public class SingleInputStreamParser {
                     return abstractStreamProcessor;
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
-                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext());
+                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext(),
+                                siddhiQueryContext);
                         throw e;
                     }
                 }

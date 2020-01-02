@@ -43,7 +43,7 @@ public class EventChunkOperator implements Operator {
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         ComplexEventChunk<StreamEvent> storeEventChunk = (ComplexEventChunk<StreamEvent>) storeEvents;
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<>();
 
         storeEventChunk.reset();
         while (storeEventChunk.hasNext()) {
@@ -130,8 +130,8 @@ public class EventChunkOperator implements Operator {
                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
         ComplexEventChunk<StreamEvent> storeEventChunk = (ComplexEventChunk<StreamEvent>) storeEvents;
         updatingOrAddingEventChunk.reset();
-        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<StateEvent>
-                (updatingOrAddingEventChunk.isBatch());
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>
+                ();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent overwritingOrAddingEvent = updatingOrAddingEventChunk.next();
             try {

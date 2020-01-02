@@ -45,7 +45,7 @@ public class CollectionOperator implements Operator {
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
 
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<>();
         for (StreamEvent storeEvent : (Collection<StreamEvent>) storeEvents) {
             matchingEvent.setEvent(storeEventPosition, storeEvent);
             if ((Boolean) expressionExecutor.execute(matchingEvent)) {
@@ -125,8 +125,8 @@ public class CollectionOperator implements Operator {
                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
 
         updatingOrAddingEventChunk.reset();
-        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<StateEvent>
-                (updatingOrAddingEventChunk.isBatch());
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>
+                ();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent updateOrAddingEvent = updatingOrAddingEventChunk.next();
             try {

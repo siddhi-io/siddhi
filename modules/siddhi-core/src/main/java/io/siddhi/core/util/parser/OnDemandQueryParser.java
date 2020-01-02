@@ -20,6 +20,7 @@ package io.siddhi.core.util.parser;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiOnDemandQueryContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEventFactory;
@@ -97,7 +98,8 @@ public class OnDemandQueryParser {
      */
     private static final Logger log = Logger.getLogger(OnDemandQueryParser.class);
 
-    public static OnDemandQueryRuntime parse(OnDemandQuery onDemandQuery, SiddhiAppContext siddhiAppContext,
+    public static OnDemandQueryRuntime parse(OnDemandQuery onDemandQuery, String onDemandQueryString,
+                                             SiddhiAppContext siddhiAppContext,
                                              Map<String, Table> tableMap, Map<String, Window> windowMap,
                                              Map<String, AggregationRuntime> aggregationMap) {
 
@@ -119,7 +121,7 @@ public class OnDemandQueryParser {
                 Within within = null;
                 Expression per = null;
                 queryName = "store_select_query_" + onDemandQuery.getInputStore().getStoreId();
-                siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext = new SiddhiOnDemandQueryContext(siddhiAppContext, queryName, onDemandQueryString);
                 InputStore inputStore = onDemandQuery.getInputStore();
                 try {
                     onCondition = Expression.value(true);
@@ -179,7 +181,7 @@ public class OnDemandQueryParser {
             case INSERT:
                 InsertIntoStream inserIntoStreamt = (InsertIntoStream) onDemandQuery.getOutputStream();
                 queryName = "store_insert_query_" + inserIntoStreamt.getId();
-                siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext = new SiddhiOnDemandQueryContext(siddhiAppContext, queryName, onDemandQueryString);
                 onCondition = Expression.value(true);
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -187,7 +189,7 @@ public class OnDemandQueryParser {
             case DELETE:
                 DeleteStream deleteStream = (DeleteStream) onDemandQuery.getOutputStream();
                 queryName = "store_delete_query_" + deleteStream.getId();
-                siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext = new SiddhiOnDemandQueryContext(siddhiAppContext, queryName, onDemandQueryString);
                 onCondition = deleteStream.getOnDeleteExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -195,7 +197,7 @@ public class OnDemandQueryParser {
             case UPDATE:
                 UpdateStream outputStream = (UpdateStream) onDemandQuery.getOutputStream();
                 queryName = "store_update_query_" + outputStream.getId();
-                siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext = new SiddhiOnDemandQueryContext(siddhiAppContext, queryName, onDemandQueryString);
                 onCondition = outputStream.getOnUpdateExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -203,7 +205,7 @@ public class OnDemandQueryParser {
             case UPDATE_OR_INSERT:
                 UpdateOrInsertStream onDemandQueryOutputStream = (UpdateOrInsertStream) onDemandQuery.getOutputStream();
                 queryName = "store_update_or_insert_query_" + onDemandQueryOutputStream.getId();
-                siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+                siddhiQueryContext = new SiddhiOnDemandQueryContext(siddhiAppContext, queryName, onDemandQueryString);
                 onCondition = onDemandQueryOutputStream.getOnUpdateExpression();
 
                 return getOnDemandQueryRuntime(onDemandQuery, tableMap, windowMap, metaPosition,
@@ -214,7 +216,8 @@ public class OnDemandQueryParser {
     }
 
     private static OnDemandQueryRuntime getOnDemandQueryRuntime(OnDemandQuery onDemandQuery,
-                                                                Map<String, Table> tableMap, Map<String, Window> windowMap,
+                                                                Map<String, Table> tableMap,
+                                                                Map<String, Window> windowMap,
                                                                 int metaPosition, LockWrapper lockWrapper,
                                                                 MetaStreamEvent metaStreamEvent,
                                                                 OutputStream outputStream, Expression onCondition,
@@ -257,7 +260,8 @@ public class OnDemandQueryParser {
         return findOnDemandQueryRuntime;
     }
 
-    private static OnDemandQueryRuntime constructOnDemandQueryRuntime(AggregationRuntime aggregation, OnDemandQuery onDemandQuery,
+    private static OnDemandQueryRuntime constructOnDemandQueryRuntime(AggregationRuntime aggregation,
+                                                                      OnDemandQuery onDemandQuery,
                                                                       Map<String, Table> tableMap,
                                                                       Map<String, Window> windowMap,
                                                                       Within within, Expression per,
@@ -568,7 +572,7 @@ public class OnDemandQueryParser {
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {
         metaStreamEvent.addInputDefinition(inputDefinition);
-        metaStreamEvent.initializeAfterWindowData();
+        metaStreamEvent.initializeOnAfterWindowData();
         inputDefinition.getAttributeList().forEach(metaStreamEvent::addData);
     }
 

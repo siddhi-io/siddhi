@@ -21,6 +21,7 @@ package io.siddhi.core.stream.input.source;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.util.AttributeConverter;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
@@ -36,7 +37,7 @@ public class InputEventHandler {
 
     private static final Logger LOG = Logger.getLogger(InputEventHandler.class);
 
-    private final ThreadLocal<String[]> trpProperties;
+    private final ThreadLocal<Object[]> trpProperties;
     private final TimestampGenerator timestampGenerator;
     private ThreadLocal<String[]> trpSyncProperties;
     private String sourceType;
@@ -47,7 +48,7 @@ public class InputEventHandler {
     private InputEventHandlerCallback inputEventHandlerCallback;
 
     InputEventHandler(InputHandler inputHandler, List<AttributeMapping> transportMapping,
-                      ThreadLocal<String[]> trpProperties, ThreadLocal<String[]> trpSyncProperties, String sourceType,
+                      ThreadLocal<Object[]> trpProperties, ThreadLocal<String[]> trpSyncProperties, String sourceType,
                       LatencyTracker latencyTracker, SiddhiAppContext siddhiAppContext,
                       InputEventHandlerCallback inputEventHandlerCallback) {
         this.inputHandler = inputHandler;
@@ -66,7 +67,7 @@ public class InputEventHandler {
             if (latencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
-            String[] transportProperties = trpProperties.get();
+            Object[] transportProperties = trpProperties.get();
             trpProperties.remove();
             String[] transportSyncProperties = trpSyncProperties.get();
             trpSyncProperties.remove();
@@ -76,7 +77,8 @@ public class InputEventHandler {
             }
             for (int i = 0; i < transportMapping.size(); i++) {
                 AttributeMapping attributeMapping = transportMapping.get(i);
-                event.getData()[attributeMapping.getPosition()] = transportProperties[i];
+                event.getData()[attributeMapping.getPosition()] = AttributeConverter.getPropertyValue(
+                        transportProperties[i], attributeMapping.getType());
             }
             inputEventHandlerCallback.sendEvent(event, transportSyncProperties);
         } catch (RuntimeException e) {
@@ -94,7 +96,7 @@ public class InputEventHandler {
             if (latencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
-            String[] transportProperties = trpProperties.get();
+            Object[] transportProperties = trpProperties.get();
             trpProperties.remove();
             String[] transportSyncProperties = trpSyncProperties.get();
             trpSyncProperties.remove();
@@ -105,7 +107,8 @@ public class InputEventHandler {
                 }
                 for (int i = 0; i < transportMapping.size(); i++) {
                     AttributeMapping attributeMapping = transportMapping.get(i);
-                    event.getData()[attributeMapping.getPosition()] = transportProperties[i];
+                    event.getData()[attributeMapping.getPosition()] = AttributeConverter.getPropertyValue(
+                            transportProperties[i], attributeMapping.getType());
                 }
             }
             inputEventHandlerCallback.sendEvents(events, transportSyncProperties);

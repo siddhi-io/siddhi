@@ -51,7 +51,7 @@ public class CacheTableFIFO extends CacheTable {
         Set<Object> keys = indexEventHolder.getAllPrimaryKeyValues();
         long minTimestamp = Long.MAX_VALUE;
         Object keyOfMinTimestamp = null;
-        for (Object key: keys) {
+        for (Object key : keys) {
             Object[] data = indexEventHolder.getEvent(key).getOutputData();
             long timestamp = (long) data[cachePolicyAttributePosition];
             if (timestamp < minTimestamp) {
@@ -84,7 +84,7 @@ public class CacheTableFIFO extends CacheTable {
                     }
                 }
             }
-            for (Object deleteKey: toDelete.values()) {
+            for (Object deleteKey : toDelete.values()) {
                 if (deleteKey != null) {
                     indexEventHolder.deleteEvent(deleteKey);
                 }
@@ -97,9 +97,9 @@ public class CacheTableFIFO extends CacheTable {
                                             boolean cacheExpiryEnabled) {
         Object[] outputDataForCache;
         Object[] outputData = event.getOutputData();
-            outputDataForCache = new Object[numColumns];
-            outputDataForCache[cachePolicyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
-        System.arraycopy(outputData, 0 , outputDataForCache, 0, outputData.length);
+        outputDataForCache = new Object[numColumns];
+        outputDataForCache[cachePolicyAttributePosition] = siddhiAppContext.getTimestampGenerator().currentTime();
+        System.arraycopy(outputData, 0, outputDataForCache, 0, outputData.length);
         StreamEvent eventForCache = new StreamEvent(0, 0, outputDataForCache.length);
         eventForCache.setOutputData(outputDataForCache);
         return eventForCache;

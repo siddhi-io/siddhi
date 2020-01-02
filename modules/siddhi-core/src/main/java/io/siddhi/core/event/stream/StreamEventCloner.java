@@ -47,7 +47,9 @@ public class StreamEventCloner {
      */
     public StreamEvent copyStreamEvent(StreamEvent streamEvent) {
         StreamEvent newEvent = eventFactory.newInstance();
-        if (beforeWindowDataSize > 0) {
+        if (streamEvent.getBeforeWindowData() == null) {
+            newEvent.setBeforeWindowData(null);
+        } else if (beforeWindowDataSize > 0) {
             System.arraycopy(streamEvent.getBeforeWindowData(), 0, newEvent.getBeforeWindowData(), 0,
                     beforeWindowDataSize);
         }

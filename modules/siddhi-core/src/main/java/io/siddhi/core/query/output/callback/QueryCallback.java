@@ -40,9 +40,18 @@ public abstract class QueryCallback {
 
     private SiddhiAppContext siddhiAppContext;
     private Query query;
+    private String queryName;
 
     public void setQuery(Query query) {
         this.query = query;
+    }
+
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
+    }
+
+    public String getQueryName() {
+        return queryName;
     }
 
     public void setContext(SiddhiAppContext siddhiAppContext) {

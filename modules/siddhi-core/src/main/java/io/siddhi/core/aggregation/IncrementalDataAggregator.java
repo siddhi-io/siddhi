@@ -52,12 +52,10 @@ public class IncrementalDataAggregator {
 
     private final long oldestEventTimestamp;
     private final List<ExpressionExecutor> baseExecutorsForFind;
-    private ExpressionExecutor shouldUpdateTimestamp;
-
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
-
     private final StreamEventFactory streamEventFactory;
+    private ExpressionExecutor shouldUpdateTimestamp;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration durationToAggregate, long oldestEventTimestamp,
@@ -114,7 +112,7 @@ public class IncrementalDataAggregator {
                             if (shouldUpdate) {
                                 state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
                             } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                                    state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
                             }
                         }
                     } finally {
@@ -139,8 +137,8 @@ public class IncrementalDataAggregator {
     }
 
 
-    private ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
-        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
+    private synchronized ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
+        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>();
         Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
         try {
             for (State aState : valueStoreMap.values()) {
@@ -169,8 +167,8 @@ public class IncrementalDataAggregator {
     }
 
     class ValueState extends State {
-        private Object[] values;
         public long lastTimestamp;
+        private Object[] values;
 
         public ValueState() {
             this.lastTimestamp = 0;

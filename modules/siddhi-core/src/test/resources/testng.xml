@@ -33,6 +33,7 @@
 
             <class name="io.siddhi.core.managment.AsyncTestCase"/>
             <class name="io.siddhi.core.managment.EventTestCase"/>
+            <class name="io.siddhi.core.managment.StartStopTestCase"/>
             <class name="io.siddhi.core.managment.QuerySyncTestCase"/>
             <class name="io.siddhi.core.managment.ValidateTestCase"/>
             <class name="io.siddhi.core.managment.PlaybackTestCase"/>
@@ -109,6 +110,8 @@
             <class name="io.siddhi.core.query.trigger.TriggerTestCase"/>
 
             <class name="io.siddhi.core.query.window.CronWindowTestCase"/>
+            <class name="io.siddhi.core.query.window.ExpressionWindowTestCase"/>
+            <class name="io.siddhi.core.query.window.ExpressionBatchWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExternalTimeBatchWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExternalTimeWindowTestCase"/>
             <class name="io.siddhi.core.query.window.FrequentWindowTestCase"/>
@@ -136,6 +139,7 @@
             <class name="io.siddhi.core.window.DelayWindowTestCase"/>
 
             <class name="io.siddhi.core.query.BooleanCompareTestCase"/>
+            <class name="io.siddhi.core.query.CallbackTestCase"/>
             <class name="io.siddhi.core.query.FilterTestCase1"/>
             <class name="io.siddhi.core.query.FilterTestCase2"/>
             <class name="io.siddhi.core.query.IsNullTestCase"/>

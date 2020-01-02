@@ -59,14 +59,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     private static final Logger LOG = Logger.getLogger(Table.class);
-
+    public Map<String, Table> tableMap;
     protected TableDefinition tableDefinition;
-
+    protected SiddhiAppContext siddhiAppContext;
     private AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
-    protected SiddhiAppContext siddhiAppContext;
     private RecordTableHandler recordTableHandler;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
@@ -80,7 +79,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private ThroughputTracker throughputTrackerDelete;
     private ThroughputTracker throughputTrackerUpdateOrInsert;
     private ThroughputTracker throughputTrackerContains;
-    public Map<String, Table> tableMap;
 
     public void initTable(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
                           StreamEventCloner storeEventCloner,

@@ -40,13 +40,11 @@ public class OverwriteTableIndexOperatorForCache extends IndexOperatorForCache {
                                                    Object storeEvents,
                                                    InMemoryCompiledUpdateSet compiledUpdateSet,
                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
-
         updatingOrAddingEventChunk.reset();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent overwritingOrAddingEvent = updatingOrAddingEventChunk.next();
             ((IndexedEventHolder) storeEvents).overwrite(addingStreamEventExtractor.getAddingStreamEvent
                     (overwritingOrAddingEvent));
-
         }
         return null;
     }

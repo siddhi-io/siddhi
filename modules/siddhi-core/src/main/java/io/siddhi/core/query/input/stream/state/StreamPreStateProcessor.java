@@ -109,6 +109,12 @@ public class StreamPreStateProcessor implements PreStateProcessor {
                 "processAndReturn method is used for handling event chunks.");
     }
 
+    @Override
+    public void process(List<ComplexEventChunk> complexEventChunks) {
+        throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. " +
+                "processAndReturn method is used for handling event chunks.");
+    }
+
     protected boolean isExpired(StateEvent pendingStateEvent, long currentTimestamp) {
         if (withinTime != SiddhiConstants.UNKNOWN_STATE) {
             for (int startStateId : startStateIds) {
@@ -356,7 +362,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
 
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
-        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
+        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>();
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
         StreamPreState state = stateHolder.getState();
@@ -427,7 +433,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     }
 
     class StreamPreState extends State {
-        private ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>(false);
+        private ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>();
         private LinkedList<StateEvent> pendingStateEventList = new LinkedList<StateEvent>();
         private LinkedList<StateEvent> newAndEveryStateEventList = new LinkedList<StateEvent>();
         private volatile boolean stateChanged = false;

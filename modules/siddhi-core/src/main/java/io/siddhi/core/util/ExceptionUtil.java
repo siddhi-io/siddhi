@@ -19,6 +19,8 @@
 package io.siddhi.core.util;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiOnDemandQueryContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.query.api.SiddhiElement;
 import io.siddhi.query.api.exception.SiddhiAppContextException;
@@ -30,17 +32,31 @@ public class ExceptionUtil {
 
     public static void populateQueryContext(Throwable t, SiddhiElement siddhiElement,
                                             SiddhiAppContext siddhiAppContext) {
+        populateQueryContext(t, siddhiElement, siddhiAppContext, null);
+    }
+
+    public static void populateQueryContext(Throwable t, SiddhiElement siddhiElement,
+                                            SiddhiAppContext siddhiAppContext,
+                                            SiddhiQueryContext siddhiQueryContext) {
+        String siddhiAppString = null;
+        if (siddhiQueryContext instanceof SiddhiOnDemandQueryContext &&
+                ((SiddhiOnDemandQueryContext) siddhiQueryContext).getOnDemandQueryString() != null) {
+            siddhiAppString = ((SiddhiOnDemandQueryContext) siddhiQueryContext).getOnDemandQueryString();
+        } else if (siddhiAppContext != null) {
+            siddhiAppString = siddhiAppContext.getSiddhiAppString();
+        }
+
         if (siddhiElement != null) {
             if (siddhiAppContext != null) {
                 if (t instanceof SiddhiAppContextException) {
                     ((SiddhiAppContextException) t).setQueryContextIndexIfAbsent(
                             siddhiElement.getQueryContextStartIndex(),
                             siddhiElement.getQueryContextEndIndex(), siddhiAppContext.getName(),
-                            siddhiAppContext.getSiddhiAppString());
+                            siddhiAppString);
                 } else {
                     throw new SiddhiAppCreationException(t.getMessage(), t, siddhiElement.getQueryContextStartIndex(),
                             siddhiElement.getQueryContextEndIndex(), siddhiAppContext.getName(),
-                            siddhiAppContext.getSiddhiAppString());
+                            siddhiAppString);
                 }
             } else {
                 if (t instanceof SiddhiAppContextException) {
@@ -57,10 +73,10 @@ public class ExceptionUtil {
                 if (t instanceof SiddhiAppContextException) {
                     ((SiddhiAppContextException) t).setQueryContextIndexIfAbsent(
                             null, null, siddhiAppContext.getName(),
-                            siddhiAppContext.getSiddhiAppString());
+                            siddhiAppString);
                 } else {
                     throw new SiddhiAppCreationException(t.getMessage(), t, null, null, siddhiAppContext.getName(),
-                            siddhiAppContext.getSiddhiAppString());
+                            siddhiAppString);
                 }
             } else {
                 if (!(t instanceof SiddhiAppContextException)) {

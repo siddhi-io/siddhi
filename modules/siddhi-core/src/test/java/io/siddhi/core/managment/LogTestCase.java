@@ -88,7 +88,9 @@ public class LogTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+        inputHandler.send(new Event[]{
+                new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100}),
+                new Event(System.currentTimeMillis(), new Object[]{"GOOG", 70.6f, 100})});
         Thread.sleep(100);
 
         siddhiAppRuntime.shutdown();

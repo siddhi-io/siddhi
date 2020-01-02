@@ -101,7 +101,8 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Que
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
         return ((AbstractQueryableRecordTable) this.table).query(matchingEvent, compiledCondition, compiledSelection,
-                outputAttributes);    }
+                outputAttributes);
+    }
 
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,

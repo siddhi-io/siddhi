@@ -269,6 +269,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     }
 
     public void addCallback(String queryName, QueryCallback callback) {
+        callback.setQueryName(queryName);
         callback.setContext(siddhiAppContext);
         QueryRuntime queryRuntime = queryProcessorMap.get(queryName);
         if (queryRuntime == null) {
@@ -278,17 +279,51 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         ((QueryRuntimeImpl) queryRuntime).addCallback(callback);
     }
 
+    public void removeCallback(StreamCallback streamCallback) {
+        if (streamCallback.getStreamId() == null) {
+            throw new SiddhiAppRuntimeException("Cannot find streamID in the streamCallback");
+        }
+        String streamId = streamCallback.getStreamId();
+        StreamJunction streamJunction = streamJunctionMap.get(streamId);
+        if (streamJunction != null) {
+            streamJunction.unsubscribe(streamCallback);
+        }
+    }
+
+    public void removeCallback(QueryCallback callback) {
+        if (callback.getQueryName() == null) {
+            throw new SiddhiAppRuntimeException("Cannot find QueryName in the queryCallback");
+        }
+        String queryName = callback.getQueryName();
+        QueryRuntime queryRuntime = queryProcessorMap.get(queryName);
+        if (queryRuntime != null) {
+            ((QueryRuntimeImpl) queryRuntime).removeCallback(callback);
+        }
+    }
+
     public Event[] query(String onDemandQuery) {
-        return query(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
+        if (this.running) {
+            return query(SiddhiCompiler.parseOnDemandQuery(onDemandQuery), onDemandQuery);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + onDemandQuery + "' cannot be executed.");
     }
 
     public Event[] query(OnDemandQuery onDemandQuery) {
-        return query(onDemandQuery, null);
+        if (this.running) {
+            return query(onDemandQuery, null);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + onDemandQuery.toString() + "' cannot be executed.");
     }
 
     @Deprecated
     public Event[] query(StoreQuery storeQuery) {
-        return query(storeQuery.getOnDemandQuery(), null);
+        if (this.running) {
+            return query(storeQuery.getOnDemandQuery(), null);
+        }
+        throw new OnDemandQueryCreationException("The siddhi app, '" + this.getName() + "' is currently shut down, " +
+                "the on demand query '" + storeQuery.getOnDemandQuery().toString() + "' cannot be executed.");
     }
 
     private Event[] query(OnDemandQuery onDemandQuery, String onDemandQueryString) {
@@ -301,8 +336,8 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
             synchronized (this) {
                 onDemandQueryRuntime = onDemandQueryRuntimeMap.remove(onDemandQuery);
                 if (onDemandQueryRuntime == null) {
-                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext,
-                            tableMap, windowMap, aggregationMap);
+                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, onDemandQueryString,
+                            siddhiAppContext, tableMap, windowMap, aggregationMap);
                 } else {
                     onDemandQueryRuntime.reset();
                 }
@@ -360,8 +395,8 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
         try {
             OnDemandQueryRuntime onDemandQueryRuntime = onDemandQueryRuntimeMap.get(onDemandQuery);
             if (onDemandQueryRuntime == null) {
-                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, siddhiAppContext, tableMap, windowMap,
-                        aggregationMap);
+                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, onDemandQueryString,
+                        siddhiAppContext, tableMap, windowMap, aggregationMap);
                 onDemandQueryRuntimeMap.put(onDemandQuery, onDemandQueryRuntime);
             }
             return onDemandQueryRuntime.getOnDemandQueryOutputAttributes();
@@ -450,6 +485,12 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         aggregationRuntime.startPurging();
                     }
                 }
+                for (Trigger trigger :
+                        siddhiAppContext.getTriggerHolders()) {
+                    trigger.start();
+                }
+                inputManager.connect();
+
                 runningWithoutSources = true;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +

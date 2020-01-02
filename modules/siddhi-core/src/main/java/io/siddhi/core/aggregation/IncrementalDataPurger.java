@@ -72,7 +72,7 @@ public class IncrementalDataPurger implements Runnable {
     private ScheduledFuture scheduledPurgingTaskStatus;
     private String purgingTimestampField;
     private Map<TimePeriod.Duration, Long> minimumDurationMap = new EnumMap<>(TimePeriod.Duration.class);
-    private ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>(true);
+    private ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>();
     private List<VariableExpressionExecutor> variableExpressionExecutorList = new ArrayList<>();
     private Attribute aggregatedTimestampAttribute;
     private Map<TimePeriod.Duration, CompiledCondition> compiledConditionsHolder =

@@ -29,7 +29,7 @@ public interface ConfigManager {
      * Generates Config reader for extensions with specific namespace and name
      *
      * @param namespace Namespace of the extension
-     * @param name Name of the extension
+     * @param name      Name of the extension
      * @return ConfigReader
      */
     ConfigReader generateConfigReader(String namespace, String name);

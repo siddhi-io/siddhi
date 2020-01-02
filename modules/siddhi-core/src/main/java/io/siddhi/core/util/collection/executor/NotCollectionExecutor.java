@@ -51,7 +51,7 @@ public class NotCollectionExecutor implements CollectionExecutor {
         if (notStreamEvents == null) {
             return exhaustiveCollectionExecutor.find(matchingEvent, indexedEventHolder, storeEventCloner);
         } else if (notStreamEvents.size() == 0) {
-            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
             Collection<StreamEvent> storeEventSet = indexedEventHolder.getAllEvents();
 
             for (StreamEvent storeEvent : storeEventSet) {
@@ -64,7 +64,7 @@ public class NotCollectionExecutor implements CollectionExecutor {
             return returnEventChunk.getFirst();
         } else {
             Collection<StreamEvent> allEvents = indexedEventHolder.getAllEvents();
-            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
             for (StreamEvent aEvent : allEvents) {
                 if (!notStreamEvents.contains(aEvent)) {
                     if (storeEventCloner != null) {

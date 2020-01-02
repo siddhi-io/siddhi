@@ -38,6 +38,7 @@ public class InputManager {
     private Map<String, InputHandler> inputHandlerMap = new LinkedHashMap<String, InputHandler>();
     private Map<String, StreamJunction> streamJunctionMap;
     private InputDistributor inputDistributor;
+    private boolean isConnected = false;
 
     public InputManager(SiddhiAppContext siddhiAppContext,
                         ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
@@ -57,10 +58,18 @@ public class InputManager {
                     inputHandler = constructInputHandler(streamId);
                 }
                 return inputHandler;
+
             }
         } else {
             return inputHandler;
         }
+    }
+
+    public synchronized void connect() {
+        for (InputHandler inputHandler : inputHandlerMap.values()) {
+            inputHandler.connect();
+        }
+        this.isConnected = true;
     }
 
     public synchronized void disconnect() {
@@ -68,6 +77,7 @@ public class InputManager {
             inputHandler.disconnect();
         }
         inputHandlerMap.clear();
+        this.isConnected = false;
     }
 
     public synchronized InputHandler constructInputHandler(String streamId) {

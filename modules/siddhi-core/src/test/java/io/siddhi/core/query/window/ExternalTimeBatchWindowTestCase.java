@@ -1542,6 +1542,7 @@ public class ExternalTimeBatchWindowTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             int count = 0;
+
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
@@ -1600,6 +1601,7 @@ public class ExternalTimeBatchWindowTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             int count = 0;
+
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
 

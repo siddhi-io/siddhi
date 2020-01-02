@@ -81,7 +81,7 @@ public class IndexOperator implements Operator {
 
             StreamEvent streamEvents = collectionExecutor.find(updatingEvent, (IndexedEventHolder) storeEvents, null);
             if (streamEvents != null) {
-                ComplexEventChunk<StreamEvent> foundEventChunk = new ComplexEventChunk<>(false);
+                ComplexEventChunk<StreamEvent> foundEventChunk = new ComplexEventChunk<>();
                 foundEventChunk.add(streamEvents);
                 update((IndexedEventHolder) storeEvents, compiledUpdateSet, updatingEvent, foundEventChunk);
             }
@@ -93,13 +93,13 @@ public class IndexOperator implements Operator {
                                                    Object storeEvents,
                                                    InMemoryCompiledUpdateSet compiledUpdateSet,
                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
-        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>(updatingOrAddingEventChunk.isBatch());
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>();
         updatingOrAddingEventChunk.reset();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent overwritingOrAddingEvent = updatingOrAddingEventChunk.next();
             StreamEvent streamEvents = collectionExecutor.find(overwritingOrAddingEvent, (IndexedEventHolder)
                     storeEvents, null);
-            ComplexEventChunk<StreamEvent> foundEventChunk = new ComplexEventChunk<>(false);
+            ComplexEventChunk<StreamEvent> foundEventChunk = new ComplexEventChunk<>();
             foundEventChunk.add(streamEvents);
             if (foundEventChunk.getFirst() != null) {
                 //for cases when indexed attribute is also updated but that not changed
@@ -163,7 +163,7 @@ public class IndexOperator implements Operator {
 
             if (doDeleteUpdate) {
                 collectionExecutor.delete(overwritingOrAddingEvent, storeEvents);
-                ComplexEventChunk<StreamEvent> toUpdateEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                ComplexEventChunk<StreamEvent> toUpdateEventChunk = new ComplexEventChunk<>();
                 while (foundEventChunk.hasNext()) {
                     StreamEvent streamEvent = foundEventChunk.next();
                     foundEventChunk.remove();

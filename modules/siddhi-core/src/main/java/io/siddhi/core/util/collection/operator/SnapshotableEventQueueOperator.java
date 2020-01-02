@@ -52,7 +52,7 @@ public class SnapshotableEventQueueOperator implements Operator {
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         SnapshotableStreamEventQueue storeEventQueue = (SnapshotableStreamEventQueue) storeEvents;
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<>();
 
         storeEventQueue.reset();
         while (storeEventQueue.hasNext()) {
@@ -140,8 +140,7 @@ public class SnapshotableEventQueueOperator implements Operator {
                                                    AddingStreamEventExtractor addingStreamEventExtractor) {
         SnapshotableStreamEventQueue storeEventQueue = (SnapshotableStreamEventQueue) storeEvents;
         updatingOrAddingEventChunk.reset();
-        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<StateEvent>
-                (updatingOrAddingEventChunk.isBatch());
+        ComplexEventChunk<StateEvent> failedEventChunk = new ComplexEventChunk<>();
         while (updatingOrAddingEventChunk.hasNext()) {
             StateEvent overwritingOrAddingEvent = updatingOrAddingEventChunk.next();
             try {

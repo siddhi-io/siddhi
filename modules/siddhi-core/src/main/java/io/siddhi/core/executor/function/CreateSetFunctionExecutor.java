@@ -89,7 +89,7 @@ public class CreateSetFunctionExecutor extends FunctionExecutor {
     /**
      * return set object, containing only one element: data.
      *
-     * @param data array of Double values
+     * @param data  array of Double values
      * @param state
      * @return the set object
      */

@@ -33,6 +33,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import org.apache.log4j.Logger;
 
+import java.util.List;
+
 /**
  * Parent implementation to run the {@link Scheduler} to handle periodic snapshot rate
  * limiting.
@@ -70,8 +72,14 @@ public abstract class SnapshotOutputRateLimiter<S extends State> implements Sche
         this.receiveStreamEvent = false;
     }
 
-    protected void sendToCallBacks(ComplexEventChunk complexEventChunk) {
-        wrappedSnapshotOutputRateLimiter.passToCallBacks(complexEventChunk);
+    protected void sendToCallBacks(List<ComplexEventChunk> outputEventChunks) {
+        if (!outputEventChunks.isEmpty()) {
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
+            for (ComplexEventChunk eventChunk : outputEventChunks) {
+                outputEventChunk.addAll(eventChunk);
+            }
+            wrappedSnapshotOutputRateLimiter.passToCallBacks(outputEventChunk);
+        }
     }
 
     /**

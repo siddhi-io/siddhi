@@ -42,6 +42,7 @@ public class CacheLFUTestCase {
     private int inEventCount;
     private boolean eventArrived;
     private int removeEventCount;
+
     @BeforeMethod
     public void init() {
         inEventCount = 0;

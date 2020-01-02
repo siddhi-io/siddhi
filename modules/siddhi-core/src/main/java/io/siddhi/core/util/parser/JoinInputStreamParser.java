@@ -36,8 +36,8 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.AggregateWindowProcessor;
+import io.siddhi.core.query.processor.stream.window.EmptyWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
-import io.siddhi.core.query.processor.stream.window.LengthBatchWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
@@ -108,14 +108,8 @@ public class JoinInputStreamParser {
                         rightMetaStreamEvent, rightInputStreamId);
                 leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId,
                         siddhiQueryContext);
-                leftProcessStreamReceiver.setBatchProcessingAllowed(
-                        leftMetaStreamEvent.getEventType() == WINDOW);
-
                 rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId,
                         siddhiQueryContext);
-                rightProcessStreamReceiver.setBatchProcessingAllowed(
-                        rightMetaStreamEvent.getEventType() == WINDOW);
-
                 if ((leftMetaStreamEvent.getEventType() == TABLE || leftMetaStreamEvent.getEventType() == AGGREGATE) &&
                         (rightMetaStreamEvent.getEventType() == TABLE ||
                                 rightMetaStreamEvent.getEventType() == AGGREGATE)) {
@@ -138,7 +132,6 @@ public class JoinInputStreamParser {
                     rightMetaStreamEvent.setEventType(WINDOW);
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
                             joinInputStream.getAllStreamIds().get(0), 1, new Object(), siddhiQueryContext);
-                    rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
@@ -316,7 +309,8 @@ public class JoinInputStreamParser {
             joinStreamRuntime.setQuerySelector(querySelector);
             return joinStreamRuntime;
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext());
+            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext(),
+                    siddhiQueryContext);
             throw t;
         }
     }
@@ -396,7 +390,6 @@ public class JoinInputStreamParser {
         }
     }
 
-
     private static FindableProcessor insertJoinProcessorsAndGetFindable(JoinProcessor preJoinProcessor,
                                                                         JoinProcessor postJoinProcessor,
                                                                         SingleStreamRuntime streamRuntime,
@@ -406,16 +399,21 @@ public class JoinInputStreamParser {
 
         Processor lastProcessor = streamRuntime.getProcessorChain();
         Processor prevLastProcessor = null;
+        boolean containFindable = false;
         if (lastProcessor != null) {
+            containFindable = lastProcessor instanceof FindableProcessor;
             while (lastProcessor.getNextProcessor() != null) {
                 prevLastProcessor = lastProcessor;
                 lastProcessor = lastProcessor.getNextProcessor();
+                if (!containFindable) {
+                    containFindable = lastProcessor instanceof FindableProcessor;
+                }
             }
         }
 
-        if (lastProcessor == null) {
+        if (!containFindable) {
             try {
-                WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
+                WindowProcessor windowProcessor = new EmptyWindowProcessor();
                 ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
                 ConfigReader configReader = siddhiQueryContext.getSiddhiContext()
@@ -424,7 +422,13 @@ public class JoinInputStreamParser {
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
                         expressionExecutors, configReader, outputExpectsExpiredEvents,
                         true, false, inputStream, siddhiQueryContext);
-                lastProcessor = windowProcessor;
+                if (lastProcessor != null) {
+                    prevLastProcessor = lastProcessor;
+                    prevLastProcessor.setNextProcessor(windowProcessor);
+                    lastProcessor = windowProcessor;
+                } else {
+                    lastProcessor = windowProcessor;
+                }
             } catch (Throwable t) {
                 throw new SiddhiAppCreationException(t);
             }

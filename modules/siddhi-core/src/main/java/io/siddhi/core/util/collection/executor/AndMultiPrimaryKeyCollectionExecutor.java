@@ -50,7 +50,7 @@ public class AndMultiPrimaryKeyCollectionExecutor implements CollectionExecutor 
     public StreamEvent find(StateEvent matchingEvent, IndexedEventHolder indexedEventHolder, StreamEventCloner
             storeEventCloner) {
 
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
         Collection<StreamEvent> storeEventSet = findEvents(matchingEvent, indexedEventHolder);
 
         if (storeEventSet == null) {

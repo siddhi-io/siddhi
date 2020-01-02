@@ -7,6 +7,7 @@ Siddhi Core Libraries
   [![GitHub Open Issues](https://img.shields.io/github/issues-raw/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
   [![Codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
+  [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2974/badge)](https://bestpractices.coreinfrastructure.org/projects/2974)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 <a target="_blank" href="https://siddhi.io/">Siddhi</a> is a cloud native **_Streaming_** and **_Complex Event Processing_** engine that understands **Streaming SQL queries** in order to capture events from diverse data sources, process them, detect complex conditions, and publish output to various endpoints in real time.
@@ -40,7 +41,7 @@ For more information on using Siddhi refer <a target="_blank" href="https://sidd
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.4">5.1.4</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.11">5.1.11</a>.
 
 ## Support and Contribution
 

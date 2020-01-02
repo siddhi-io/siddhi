@@ -177,7 +177,7 @@ public class DistinctCountAggregationTestCase {
 
             AssertJUnit.assertEquals("Number of remove events", 8, removeEventCount.get());
             AssertJUnit.assertTrue("Remove events matched",
-                                                        SiddhiTestHelper.isEventsMatch(removeEventsList, expected));
+                    SiddhiTestHelper.isEventsMatch(removeEventsList, expected));
 
         } finally {
             siddhiAppRuntime.shutdown();

@@ -48,7 +48,7 @@ public class FirstGroupByPerEventOutputRateLimiter
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>();
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -70,7 +70,8 @@ public class FirstGroupByPerEventOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-        if (outputEventChunk.getFirst() != null) {
+        outputEventChunk.reset();
+        if (outputEventChunk.hasNext()) {
             sendToCallBacks(outputEventChunk);
         }
     }

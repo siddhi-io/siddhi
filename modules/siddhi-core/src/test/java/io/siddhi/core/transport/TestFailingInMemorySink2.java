@@ -60,8 +60,8 @@ public class TestFailingInMemorySink2 extends InMemorySink {
 
     @Override
     protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                                ConfigReader sinkConfigReader, SiddhiAppContext
-                                siddhiAppContext) {
+                                       ConfigReader sinkConfigReader, SiddhiAppContext
+                                               siddhiAppContext) {
         optionHolder.validateAndGetOption(TOPIC_KEY);
         optionHolder.validateAndGetOption(TEST_KEY);
         super.init(outputStreamDefinition, optionHolder, sinkConfigReader, siddhiAppContext);
