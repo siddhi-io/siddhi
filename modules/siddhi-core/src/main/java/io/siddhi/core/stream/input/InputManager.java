@@ -51,7 +51,13 @@ public class InputManager {
     public InputHandler getInputHandler(String streamId) {
         InputHandler inputHandler = inputHandlerMap.get(streamId);
         if (inputHandler == null) {
-            return constructInputHandler(streamId);
+            synchronized (this) {
+                inputHandler = inputHandlerMap.get(streamId);
+                if (inputHandler == null) {
+                    inputHandler = constructInputHandler(streamId);
+                }
+                return inputHandler;
+            }
         } else {
             return inputHandler;
         }
