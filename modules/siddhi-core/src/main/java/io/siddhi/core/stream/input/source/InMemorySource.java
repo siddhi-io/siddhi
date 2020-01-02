@@ -65,9 +65,9 @@ public class InMemorySource extends Source {
     private static final String TOPIC_KEY = "topic";
     private SourceEventListener sourceEventListener;
     private InMemoryBroker.Subscriber subscriber;
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition condition = lock.newCondition();
-    private volatile boolean paused;
+    private ReentrantLock pauseLock = new ReentrantLock();
+    private Condition unpaused = pauseLock.newCondition();
+    private volatile boolean paused = false;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -84,15 +84,15 @@ public class InMemorySource extends Source {
             @Override
             public void onMessage(Object event) {
                 if (paused) {
-                    lock.lock();
+                    pauseLock.lock();
                     try {
                         while (paused) {
-                            condition.await();
+                            unpaused.await();
                         }
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     } finally {
-                        lock.unlock();
+                        pauseLock.unlock();
                     }
                 }
                 sourceEventListener.onEvent(event, null);
@@ -133,12 +133,12 @@ public class InMemorySource extends Source {
 
     @Override
     public void resume() {
-        lock.lock();
+        paused = false;
         try {
-            paused = false;
-            condition.signalAll();
+            pauseLock.lock();
+            unpaused.signalAll();
         } finally {
-            lock.unlock();
+            pauseLock.unlock();
         }
     }
 }

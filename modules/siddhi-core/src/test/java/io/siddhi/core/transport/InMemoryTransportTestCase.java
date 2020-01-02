@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryTransportTestCase {
@@ -1564,4 +1565,60 @@ public class InMemoryTransportTestCase {
 
     }
 
+    @Test(dependsOnMethods = {"inMemoryTestCase21"})
+    public void inMemoryTestCase22() throws InterruptedException {
+        log.info("Test inMemoryTestCase22");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String publisherApp = "" +
+                "define stream CheckStockStream (symbol1 string, totalPrice double); " +
+                "@sink(type='inMemory', topic='OutputStream', @map(type='passThrough')) " +
+                "define stream OutputStream (symbol1 string, totalPrice double); " +
+                "" +
+                "from CheckStockStream " +
+                "select * " +
+                "insert into OutputStream; ";
+
+        String consumerApp = "" +
+                "@source(type='inMemory', topic='OutputStream', @map(type='passThrough')) " +
+                "define stream InputStream (symbol1 string, totalPrice double); ";
+
+        SiddhiAppRuntime publisherRuntime = siddhiManager.createSiddhiAppRuntime(publisherApp);
+        SiddhiAppRuntime consumerRuntime = siddhiManager.createSiddhiAppRuntime(consumerApp);
+
+        consumerRuntime.addCallback("InputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                wso2Count.incrementAndGet();
+            }
+        });
+        InputHandler stockStream = publisherRuntime.getInputHandler("CheckStockStream");
+
+        publisherRuntime.start();
+        consumerRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 50.0f});
+        stockStream.send(new Object[]{"WSO2", 70.0f});
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                consumerRuntime.getSources().iterator().next().get(0).pause();
+            }
+        });
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    stockStream.send(new Object[]{"WSO2", 90f});
+                } catch (InterruptedException ignored) {
+                }
+            }
+        });
+        Thread.sleep(2000);
+        consumerRuntime.getSources().iterator().next().get(0).resume();
+        Thread.sleep(2000);
+        Assert.assertEquals(wso2Count.get(), 3);
+        siddhiManager.shutdown();
+    }
 }
