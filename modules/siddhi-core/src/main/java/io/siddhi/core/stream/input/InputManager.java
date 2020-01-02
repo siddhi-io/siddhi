@@ -52,11 +52,18 @@ public class InputManager {
     public InputHandler getInputHandler(String streamId) {
         InputHandler inputHandler = inputHandlerMap.get(streamId);
         if (inputHandler == null) {
-            InputHandler newInputHandler = constructInputHandler(streamId);
-            if (this.isConnected) {
-                newInputHandler.connect();
+            synchronized (this) {
+                inputHandler = inputHandlerMap.get(streamId);
+                if (inputHandler == null) {
+                    InputHandler newInputHandler = constructInputHandler(streamId);
+                    if (this.isConnected) {
+                        newInputHandler.connect();
+                    }
+                    return newInputHandler;
+                } else {
+                    return inputHandler;
+                }
             }
-            return newInputHandler;
         } else {
             return inputHandler;
         }
@@ -73,12 +80,11 @@ public class InputManager {
         for (InputHandler inputHandler : inputHandlerMap.values()) {
             inputHandler.disconnect();
         }
-        inputDistributor.clear();
         inputHandlerMap.clear();
         this.isConnected = false;
     }
 
-    public InputHandler constructInputHandler(String streamId) {
+    public synchronized InputHandler constructInputHandler(String streamId) {
         InputHandler inputHandler = new InputHandler(streamId, inputHandlerMap.size(),
                 inputEntryValve, siddhiAppContext);
         StreamJunction streamJunction = streamJunctionMap.get(streamId);
