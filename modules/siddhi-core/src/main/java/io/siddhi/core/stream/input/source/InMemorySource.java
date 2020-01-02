@@ -33,6 +33,9 @@ import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Implementation of {@link Source} to receive events through in-memory transport.
  */
@@ -62,6 +65,9 @@ public class InMemorySource extends Source {
     private static final String TOPIC_KEY = "topic";
     private SourceEventListener sourceEventListener;
     private InMemoryBroker.Subscriber subscriber;
+    private ReentrantLock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
+    private volatile boolean paused;
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -77,6 +83,18 @@ public class InMemorySource extends Source {
         this.subscriber = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object event) {
+                if (paused) {
+                    lock.lock();
+                    try {
+                        while (paused) {
+                            condition.await();
+                        }
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        lock.unlock();
+                    }
+                }
                 sourceEventListener.onEvent(event, null);
             }
 
@@ -110,12 +128,17 @@ public class InMemorySource extends Source {
 
     @Override
     public void pause() {
-        InMemoryBroker.unsubscribe(subscriber);
+        paused = true;
     }
 
     @Override
     public void resume() {
-        InMemoryBroker.subscribe(subscriber);
+        lock.lock();
+        try {
+            paused = false;
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
     }
-
 }
