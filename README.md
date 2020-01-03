@@ -44,6 +44,5 @@ For more information on using Siddhi refer <a target="_blank" href="https://sidd
 Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.11">5.1.11</a>.
 
 ## Support and Contribution
-
 You can reachout through Slack channel, Google mail group and etc. Please refer the community contribution [site](https://siddhi.io/community/) for more information.
 
