@@ -18,7 +18,7 @@ Siddhi Core Libraries
 
 ![](https://raw.githubusercontent.com/siddhi-io/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
-Siddhi can can run as an embedded Java and Python library, as a micro service on bare metal, VM, and Docker and natively in Kubernetes. 
+Siddhi can run as an embedded Java and Python library, as a micro service on bare metal, VM, and Docker and natively in Kubernetes. 
 
 Siddhi provides web-based graphical and textual tooling for development.
 
@@ -41,7 +41,7 @@ For more information on using Siddhi refer <a target="_blank" href="https://sidd
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.11">5.1.11</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/5.1.12">5.1.12</a>.
 
 ## Support and Contribution
 
