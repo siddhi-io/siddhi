@@ -1720,14 +1720,17 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
             }
+            Expression expression = null;
+            if (ctx.expression() != null) {
+                expression = (Expression) visit(ctx.expression());
+            }
             if (ctx.output_event_type() != null) {
                 OutputStream outputStream = new DeleteStream(source.streamId,
-                        (OutputStream.OutputEventType) visit(ctx.output_event_type()),
-                        (Expression) visit(ctx.expression()));
+                        (OutputStream.OutputEventType) visit(ctx.output_event_type()), expression);
                 populateQueryContext(outputStream, ctx);
                 return outputStream;
             } else {
-                OutputStream outputStream = new DeleteStream(source.streamId, (Expression) visit(ctx.expression()));
+                OutputStream outputStream = new DeleteStream(source.streamId, expression);
                 populateQueryContext(outputStream, ctx);
                 return outputStream;
             }
@@ -1797,7 +1800,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
             }
-            OutputStream outputStream = new DeleteStream(source.streamId, (Expression) visit(ctx.expression()));
+            Expression expression = null;
+            if (ctx.expression() != null) {
+                expression = (Expression) visit(ctx.expression());
+            }
+            OutputStream outputStream = new DeleteStream(source.streamId, expression);
             populateQueryContext(outputStream, ctx);
             return outputStream;
         } else if (ctx.UPDATE() != null) {
