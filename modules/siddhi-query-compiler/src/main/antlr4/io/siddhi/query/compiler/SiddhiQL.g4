@@ -394,14 +394,14 @@ offset
 
 query_output
     :INSERT output_event_type? INTO target
-    |DELETE target (FOR output_event_type)? ON expression
+    |DELETE target (FOR output_event_type)? (ON expression)?
     |UPDATE OR INSERT INTO target (FOR output_event_type)? set_clause? ON expression
     |UPDATE target (FOR output_event_type)? set_clause? ON expression
     |RETURN output_event_type?
     ;
 
 store_query_output
-    :DELETE target ON expression
+    :DELETE target (ON expression)?
     |UPDATE target set_clause? ON expression
     ;
 
