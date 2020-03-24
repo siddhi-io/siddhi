@@ -62,6 +62,7 @@ public class IncrementalExecutor implements Executor {
     private StreamEventFactory streamEventFactory;
     private Scheduler scheduler;
     private ExecutorService executorService;
+    private String timeZone;
 
     private BaseIncrementalValueStore baseIncrementalValueStore;
 
@@ -69,7 +70,9 @@ public class IncrementalExecutor implements Executor {
                                List<ExpressionExecutor> processExpressionExecutors,
                                ExpressionExecutor shouldUpdateTimestamp, GroupByKeyGenerator groupByKeyGenerator,
                                boolean isRoot, Table table, IncrementalExecutor child,
-                               SiddhiQueryContext siddhiQueryContext, MetaStreamEvent metaStreamEvent) {
+                               SiddhiQueryContext siddhiQueryContext, MetaStreamEvent metaStreamEvent,
+                               String timeZone) {
+        this.timeZone = timeZone;
         this.aggregatorName = aggregatorName;
         this.duration = duration;
         this.isRoot = isRoot;
@@ -113,10 +116,10 @@ public class IncrementalExecutor implements Executor {
             try {
                 long timestamp = getTimestamp(streamEvent, executorState);
                 executorState.startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                        timestamp, duration);
+                        timestamp, duration, timeZone);
                 if (timestamp >= executorState.nextEmitTime) {
                     executorState.nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(
-                            timestamp, duration, null);
+                            timestamp, duration, timeZone);
                     dispatchAggregateEvents(executorState.startTimeOfAggregates);
                     sendTimerEvent(executorState);
                 }
@@ -145,14 +148,14 @@ public class IncrementalExecutor implements Executor {
         if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
             timestamp = (long) timestampExpressionExecutor.execute(streamEvent);
             if (isRoot && !executorState.timerStarted) {
-                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
+                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone));
                 executorState.timerStarted = true;
             }
         } else {
             timestamp = streamEvent.getTimestamp();
             if (isRoot) {
                 // Scheduling is done by root incremental executor only
-                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
+                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone));
             }
         }
         return timestamp;

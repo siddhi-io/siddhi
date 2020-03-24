@@ -72,11 +72,14 @@ import io.siddhi.query.api.util.AnnotationHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.TimeZone;
 
 import static io.siddhi.core.util.SiddhiConstants.AGG_EXTERNAL_TIMESTAMP_COL;
 import static io.siddhi.core.util.SiddhiConstants.AGG_LAST_TIMESTAMP_COL;
@@ -102,6 +105,12 @@ public class AggregationParser {
                                            Map<String, Window> windowMap,
                                            Map<String, AggregationRuntime> aggregationMap,
                                            SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder) {
+        String timeZone = getTimeZone(siddhiAppContext);
+        if (!validateTimeZone(timeZone)) {
+            throw new SiddhiAppCreationException(
+                    "Given timeZone '" + timeZone + "' for aggregations is invalid. Please provide a valid time zone."
+            );
+        }
 
         if (aggregationDefinition == null) {
             throw new SiddhiAppCreationException(
@@ -338,7 +347,7 @@ public class AggregationParser {
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
                     processedMetaStreamEvent, processExpressionExecutorsMap, groupByKeyGeneratorMap, incrementalDurations,
-                    aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
+                    aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp, timeZone);
 
             isOptimisedLookup = isOptimisedLookup &&
                                 aggregationTables.get(incrementalDurations.get(0)) instanceof QueryableProcessor;
@@ -395,7 +404,7 @@ public class AggregationParser {
                     groupByVariablesList, isLatestEventColAdded, baseAggregatorBeginIndex,
                     finalBaseExpressions, incrementalDataPurger, incrementalExecutorsInitialiser,
                     ((SingleStreamRuntime) streamRuntime), processedMetaStreamEvent,
-                    latencyTrackerFind, throughputTrackerFind);
+                    latencyTrackerFind, throughputTrackerFind, timeZone);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -409,6 +418,20 @@ public class AggregationParser {
         }
     }
 
+    private static String getTimeZone(SiddhiAppContext siddhiAppContext) {
+        String timeZone = siddhiAppContext.getSiddhiContext().getConfigManager().extractProperty(SiddhiConstants
+                .AGG_TIME_ZONE);
+        if (timeZone == null) {
+            return SiddhiConstants.AGG_TIME_ZONE_DEFAULT;
+        }
+        return timeZone;
+    }
+
+    private static Boolean validateTimeZone(String timeZone) {
+        Set timeZoneSet = new HashSet(Arrays.asList(TimeZone.getAvailableIDs()));
+        return timeZoneSet.contains(timeZone);
+    }
+
     private static Map<TimePeriod.Duration, IncrementalExecutor> buildIncrementalExecutors(
             MetaStreamEvent processedMetaStreamEvent,
             Map<TimePeriod.Duration, List<ExpressionExecutor>> processExpressionExecutorsMap,
@@ -416,7 +439,7 @@ public class AggregationParser {
             List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables,
             SiddhiQueryContext siddhiQueryContext,
-            String aggregatorName, ExpressionExecutor shouldUpdateTimestamp) {
+            String aggregatorName, ExpressionExecutor shouldUpdateTimestamp, String timeZone) {
 
         Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = new HashMap<>();
         // Create incremental executors
@@ -434,7 +457,7 @@ public class AggregationParser {
             IncrementalExecutor incrementalExecutor = new IncrementalExecutor(aggregatorName, duration,
                     processExpressionExecutorsMap.get(duration), shouldUpdateTimestamp,
                     groupByKeyGeneratorList.get(duration), isRoot, aggregationTables.get(duration),
-                    child, siddhiQueryContext, processedMetaStreamEvent);
+                    child, siddhiQueryContext, processedMetaStreamEvent, timeZone);
 
             incrementalExecutorMap.put(duration, incrementalExecutor);
             root = incrementalExecutor;

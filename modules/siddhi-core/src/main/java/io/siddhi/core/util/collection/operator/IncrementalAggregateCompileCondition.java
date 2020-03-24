@@ -144,7 +144,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
                             Map<TimePeriod.Duration, GroupByKeyGenerator> groupByKeyGeneratorMap,
-                            ExpressionExecutor shouldUpdateTimestamp) {
+                            ExpressionExecutor shouldUpdateTimestamp, String timeZone) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>();
 
@@ -242,7 +242,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(
                         incrementalDurations, perValue, oldestInMemoryEventTimestamp,
                         aggregateProcessingExecutorsMap.get(rootDuration), shouldUpdateTimestamp,
-                        groupByKeyGeneratorMap.get(rootDuration) != null, tableMetaStreamEvent);
+                        groupByKeyGeneratorMap.get(rootDuration) != null, tableMetaStreamEvent, timeZone);
                 ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
                 // Aggregate in-memory data and create an event chunk out of it
                 aggregatedInMemoryEventChunk = incrementalDataAggregator.aggregateInMemoryData(incrementalExecutorMap);

@@ -141,6 +141,8 @@ public final class SiddhiConstants {
     public static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
     public static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
     public static final String AGG_SHARD_ID_COL = "SHARD_ID";
+    public static final String AGG_TIME_ZONE = "aggTimeZone";
+    public static final String AGG_TIME_ZONE_DEFAULT = "GMT";
 
     public static final String REPETITIVE_PARAMETER_NOTATION = "...";
 }

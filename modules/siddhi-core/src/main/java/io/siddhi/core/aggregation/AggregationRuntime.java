@@ -109,6 +109,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private ThroughputTracker throughputTrackerFind;
 
     private boolean isFirstEventArrived;
+    private String timeZone;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition, boolean isProcessingOnExternalTime,
                               boolean isDistributed, List<TimePeriod.Duration> incrementalDurations,
@@ -124,8 +125,9 @@ public class AggregationRuntime implements MemoryCalculable {
                               List<Expression> finalBaseExpressionList, IncrementalDataPurger incrementalDataPurger,
                               IncrementalExecutorsInitialiser incrementalExecutorInitialiser,
                               SingleStreamRuntime singleStreamRuntime, MetaStreamEvent tableMetaStreamEvent,
-                              LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind) {
-
+                              LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
+                              String timeZone) {
+        this.timeZone = timeZone;
         this.aggregationDefinition = aggregationDefinition;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.isDistributed = isDistributed;
@@ -343,7 +345,7 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     incrementalExecutorMap, aggregateProcessingExecutorsMap, groupByKeyGeneratorMap,
-                    shouldUpdateTimestamp);
+                    shouldUpdateTimestamp, timeZone);
 
         } finally {
             SnapshotService.getSkipStateStorageThreadLocal().set(null);
