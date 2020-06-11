@@ -25,6 +25,7 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.ReceivedEventCounter;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.OptionHolder;
@@ -32,6 +33,10 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+
+import static io.siddhi.core.util.SiddhiConstants.ENABLE_EVENT_COUNT_LOGGER;
+import static io.siddhi.core.util.SiddhiConstants.LOGGING_DURATION;
+import static io.siddhi.core.util.SiddhiConstants.TRUE;
 
 /**
  * Convert custom input from {@link Source} to {@link ComplexEventChunk}.
@@ -51,6 +56,10 @@ public abstract class SourceMapper implements SourceEventListener {
     private SiddhiAppContext siddhiAppContext;
     private ThroughputTracker throughputTracker;
     private LatencyTracker mapperLatencyTracker;
+    private int loggingDuration = 1;
+    private boolean logEventCount = false;
+    private ReceivedEventCounter receivedEventCounter;
+    private boolean firstRun = true;
 
     public final void init(StreamDefinition streamDefinition, String mapType, OptionHolder mapOptionHolder,
                            List<AttributeMapping> attributeMappings, String sourceType,
@@ -77,6 +86,17 @@ public abstract class SourceMapper implements SourceEventListener {
                     streamDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_SOURCE_MAPPERS,
                     sourceType + SiddhiConstants.METRIC_DELIMITER + mapType);
+        }
+        if (configReader != null && configReader.getAllConfigs().size() != 0) {
+            if (configReader.getAllConfigs().containsKey(ENABLE_EVENT_COUNT_LOGGER) &&
+                    configReader.getAllConfigs().get(ENABLE_EVENT_COUNT_LOGGER).toLowerCase().equals(TRUE)) {
+                logEventCount = true;
+                this.receivedEventCounter = new ReceivedEventCounter();
+                if (configReader.getAllConfigs().containsKey(LOGGING_DURATION)) {
+                    loggingDuration = Integer.parseInt(configReader.getAllConfigs().get(LOGGING_DURATION));
+                }
+                receivedEventCounter.init(siddhiAppContext, streamDefinition, loggingDuration);
+            }
         }
         init(streamDefinition, mapOptionHolder, attributeMappings, configReader, siddhiAppContext);
     }
@@ -173,6 +193,13 @@ public abstract class SourceMapper implements SourceEventListener {
                         mapperLatencyTracker.markIn();
                     }
                     mapAndProcess(eventObject, inputEventHandler);
+                    if (logEventCount) {
+                        if (firstRun) {
+                            receivedEventCounter.scheduleEventCounterLogger();
+                            firstRun = false;
+                        }
+                        receivedEventCounter.countEvents(eventObject);
+                    }
                 } finally {
                     if (throughputTracker != null &&
                             Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
