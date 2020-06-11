@@ -143,4 +143,7 @@ public final class SiddhiConstants {
     public static final String AGG_SHARD_ID_COL = "SHARD_ID";
 
     public static final String REPETITIVE_PARAMETER_NOTATION = "...";
+
+    public static final String ENABLE_EVENT_COUNT_LOGGER = "enableLoggingEventCount";
+    public static final String LOGGING_DURATION = "loggingDuration";
 }
