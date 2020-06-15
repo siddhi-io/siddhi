@@ -29,6 +29,7 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiTestHelper;
+import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
@@ -624,6 +625,511 @@ public class Aggregation2TestCase {
             AssertJUnit.assertFalse(appender.getMessages().contains("Error when adding time:"));
         }
         logger.removeAppender(appender);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest57"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneHour() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every hour ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Monday December 31, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1577721601000L});
+
+        // Tuesday December 31, 2019 00:59:59 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1577725199000L});
+
+        // Tuesday December 31, 2019 01:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1577725201000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2019-**-** **:**:**\" " +
+                "per \"hour\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1577721600000L, "WSO2", 60.0},
+                new Object[]{1577725200000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneHour"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneHour2() throws InterruptedException {
+        //feb 29 leap end hour
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every hour ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday February 29, 2020 23:00:01 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1582988401000L});
+
+        // Saturday February 29, 2020 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1582991999000L});
+
+        // Sunday March 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1582992001000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2020-**-** **:**:**\" " +
+                "per \"hour\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1582988400000L, "WSO2", 60.0},
+                new Object[]{1582992000000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneHour2"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneDay() throws InterruptedException {
+        //normal day
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every day ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday February 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1580486401000L});
+
+        // Saturday February 01, 2020 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1580572799000L});
+
+        // Sunday February 02, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1580572801000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2020-**-** **:**:**\" " +
+                "per \"day\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1580486400000L, "WSO2", 60.0},
+                new Object[]{1580572800000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneDay"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneDay2() throws InterruptedException {
+        //feb 29 leap
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every day ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday February 29, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1582905601000L});
+
+        // Saturday February 29, 2020 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1582991999000L});
+
+        // Sunday March 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1582992001000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2020-**-** **:**:**\" " +
+                "per \"day\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1582905600000L, "WSO2", 60.0},
+                new Object[]{1582992000000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneDay2"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneDay3() throws InterruptedException {
+        //feb 28 non-leap
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every day ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday February 28, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1551283201000L});
+
+        // Saturday February 28, 2019 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1551369599000L});
+
+        // Sunday March 01, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1551369601000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2019-**-** **:**:**\" " +
+                "per \"day\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1551283200000L, "WSO2", 60.0},
+                new Object[]{1551369600000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneDay3"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneDay4() throws InterruptedException {
+        //jan 31
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every day ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday January 31, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1548864001000L});
+
+        // Saturday January 31, 2019 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1548950399000L});
+
+        // Sunday February 01, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1548950401000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2019-**-** **:**:**\" " +
+                "per \"day\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1548864000000L, "WSO2", 60.0},
+                new Object[]{1548950400000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneDay4"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneDay5() throws InterruptedException {
+        //dec 31 2019
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every day ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Monday December 31, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1577721601000L});
+
+        // Tuesday December 31, 2019 23:59:59 (pm in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1577807999000L});
+
+        // Wednesday January 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1577808001000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2019-**-** **:**:**\" " +
+                "per \"day\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1577721600000L, "WSO2", 60.0},
+                new Object[]{1577808000000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneDay5"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneMonth() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> systemConfigs = new HashMap<>();
+        systemConfigs.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, systemConfigs);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every month ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+//        siddhiAppRuntime.
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Saturday February 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1580486401000L});
+
+        // Saturday February 29, 2020 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1582991999000L});
+
+        // Sunday March 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1582992001000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2020-**-** **:**:**\" " +
+                "per \"month\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(2, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{1580486400000L, "WSO2", 60.0},
+                new Object[]{1582992000000L, "WSO2", 80.0}
+        );
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneMonth"})
+    public void incrementalStreamProcessorTest5SGTTimeZoneYear() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("aggTimeZone", "Asia/Singapore");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, configMap);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every year ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+//        siddhiAppRuntime.
+
+        InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+        siddhiAppRuntime.start();
+
+        // Tuesday January 01, 2019 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 1546272001000L});
+
+        // Tuesday December 31, 2019 23:59:59 (pm) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 70f, 1577807999000L});
+
+        // Wednesday January 01, 2020 00:00:01 (am) in time zone Asia/Singapore (+08)
+        stockStreamInputHandler.send(new Object[]{"WSO2", 80f, 1577808001000L});
+
+        Thread.sleep(2000);
+
+        Event[] events = siddhiAppRuntime.query("from stockAggregation " +
+                "within \"2018-**-** **:**:**\" " +
+                "per \"year\"");
+        EventPrinter.print(events);
+
+        Assert.assertNotNull(events, "Queried results cannot be null.");
+        AssertJUnit.assertEquals(1, events.length);
+
+        List<Object[]> eventsOutputList = new ArrayList<>();
+        for (Event event : events) {
+            eventsOutputList.add(event.getData());
+        }
+        List<Object[]> expected = new ArrayList<>();
+        expected.add(new Object[]{1546272000000L, "WSO2", 60.0});
+
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(eventsOutputList, expected));
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest5SGTTimeZoneYear"}, expectedExceptions =
+            SiddhiAppCreationException.class)
+    public void incrementalStreamProcessorTestInvalidTimeZone() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest5");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("aggTimeZone", "Asia/Singapo");
+        ConfigManager configManager = new InMemoryConfigManager(null, null, configMap);
+        siddhiManager.setConfigManager(configManager);
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice  " +
+                "group by symbol " +
+                "aggregate by timestamp every year ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
         siddhiAppRuntime.shutdown();
     }
 }

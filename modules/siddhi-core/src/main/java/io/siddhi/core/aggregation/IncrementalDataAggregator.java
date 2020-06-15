@@ -56,13 +56,14 @@ public class IncrementalDataAggregator {
     private final StreamEvent resetEvent;
     private final StreamEventFactory streamEventFactory;
     private ExpressionExecutor shouldUpdateTimestamp;
+    private String timeZone;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration durationToAggregate, long oldestEventTimestamp,
                                      List<ExpressionExecutor> baseExecutorsForFind,
                                      ExpressionExecutor shouldUpdateTimestamp, boolean groupBy,
-                                     MetaStreamEvent metaStreamEvent) {
-
+                                     MetaStreamEvent metaStreamEvent, String timeZone) {
+        this.timeZone = timeZone;
         this.incrementalDurations = incrementalDurations;
         this.durationToAggregate = durationToAggregate;
 
@@ -93,7 +94,7 @@ public class IncrementalDataAggregator {
             Map<String, StreamEvent> groupedByEvents = aBaseIncrementalValueStore.getGroupedByEvents();
             for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
                 long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                        eventEntry.getValue().getTimestamp(), durationToAggregate);
+                        eventEntry.getValue().getTimestamp(), durationToAggregate, timeZone);
                 String groupByKey = eventEntry.getKey() + "-" + startTimeOfAggregates;
                 synchronized (this) {
                     groupByKeys.add(groupByKey);

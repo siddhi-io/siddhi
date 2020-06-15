@@ -23,6 +23,7 @@ import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
@@ -35,6 +36,7 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
  * This is important when retrieving incremental aggregate values by specifying a time range with 'within' clause.
  */
 public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecutor {
+    private String timeZone;
 
     @Override
     protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
@@ -47,6 +49,11 @@ public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecut
             throw new SiddhiAppValidationException("Second argument of " +
                     "incrementalAggregator:getAggregationStartTime() function accepts should be of type 'STRING', " +
                     "but found '" + attributeExpressionExecutors[1].getReturnType() + "'.");
+        }
+        this.timeZone = siddhiQueryContext.getSiddhiContext().getConfigManager().extractProperty(SiddhiConstants
+                .AGG_TIME_ZONE);
+        if (timeZone == null) {
+            this.timeZone = SiddhiConstants.AGG_TIME_ZONE_DEFAULT;
         }
         return null;
     }
@@ -80,7 +87,7 @@ public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecut
                 throw new SiddhiAppRuntimeException("Duration '" + durationName + "' used for " +
                         "incrementalAggregator:aggregateBaseTime() is invalid.");
         }
-        return IncrementalTimeConverterUtil.getStartTimeOfAggregates(time, duration);
+        return IncrementalTimeConverterUtil.getStartTimeOfAggregates(time, duration, timeZone);
     }
 
     @Override
