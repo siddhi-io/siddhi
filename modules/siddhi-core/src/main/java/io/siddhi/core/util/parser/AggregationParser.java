@@ -370,7 +370,7 @@ public class AggregationParser {
             //Recreate in-memory data from tables
             IncrementalExecutorsInitialiser incrementalExecutorsInitialiser = new IncrementalExecutorsInitialiser(
                     incrementalDurations, aggregationTables, incrementalExecutorMap, isDistributed, shardId,
-                    siddhiAppContext, processedMetaStreamEvent, tableMap, windowMap, aggregationMap);
+                    siddhiAppContext, processedMetaStreamEvent, tableMap, windowMap, aggregationMap, timeZone);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
