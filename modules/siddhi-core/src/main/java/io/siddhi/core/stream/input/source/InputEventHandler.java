@@ -46,6 +46,7 @@ public class InputEventHandler {
     private InputHandler inputHandler;
     private List<AttributeMapping> transportMapping;
     private InputEventHandlerCallback inputEventHandlerCallback;
+    private long eventCount;
 
     InputEventHandler(InputHandler inputHandler, List<AttributeMapping> transportMapping,
                       ThreadLocal<Object[]> trpProperties, ThreadLocal<String[]> trpSyncProperties, String sourceType,
@@ -81,6 +82,7 @@ public class InputEventHandler {
                         transportProperties[i], attributeMapping.getType());
             }
             inputEventHandlerCallback.sendEvent(event, transportSyncProperties);
+            eventCount++;
         } catch (RuntimeException e) {
             LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error in applying transport property mapping for '" + sourceType
@@ -112,6 +114,7 @@ public class InputEventHandler {
                 }
             }
             inputEventHandlerCallback.sendEvents(events, transportSyncProperties);
+            eventCount += events.length;
         } catch (RuntimeException e) {
             LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error in applying transport property mapping for '" + sourceType
@@ -120,5 +123,9 @@ public class InputEventHandler {
             trpProperties.remove();
             trpSyncProperties.remove();
         }
+    }
+
+    long getEventCount() {
+        return eventCount;
     }
 }

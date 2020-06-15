@@ -228,6 +228,10 @@ public abstract class SourceMapper implements SourceEventListener {
         return streamDefinition;
     }
 
+    public long getEventCount() {
+        return this.inputEventHandler.getEventCount();
+    }
+
     /**
      * Method to map the incoming event and as pass that via inputEventHandler to process further.
      *
