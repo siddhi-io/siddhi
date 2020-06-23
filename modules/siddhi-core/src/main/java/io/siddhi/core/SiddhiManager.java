@@ -30,6 +30,7 @@ import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
+import io.siddhi.core.util.preservation.PreservationStore;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -166,6 +167,10 @@ public class SiddhiManager {
      */
     public void setPersistenceStore(PersistenceStore persistenceStore) {
         this.siddhiContext.setPersistenceStore(persistenceStore);
+    }
+
+    public void setPreservationStore(PreservationStore preservationStore) {
+        this.siddhiContext.setPreservationStore(preservationStore);
     }
 
     /**

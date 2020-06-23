@@ -48,6 +48,7 @@ import org.apache.log4j.Logger;
 import java.beans.ExceptionListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -398,6 +399,11 @@ public class StreamJunction implements EventBufferHolder {
                             + "' is not defined. " + "Hence, dropping event '" + event.toString() + "'", e);
                 }
                 break;
+            case PRESERVE:
+                siddhiAppContext.getSiddhiContext().getPreservationStore()
+                        .saveTransportError(siddhiAppContext.getName(), streamDefinition.getId(),
+                                Collections.singletonList(event), e);
+                break;
             default:
                 break;
         }
@@ -423,7 +429,7 @@ public class StreamJunction implements EventBufferHolder {
                             + "', " + e.getMessage() + ". Siddhi Fault Stream for '" + streamDefinition.getId()
                             + "' is not defined. " + "Hence, dropping data '" + Arrays.toString(data) + "'", e);
                 }
-                break;
+                break; // TODO handle PRESERVE Here too
             default:
                 break;
         }
@@ -434,7 +440,8 @@ public class StreamJunction implements EventBufferHolder {
      */
     public enum OnErrorAction {
         LOG,
-        STREAM
+        STREAM,
+        PRESERVE
     }
 
     /**

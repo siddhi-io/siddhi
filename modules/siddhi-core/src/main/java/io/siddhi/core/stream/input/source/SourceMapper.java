@@ -20,6 +20,7 @@ package io.siddhi.core.stream.input.source;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
@@ -207,6 +208,17 @@ public abstract class SourceMapper implements SourceEventListener {
                     }
                 }
             }
+        } catch (MappingFailedException e) {
+            // TODO if there is a mapping exception, e will contain atleast one failure object in its array
+            /*
+            * TODO
+            * check for the above fact very well by going thru the code.
+            * <events><event>...<event></events> CHeck by sending events like this
+            * */
+            siddhiAppContext.getSiddhiContext().getPreservationStore()
+                    .saveMappingError(siddhiAppContext.getName(), streamDefinition.getId(), e.getFailures(), e);
+            log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
+                    "' for the stream '" + streamDefinition.getId() + "'.", e);
         } catch (InterruptedException | RuntimeException e) {
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
                     "' for the stream '" + streamDefinition.getId() + "'.", e);
@@ -241,7 +253,7 @@ public abstract class SourceMapper implements SourceEventListener {
      */
     protected abstract void mapAndProcess(Object eventObject,
                                           InputEventHandler inputEventHandler)
-            throws InterruptedException;
+            throws MappingFailedException, InterruptedException;
 
     /**
      * Method used by {@link SourceMapper} to determine on how to handle transport properties with null values. If
