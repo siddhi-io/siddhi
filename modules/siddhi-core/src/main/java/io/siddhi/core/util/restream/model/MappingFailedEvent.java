@@ -2,7 +2,7 @@ package io.siddhi.core.util.restream.model;
 
 public class MappingFailedEvent {
     private Object event;
-    private Exception exception;
+    private Throwable throwable;
     private String cause;
 
     public MappingFailedEvent(Object event, String cause) {
@@ -10,9 +10,9 @@ public class MappingFailedEvent {
         this.cause = cause;
     }
 
-    public MappingFailedEvent(Object event, Exception exception, String cause) {
+    public MappingFailedEvent(Object event, Throwable throwable, String cause) {
         this.event = event;
-        this.exception = exception;
+        this.throwable = throwable;
         this.cause = cause;
     }
 
@@ -24,7 +24,7 @@ public class MappingFailedEvent {
         return cause;
     }
 
-    public Exception getException() {
-        return exception;
+    public Throwable getThrowable() {
+        return throwable;
     }
 }
