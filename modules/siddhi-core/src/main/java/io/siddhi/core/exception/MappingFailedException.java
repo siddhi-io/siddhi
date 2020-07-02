@@ -1,15 +1,17 @@
 package io.siddhi.core.exception;
 
+import io.siddhi.core.util.restream.model.MappingFailedEvent;
+
 import java.util.List;
 
 public class MappingFailedException extends Exception {
-    List<Object> failures;
+    List<MappingFailedEvent> failures;
 
     public MappingFailedException() {
         super();
     }
 
-    public MappingFailedException(List<Object> failures) {
+    public MappingFailedException(List<MappingFailedEvent> failures) {
         this.failures = failures;
     }
 
@@ -17,7 +19,7 @@ public class MappingFailedException extends Exception {
         super(message);
     }
 
-    public MappingFailedException(List<Object> failures, String message) {
+    public MappingFailedException(List<MappingFailedEvent> failures, String message) {
         super(message);
         this.failures = failures;
     }
@@ -26,7 +28,7 @@ public class MappingFailedException extends Exception {
         super(message, throwable);
     }
 
-    public MappingFailedException(List<Object> failures, String message, Throwable cause) {
+    public MappingFailedException(List<MappingFailedEvent> failures, String message, Throwable cause) {
         super(message, cause);
         this.failures = failures;
     }
@@ -35,12 +37,12 @@ public class MappingFailedException extends Exception {
         super(throwable);
     }
 
-    public MappingFailedException(List<Object> failures, Throwable cause) {
+    public MappingFailedException(List<MappingFailedEvent> failures, Throwable cause) {
         super(cause);
         this.failures = failures;
     }
 
-    public List<Object> getFailures() {
+    public List<MappingFailedEvent> getFailures() {
         return failures;
     }
 }

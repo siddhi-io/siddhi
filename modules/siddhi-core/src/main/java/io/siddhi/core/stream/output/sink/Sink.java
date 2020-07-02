@@ -29,6 +29,8 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.restream.util.ErrorOccurrence;
+import io.siddhi.core.util.restream.util.ErrorStoreHelper;
 import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
@@ -426,6 +428,10 @@ public abstract class Sink<S extends State> implements SinkListener {
                         stateHolder.returnState(state);
                     }
                     break;
+                case STORE:
+                    ErrorStoreHelper.storeFailedEvents(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                            ErrorOccurrence.STORE_ON_SINK_ERROR, siddhiAppContext.getName(),
+                            dynamicOptions.getEvent(), streamDefinition.getId(), e);
                 case LOG:
                 default:
                     connectWithRetry();
@@ -471,6 +477,7 @@ public abstract class Sink<S extends State> implements SinkListener {
     public enum OnErrorAction {
         LOG,
         WAIT,
-        STREAM
+        STREAM,
+        STORE
     }
 }

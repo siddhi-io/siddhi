@@ -30,8 +30,7 @@ import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
-import io.siddhi.core.util.preservation.PreservationStore;
-import io.siddhi.core.util.preservation.TestSysOutPreservationStore;
+import io.siddhi.core.util.restream.store.ErrorStore;
 import io.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 import org.apache.log4j.Logger;
 
@@ -51,7 +50,7 @@ public class SiddhiContext {
     private Map<String, Class> siddhiExtensions = new HashMap<>();
     private PersistenceStore persistenceStore = null;
     private IncrementalPersistenceStore incrementalPersistenceStore = null;
-    private PreservationStore preservationStore = new TestSysOutPreservationStore(); // TODO make this  null and resolve
+    private ErrorStore errorStore = null;
     private ConcurrentHashMap<String, DataSource> siddhiDataSources;
     private StatisticsConfiguration statisticsConfiguration;
     private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap
@@ -116,12 +115,12 @@ public class SiddhiContext {
         this.incrementalPersistenceStore = incrementalPersistenceStore;
     }
 
-    public synchronized void setPreservationStore(PreservationStore preservationStore) {
-        this.preservationStore = preservationStore;
+    public synchronized void setErrorStore(ErrorStore errorStore) {
+        this.errorStore = errorStore;
     }
 
-    public synchronized PreservationStore getPreservationStore() {
-        return preservationStore;
+    public synchronized ErrorStore getErrorStore() {
+        return errorStore;
     }
 
     public ConfigManager getConfigManager() {

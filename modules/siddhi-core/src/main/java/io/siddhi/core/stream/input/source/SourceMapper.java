@@ -25,6 +25,8 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.restream.util.ErrorOccurrence;
+import io.siddhi.core.util.restream.util.ErrorStoreHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ReceivedEventCounter;
 import io.siddhi.core.util.statistics.ThroughputTracker;
@@ -209,14 +211,9 @@ public abstract class SourceMapper implements SourceEventListener {
                 }
             }
         } catch (MappingFailedException e) {
-            // TODO if there is a mapping exception, e will contain atleast one failure object in its array
-            /*
-            * TODO
-            * check for the above fact very well by going thru the code.
-            * <events><event>...<event></events> CHeck by sending events like this
-            * */
-            siddhiAppContext.getSiddhiContext().getPreservationStore()
-                    .saveMappingError(siddhiAppContext.getName(), streamDefinition.getId(), e.getFailures(), e);
+            ErrorStoreHelper.storeFailedEvents(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                    ErrorOccurrence.BEFORE_SOURCE_MAPPING, siddhiAppContext.getName(), e.getFailures(),
+                    streamDefinition.getId(), e);
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
                     "' for the stream '" + streamDefinition.getId() + "'.", e);
         } catch (InterruptedException | RuntimeException e) {

@@ -36,6 +36,8 @@ import io.siddhi.core.util.event.handler.EventExchangeHolder;
 import io.siddhi.core.util.event.handler.EventExchangeHolderFactory;
 import io.siddhi.core.util.event.handler.StreamHandler;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.restream.util.ErrorOccurrence;
+import io.siddhi.core.util.restream.util.ErrorStoreHelper;
 import io.siddhi.core.util.statistics.EventBufferHolder;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
@@ -48,7 +50,6 @@ import org.apache.log4j.Logger;
 import java.beans.ExceptionListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -399,10 +400,16 @@ public class StreamJunction implements EventBufferHolder {
                             + "' is not defined. " + "Hence, dropping event '" + event.toString() + "'", e);
                 }
                 break;
-            case PRESERVE:
-                siddhiAppContext.getSiddhiContext().getPreservationStore()
-                        .saveTransportError(siddhiAppContext.getName(), streamDefinition.getId(),
-                                Collections.singletonList(event), e);
+            case STORE:
+                ErrorStoreHelper.storeFailedEvents(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_STREAM_ERROR, siddhiAppContext.getName(), event,
+                        streamDefinition.getId(), e);
+                // TODO do a instanceof Event check and convert like above
+//                siddhiAppContext.getSiddhiContext().getErrorStore()
+//                        .savePreserveOnError(siddhiAppContext.getName(), event, streamDefinition.getId(), e);
+//                siddhiAppContext.getSiddhiContext().getErrorStore()
+//                        .saveTransportError(siddhiAppContext.getName(), streamDefinition.getId(),
+//                                Collections.singletonList(event), e);
                 break;
             default:
                 break;
@@ -441,7 +448,7 @@ public class StreamJunction implements EventBufferHolder {
     public enum OnErrorAction {
         LOG,
         STREAM,
-        PRESERVE
+        STORE
     }
 
     /**

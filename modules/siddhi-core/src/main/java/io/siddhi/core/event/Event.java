@@ -19,12 +19,13 @@ package io.siddhi.core.event;
 
 import io.siddhi.core.event.stream.StreamEvent;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Event that is used external to Siddhi
  */
-public class Event {
+public class Event implements Serializable {
 
     protected long timestamp = -1;
     protected Object[] data;
