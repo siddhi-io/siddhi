@@ -211,9 +211,9 @@ public abstract class SourceMapper implements SourceEventListener {
                 }
             }
         } catch (MappingFailedException e) {
-            ErrorStoreHelper.storeFailedEvents(siddhiAppContext.getSiddhiContext().getErrorStore(),
+            ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                     ErrorOccurrence.BEFORE_SOURCE_MAPPING, siddhiAppContext.getName(), e.getFailures(),
-                    streamDefinition.getId(), e);
+                    streamDefinition.getId());
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
                     "' for the stream '" + streamDefinition.getId() + "'.", e);
         } catch (InterruptedException | RuntimeException e) {

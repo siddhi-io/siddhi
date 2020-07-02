@@ -1,20 +1,39 @@
 package io.siddhi.core.util.restream.model;
 
-import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.Event;
-import io.siddhi.core.util.restream.util.ErroneousEventType;
-import io.siddhi.core.util.restream.util.ErrorOccurrence;
-import io.siddhi.core.util.restream.util.ErrorType;
+public class ErroneousEvent {
+    private Object event;
+    private Throwable throwable;
+    private String cause;
+    private Object originalPayload;
 
-public class ErroneousEvent extends AbstractErroneousEvent {
-    private Event event;
-
-    public ErroneousEvent(int id, long timestamp, String siddhiAppName, String streamName, ErrorOccurrence errorOccurrence, ErrorType errorType, String errorMessage, Event event) {
-        super(id, timestamp, siddhiAppName, streamName, errorOccurrence, errorType, ErroneousEventType.EVENT, errorMessage);
+    public ErroneousEvent(Object event, String cause) {
         this.event = event;
+        this.cause = cause;
     }
 
-    public Event getEvent() {
+    public ErroneousEvent(Object event, Throwable throwable, String cause) {
+        this.event = event;
+        this.throwable = throwable;
+        this.cause = cause;
+    }
+
+    public void setOriginalPayload(Object originalPayload) {
+        this.originalPayload = originalPayload;
+    }
+
+    public Object getEvent() {
         return event;
+    }
+
+    public String getCause() {
+        return cause;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    public Object getOriginalPayload() {
+        return originalPayload;
     }
 }
