@@ -27,7 +27,9 @@ public class ErroneousEvent {
     private String cause;
     private Object originalPayload;
 
-    public ErroneousEvent(String cause) {
+    public ErroneousEvent(Object event, Throwable throwable, String cause) {
+        this.event = event;
+        this.throwable = throwable;
         this.cause = cause;
     }
 
@@ -36,9 +38,12 @@ public class ErroneousEvent {
         this.cause = cause;
     }
 
-    public ErroneousEvent(Object event, Throwable throwable, String cause) {
-        this.event = event;
+    public ErroneousEvent(Throwable throwable, String cause) {
         this.throwable = throwable;
+        this.cause = cause;
+    }
+
+    public ErroneousEvent(String cause) {
         this.cause = cause;
     }
 

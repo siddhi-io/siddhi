@@ -66,9 +66,8 @@ public class ErrorStoreHelper {
             return ErroneousEventType.EVENT_ARRAY;
         } else if (event instanceof List) {
             return ErroneousEventType.EVENT_LIST;
-        } else if (event instanceof String) {
+        } else {
             return ErroneousEventType.PAYLOAD_STRING;
         }
-        return null;
     }
 }
