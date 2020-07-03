@@ -24,9 +24,9 @@ import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
+import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.restream.util.ErrorOccurrence;
-import io.siddhi.core.util.restream.util.ErrorStoreHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ReceivedEventCounter;
 import io.siddhi.core.util.statistics.ThroughputTracker;
@@ -246,6 +246,7 @@ public abstract class SourceMapper implements SourceEventListener {
      *
      * @param eventObject       Incoming event Object
      * @param inputEventHandler Handler to pass the converted Siddhi Event for processing
+     * @throws MappingFailedException Throws MappingFailedException
      * @throws InterruptedException Throws InterruptedException
      */
     protected abstract void mapAndProcess(Object eventObject,

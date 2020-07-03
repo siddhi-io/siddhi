@@ -26,11 +26,11 @@ import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigManager;
+import io.siddhi.core.util.error.handler.store.ErrorStore;
 import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
-import io.siddhi.core.util.restream.store.ErrorStore;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -169,6 +169,10 @@ public class SiddhiManager {
         this.siddhiContext.setPersistenceStore(persistenceStore);
     }
 
+    /**
+     * Method to set error store for the S
+     * @param errorStore
+     */
     public void setErrorStore(ErrorStore errorStore) {
         this.siddhiContext.setErrorStore(errorStore);
     }

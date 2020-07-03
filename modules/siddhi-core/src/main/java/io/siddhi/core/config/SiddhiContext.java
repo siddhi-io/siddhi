@@ -27,10 +27,10 @@ import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiExtensionLoader;
 import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.error.handler.store.ErrorStore;
 import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
-import io.siddhi.core.util.restream.store.ErrorStore;
 import io.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 import org.apache.log4j.Logger;
 
