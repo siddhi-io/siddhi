@@ -25,11 +25,12 @@ import io.siddhi.core.util.error.handler.util.ErrorType;
 /**
  * Represents an entry which represents an error, in the {@link io.siddhi.core.util.error.handler.store.ErrorStore}.
  */
-public abstract class AbstractErrorEntry {
+public class ErrorEntry<T> {
     private int id;
     private long timestamp;
     private String siddhiAppName;
     private String streamName;
+    private T event;
     private String cause;
     private String stackTrace;
     private String originalPayload;
@@ -37,13 +38,14 @@ public abstract class AbstractErrorEntry {
     private ErroneousEventType eventType;
     private ErrorType errorType;
 
-    public AbstractErrorEntry(int id, long timestamp, String siddhiAppName, String streamName, String cause,
-                              String stackTrace, String originalPayload, ErrorOccurrence errorOccurrence,
-                              ErroneousEventType eventType, ErrorType errorType) {
+    public ErrorEntry(int id, long timestamp, String siddhiAppName, String streamName, T event, String cause,
+                      String stackTrace, String originalPayload, ErrorOccurrence errorOccurrence,
+                      ErroneousEventType eventType, ErrorType errorType) {
         this.id = id;
         this.timestamp = timestamp;
         this.siddhiAppName = siddhiAppName;
         this.streamName = streamName;
+        this.event = event;
         this.cause = cause;
         this.stackTrace = stackTrace;
         this.originalPayload = originalPayload;
@@ -66,6 +68,10 @@ public abstract class AbstractErrorEntry {
 
     public String getStreamName() {
         return streamName;
+    }
+
+    public T getEvent() {
+        return event;
     }
 
     public String getCause() {

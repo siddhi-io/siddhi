@@ -24,6 +24,7 @@ import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -35,6 +36,7 @@ import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
+import java.util.Collections;
 import java.util.List;
 
 import static io.siddhi.core.util.SiddhiConstants.ENABLE_EVENT_COUNT_LOGGER;
@@ -217,6 +219,12 @@ public abstract class SourceMapper implements SourceEventListener {
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
                     "' for the stream '" + streamDefinition.getId() + "'.", e);
         } catch (InterruptedException | RuntimeException e) {
+            ErroneousEvent erroneousEvent = new ErroneousEvent(eventObject, e, "Error while processing '" +
+                    eventObject + "', for the input Mapping '" + mapType + "' for the stream '" +
+                    streamDefinition.getId() + "'.");
+            ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                    ErrorOccurrence.BEFORE_SOURCE_MAPPING, siddhiAppContext.getName(),
+                    Collections.singletonList(erroneousEvent), streamDefinition.getId());
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
                     "' for the stream '" + streamDefinition.getId() + "'.", e);
         } finally {
