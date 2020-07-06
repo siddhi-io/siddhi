@@ -17,10 +17,8 @@
  */
 package io.siddhi.core.util.error.handler.exception;
 
-import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
 /**
- * Exception thrown when attribute is not present
+ * Exception thrown by the error store.
  */
 public class ErrorStoreException extends Exception {
 

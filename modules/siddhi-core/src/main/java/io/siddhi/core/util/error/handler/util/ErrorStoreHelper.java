@@ -29,6 +29,7 @@ import java.util.List;
  * Acts as the static collector which is called to send erroneous events during error occurrences in Siddhi.
  */
 public class ErrorStoreHelper {
+
     private ErrorStoreHelper() {}
 
     /**

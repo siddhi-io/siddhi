@@ -18,9 +18,17 @@
 
 package io.siddhi.core.util.error.handler.store;
 
+import com.lmax.disruptor.BusySpinWaitStrategy;
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.InsufficientCapacityException;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
+import com.lmax.disruptor.util.DaemonThreadFactory;
 import io.siddhi.core.util.error.handler.exception.ErrorStoreException;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.model.ErrorEntry;
+import io.siddhi.core.util.error.handler.model.PublishableErrorEntry;
 import io.siddhi.core.util.error.handler.util.ErroneousEventType;
 import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorStoreUtils;
@@ -30,12 +38,61 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 /**
- * Denotes the interface for an error store in which, error event entries will be stored.
+ * Denotes the abstract error store in which, error event entries will be stored.
  */
 public abstract class ErrorStore {
+
     private static final Logger log = Logger.getLogger(ErrorStore.class);
+
+    private int bufferSize = 1024;
+    private boolean dropWhenBufferFull = true;
+
+    private Disruptor<PublishableErrorEntry> disruptor;
+    private RingBuffer<PublishableErrorEntry> ringBuffer;
+
+    public ErrorStore() {
+        final ThreadFactory threadFactory = DaemonThreadFactory.INSTANCE;
+        disruptor = new Disruptor<>(PublishableErrorEntry.EVENT_FACTORY, bufferSize, threadFactory, ProducerType.SINGLE,
+                new BusySpinWaitStrategy());
+        disruptor.handleEventsWith(getEventHandler());
+        ringBuffer = disruptor.start();
+    }
+
+    protected void produce(long timestamp, String siddhiAppName, String streamName,
+                           byte[] eventAsBytes, String cause, byte[] stackTraceAsBytes,
+                           byte[] originalPayloadAsBytes, String errorOccurrence, String eventType,
+                           String errorType) {
+        final long seq;
+        try {
+            seq = dropWhenBufferFull ? ringBuffer.tryNext() : ringBuffer.next();
+            final PublishableErrorEntry publishableErrorEntry = ringBuffer.get(seq);
+            publishableErrorEntry.setTimestamp(timestamp);
+            publishableErrorEntry.setSiddhiAppName(siddhiAppName);
+            publishableErrorEntry.setStreamName(streamName);
+            publishableErrorEntry.setEventAsBytes(eventAsBytes);
+            publishableErrorEntry.setCause(cause);
+            publishableErrorEntry.setStackTraceAsBytes(stackTraceAsBytes);
+            publishableErrorEntry.setOriginalPayloadAsBytes(originalPayloadAsBytes);
+            publishableErrorEntry.setErrorOccurrence(errorOccurrence);
+            publishableErrorEntry.setEventType(eventType);
+            publishableErrorEntry.setErrorType(errorType);
+            ringBuffer.publish(seq);
+        } catch (InsufficientCapacityException e) {
+            log.error("Insufficient capacity in the buffer.", e);
+        }
+    }
+
+    protected EventHandler<PublishableErrorEntry>[] getEventHandler() {
+        final EventHandler<PublishableErrorEntry> eventHandler = (event, sequence, endOfBatch) ->
+                saveEntry(event.getTimestamp(), event.getSiddhiAppName(), event.getStreamName(),
+                        event.getEventAsBytes(), event.getCause(), event.getStackTraceAsBytes(),
+                        event.getOriginalPayloadAsBytes(), event.getErrorOccurrence(), event.getEventType(),
+                        event.getErrorType());
+        return new EventHandler[] {eventHandler};
+    }
 
     public abstract void setProperties(Map properties);
 
@@ -96,7 +153,7 @@ public abstract class ErrorStore {
                     ErrorStoreUtils.getAsBytes(null);
             byte[] originalPayloadAsBytes = ErrorStoreUtils.getAsBytes(originalPayload);
 
-            saveEntry(timestamp, siddhiAppName, streamName, eventAsBytes, cause, stackTraceAsBytes,
+            produce(timestamp, siddhiAppName, streamName, eventAsBytes, cause, stackTraceAsBytes,
                     originalPayloadAsBytes, errorOccurrence.toString(), eventType.toString(), errorType.toString());
         } catch (IOException e) {
             throw new ErrorStoreException("Failure occurred during byte array conversion.", e);
@@ -126,4 +183,12 @@ public abstract class ErrorStore {
     public abstract void discardErroneousEvent(int id);
 
     public abstract Map getStatus();
+
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    public void setDropWhenBufferFull(boolean dropWhenBufferFull) {
+        this.dropWhenBufferFull = dropWhenBufferFull;
+    }
 }

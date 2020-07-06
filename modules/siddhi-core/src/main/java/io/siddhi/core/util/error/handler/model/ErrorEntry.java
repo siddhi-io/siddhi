@@ -24,6 +24,8 @@ import io.siddhi.core.util.error.handler.util.ErrorType;
 
 /**
  * Represents an entry which represents an error, in the {@link io.siddhi.core.util.error.handler.store.ErrorStore}.
+ *
+ * @param <T> Type of the contained event.
  */
 public class ErrorEntry<T> {
     private int id;

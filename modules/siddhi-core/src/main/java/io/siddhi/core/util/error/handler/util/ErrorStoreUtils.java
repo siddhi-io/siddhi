@@ -26,7 +26,13 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * Contains utility methods for the error store.
+ */
 public class ErrorStoreUtils {
+
+    private ErrorStoreUtils() {}
+
     public static byte[] getAsBytes(Object event) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
