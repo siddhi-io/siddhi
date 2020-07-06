@@ -22,12 +22,14 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,7 +60,8 @@ public class PassThroughSourceMapper extends SourceMapper {
     }
 
     @Override
-    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler) throws InterruptedException {
+    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler)
+            throws MappingFailedException, InterruptedException {
         if (eventObject != null) {
             if (eventObject instanceof Event[]) {
                 inputEventHandler.sendEvents((Event[]) eventObject);
@@ -68,8 +71,9 @@ public class PassThroughSourceMapper extends SourceMapper {
                 Event event = new Event(-1, (Object[]) eventObject);
                 inputEventHandler.sendEvent(event);
             } else {
-                throw new SiddhiAppRuntimeException("Event object must be either Event[], Event or Object[] " +
-                        "but found " + eventObject.getClass().getCanonicalName());
+                throw new MappingFailedException(Collections.singletonList(
+                        new ErroneousEvent(eventObject, "Event object must be either Event[], Event or Object[] " +
+                                "but found " + eventObject.getClass().getCanonicalName())));
             }
         }
     }

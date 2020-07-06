@@ -22,14 +22,16 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.exception.MappingFailedException;
 import io.siddhi.core.stream.input.source.AttributeMapping;
 import io.siddhi.core.stream.input.source.InputEventHandler;
 import io.siddhi.core.stream.input.source.PassThroughSourceMapper;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -71,7 +73,8 @@ public class TestTrpSourceMapper extends PassThroughSourceMapper {
     }
 
     @Override
-    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler) throws InterruptedException {
+    protected void mapAndProcess(Object eventObject, InputEventHandler inputEventHandler)
+            throws MappingFailedException, InterruptedException {
         if (eventObject != null) {
             if (eventObject instanceof Event) {
                 Event output = new Event(streamDefinition.getAttributeList().size());
@@ -81,8 +84,9 @@ public class TestTrpSourceMapper extends PassThroughSourceMapper {
                 }
                 inputEventHandler.sendEvent(output);
             } else {
-                throw new SiddhiAppRuntimeException("Event object must be either Event[], Event or Object[] " +
-                        "but found " + eventObject.getClass().getCanonicalName());
+                throw new MappingFailedException(Collections.singletonList(new ErroneousEvent(eventObject,
+                        "Event object must be either Event[], Event or Object[] " +
+                        "but found " + eventObject.getClass().getCanonicalName())));
             }
         }
     }

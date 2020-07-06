@@ -27,6 +27,7 @@ import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiExtensionLoader;
 import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.error.handler.store.ErrorStore;
 import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
@@ -49,6 +50,7 @@ public class SiddhiContext {
     private Map<String, Class> siddhiExtensions = new HashMap<>();
     private PersistenceStore persistenceStore = null;
     private IncrementalPersistenceStore incrementalPersistenceStore = null;
+    private ErrorStore errorStore = null;
     private ConcurrentHashMap<String, DataSource> siddhiDataSources;
     private StatisticsConfiguration statisticsConfiguration;
     private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap
@@ -111,6 +113,14 @@ public class SiddhiContext {
                     " Persistence store '" + persistenceStore.getClass().getName() + "' already registered!");
         }
         this.incrementalPersistenceStore = incrementalPersistenceStore;
+    }
+
+    public synchronized void setErrorStore(ErrorStore errorStore) {
+        this.errorStore = errorStore;
+    }
+
+    public synchronized ErrorStore getErrorStore() {
+        return errorStore;
     }
 
     public ConfigManager getConfigManager() {

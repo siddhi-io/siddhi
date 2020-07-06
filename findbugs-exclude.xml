@@ -233,6 +233,14 @@
         <Bug pattern="DC_DOUBLECHECK"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.core.util.error.handler.model.EventArrayErrorEntry"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.util.error.handler.model.PublishableErrorEntry"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.doc.gen.core.utils.DocumentationUtils"/>
         <Bug pattern="NP_NULL_ON_SOME_PATH_EXCEPTION"/>
     </Match>

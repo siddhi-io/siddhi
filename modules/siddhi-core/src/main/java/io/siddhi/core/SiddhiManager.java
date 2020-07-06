@@ -26,6 +26,7 @@ import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigManager;
+import io.siddhi.core.util.error.handler.store.ErrorStore;
 import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
@@ -166,6 +167,15 @@ public class SiddhiManager {
      */
     public void setPersistenceStore(PersistenceStore persistenceStore) {
         this.siddhiContext.setPersistenceStore(persistenceStore);
+    }
+
+    /**
+     * Method to set error store for the Siddhi Manager instance.
+     *
+     * @param errorStore Error store implementation to be used.
+     */
+    public void setErrorStore(ErrorStore errorStore) {
+        this.siddhiContext.setErrorStore(errorStore);
     }
 
     /**

@@ -32,6 +32,9 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputProcessor;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
+import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
 import io.siddhi.core.util.event.handler.EventExchangeHolder;
 import io.siddhi.core.util.event.handler.EventExchangeHolderFactory;
 import io.siddhi.core.util.event.handler.StreamHandler;
@@ -398,6 +401,16 @@ public class StreamJunction implements EventBufferHolder {
                             + "' is not defined. " + "Hence, dropping event '" + event.toString() + "'", e);
                 }
                 break;
+            case STORE:
+                ErroneousEvent erroneousEvent =
+                        new ErroneousEvent(event, e, "Error in SiddhiApp '" + siddhiAppContext.getName() +
+                                "' after consuming events from Stream '" + streamDefinition.getId()
+                                + "', " + e.getMessage() + ". Siddhi Fault Stream for '" + streamDefinition.getId()
+                                + "' is not defined. " + "Hence, dropping event '" + event.toString() + "'");
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_STREAM_ERROR, siddhiAppContext.getName(), erroneousEvent,
+                        streamDefinition.getId());
+                break;
             default:
                 break;
         }
@@ -424,6 +437,17 @@ public class StreamJunction implements EventBufferHolder {
                             + "' is not defined. " + "Hence, dropping data '" + Arrays.toString(data) + "'", e);
                 }
                 break;
+            case STORE:
+                StreamEvent streamEvent = faultStreamEventConverter.convert(timeStamp, data, e);
+                ErroneousEvent erroneousEvent =
+                        new ErroneousEvent(streamEvent, e, "Error in SiddhiApp '" + siddhiAppContext.getName() +
+                                "' after consuming events from Stream '" + streamDefinition.getId()
+                                + "', " + e.getMessage() + ". Siddhi Fault Stream for '" + streamDefinition.getId()
+                                + "' is not defined. " + "Hence, dropping data '" + Arrays.toString(data) + "'");
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_STREAM_ERROR, siddhiAppContext.getName(), erroneousEvent,
+                        streamDefinition.getId());
+                break;
             default:
                 break;
         }
@@ -434,7 +458,8 @@ public class StreamJunction implements EventBufferHolder {
      */
     public enum OnErrorAction {
         LOG,
-        STREAM
+        STREAM,
+        STORE
     }
 
     /**
