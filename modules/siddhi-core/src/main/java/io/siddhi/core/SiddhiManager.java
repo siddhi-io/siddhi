@@ -170,8 +170,9 @@ public class SiddhiManager {
     }
 
     /**
-     * Method to set error store for the S
-     * @param errorStore
+     * Method to set error store for the Siddhi Manager instance.
+     *
+     * @param errorStore Error store implementation to be used.
      */
     public void setErrorStore(ErrorStore errorStore) {
         this.siddhiContext.setErrorStore(errorStore);
