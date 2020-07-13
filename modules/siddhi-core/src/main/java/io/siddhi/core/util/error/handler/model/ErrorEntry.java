@@ -32,22 +32,22 @@ public class ErrorEntry {
     private String streamName;
     private byte[] eventAsBytes;
     private String cause;
-    private byte[] stackTraceAsBytes;
+    private String stackTrace;
     private byte[] originalPayloadAsBytes;
     private ErrorOccurrence errorOccurrence;
     private ErroneousEventType eventType;
     private ErrorType errorType;
 
     public ErrorEntry(int id, long timestamp, String siddhiAppName, String streamName, byte[] eventAsBytes,
-                      String cause, byte[] stackTraceAsBytes, byte[] originalPayloadAsBytes,
-                      ErrorOccurrence errorOccurrence, ErroneousEventType eventType, ErrorType errorType) {
+                      String cause, String stackTrace, byte[] originalPayloadAsBytes, ErrorOccurrence errorOccurrence,
+                      ErroneousEventType eventType, ErrorType errorType) {
         this.id = id;
         this.timestamp = timestamp;
         this.siddhiAppName = siddhiAppName;
         this.streamName = streamName;
         this.eventAsBytes = eventAsBytes;
         this.cause = cause;
-        this.stackTraceAsBytes = stackTraceAsBytes;
+        this.stackTrace = stackTrace;
         this.originalPayloadAsBytes = originalPayloadAsBytes;
         this.errorOccurrence = errorOccurrence;
         this.eventType = eventType;
@@ -78,8 +78,8 @@ public class ErrorEntry {
         return cause;
     }
 
-    public byte[] getStackTraceAsBytes() {
-        return stackTraceAsBytes;
+    public String getStackTrace() {
+        return stackTrace;
     }
 
     public byte[] getOriginalPayloadAsBytes() {
