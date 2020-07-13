@@ -237,6 +237,10 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
+        <Class name="io.siddhi.core.util.error.handler.model.ErrorEntry"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.core.util.error.handler.model.PublishableErrorEntry"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>

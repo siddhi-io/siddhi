@@ -30,8 +30,8 @@ import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.model.ErrorEntry;
 import io.siddhi.core.util.error.handler.model.PublishableErrorEntry;
 import io.siddhi.core.util.error.handler.util.ErroneousEventType;
-import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorHandlerUtils;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorType;
 import org.apache.log4j.Logger;
 
