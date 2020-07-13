@@ -24,15 +24,13 @@ import io.siddhi.core.util.error.handler.util.ErrorType;
 
 /**
  * Represents an entry which represents an error, in the {@link io.siddhi.core.util.error.handler.store.ErrorStore}.
- *
- * @param <T> Type of the contained event.
  */
-public class ErrorEntry<T> {
+public class ErrorEntry {
     private int id;
     private long timestamp;
     private String siddhiAppName;
     private String streamName;
-    private T event;
+    private byte[] eventAsBytes;
     private String cause;
     private String stackTrace;
     private String originalPayload;
@@ -40,14 +38,14 @@ public class ErrorEntry<T> {
     private ErroneousEventType eventType;
     private ErrorType errorType;
 
-    public ErrorEntry(int id, long timestamp, String siddhiAppName, String streamName, T event, String cause,
-                      String stackTrace, String originalPayload, ErrorOccurrence errorOccurrence,
+    public ErrorEntry(int id, long timestamp, String siddhiAppName, String streamName, byte[] eventAsBytes,
+                      String cause, String stackTrace, String originalPayload, ErrorOccurrence errorOccurrence,
                       ErroneousEventType eventType, ErrorType errorType) {
         this.id = id;
         this.timestamp = timestamp;
         this.siddhiAppName = siddhiAppName;
         this.streamName = streamName;
-        this.event = event;
+        this.eventAsBytes = eventAsBytes;
         this.cause = cause;
         this.stackTrace = stackTrace;
         this.originalPayload = originalPayload;
@@ -72,8 +70,8 @@ public class ErrorEntry<T> {
         return streamName;
     }
 
-    public T getEvent() {
-        return event;
+    public byte[] getEventAsBytes() {
+        return eventAsBytes;
     }
 
     public String getCause() {
