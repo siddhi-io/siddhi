@@ -96,6 +96,14 @@ public abstract class ErrorStore {
 
     public abstract void setProperties(Map properties);
 
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    public void setDropWhenBufferFull(boolean dropWhenBufferFull) {
+        this.dropWhenBufferFull = dropWhenBufferFull;
+    }
+
     public void saveBeforeSourceMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
                                              String streamName) {
         for (ErroneousEvent erroneousEvent : erroneousEvents) {
@@ -167,6 +175,8 @@ public abstract class ErrorStore {
 
     public abstract List<ErrorEntry> loadErrorEntries(String siddhiAppName, Map<String, String> queryParams);
 
+    public abstract ErrorEntry loadErrorEntry(int id);
+
     protected ErrorEntry constructErrorEntry(int id, long timestamp, String siddhiAppName, String streamName,
                                              byte[] eventAsBytes, String cause, byte[] stackTraceAsBytes,
                                              byte[] originalPayloadAsBytes, ErrorOccurrence errorOccurrence,
@@ -178,17 +188,13 @@ public abstract class ErrorStore {
                 originalPayloadAsBytes, errorOccurrence, erroneousEventType, errorType);
     }
 
-    public abstract ErrorEntry loadErrorEntry(int id);
+    public abstract void discardErrorEntry(int id);
 
-    public abstract void discardErroneousEvent(int id);
+    public abstract void discardErrorEntries(String siddhiAppName);
 
-    public abstract Map getStatus();
+    public abstract int getTotalErrorEntriesCount();
 
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
+    public abstract int getErrorEntriesCount(String siddhiAppName);
 
-    public void setDropWhenBufferFull(boolean dropWhenBufferFull) {
-        this.dropWhenBufferFull = dropWhenBufferFull;
-    }
+    public abstract void purge();
 }
