@@ -196,5 +196,5 @@ public abstract class ErrorStore {
 
     public abstract int getErrorEntriesCount(String siddhiAppName);
 
-    public abstract void purge();
+    public abstract void purge(Map retentionPolicyParams);
 }
