@@ -182,10 +182,13 @@ public abstract class ErrorStore {
                                              byte[] originalPayloadAsBytes, ErrorOccurrence errorOccurrence,
                                              ErroneousEventType erroneousEventType, ErrorType errorType)
             throws IOException, ClassNotFoundException {
-        String stackTrace = stackTraceAsBytes != null ?
-                (String) ErrorHandlerUtils.getAsObject(stackTraceAsBytes) : null;
+        String stackTrace = stackTraceAsBytes != null ? (String) ErrorHandlerUtils.getAsObject(stackTraceAsBytes) :
+                null;
+        String originalPayloadString = originalPayloadAsBytes != null ?
+                ErrorHandlerUtils.getOriginalPayloadString(ErrorHandlerUtils.getAsObject(originalPayloadAsBytes)) :
+                null;
         return new ErrorEntry(id, timestamp, siddhiAppName, streamName, eventAsBytes, cause, stackTrace,
-                originalPayloadAsBytes, errorOccurrence, erroneousEventType, errorType);
+                originalPayloadString, errorOccurrence, erroneousEventType, errorType);
     }
 
     public abstract void discardErrorEntry(int id);
