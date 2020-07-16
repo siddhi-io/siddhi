@@ -27,11 +27,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Contains utility methods for the error store.
+ * Contains utility methods for the error handler.
  */
-public class ErrorStoreUtils {
+public class ErrorHandlerUtils {
 
-    private ErrorStoreUtils() {}
+    private ErrorHandlerUtils() {}
 
     public static byte[] getAsBytes(Object event) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

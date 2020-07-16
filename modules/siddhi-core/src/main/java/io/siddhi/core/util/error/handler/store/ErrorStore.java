@@ -30,8 +30,8 @@ import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.model.ErrorEntry;
 import io.siddhi.core.util.error.handler.model.PublishableErrorEntry;
 import io.siddhi.core.util.error.handler.util.ErroneousEventType;
+import io.siddhi.core.util.error.handler.util.ErrorHandlerUtils;
 import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
-import io.siddhi.core.util.error.handler.util.ErrorStoreUtils;
 import io.siddhi.core.util.error.handler.util.ErrorType;
 import org.apache.log4j.Logger;
 
@@ -96,6 +96,14 @@ public abstract class ErrorStore {
 
     public abstract void setProperties(Map properties);
 
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    public void setDropWhenBufferFull(boolean dropWhenBufferFull) {
+        this.dropWhenBufferFull = dropWhenBufferFull;
+    }
+
     public void saveBeforeSourceMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
                                              String streamName) {
         for (ErroneousEvent erroneousEvent : erroneousEvents) {
@@ -148,10 +156,10 @@ public abstract class ErrorStore {
         try {
             Object originalPayload = erroneousEvent.getOriginalPayload();
             byte[] eventAsBytes = (event != null && eventType == ErroneousEventType.PAYLOAD_STRING) ?
-                    ErrorStoreUtils.getAsBytes(event.toString()) : ErrorStoreUtils.getAsBytes(event);
-            byte[] stackTraceAsBytes = (throwable != null) ? ErrorStoreUtils.getThrowableStackTraceAsBytes(throwable) :
-                    ErrorStoreUtils.getAsBytes(null);
-            byte[] originalPayloadAsBytes = ErrorStoreUtils.getAsBytes(originalPayload);
+                    ErrorHandlerUtils.getAsBytes(event.toString()) : ErrorHandlerUtils.getAsBytes(event);
+            byte[] stackTraceAsBytes = (throwable != null) ?
+                    ErrorHandlerUtils.getThrowableStackTraceAsBytes(throwable) : ErrorHandlerUtils.getAsBytes(null);
+            byte[] originalPayloadAsBytes = ErrorHandlerUtils.getAsBytes(originalPayload);
 
             produce(timestamp, siddhiAppName, streamName, eventAsBytes, cause, stackTraceAsBytes,
                     originalPayloadAsBytes, errorOccurrence.toString(), eventType.toString(), errorType.toString());
@@ -167,28 +175,29 @@ public abstract class ErrorStore {
 
     public abstract List<ErrorEntry> loadErrorEntries(String siddhiAppName, Map<String, String> queryParams);
 
+    public abstract ErrorEntry loadErrorEntry(int id);
+
     protected ErrorEntry constructErrorEntry(int id, long timestamp, String siddhiAppName, String streamName,
                                              byte[] eventAsBytes, String cause, byte[] stackTraceAsBytes,
                                              byte[] originalPayloadAsBytes, ErrorOccurrence errorOccurrence,
                                              ErroneousEventType erroneousEventType, ErrorType errorType)
             throws IOException, ClassNotFoundException {
-        String originalPayloadString =
-                ErrorStoreUtils.getOriginalPayloadString(ErrorStoreUtils.getAsObject(originalPayloadAsBytes));
-        Object eventObject = ErrorStoreUtils.getAsObject(eventAsBytes);
-        return new ErrorEntry<>(id, timestamp, siddhiAppName, streamName, eventObject, cause,
-                (String) ErrorStoreUtils.getAsObject(stackTraceAsBytes), originalPayloadString, errorOccurrence,
-                erroneousEventType, errorType);
+        String stackTrace = stackTraceAsBytes != null ? (String) ErrorHandlerUtils.getAsObject(stackTraceAsBytes) :
+                null;
+        String originalPayloadString = originalPayloadAsBytes != null ?
+                ErrorHandlerUtils.getOriginalPayloadString(ErrorHandlerUtils.getAsObject(originalPayloadAsBytes)) :
+                null;
+        return new ErrorEntry(id, timestamp, siddhiAppName, streamName, eventAsBytes, cause, stackTrace,
+                originalPayloadString, errorOccurrence, erroneousEventType, errorType);
     }
 
-    public abstract void discardErroneousEvent(int id);
+    public abstract void discardErrorEntry(int id);
 
-    public abstract Map getStatus();
+    public abstract void discardErrorEntries(String siddhiAppName);
 
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
+    public abstract int getTotalErrorEntriesCount();
 
-    public void setDropWhenBufferFull(boolean dropWhenBufferFull) {
-        this.dropWhenBufferFull = dropWhenBufferFull;
-    }
+    public abstract int getErrorEntriesCount(String siddhiAppName);
+
+    public abstract void purge(Map retentionPolicyParams);
 }
