@@ -793,7 +793,7 @@
         <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
         <maven.invoker.plugin.version>3.2.1</maven.invoker.plugin.version>
         <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
-        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+        <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
         <maven.scm.plugin.version>1.11.2</maven.scm.plugin.version>
         <maven.scm.publish.plugin.version>3.0.0</maven.scm.publish.plugin.version>
         <maven.site.plugin.version>3.8.2</maven.site.plugin.version>
