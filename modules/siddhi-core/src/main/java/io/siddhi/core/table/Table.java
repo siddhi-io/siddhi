@@ -37,12 +37,16 @@ import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.model.ErroneousEvent;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
+import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
+import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -141,6 +145,34 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     public TableDefinition getTableDefinition() {
         return tableDefinition;
+    }
+
+    public void onError(Object payload, DynamicOptions dynamicOptions, Exception e) {
+        OnErrorAction errorAction = onErrorAction;
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+//        } else if (errorAction == Sink.OnErrorAction.WAIT) {
+//            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+//                    + type + "' at '" + streamDefinition.getId() + "' as on.error='wait' does not handle " +
+//                    "'" + e.getClass().getName() + "' error: '" + e.getMessage() + "', events dropped '" +
+//                    payload + "'", e);
+//            return;
+        }
+        try {
+            switch (errorAction) {
+                case STORE:
+                    ErroneousEvent erroneousEvent = new ErroneousEvent(dynamicOptions.getEvent(), e, e.getMessage());
+                    erroneousEvent.setOriginalPayload(payload);
+                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                            ErrorOccurrence.STORE_ON_SINK_ERROR, siddhiAppContext.getName(),
+                            erroneousEvent, tableDefinition.getId());
+                    break;
+            }
+        } catch (Throwable t) {
+            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
+                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
+                    + "', events dropped '" + payload + "'", e);
+        }
     }
 
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
