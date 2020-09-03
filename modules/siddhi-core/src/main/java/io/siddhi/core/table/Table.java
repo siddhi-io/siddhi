@@ -43,6 +43,8 @@ import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
+import io.siddhi.query.api.annotation.Annotation;
+import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import org.apache.log4j.Logger;
@@ -52,6 +54,11 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
+import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
+import static io.siddhi.query.api.util.AnnotationHelper.getAnnotationElement;
 
 /**
  * Interface class to represent Tables in Siddhi. There are multiple implementations. Ex: {@link InMemoryTable}. Table
@@ -68,7 +75,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
     private RecordTableHandler recordTableHandler;
-    private Sink.OnErrorAction onErrorAction;
+    private OnErrorAction onErrorAction;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
     private LatencyTracker latencyTrackerUpdate;
@@ -90,9 +97,11 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
         this.siddhiAppContext = siddhiAppContext;
         this.recordTableHandler = recordTableHandler;
-        this.onErrorAction = Sink.OnErrorAction.valueOf(transportOptionHolder
-                .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
-                .getValue().toUpperCase());
+        Element onErrorElement = getAnnotationElement(ANNOTATION_STORE, ANNOTATION_ELEMENT_ON_ERROR,
+                tableDefinition.getAnnotations());
+        if (onErrorElement != null) {
+            this.onErrorAction = OnErrorAction.valueOf(onErrorElement.getValue());
+        }
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
@@ -503,4 +512,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public abstract boolean isStateful();
+
+    /**
+     * Different Type of On Error Actions
+     */
+    public enum OnErrorAction {
+        LOG,
+        WAIT,
+        STREAM,
+        STORE
+    }
 }
