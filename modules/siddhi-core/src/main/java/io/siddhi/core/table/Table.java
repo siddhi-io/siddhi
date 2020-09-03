@@ -147,7 +147,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onError(Object payload, DynamicOptions dynamicOptions, Exception e) {
+    public void onError(Object payload, DynamicOptions dynamicOptions, Exception e, ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
@@ -164,8 +164,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     ErroneousEvent erroneousEvent = new ErroneousEvent(dynamicOptions.getEvent(), e, e.getMessage());
                     erroneousEvent.setOriginalPayload(payload);
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                            ErrorOccurrence.STORE_ON_SINK_ERROR, siddhiAppContext.getName(),
-                            erroneousEvent, tableDefinition.getId());
+                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
             }
         } catch (Throwable t) {
