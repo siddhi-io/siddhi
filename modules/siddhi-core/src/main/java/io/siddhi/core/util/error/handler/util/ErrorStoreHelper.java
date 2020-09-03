@@ -46,14 +46,21 @@ public class ErrorStoreHelper {
             if (occurrence == ErrorOccurrence.BEFORE_SOURCE_MAPPING && erroneousEvent instanceof List) {
                 errorStore.saveBeforeSourceMappingError(siddhiAppName, (List<ErroneousEvent>) erroneousEvent,
                         streamName);
-            } else if (occurrence == ErrorOccurrence.STORE_ON_SINK_ERROR) {
-                errorStore.saveOnSinkError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()),
-                        streamName);
-            } else if (occurrence == ErrorOccurrence.STORE_ON_STREAM_ERROR) {
-                errorStore.saveOnStreamError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()),
-                        streamName);
+//            } else if (occurrence == ErrorOccurrence.STORE_ON_SINK_ERROR) {
+//                errorStore.saveOnSinkError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+//                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()),
+//                        streamName);
+//            } else if (occurrence == ErrorOccurrence.STORE_ON_STREAM_ERROR) {
+//                errorStore.saveOnStreamError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+//                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()),
+//                        streamName);
+//            } else if (occurrence == ErrorOccurrence.STORE_ON_TABLE_ADD) {
+//                errorStore.saveOnStreamError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+//                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()),
+//                        streamName);
+            } else {
+                errorStore.saveOnError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
             }
         }
     }

@@ -116,25 +116,24 @@ public abstract class ErrorStore {
         }
     }
 
-    public void saveOnSinkError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                String streamName) {
+    public void saveOnError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+                                String streamName, ErrorOccurrence errorOccurrence) {
         try {
-            save(siddhiAppName, streamName, erroneousEvent, eventType, ErrorOccurrence.STORE_ON_SINK_ERROR,
-                    ErrorType.TRANSPORT);
+            save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.TRANSPORT);
         } catch (ErrorStoreException e) {
             log.error("Failed to save erroneous event.", e);
         }
     }
 
-    public void saveOnStreamError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                  String streamName) {
-        try {
-            save(siddhiAppName, streamName, erroneousEvent, eventType, ErrorOccurrence.STORE_ON_STREAM_ERROR,
-                    ErrorType.TRANSPORT);
-        } catch (ErrorStoreException e) {
-            log.error("Failed to save erroneous event.", e);
-        }
-    }
+//    public void saveOnStreamError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+//                                  String streamName) {
+//        try {
+//            save(siddhiAppName, streamName, erroneousEvent, eventType, ErrorOccurrence.STORE_ON_STREAM_ERROR,
+//                    ErrorType.TRANSPORT);
+//        } catch (ErrorStoreException e) {
+//            log.error("Failed to save erroneous event.", e);
+//        }
+//    }
 
     protected void save(String siddhiAppName, String streamName, ErroneousEvent erroneousEvent,
                         ErroneousEventType eventType, ErrorOccurrence errorOccurrence, ErrorType errorType)
