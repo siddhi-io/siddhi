@@ -28,6 +28,7 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
+import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.table.record.RecordTableHandler;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -67,6 +68,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
     private RecordTableHandler recordTableHandler;
+    private Sink.OnErrorAction onErrorAction;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
     private LatencyTracker latencyTrackerUpdate;
@@ -88,6 +90,9 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
         this.siddhiAppContext = siddhiAppContext;
         this.recordTableHandler = recordTableHandler;
+        this.onErrorAction = Sink.OnErrorAction.valueOf(transportOptionHolder
+                .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
+                .getValue().toUpperCase());
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
