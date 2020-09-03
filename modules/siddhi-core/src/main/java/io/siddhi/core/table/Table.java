@@ -28,7 +28,6 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
-import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.table.record.RecordTableHandler;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -47,7 +46,6 @@ import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.core.util.transport.DynamicOptions;
-import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
@@ -61,7 +59,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
-import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
 import static io.siddhi.query.api.util.AnnotationHelper.getAnnotationElement;
 
 /**
