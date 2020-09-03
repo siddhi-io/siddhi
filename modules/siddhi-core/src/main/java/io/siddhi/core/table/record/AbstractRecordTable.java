@@ -36,7 +36,9 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
@@ -53,9 +55,8 @@ import java.util.Map;
  * developer can directly work with event data.
  */
 public abstract class AbstractRecordTable extends Table {
-
     private static final Logger log = Logger.getLogger(AbstractRecordTable.class);
-
+    private ThreadLocal<DynamicOptions> trpDynamicOptions;
     protected StreamEventFactory storeEventPool;
     protected RecordTableHandler recordTableHandler;
 
@@ -95,6 +96,7 @@ public abstract class AbstractRecordTable extends Table {
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
+        DynamicOptions dynamicOptions = trpDynamicOptions.get();
         long timestamp = 0L;
         while (addingEventChunk.hasNext()) {
             StreamEvent event = addingEventChunk.next();
@@ -104,7 +106,13 @@ public abstract class AbstractRecordTable extends Table {
         if (recordTableHandler != null) {
             recordTableHandler.add(timestamp, records);
         } else {
-            add(records);
+            try {
+                add(records);
+            } catch (ConnectionUnavailableException exception) {
+                for (Object payload: records) {
+                    onError(payload, dynamicOptions, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
+                }
+            }
         }
     }
 
