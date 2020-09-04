@@ -143,7 +143,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onError(Object payload, ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
+    public void onError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
                         ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
@@ -158,9 +158,11 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         try {
             switch (errorAction) {
                 case STORE:
+                    addingEventChunk.reset();
                     while (addingEventChunk.hasNext()) {
-                        ErroneousEvent erroneousEvent = new ErroneousEvent(addingEventChunk.next(), e, e.getMessage());
-                        erroneousEvent.setOriginalPayload(payload);
+                        StreamEvent event = addingEventChunk.next();
+                        ErroneousEvent erroneousEvent = new ErroneousEvent(event, e, e.getMessage());
+                        erroneousEvent.setOriginalPayload(event.getOutputData());
                         ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                                 errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     }
@@ -169,7 +171,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         } catch (Throwable t) {
             LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
                     + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                    + "', events dropped '" + payload + "'", e);
+                    + "', events dropped '" + addingEventChunk.toString() + "'", e);
         }
     }
 
