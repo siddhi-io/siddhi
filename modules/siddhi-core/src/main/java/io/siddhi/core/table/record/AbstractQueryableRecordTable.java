@@ -234,17 +234,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
                 ((CacheTable) cacheTable).addAndTrimUptoMaxSize(addingEventChunk);
-                super.add(addingEventChunk);
+                super.add(addingEventChunk, noOfEvents);
             } finally {
                 readWriteLock.writeLock().unlock();
             }
         } else {
-            super.add(addingEventChunk);
+            super.add(addingEventChunk, noOfEvents);
         }
     }
 
