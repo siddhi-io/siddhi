@@ -96,7 +96,7 @@ public abstract class AbstractRecordTable extends Table {
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
-        DynamicOptions dynamicOptions = trpDynamicOptions.get();
+//        DynamicOptions dynamicOptions = trpDynamicOptions.get();
         long timestamp = 0L;
         while (addingEventChunk.hasNext()) {
             StreamEvent event = addingEventChunk.next();
@@ -110,7 +110,7 @@ public abstract class AbstractRecordTable extends Table {
                 add(records);
             } catch (ConnectionUnavailableException exception) {
                 for (Object payload: records) {
-                    onError(payload, dynamicOptions, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
+                    onError(payload, addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
                 }
             }
         }
