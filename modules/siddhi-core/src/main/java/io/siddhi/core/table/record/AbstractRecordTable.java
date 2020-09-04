@@ -93,10 +93,9 @@ public abstract class AbstractRecordTable extends Table {
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
-//        DynamicOptions dynamicOptions = trpDynamicOptions.get();
         long timestamp = 0L;
         while (addingEventChunk.hasNext()) {
             StreamEvent event = addingEventChunk.next();
