@@ -45,7 +45,6 @@ import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
-import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
@@ -144,7 +143,8 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onError(Object payload, ComplexEventChunk<StreamEvent> addingEventChunk, Exception e, ErrorOccurrence errorOccurrence) {
+    public void onError(Object payload, ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
+                        ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
