@@ -103,16 +103,14 @@ public abstract class AbstractRecordTable extends Table {
             records.add(event.getOutputData());
             timestamp = event.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.add(timestamp, records);
-        } else {
-            try {
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.add(timestamp, records);
+            } else {
                 add(records);
-            } catch (ConnectionUnavailableException exception) {
-                for (Object payload: records) {
-                    onError(payload, addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
-                }
             }
+        } catch (ConnectionUnavailableException exception) {
+            onError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
         }
     }
 
