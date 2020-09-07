@@ -109,7 +109,7 @@ public abstract class AbstractRecordTable extends Table {
                 add(records);
             }
         } catch (ConnectionUnavailableException exception) {
-            onError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD, noOfEvents);
+            onAddError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD, noOfEvents);
         }
     }
 
