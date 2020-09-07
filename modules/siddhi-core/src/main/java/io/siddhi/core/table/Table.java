@@ -242,6 +242,8 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 //        }
     }
 
+    protected abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk);
+
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         if (isConnected.get()) {
             try {
