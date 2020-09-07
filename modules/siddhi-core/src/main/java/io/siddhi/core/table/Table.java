@@ -153,15 +153,11 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             switch (errorAction) {
                 case STORE:
                     addingEventChunk.reset();
-                    // TODO: 2020-09-07 save the entire chunk as ErroneousEvent
-                    while (addingEventChunk.hasNext()) {
-                        StreamEvent event = addingEventChunk.next();
-                        ErroneousEvent erroneousEvent = new ErroneousEvent(event, e, e.getMessage());
-                        // TODO: 2020-09-07 construct original payload with column valu like SQL describe command output 
-                        erroneousEvent.setOriginalPayload(event.toString());
-                        ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                                errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-                    }
+                    ErroneousEvent erroneousEvent = new ErroneousEvent(addingEventChunk, e, e.getMessage());
+                    // TODO: 2020-09-07 construct original payload with column valu like SQL describe command output
+                    erroneousEvent.setOriginalPayload(addingEventChunk.toString());
+                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
                 case RETRY:
                 default:
