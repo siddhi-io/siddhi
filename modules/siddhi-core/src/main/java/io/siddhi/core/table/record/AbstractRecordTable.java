@@ -93,7 +93,7 @@ public abstract class AbstractRecordTable extends Table {
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
         long timestamp = 0L;
@@ -109,7 +109,7 @@ public abstract class AbstractRecordTable extends Table {
                 add(records);
             }
         } catch (ConnectionUnavailableException exception) {
-            onAddError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD, noOfEvents);
+            onAddError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
         }
     }
 

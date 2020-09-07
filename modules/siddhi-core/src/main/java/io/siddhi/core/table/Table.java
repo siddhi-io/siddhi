@@ -144,7 +144,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
-                           ErrorOccurrence errorOccurrence, int noOfEvents) {
+                           ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
@@ -156,7 +156,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     while (addingEventChunk.hasNext()) {
                         StreamEvent event = addingEventChunk.next();
                         ErroneousEvent erroneousEvent = new ErroneousEvent(event, e, e.getMessage());
-                        erroneousEvent.setOriginalPayload(event.getOutputData());
+                        erroneousEvent.setOriginalPayload(event.toString());
                         ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                                 errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     }
@@ -170,10 +170,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         waitWhileConnect();
                         LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                                 "' has become available for add operation for events '" + addingEventChunk + "'");
-                        addEvents(addingEventChunk, noOfEvents);
+                        add(addingEventChunk);
                     } else {
                         connectWithRetry();
-                        addEvents(addingEventChunk, noOfEvents);
+                        add(addingEventChunk);
                     }
                     break;
                 case LOG:
@@ -198,7 +198,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             latencyTrackerInsert.markIn();
         }
         addingEventChunk.reset();
-        add(addingEventChunk, noOfEvents);
+        add(addingEventChunk);
         if (throughputTrackerInsert != null &&
                 Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerInsert.eventsIn(noOfEvents);
@@ -241,8 +241,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 //            addEvents(addingEventChunk, noOfEvents);
 //        }
     }
-
-    protected abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents);
 
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         if (isConnected.get()) {

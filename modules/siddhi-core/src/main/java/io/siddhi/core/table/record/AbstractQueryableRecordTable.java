@@ -234,17 +234,17 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
                 ((CacheTable) cacheTable).addAndTrimUptoMaxSize(addingEventChunk);
-                super.add(addingEventChunk, noOfEvents);
+                super.add(addingEventChunk);
             } finally {
                 readWriteLock.writeLock().unlock();
             }
         } else {
-            super.add(addingEventChunk, noOfEvents);
+            super.add(addingEventChunk);
         }
     }
 
