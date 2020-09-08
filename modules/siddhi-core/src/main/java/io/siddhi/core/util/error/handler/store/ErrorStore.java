@@ -104,8 +104,8 @@ public abstract class ErrorStore {
         this.dropWhenBufferFull = dropWhenBufferFull;
     }
 
-    public void saveBeforeSourceMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
-                                             String streamName) {
+    public void saveMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
+                                 String streamName) {
         for (ErroneousEvent erroneousEvent : erroneousEvents) {
             try {
                 save(siddhiAppName, streamName, erroneousEvent, ErroneousEventType.PAYLOAD_STRING,
@@ -116,10 +116,19 @@ public abstract class ErrorStore {
         }
     }
 
-    public void saveOnError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                String streamName, ErrorOccurrence errorOccurrence) {
+    public void saveTransportError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+                                   String streamName, ErrorOccurrence errorOccurrence) {
         try {
             save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.TRANSPORT);
+        } catch (ErrorStoreException e) {
+            log.error("Failed to save erroneous event.", e);
+        }
+    }
+
+    public void saveStoreError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+                                   String streamName, ErrorOccurrence errorOccurrence) {
+        try {
+            save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.STORE);
         } catch (ErrorStoreException e) {
             log.error("Failed to save erroneous event.", e);
         }

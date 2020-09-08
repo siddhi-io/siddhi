@@ -44,13 +44,33 @@ public class ErrorStoreHelper {
     public static void storeErroneousEvent(ErrorStore errorStore, ErrorOccurrence occurrence, String siddhiAppName,
                                            Object erroneousEvent, String streamName) {
         if (errorStore != null && erroneousEvent != null) {
-            if (occurrence == ErrorOccurrence.BEFORE_SOURCE_MAPPING && erroneousEvent instanceof List) {
-                errorStore.saveBeforeSourceMappingError(siddhiAppName, (List<ErroneousEvent>) erroneousEvent,
-                        streamName);
-            } else {
-                errorStore.saveOnError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                        getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
+            switch (getErrorType(occurrence)) {
+                case MAPPING:
+                    if (erroneousEvent instanceof List) {
+                        errorStore.saveMappingError(siddhiAppName, (List<ErroneousEvent>) erroneousEvent,
+                                streamName);
+                    }
+                    break;
+                case TRANSPORT:
+                    errorStore.saveTransportError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
+                    break;
+                case STORE:
+                    errorStore.saveStoreError(siddhiAppName, (ErroneousEvent) erroneousEvent,
+                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
+                    break;
             }
+        }
+    }
+
+    private static ErrorType getErrorType(ErrorOccurrence errorOccurrence) {
+        if (errorOccurrence == ErrorOccurrence.BEFORE_SOURCE_MAPPING) {
+            return ErrorType.MAPPING;
+        } else if (errorOccurrence == ErrorOccurrence.STORE_ON_SINK_ERROR ||
+                errorOccurrence == ErrorOccurrence.STORE_ON_STREAM_ERROR) {
+            return ErrorType.TRANSPORT;
+        } else {
+            return ErrorType.STORE;
         }
     }
 
