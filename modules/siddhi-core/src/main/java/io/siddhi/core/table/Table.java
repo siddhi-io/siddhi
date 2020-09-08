@@ -18,6 +18,7 @@
 
 package io.siddhi.core.table;
 
+import de.vandermeer.asciitable.AsciiTable;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -155,7 +156,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     addingEventChunk.reset();
                     ErroneousEvent erroneousEvent = new ErroneousEvent(addingEventChunk, e, e.getMessage());
                     // TODO: 2020-09-07 construct original payload with column valu like SQL describe command output
-                    erroneousEvent.setOriginalPayload(addingEventChunk.toString());
+                    erroneousEvent.setOriginalPayload(constructErrorRecordString(addingEventChunk));
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
@@ -190,6 +191,20 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         }
     }
 
+    private String constructErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
+        AsciiTable asciiTable = new AsciiTable();
+        asciiTable.addRule();
+        asciiTable.addRow(tableDefinition.getAttributeNameArray());
+        asciiTable.addRule();
+        eventChunk.reset();
+        while (eventChunk.hasNext()) {
+            StreamEvent streamEvent = eventChunk.next();
+            asciiTable.addRow(streamEvent.getOutputData());
+            asciiTable.addRule();
+        }
+        return asciiTable.render();
+    }
+
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
         if (latencyTrackerInsert != null &&
                 Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
@@ -201,43 +216,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerInsert.eventsIn(noOfEvents);
         }
-//        if (isConnected.get()) {
-//            try {
-//                if (latencyTrackerInsert != null &&
-//                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-//                    latencyTrackerInsert.markIn();
-//                }
-//                addingEventChunk.reset();
-//                add(addingEventChunk);
-//                if (throughputTrackerInsert != null &&
-//                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-//                    throughputTrackerInsert.eventsIn(noOfEvents);
-//                }
-//            } catch (ConnectionUnavailableException e) {
-//                isConnected.set(false);
-//                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-//                        " Connection unavailable at Table '" + tableDefinition.getId() +
-//                        "', will retry connection immediately.", e);
-//                connectWithRetry();
-//                addEvents(addingEventChunk, noOfEvents);
-//            } finally {
-//                if (latencyTrackerInsert != null &&
-//                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-//                    latencyTrackerInsert.markOut();
-//                }
-//            }
-//        } else if (isTryingToConnect.get()) {
-//            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
-//                    addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
-//                    "' as its trying to reconnect!");
-//            waitWhileConnect();
-//            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-//                    "' has become available for add operation for events '" + addingEventChunk + "'");
-//            addEvents(addingEventChunk, noOfEvents);
-//        } else {
-//            connectWithRetry();
-//            addEvents(addingEventChunk, noOfEvents);
-//        }
     }
 
     public abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk);
