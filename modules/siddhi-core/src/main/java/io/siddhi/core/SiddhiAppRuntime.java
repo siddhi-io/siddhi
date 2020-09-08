@@ -27,6 +27,7 @@ import io.siddhi.core.partition.PartitionRuntime;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.input.TableInputHandler;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.stream.output.sink.Sink;
@@ -138,6 +139,8 @@ public interface SiddhiAppRuntime {
     Attribute[] getOnDemandQueryOutputAttributes(OnDemandQuery onDemandQuery);
 
     InputHandler getInputHandler(String streamId);
+
+    TableInputHandler getTableInputHandler(String tableId);
 
     void setPurgingEnabled(boolean purgingEnabled);
 
