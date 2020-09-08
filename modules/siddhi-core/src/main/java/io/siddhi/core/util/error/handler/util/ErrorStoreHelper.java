@@ -19,6 +19,7 @@
 package io.siddhi.core.util.error.handler.util;
 
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.store.ErrorStore;
@@ -54,7 +55,9 @@ public class ErrorStoreHelper {
     }
 
     private static ErroneousEventType getErroneousEventType(Object event) {
-        if (event instanceof ComplexEvent) {
+        if (event instanceof ComplexEventChunk) {
+            return ErroneousEventType.COMPLEX_EVENT_CHUNK;
+        } else if (event instanceof ComplexEvent) {
             return ErroneousEventType.COMPLEX_EVENT;
         } else if (event instanceof Event) {
             return ErroneousEventType.EVENT;

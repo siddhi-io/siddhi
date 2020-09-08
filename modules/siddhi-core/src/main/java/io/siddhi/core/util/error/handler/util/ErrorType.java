@@ -23,5 +23,6 @@ package io.siddhi.core.util.error.handler.util;
  */
 public enum ErrorType {
     MAPPING,
-    TRANSPORT
+    TRANSPORT,
+    STORE
 }
