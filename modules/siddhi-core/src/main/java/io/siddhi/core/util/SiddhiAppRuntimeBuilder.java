@@ -97,7 +97,7 @@ public class SiddhiAppRuntimeBuilder {
 
     public SiddhiAppRuntimeBuilder(SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
-        this.inputManager = new InputManager(this.siddhiAppContext, streamDefinitionMap, streamJunctionMap);
+        this.inputManager = new InputManager(this.siddhiAppContext, streamDefinitionMap, streamJunctionMap, tableMap);
     }
 
     public void defineStream(StreamDefinition streamDefinition) {

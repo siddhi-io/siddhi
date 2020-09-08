@@ -53,11 +53,13 @@ public class ErrorStoreHelper {
                     break;
                 case TRANSPORT:
                     errorStore.saveTransportError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
+                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName,
+                            occurrence);
                     break;
                 case STORE:
                     errorStore.saveStoreError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName, occurrence);
+                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName,
+                            occurrence);
                     break;
             }
         }
