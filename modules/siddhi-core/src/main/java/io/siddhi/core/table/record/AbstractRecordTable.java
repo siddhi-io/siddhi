@@ -108,8 +108,8 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 add(records);
             }
-        } catch (ConnectionUnavailableException exception) {
-            onAddError(addingEventChunk, exception, ErrorOccurrence.STORE_ON_TABLE_ADD);
+        } catch (ConnectionUnavailableException e) {
+            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD);
         }
     }
 
@@ -123,8 +123,7 @@ public abstract class AbstractRecordTable extends Table {
     protected abstract void add(List<Object[]> records) throws ConnectionUnavailableException;
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
-            throws ConnectionUnavailableException {
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
 
@@ -134,23 +133,28 @@ public abstract class AbstractRecordTable extends Table {
             findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
         }
 
-        Iterator<Object[]> records;
-        if (recordTableHandler != null) {
-            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
-        } else {
-            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
-        }
-        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
-        if (records != null) {
-            while (records.hasNext()) {
-                Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.newInstance();
-                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                streamEventComplexEventChunk.add(streamEvent);
+        try {
+            Iterator<Object[]> records;
+            if (recordTableHandler != null) {
+                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                        recordStoreCompiledCondition.compiledCondition);
+            } else {
+                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
             }
+            ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
+            if (records != null) {
+                while (records.hasNext()) {
+                    Object[] record = records.next();
+                    StreamEvent streamEvent = storeEventPool.newInstance();
+                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                    streamEventComplexEventChunk.add(streamEvent);
+                }
+            }
+            return streamEventComplexEventChunk.getFirst();
+        } catch (ConnectionUnavailableException e) {
+            onFindError(matchingEvent, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_FIND);
         }
-        return streamEventComplexEventChunk.getFirst();
+        return null;
     }
 
     /**

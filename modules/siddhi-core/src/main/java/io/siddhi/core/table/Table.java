@@ -264,9 +264,8 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
                     + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
                     + "', events dropped '" + matchingEvent.toString() + "'", e);
-        } finally {
-            return null;
         }
+        return null;
     }
 
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
