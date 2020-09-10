@@ -19,7 +19,6 @@
 package io.siddhi.core.util.error.handler.util;
 
 import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.store.ErrorStore;
@@ -77,7 +76,7 @@ public class ErrorStoreHelper {
     }
 
     private static ErroneousEventType getErroneousEventType(Object event) {
-        if (event instanceof ComplexEventChunk) {
+        if (event instanceof ReplayableTableRecord) {
             return ErroneousEventType.REPLAYABLE_TABLE_RECORD;
         } else if (event instanceof ComplexEvent) {
             return ErroneousEventType.COMPLEX_EVENT;
