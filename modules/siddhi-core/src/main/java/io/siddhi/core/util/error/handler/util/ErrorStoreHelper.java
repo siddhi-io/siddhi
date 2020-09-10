@@ -78,7 +78,7 @@ public class ErrorStoreHelper {
 
     private static ErroneousEventType getErroneousEventType(Object event) {
         if (event instanceof ComplexEventChunk) {
-            return ErroneousEventType.COMPLEX_EVENT_CHUNK;
+            return ErroneousEventType.REPLAYABLE_TABLE_RECORD;
         } else if (event instanceof ComplexEvent) {
             return ErroneousEventType.COMPLEX_EVENT;
         } else if (event instanceof Event) {

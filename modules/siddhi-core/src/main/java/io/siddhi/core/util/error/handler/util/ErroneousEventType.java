@@ -23,7 +23,7 @@ package io.siddhi.core.util.error.handler.util;
  * {@link io.siddhi.core.util.error.handler.store.ErrorStore}.
  */
 public enum ErroneousEventType {
-    COMPLEX_EVENT_CHUNK,
+    REPLAYABLE_TABLE_RECORD,
     COMPLEX_EVENT,
     EVENT,
     EVENT_ARRAY,
