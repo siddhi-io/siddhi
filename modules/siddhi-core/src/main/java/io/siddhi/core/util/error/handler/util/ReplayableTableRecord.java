@@ -85,7 +85,8 @@ public class ReplayableTableRecord implements Serializable {
      * @param addingStreamEventExtractor
      */
     public ReplayableTableRecord(ComplexEventChunk complexEventChunk, CompiledCondition compiledCondition,
-                                 CompiledUpdateSet compiledUpdateSet, AddingStreamEventExtractor addingStreamEventExtractor) {
+                                 CompiledUpdateSet compiledUpdateSet,
+                                 AddingStreamEventExtractor addingStreamEventExtractor) {
         this.complexEventChunk = complexEventChunk;
         this.compiledCondition = compiledCondition;
         this.compiledUpdateSet = compiledUpdateSet;
