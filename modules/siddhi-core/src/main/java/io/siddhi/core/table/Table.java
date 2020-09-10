@@ -18,7 +18,6 @@
 
 package io.siddhi.core.table;
 
-import de.vandermeer.asciitable.AsciiTable;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -156,7 +155,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     addingEventChunk.reset();
                     ErroneousEvent erroneousEvent = new ErroneousEvent(addingEventChunk, e, e.getMessage());
                     // TODO: 2020-09-07 construct original payload with column valu like SQL describe command output
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(addingEventChunk));
+                    erroneousEvent.setOriginalPayload(addingEventChunk.toString());
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
@@ -191,19 +190,19 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         }
     }
 
-    private String constructErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
-        AsciiTable asciiTable = new AsciiTable();
-        asciiTable.addRule();
-        asciiTable.addRow(tableDefinition.getAttributeNameArray());
-        asciiTable.addRule();
-        eventChunk.reset();
-        while (eventChunk.hasNext()) {
-            StreamEvent streamEvent = eventChunk.next();
-            asciiTable.addRow(streamEvent.getOutputData());
-            asciiTable.addRule();
-        }
-        return asciiTable.render();
-    }
+//    private String constructErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
+//        AsciiTable asciiTable = new AsciiTable();
+//        asciiTable.addRule();
+//        asciiTable.addRow(tableDefinition.getAttributeNameArray());
+//        asciiTable.addRule();
+//        eventChunk.reset();
+//        while (eventChunk.hasNext()) {
+//            StreamEvent streamEvent = eventChunk.next();
+//            asciiTable.addRow(streamEvent.getOutputData());
+//            asciiTable.addRule();
+//        }
+//        return asciiTable.render();
+//    }
 
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
         if (latencyTrackerInsert != null &&
