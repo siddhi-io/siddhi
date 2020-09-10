@@ -202,8 +202,7 @@ public abstract class AbstractRecordTable extends Table {
             throws ConnectionUnavailableException;
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
-            throws ConnectionUnavailableException {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
@@ -221,12 +220,17 @@ public abstract class AbstractRecordTable extends Table {
             deleteConditionParameterMaps.add(variableMap);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                    compiledCondition);
-        } else {
-            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                        compiledCondition);
+            } else {
+                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onDeleteError(deletingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_DELETE);
         }
+
     }
 
     protected void connectAndLoadCache() throws ConnectionUnavailableException {

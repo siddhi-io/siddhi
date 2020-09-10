@@ -340,7 +340,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         }
     }
 
-    protected abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
+    public abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
                                    CompiledCondition compiledCondition);
 
 

@@ -20,8 +20,10 @@ package io.siddhi.core.stream.input;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 import org.apache.log4j.Logger;
 
 /**
@@ -42,5 +44,9 @@ public class TableInputHandler {
 
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         table.add(addingEventChunk);
+    }
+
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
+        table.delete(deletingEventChunk, compiledCondition);
     }
 }
