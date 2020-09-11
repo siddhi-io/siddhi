@@ -19,12 +19,10 @@ package io.siddhi.core.event;
 
 import io.siddhi.query.api.definition.StreamDefinition;
 
-import java.io.Serializable;
-
 /**
  * Interface for meta event to hold information relevant to a {@link ComplexEvent}.
  */
-public interface MetaComplexEvent extends Serializable {
+public interface MetaComplexEvent {
 
     void setOutputDefinition(StreamDefinition streamDefinition);
 

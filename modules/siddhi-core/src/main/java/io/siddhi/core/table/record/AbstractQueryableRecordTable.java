@@ -234,7 +234,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
@@ -249,7 +249,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
+            throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache;
         if (cacheEnabled) {
@@ -369,14 +370,9 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
-        try {
-            updateStoreTableSize();
-        } catch (ConnectionUnavailableException e) {
-            // TODO: 2020-09-10 Improve this error flow
-            log.error(e);
-        }
-
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException {
+        updateStoreTableSize();
         // handle compile condition type conv
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache = null;

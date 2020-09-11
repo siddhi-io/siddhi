@@ -21,12 +21,10 @@ package io.siddhi.core.executor;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.query.api.definition.Attribute;
 
-import java.io.Serializable;
-
 /**
  * Parent interface for all Expression Executors classes.
  */
-public interface ExpressionExecutor extends Serializable {
+public interface ExpressionExecutor {
 
     Object execute(ComplexEvent event);
 

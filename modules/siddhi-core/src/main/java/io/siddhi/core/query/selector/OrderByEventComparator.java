@@ -28,7 +28,6 @@ import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 
-import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,7 @@ import java.util.Map;
 /**
  * Comparator class to arrange complex events based on hashcode.
  */
-public class OrderByEventComparator implements Comparator<ComplexEvent>, Serializable {
+public class OrderByEventComparator implements Comparator<ComplexEvent> {
 
     private VariableExpressionExecutor[] groupByExecutors = null;
     private boolean[] isAscendingArray = null;

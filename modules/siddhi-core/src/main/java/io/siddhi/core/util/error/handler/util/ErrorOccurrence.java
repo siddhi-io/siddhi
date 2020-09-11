@@ -24,11 +24,5 @@ package io.siddhi.core.util.error.handler.util;
 public enum ErrorOccurrence {
     BEFORE_SOURCE_MAPPING,
     STORE_ON_SINK_ERROR,
-    STORE_ON_STREAM_ERROR,
-    STORE_ON_TABLE_ADD,
-    STORE_ON_TABLE_FIND,
-    STORE_ON_TABLE_DELETE,
-    STORE_ON_TABLE_UPDATE,
-    STORE_ON_TABLE_UPDATE_OR_ADD,
-    STORE_ON_TABLE_CONTAINS
+    STORE_ON_STREAM_ERROR
 }

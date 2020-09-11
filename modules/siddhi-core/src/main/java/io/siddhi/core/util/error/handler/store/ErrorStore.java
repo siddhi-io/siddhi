@@ -104,8 +104,8 @@ public abstract class ErrorStore {
         this.dropWhenBufferFull = dropWhenBufferFull;
     }
 
-    public void saveMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
-                                 String streamName) {
+    public void saveBeforeSourceMappingError(String siddhiAppName, List<ErroneousEvent> erroneousEvents,
+                                             String streamName) {
         for (ErroneousEvent erroneousEvent : erroneousEvents) {
             try {
                 save(siddhiAppName, streamName, erroneousEvent, ErroneousEventType.PAYLOAD_STRING,
@@ -116,19 +116,21 @@ public abstract class ErrorStore {
         }
     }
 
-    public void saveTransportError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                   String streamName, ErrorOccurrence errorOccurrence) {
+    public void saveOnSinkError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+                                String streamName) {
         try {
-            save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.TRANSPORT);
+            save(siddhiAppName, streamName, erroneousEvent, eventType, ErrorOccurrence.STORE_ON_SINK_ERROR,
+                    ErrorType.TRANSPORT);
         } catch (ErrorStoreException e) {
             log.error("Failed to save erroneous event.", e);
         }
     }
 
-    public void saveStoreError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                   String streamName, ErrorOccurrence errorOccurrence) {
+    public void saveOnStreamError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
+                                  String streamName) {
         try {
-            save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.STORE);
+            save(siddhiAppName, streamName, erroneousEvent, eventType, ErrorOccurrence.STORE_ON_STREAM_ERROR,
+                    ErrorType.TRANSPORT);
         } catch (ErrorStoreException e) {
             log.error("Failed to save erroneous event.", e);
         }

@@ -36,17 +36,12 @@ import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.error.handler.model.ErroneousEvent;
-import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
-import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
-import io.siddhi.core.util.error.handler.model.ReplayableTableRecord;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
-import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import org.apache.log4j.Logger;
@@ -56,10 +51,6 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR;
-import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
-import static io.siddhi.query.api.util.AnnotationHelper.getAnnotationElement;
 
 /**
  * Interface class to represent Tables in Siddhi. There are multiple implementations. Ex: {@link InMemoryTable}. Table
@@ -76,7 +67,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
     private RecordTableHandler recordTableHandler;
-    private OnErrorAction onErrorAction;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
     private LatencyTracker latencyTrackerUpdate;
@@ -98,11 +88,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
         this.siddhiAppContext = siddhiAppContext;
         this.recordTableHandler = recordTableHandler;
-        Element onErrorElement = getAnnotationElement(ANNOTATION_STORE, ANNOTATION_ELEMENT_ON_ERROR,
-                tableDefinition.getAnnotations());
-        if (onErrorElement != null) {
-            this.onErrorAction = OnErrorAction.valueOf(onErrorElement.getValue());
-        }
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
@@ -144,205 +129,133 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
-                           ErrorOccurrence errorOccurrence) {
-        OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
-        try {
-            switch (errorAction) {
-                case STORE:
-                    addingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk), e,
-                            e.getMessage());
-                    // TODO: 2020-09-07 construct original payload with column valu like SQL describe command output
-                    erroneousEvent.setOriginalPayload(addingEventChunk.toString());
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-                    break;
-                case RETRY:
-                default:
-                    // TODO: 2020-09-10 make as infinite loop 
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
-                                addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                                "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                                "' has become available for add operation for events '" + addingEventChunk + "'");
-                        add(addingEventChunk);
-                    } else {
-                        connectWithRetry();
-                        add(addingEventChunk);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                    break;
-            }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                    + "', events dropped '" + addingEventChunk.toString() + "'", e);
-        }
-    }
-
-//    private String constructErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
-//        AsciiTable asciiTable = new AsciiTable();
-//        asciiTable.addRule();
-//        asciiTable.addRow(tableDefinition.getAttributeNameArray());
-//        asciiTable.addRule();
-//        eventChunk.reset();
-//        while (eventChunk.hasNext()) {
-//            StreamEvent streamEvent = eventChunk.next();
-//            asciiTable.addRow(streamEvent.getOutputData());
-//            asciiTable.addRule();
-//        }
-//        return asciiTable.render();
-//    }
-
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
-        if (latencyTrackerInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerInsert.markIn();
-        }
-        addingEventChunk.reset();
-        add(addingEventChunk);
-        if (throughputTrackerInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerInsert.eventsIn(noOfEvents);
-        }
-    }
-
-    public abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk);
-
-    public StreamEvent onFindError(StateEvent matchingEvent, CompiledCondition compiledCondition, Exception e,
-                           ErrorOccurrence errorOccurrence) {
-        OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
-        try {
-            switch (errorAction) {
-                case STORE:
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(compiledCondition,
-                            matchingEvent), e,
-                            e.getMessage());
-                    erroneousEvent.setOriginalPayload(matchingEvent.toString());
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-                    break;
-                case RETRY:
-                default:
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
-                                matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                                "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                                "' has become available for find operation for events '" + matchingEvent + "'");
-                        return find(matchingEvent, compiledCondition);
-                    } else {
-                        connectWithRetry();
-                        return find(matchingEvent, compiledCondition);
-                    }
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing find for event  at '"
-                            + tableDefinition.getId() + "'. Event dropped '" + matchingEvent.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                    break;
+        if (isConnected.get()) {
+            try {
+                if (latencyTrackerInsert != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerInsert.markIn();
+                }
+                addingEventChunk.reset();
+                add(addingEventChunk);
+                if (throughputTrackerInsert != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    throughputTrackerInsert.eventsIn(noOfEvents);
+                }
+            } catch (ConnectionUnavailableException e) {
+                isConnected.set(false);
+                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                        " Connection unavailable at Table '" + tableDefinition.getId() +
+                        "', will retry connection immediately.", e);
+                connectWithRetry();
+                addEvents(addingEventChunk, noOfEvents);
+            } finally {
+                if (latencyTrackerInsert != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerInsert.markOut();
+                }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                    + "', events dropped '" + matchingEvent.toString() + "'", e);
+        } else if (isTryingToConnect.get()) {
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
+                    addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            waitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for add operation for events '" + addingEventChunk + "'");
+            addEvents(addingEventChunk, noOfEvents);
+        } else {
+            connectWithRetry();
+            addEvents(addingEventChunk, noOfEvents);
         }
-        return null;
     }
+
+    protected abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException;
 
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        if (latencyTrackerFind != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerFind.markIn();
-        }
-        StreamEvent results = find(compiledCondition, matchingEvent);
-        if (throughputTrackerFind != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerFind.eventIn();
-        }
-        return results;
-    }
-
-    protected abstract StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent);
-
-    public void onDeleteError(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
-                              Exception e, ErrorOccurrence errorOccurrence) {
-        OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
-        try {
-            switch (errorAction) {
-                case STORE:
-                    deletingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(
-                            new ReplayableTableRecord(deletingEventChunk, compiledCondition), e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(deletingEventChunk.toString());
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-                    break;
-                case RETRY:
-                default:
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
-                                deletingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                                "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                                "' has become available for delete operation for events '" + deletingEventChunk + "'");
-                        delete(deletingEventChunk, compiledCondition);
-                    } else {
-                        connectWithRetry();
-                        delete(deletingEventChunk, compiledCondition);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + deletingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                    break;
+        if (isConnected.get()) {
+            try {
+                if (latencyTrackerFind != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerFind.markIn();
+                }
+                StreamEvent results = find(compiledCondition, matchingEvent);
+                if (throughputTrackerFind != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    throughputTrackerFind.eventIn();
+                }
+                return results;
+            } catch (ConnectionUnavailableException e) {
+                isConnected.set(false);
+                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                        " Connection unavailable at Table '" + tableDefinition.getId() +
+                        "', will retry connection immediately.", e);
+                connectWithRetry();
+                return find(matchingEvent, compiledCondition);
+            } finally {
+                if (latencyTrackerFind != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerFind.markOut();
+                }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                    + "', events dropped '" + deletingEventChunk.toString() + "'", e);
+        } else if (isTryingToConnect.get()) {
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
+                    matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            waitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for find operation for events '" + matchingEvent + "'");
+            return find(matchingEvent, compiledCondition);
+        } else {
+            connectWithRetry();
+            return find(matchingEvent, compiledCondition);
         }
     }
+
+    protected abstract StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException;
 
     public void deleteEvents(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
                              int noOfEvents) {
-        if (latencyTrackerDelete != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerDelete.markIn();
-        }
-        delete(deletingEventChunk, compiledCondition);
-        if (throughputTrackerDelete != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerDelete.eventsIn(noOfEvents);
+        if (isConnected.get()) {
+            try {
+                if (latencyTrackerDelete != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerDelete.markIn();
+                }
+                delete(deletingEventChunk, compiledCondition);
+                if (throughputTrackerDelete != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    throughputTrackerDelete.eventsIn(noOfEvents);
+                }
+            } catch (ConnectionUnavailableException e) {
+                isConnected.set(false);
+                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+                        " Connection unavailable at Table '" + tableDefinition.getId() +
+                        "', will retry connection immediately.", e);
+                connectWithRetry();
+                deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
+            } finally {
+                if (latencyTrackerDelete != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    latencyTrackerDelete.markOut();
+                }
+            }
+        } else if (isTryingToConnect.get()) {
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
+                    deletingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            waitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for delete operation for events '" + deletingEventChunk + "'");
+            deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
+        } else {
+            connectWithRetry();
+            deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
         }
     }
 
-    public abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
-                                   CompiledCondition compiledCondition);
+    protected abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
+                                   CompiledCondition compiledCondition) throws ConnectionUnavailableException;
 
 
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
@@ -585,13 +498,4 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public abstract boolean isStateful();
-
-    /**
-     * Different Type of On Error Actions
-     */
-    public enum OnErrorAction {
-        LOG,
-        STORE,
-        RETRY
-    }
 }

@@ -22,12 +22,10 @@ import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.definition.AbstractDefinition;
 
-import java.io.Serializable;
-
 /**
  * Information holder for matching event used by in-memory table implementation.
  */
-public class MatchingMetaInfoHolder implements Serializable {
+public class MatchingMetaInfoHolder {
     private int matchingStreamEventIndex;
     private int storeEventIndex;
     private AbstractDefinition matchingStreamDefinition;

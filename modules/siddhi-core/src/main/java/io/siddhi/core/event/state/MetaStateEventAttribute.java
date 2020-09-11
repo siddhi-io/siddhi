@@ -20,13 +20,12 @@ package io.siddhi.core.event.state;
 
 import io.siddhi.query.api.definition.Attribute;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Holds the Attribute info for StateEvent data to StreamEvent data
  */
-public class MetaStateEventAttribute implements Serializable {
+public class MetaStateEventAttribute {
     private Attribute attribute;
     private int[] position;
 

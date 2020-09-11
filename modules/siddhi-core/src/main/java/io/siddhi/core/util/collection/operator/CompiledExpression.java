@@ -18,11 +18,9 @@
 
 package io.siddhi.core.util.collection.operator;
 
-import java.io.Serializable;
-
 /**
  * Represent a logical expression
  */
-public interface CompiledExpression extends Serializable {
+public interface CompiledExpression {
 
 }

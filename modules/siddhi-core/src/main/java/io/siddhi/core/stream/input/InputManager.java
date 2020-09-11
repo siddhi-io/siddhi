@@ -22,7 +22,6 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.DefinitionNotExistException;
 import io.siddhi.core.stream.StreamJunction;
-import io.siddhi.core.table.Table;
 import io.siddhi.query.api.definition.AbstractDefinition;
 
 import java.util.LinkedHashMap;
@@ -37,18 +36,14 @@ public class InputManager {
     private final InputEntryValve inputEntryValve;
     private final SiddhiAppContext siddhiAppContext;
     private Map<String, InputHandler> inputHandlerMap = new LinkedHashMap<String, InputHandler>();
-    private Map<String, TableInputHandler> tableInputHandlerMap = new LinkedHashMap<String, TableInputHandler>();
     private Map<String, StreamJunction> streamJunctionMap;
-    private ConcurrentMap<String, Table> tableMap;
     private InputDistributor inputDistributor;
     private boolean isConnected = false;
 
     public InputManager(SiddhiAppContext siddhiAppContext,
                         ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
-                        ConcurrentMap<String, StreamJunction> streamJunctionMap,
-                        ConcurrentMap<String, Table> tableMap) {
+                        ConcurrentMap<String, StreamJunction> streamJunctionMap) {
         this.streamJunctionMap = streamJunctionMap;
-        this.tableMap = tableMap;
         this.inputDistributor = new InputDistributor();
         this.inputEntryValve = new InputEntryValve(siddhiAppContext, inputDistributor);
         this.siddhiAppContext = siddhiAppContext;
@@ -71,23 +66,6 @@ public class InputManager {
             }
         } else {
             return inputHandler;
-        }
-    }
-
-    public TableInputHandler getTableInputHandler(String tableId) {
-        TableInputHandler tableInputHandler = tableInputHandlerMap.get(tableId);
-        if (tableInputHandler == null) {
-            synchronized (this) {
-                tableInputHandler = tableInputHandlerMap.get(tableId);
-                if (tableInputHandler == null) {
-                    TableInputHandler newTableInputHandler = constructTableInputHandler(tableId);
-                    return newTableInputHandler;
-                } else {
-                    return tableInputHandler;
-                }
-            }
-        } else {
-            return tableInputHandler;
         }
     }
 
@@ -117,15 +95,5 @@ public class InputManager {
         inputDistributor.addInputProcessor(streamJunctionMap.get(streamId).constructPublisher());
         inputHandlerMap.put(streamId, inputHandler);
         return inputHandler;
-    }
-
-    public synchronized TableInputHandler constructTableInputHandler(String tableId) {
-        Table correspondingTable = tableMap.get(tableId);
-        if (correspondingTable == null) {
-            throw new DefinitionNotExistException("Table with table ID " + tableId + " has not been defined");
-        }
-        TableInputHandler tableInputHandler = new TableInputHandler(correspondingTable, siddhiAppContext);
-        tableInputHandlerMap.put(tableId, tableInputHandler);
-        return tableInputHandler;
     }
 }

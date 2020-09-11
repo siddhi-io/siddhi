@@ -20,12 +20,10 @@ package io.siddhi.core.event.stream;
 
 import io.siddhi.core.partition.PartitionRuntime;
 
-import java.io.Serializable;
-
 /**
  * Cloner class for {@link StreamEvent} to be used when creating {@link PartitionRuntime}
  */
-public class StreamEventCloner implements Serializable {
+public class StreamEventCloner {
 
     private final int beforeWindowDataSize;
     private final int onAfterWindowDataSize;
