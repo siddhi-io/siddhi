@@ -21,6 +21,7 @@ package io.siddhi.core.util.error.handler.util;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
+import io.siddhi.core.util.error.handler.model.ReplayableTableRecord;
 import io.siddhi.core.util.error.handler.store.ErrorStore;
 
 import java.util.List;

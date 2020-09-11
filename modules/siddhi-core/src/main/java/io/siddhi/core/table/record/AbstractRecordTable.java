@@ -137,9 +137,9 @@ public abstract class AbstractRecordTable extends Table {
             Iterator<Object[]> records;
             if (recordTableHandler != null) {
                 records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                        recordStoreCompiledCondition.compiledCondition);
+                        recordStoreCompiledCondition.getCompiledCondition());
             } else {
-                records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+                records = find(findConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
             }
             ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
             if (records != null) {
@@ -182,9 +182,9 @@ public abstract class AbstractRecordTable extends Table {
         }
         if (recordTableHandler != null) {
             return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+                    recordStoreCompiledCondition.getCompiledCondition());
         } else {
-            return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            return contains(containsConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
         }
     }
 
@@ -223,9 +223,9 @@ public abstract class AbstractRecordTable extends Table {
         try {
             if (recordTableHandler != null) {
                 recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                        compiledCondition);
+                        getCompiledCondition());
             } else {
-                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.getCompiledCondition());
             }
         } catch (ConnectionUnavailableException e) {
             onDeleteError(deletingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_DELETE);
@@ -281,11 +281,11 @@ public abstract class AbstractRecordTable extends Table {
             timestamp = stateEvent.getTimestamp();
         }
         if (recordTableHandler != null) {
-            recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
+            recordTableHandler.update(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
                     updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
                     updateSetParameterMaps);
         } else {
-            update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+            update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                     recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
         }
     }
@@ -340,11 +340,11 @@ public abstract class AbstractRecordTable extends Table {
             timestamp = stateEvent.getTimestamp();
         }
         if (recordTableHandler != null) {
-            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
+            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
                     updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
                     updateSetParameterMaps, addingRecords);
         } else {
-            updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
+            updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                     recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
         }
 
@@ -433,30 +433,5 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public boolean isStateful() {
         return false;
-    }
-
-    /**
-     * Compiled condition of the {@link AbstractRecordTable}
-     */
-    protected class RecordStoreCompiledCondition implements CompiledCondition {
-        protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
-        private CompiledCondition compiledCondition;
-        private SiddhiQueryContext siddhiQueryContext;
-
-        RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
-                                     CompiledCondition compiledCondition,
-                                     SiddhiQueryContext siddhiQueryContext) {
-            this.variableExpressionExecutorMap = variableExpressionExecutorMap;
-            this.compiledCondition = compiledCondition;
-            this.siddhiQueryContext = siddhiQueryContext;
-        }
-
-        public CompiledCondition getCompiledCondition() {
-            return compiledCondition;
-        }
-
-        public SiddhiQueryContext getSiddhiQueryContext() {
-            return siddhiQueryContext;
-        }
     }
 }

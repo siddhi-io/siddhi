@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.siddhi.core.util.error.handler.util;
+package io.siddhi.core.util.error.handler.model;
 
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -30,6 +30,7 @@ import java.io.Serializable;
  * This class will wrap necessary objects to replay an erreneous event
  */
 public class ReplayableTableRecord implements Serializable {
+    private static final long serialVersionUID = 9103040561319725700L;
     private ComplexEventChunk complexEventChunk;
     private CompiledCondition compiledCondition;
     private StateEvent stateEvent;

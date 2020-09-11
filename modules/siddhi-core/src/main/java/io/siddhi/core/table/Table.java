@@ -39,7 +39,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorStoreHelper;
-import io.siddhi.core.util.error.handler.util.ReplayableTableRecord;
+import io.siddhi.core.util.error.handler.model.ReplayableTableRecord;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
@@ -163,6 +163,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     break;
                 case RETRY:
                 default:
+                    // TODO: 2020-09-10 make as infinite loop 
                     if (isTryingToConnect.get()) {
                         LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
                                 addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +

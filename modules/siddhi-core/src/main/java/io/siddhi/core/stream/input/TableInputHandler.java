@@ -23,6 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.table.record.RecordStoreCompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import org.apache.log4j.Logger;
 
@@ -46,7 +47,9 @@ public class TableInputHandler {
         table.add(addingEventChunk);
     }
 
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
+                       SiddhiAppContext siddhiAppContext) {
+//        ((RecordStoreCompiledCondition) compiledCondition).setSiddhiAppContext(siddhiAppContext);
         table.delete(deletingEventChunk, compiledCondition);
     }
 }
