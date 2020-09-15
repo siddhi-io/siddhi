@@ -32,20 +32,22 @@ import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Holder object for context information of {@link SiddhiApp}.
  */
-public class SiddhiQueryContext {
+public class SiddhiQueryContext implements Serializable {
 
+    private static final long serialVersionUID = 6704788687657827410L;
     private transient SiddhiAppContext siddhiAppContext = null;
     private String name;
     private String partitionId;
     private boolean partitioned;
     private OutputStream.OutputEventType outputEventType;
-    private LatencyTracker latencyTracker;
-    private IdGenerator idGenerator;
+    private transient LatencyTracker latencyTracker;
+    private transient IdGenerator idGenerator;
     private boolean stateful = false;
 
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName) {

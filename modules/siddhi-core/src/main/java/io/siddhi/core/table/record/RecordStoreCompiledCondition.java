@@ -29,6 +29,7 @@ import java.util.Map;
  * Compiled condition of the {@link AbstractRecordTable}
  */
 public class RecordStoreCompiledCondition implements CompiledCondition {
+    private static final long serialVersionUID = -8058614410325410636L;
     protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
     private CompiledCondition compiledCondition;
     private SiddhiQueryContext siddhiQueryContext;
