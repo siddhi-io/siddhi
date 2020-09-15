@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class SiddhiQueryContext {
 
-    private SiddhiAppContext siddhiAppContext = null;
+    private transient SiddhiAppContext siddhiAppContext = null;
     private String name;
     private String partitionId;
     private boolean partitioned;

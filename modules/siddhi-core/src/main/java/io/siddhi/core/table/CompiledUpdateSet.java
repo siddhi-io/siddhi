@@ -18,8 +18,10 @@
 
 package io.siddhi.core.table;
 
+import java.io.Serializable;
+
 /**
  * Marker interface for {@link CompiledUpdateSet}
  */
-public interface CompiledUpdateSet {
+public interface CompiledUpdateSet extends Serializable {
 }

@@ -19,6 +19,10 @@
 package io.siddhi.core.util.error.handler.model;
 
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.table.CompiledUpdateSet;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 import java.io.Serializable;
 
@@ -28,30 +32,105 @@ import java.io.Serializable;
 public class ReplayableTableRecord implements Serializable {
     private static final long serialVersionUID = 9103040561319725700L;
     private ComplexEventChunk complexEventChunk;
-    private String OutputCallbackID;
-    private int noOfEvents;
+    private CompiledCondition compiledCondition;
+    private StateEvent stateEvent;
+    private CompiledUpdateSet compiledUpdateSet;
+    private AddingStreamEventExtractor addingStreamEventExtractor;
 
     /**
-     *
+     * For onAddError
      * @param complexEventChunk
-     * @param outputCallbackID
-     * @param noOfEvents
      */
-    public ReplayableTableRecord(ComplexEventChunk complexEventChunk, String outputCallbackID, int noOfEvents) {
+    public ReplayableTableRecord(ComplexEventChunk complexEventChunk) {
         this.complexEventChunk = complexEventChunk;
-        this.OutputCallbackID = outputCallbackID;
-        this.noOfEvents = noOfEvents;
+    }
+
+    /**
+     * For onFindError and onContainsError
+     * @param compiledCondition
+     * @param stateEvent
+     */
+    public ReplayableTableRecord(CompiledCondition compiledCondition, StateEvent stateEvent) {
+        this.compiledCondition = compiledCondition;
+        this.stateEvent = stateEvent;
+    }
+
+    /**
+     * For onDeleteError
+     * @param complexEventChunk
+     * @param compiledCondition
+     */
+    public ReplayableTableRecord(ComplexEventChunk complexEventChunk, CompiledCondition compiledCondition) {
+        this.complexEventChunk = complexEventChunk;
+        this.compiledCondition = compiledCondition;
+    }
+
+    /**
+     * For onUpdateError
+     * @param complexEventChunk
+     * @param compiledCondition
+     * @param compiledUpdateSet
+     */
+    public ReplayableTableRecord(ComplexEventChunk complexEventChunk, CompiledCondition compiledCondition,
+                                 CompiledUpdateSet compiledUpdateSet) {
+        this.complexEventChunk = complexEventChunk;
+        this.compiledCondition = compiledCondition;
+        this.compiledUpdateSet = compiledUpdateSet;
+    }
+
+    /**
+     * For onUpdateOrAddError
+     * @param complexEventChunk
+     * @param compiledCondition
+     * @param compiledUpdateSet
+     * @param addingStreamEventExtractor
+     */
+    public ReplayableTableRecord(ComplexEventChunk complexEventChunk, CompiledCondition compiledCondition,
+                                 CompiledUpdateSet compiledUpdateSet,
+                                 AddingStreamEventExtractor addingStreamEventExtractor) {
+        this.complexEventChunk = complexEventChunk;
+        this.compiledCondition = compiledCondition;
+        this.compiledUpdateSet = compiledUpdateSet;
+        this.addingStreamEventExtractor = addingStreamEventExtractor;
+    }
+
+    public void setComplexEventChunk(ComplexEventChunk complexEventChunk) {
+        this.complexEventChunk = complexEventChunk;
+    }
+
+    public void setCompiledCondition(CompiledCondition compiledCondition) {
+        this.compiledCondition = compiledCondition;
+    }
+
+    public void setStateEvent(StateEvent stateEvent) {
+        this.stateEvent = stateEvent;
+    }
+
+    public void setCompiledUpdateSet(CompiledUpdateSet compiledUpdateSet) {
+        this.compiledUpdateSet = compiledUpdateSet;
+    }
+
+    public void setAddingStreamEventExtractor(AddingStreamEventExtractor addingStreamEventExtractor) {
+        this.addingStreamEventExtractor = addingStreamEventExtractor;
     }
 
     public ComplexEventChunk getComplexEventChunk() {
         return complexEventChunk;
     }
 
-    public String getOutputCallbackID() {
-        return OutputCallbackID;
+    public CompiledCondition getCompiledCondition() {
+        return compiledCondition;
     }
 
-    public int getNoOfEvents() {
-        return noOfEvents;
+    public StateEvent getStateEvent() {
+        return stateEvent;
+    }
+
+    public CompiledUpdateSet getCompiledUpdateSet() {
+        return compiledUpdateSet;
+    }
+
+    public AddingStreamEventExtractor getAddingStreamEventExtractor() {
+        return addingStreamEventExtractor;
     }
 }

@@ -43,6 +43,17 @@ public class DefineTableTestCase {
 
     @Test
     public void testQuery1() throws InterruptedException {
+//        AsciiTable asciiTable = new AsciiTable();
+//        asciiTable.setPadding(100);
+//        asciiTable.addRule();
+//        asciiTable.addRule();
+//        String[] tab = new String[]{"name", "value", "sdf"};
+//        asciiTable.addRow(tab);
+//        asciiTable.addRule();
+//        asciiTable.addRule();
+//        asciiTable.addRow(tab);
+//        asciiTable.addRule();
+//        String table = asciiTable.render();
         log.info("testTableDefinition1 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
