@@ -280,13 +280,17 @@ public abstract class AbstractRecordTable extends Table {
             updateSetParameterMaps.add(variableMapForUpdateSet);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.update(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps);
-        } else {
-            update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.update(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps);
+            } else {
+                update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onDeleteError(updatingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_UPDATE);
         }
     }
 

@@ -344,6 +344,53 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     public abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
                                    CompiledCondition compiledCondition);
 
+    public void onUpdateError(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
+                              CompiledUpdateSet compiledUpdateSet, Exception e, ErrorOccurrence errorOccurrence) {
+        OnErrorAction errorAction = onErrorAction;
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+        }
+        try {
+            switch (errorAction) {
+                case STORE:
+                    updatingEventChunk.reset();
+                    ErroneousEvent erroneousEvent = new ErroneousEvent(
+                            new ReplayableTableRecord(updatingEventChunk, compiledCondition, compiledUpdateSet), e,
+                            e.getMessage());
+                    erroneousEvent.setOriginalPayload(updatingEventChunk.toString());
+                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
+                    break;
+                case RETRY:
+                default:
+                    if (isTryingToConnect.get()) {
+                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for events '" +
+                                updatingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                                "' as its trying to reconnect!");
+                        waitWhileConnect();
+                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                                "' has become available for update operation for events '" + updatingEventChunk + "'");
+                        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
+                    } else {
+                        connectWithRetry();
+                        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
+                    }
+                    break;
+                case LOG:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  at '"
+                            + tableDefinition.getId() + "'. Events dropped '" + updatingEventChunk.toString() + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
+                    break;
+            }
+        } catch (Throwable t) {
+            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
+                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
+                    + "', events dropped '" + updatingEventChunk.toString() + "'", e);
+        }
+    }
+
 
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
                              CompiledCondition compiledCondition,
