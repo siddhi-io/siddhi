@@ -254,7 +254,7 @@ public abstract class AbstractRecordTable extends Table {
 
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
+                       CompiledUpdateSet compiledUpdateSet) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -290,7 +290,8 @@ public abstract class AbstractRecordTable extends Table {
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
             }
         } catch (ConnectionUnavailableException e) {
-            onDeleteError(updatingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_UPDATE);
+            onUpdateError(updatingEventChunk, compiledCondition, compiledUpdateSet, e,
+                    ErrorOccurrence.STORE_ON_TABLE_UPDATE);
         }
     }
 

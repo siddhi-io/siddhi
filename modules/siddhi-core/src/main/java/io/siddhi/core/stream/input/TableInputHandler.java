@@ -22,6 +22,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import org.apache.log4j.Logger;
@@ -50,5 +51,10 @@ public class TableInputHandler {
                        SiddhiAppContext siddhiAppContext) {
 //        ((RecordStoreCompiledCondition) compiledCondition).setSiddhiAppContext(siddhiAppContext);
         table.delete(deletingEventChunk, compiledCondition);
+    }
+
+    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
+                       CompiledUpdateSet compiledUpdateSet, SiddhiAppContext siddhiAppContext) {
+        table.update(updatingEventChunk, compiledCondition, compiledUpdateSet);
     }
 }

@@ -395,48 +395,20 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
                              CompiledCondition compiledCondition,
                              CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
-        if (isConnected.get()) {
-            try {
-                if (latencyTrackerUpdate != null &&
-                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-                    latencyTrackerUpdate.markIn();
-                }
-                update(updatingEventChunk, compiledCondition, compiledUpdateSet);
-                if (throughputTrackerUpdate != null &&
-                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-                    throughputTrackerUpdate.eventsIn(noOfEvents);
-                }
-            } catch (ConnectionUnavailableException e) {
-                isConnected.set(false);
-                LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                        " Connection unavailable at Table '" + tableDefinition.getId() +
-                        "', will retry connection immediately.", e);
-                connectWithRetry();
-                updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
-            } finally {
-                if (latencyTrackerUpdate != null &&
-                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-                    latencyTrackerUpdate.markOut();
-                }
-            }
-        } else if (isTryingToConnect.get()) {
-            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for events '" +
-                    updatingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                    "' as its trying to reconnect!");
-            waitWhileConnect();
-            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                    "' has become available for update operation for events '" + updatingEventChunk + "'");
-            updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
-        } else {
-            connectWithRetry();
-            updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
+        if (latencyTrackerUpdate != null &&
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            latencyTrackerUpdate.markIn();
+        }
+        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
+        if (throughputTrackerUpdate != null &&
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            throughputTrackerUpdate.eventsIn(noOfEvents);
         }
     }
 
-    protected abstract void update(ComplexEventChunk<StateEvent> updatingEventChunk,
+    public abstract void update(ComplexEventChunk<StateEvent> updatingEventChunk,
                                    CompiledCondition compiledCondition,
-                                   CompiledUpdateSet compiledUpdateSet)
-            throws ConnectionUnavailableException;
+                                   CompiledUpdateSet compiledUpdateSet);
 
     public void updateOrAddEvents(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                                   CompiledCondition compiledCondition,

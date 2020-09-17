@@ -276,7 +276,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
+                       CompiledUpdateSet compiledUpdateSet) {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
         CompiledConditionWithCache compiledConditionWithCache;
