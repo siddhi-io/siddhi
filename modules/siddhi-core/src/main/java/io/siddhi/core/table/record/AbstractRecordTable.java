@@ -315,8 +315,7 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                             CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                            AddingStreamEventExtractor addingStreamEventExtractor)
-            throws ConnectionUnavailableException {
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -344,15 +343,19 @@ public abstract class AbstractRecordTable extends Table {
             addingRecords.add(stateEvent.getStreamEvent(0).getOutputData());
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps, addingRecords);
-        } else {
-            updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps, addingRecords);
+            } else {
+                updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onUpdateOrAddError(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    addingStreamEventExtractor, e, ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD);
         }
-
     }
 
     /**

@@ -337,8 +337,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                             CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                            AddingStreamEventExtractor addingStreamEventExtractor)
-            throws ConnectionUnavailableException {
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
