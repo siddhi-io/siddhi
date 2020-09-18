@@ -48,20 +48,18 @@ public class TableInputHandler {
         table.add(addingEventChunk);
     }
 
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
-                       SiddhiAppContext siddhiAppContext) {
-//        ((RecordStoreCompiledCondition) compiledCondition).setSiddhiAppContext(siddhiAppContext);
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
         table.delete(deletingEventChunk, compiledCondition);
     }
 
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet, SiddhiAppContext siddhiAppContext) {
+                       CompiledUpdateSet compiledUpdateSet) {
         table.update(updatingEventChunk, compiledCondition, compiledUpdateSet);
     }
 
     public void updateOrAdd(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                            CompiledUpdateSet compiledUpdateSet, AddingStreamEventExtractor addingStreamEventExtractor,
-                            SiddhiAppContext siddhiAppContext) {
+                            CompiledUpdateSet compiledUpdateSet,
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
         table.updateOrAdd(updatingEventChunk, compiledCondition, compiledUpdateSet, addingStreamEventExtractor);
     }
 }

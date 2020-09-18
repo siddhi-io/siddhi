@@ -368,7 +368,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException {
         try {
             updateStoreTableSize();
         } catch (ConnectionUnavailableException e) {

@@ -123,7 +123,8 @@ public abstract class AbstractRecordTable extends Table {
     protected abstract void add(List<Object[]> records) throws ConnectionUnavailableException;
 
     @Override
-    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+    public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
+            throws ConnectionUnavailableException {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
 
@@ -133,28 +134,23 @@ public abstract class AbstractRecordTable extends Table {
             findConditionParameterMap.put(entry.getKey(), entry.getValue().execute(matchingEvent));
         }
 
-        try {
-            Iterator<Object[]> records;
-            if (recordTableHandler != null) {
-                records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                        recordStoreCompiledCondition.getCompiledCondition());
-            } else {
-                records = find(findConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
-            }
-            ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
-            if (records != null) {
-                while (records.hasNext()) {
-                    Object[] record = records.next();
-                    StreamEvent streamEvent = storeEventPool.newInstance();
-                    System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
-                    streamEventComplexEventChunk.add(streamEvent);
-                }
-            }
-            return streamEventComplexEventChunk.getFirst();
-        } catch (ConnectionUnavailableException e) {
-            onFindError(matchingEvent, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_FIND);
+        Iterator<Object[]> records;
+        if (recordTableHandler != null) {
+            records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
+                    recordStoreCompiledCondition.getCompiledCondition());
+        } else {
+            records = find(findConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
         }
-        return null;
+        ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
+        if (records != null) {
+            while (records.hasNext()) {
+                Object[] record = records.next();
+                StreamEvent streamEvent = storeEventPool.newInstance();
+                System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
+                streamEventComplexEventChunk.add(streamEvent);
+            }
+        }
+        return streamEventComplexEventChunk.getFirst();
     }
 
     /**
