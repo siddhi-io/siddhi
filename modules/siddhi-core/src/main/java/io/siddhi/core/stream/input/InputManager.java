@@ -80,11 +80,9 @@ public class InputManager {
             synchronized (this) {
                 tableInputHandler = tableInputHandlerMap.get(tableId);
                 if (tableInputHandler == null) {
-                    TableInputHandler newTableInputHandler = constructTableInputHandler(tableId);
-                    return newTableInputHandler;
-                } else {
-                    return tableInputHandler;
+                    return constructTableInputHandler(tableId);
                 }
+                return tableInputHandler;
             }
         }
         return tableInputHandler;
