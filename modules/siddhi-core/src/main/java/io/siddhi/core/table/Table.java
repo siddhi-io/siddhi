@@ -144,12 +144,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
+    public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, ConnectionUnavailableException e,
                            ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
+        isConnected.set(false);
         try {
             switch (errorAction) {
                 case STORE:
@@ -160,7 +158,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
-                case RETRY:
+                case LOG:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
+                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
+                    break;
                 default:
                     if (isTryingToConnect.get()) {
                         LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
@@ -173,13 +177,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     } else {
                         connectWithRetry();
                         add(addingEventChunk);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
                     }
                     break;
             }
@@ -241,52 +238,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     public abstract void add(ComplexEventChunk<StreamEvent> addingEventChunk);
 
-//    public StreamEvent onFindError(StateEvent matchingEvent, CompiledCondition compiledCondition, Exception e,
-//                           ErrorOccurrence errorOccurrence) {
-//        OnErrorAction errorAction = onErrorAction;
-//        if (e instanceof ConnectionUnavailableException) {
-//            isConnected.set(false);
-//        }
-//        try {
-//            switch (errorAction) {
-//                case STORE:
-//                    ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(compiledCondition,
-//                            matchingEvent), e,
-//                            e.getMessage());
-//                    erroneousEvent.setOriginalPayload(matchingEvent.toString());
-//                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-//                            errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-//                    break;
-//                case RETRY:
-//                default:
-//                    if (isTryingToConnect.get()) {
-//                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
-//                                matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
-//                                "' as its trying to reconnect!");
-//                        waitWhileConnect();
-//                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-//                                "' has become available for find operation for events '" + matchingEvent + "'");
-//                        return find(matchingEvent, compiledCondition);
-//                    } else {
-//                        connectWithRetry();
-//                        return find(matchingEvent, compiledCondition);
-//                    }
-//                case LOG:
-//                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing find for event  at '"
-//                            + tableDefinition.getId() + "'. Event dropped '" + matchingEvent.toString() + "'");
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug(e);
-//                    }
-//                    break;
-//            }
-//        } catch (Throwable t) {
-//            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-//                    + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-//                    + "', events dropped '" + matchingEvent.toString() + "'", e);
-//        }
-//        return null;
-//    }
-
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         if (isConnected.get()) {
             try {
@@ -331,11 +282,9 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             throws ConnectionUnavailableException;
 
     public void onDeleteError(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
-                              Exception e, ErrorOccurrence errorOccurrence) {
+                              ConnectionUnavailableException e, ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
+        isConnected.set(false);
         try {
             switch (errorAction) {
                 case STORE:
@@ -346,7 +295,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
-                case RETRY:
+                case LOG:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
+                            + tableDefinition.getId() + "'. Events dropped '" + deletingEventChunk.toString() + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
+                    break;
                 default:
                     if (isTryingToConnect.get()) {
                         LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
@@ -359,13 +314,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     } else {
                         connectWithRetry();
                         delete(deletingEventChunk, compiledCondition);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + deletingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
                     }
                     break;
             }
@@ -393,11 +341,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                    CompiledCondition compiledCondition);
 
     public void onUpdateError(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                              CompiledUpdateSet compiledUpdateSet, Exception e, ErrorOccurrence errorOccurrence) {
+                              CompiledUpdateSet compiledUpdateSet, ConnectionUnavailableException e,
+                              ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
+        isConnected.set(false);
         try {
             switch (errorAction) {
                 case STORE:
@@ -409,7 +356,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
-                case RETRY:
+                case LOG:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  at '"
+                            + tableDefinition.getId() + "'. Events dropped '" + updatingEventChunk.toString() + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
+                    break;
                 default:
                     if (isTryingToConnect.get()) {
                         LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for events '" +
@@ -422,13 +375,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     } else {
                         connectWithRetry();
                         update(updatingEventChunk, compiledCondition, compiledUpdateSet);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + updatingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
                     }
                     break;
             }
@@ -460,12 +406,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     public void onUpdateOrAddError(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                                    CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                                   AddingStreamEventExtractor addingStreamEventExtractor, Exception e,
-                                   ErrorOccurrence errorOccurrence) {
+                                   AddingStreamEventExtractor addingStreamEventExtractor,
+                                   ConnectionUnavailableException e, ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
-        if (e instanceof ConnectionUnavailableException) {
-            isConnected.set(false);
-        }
+        isConnected.set(false);
         try {
             switch (errorAction) {
                 case STORE:
@@ -477,7 +421,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
                     break;
-                case RETRY:
+                case LOG:
+                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
+                            "events  at '" + tableDefinition.getId() + "'. Events dropped '" +
+                            updateOrAddingEventChunk.toString() + "'");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
+                    break;
                 default:
                     if (isTryingToConnect.get()) {
                         LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
@@ -493,14 +444,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         connectWithRetry();
                         updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
                                 addingStreamEventExtractor);
-                    }
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
-                            "events  at '" + tableDefinition.getId() + "'. Events dropped '" +
-                            updateOrAddingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
                     }
                     break;
             }

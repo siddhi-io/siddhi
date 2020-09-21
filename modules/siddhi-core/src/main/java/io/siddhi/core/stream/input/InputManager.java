@@ -86,9 +86,8 @@ public class InputManager {
                     return tableInputHandler;
                 }
             }
-        } else {
-            return tableInputHandler;
         }
+        return tableInputHandler;
     }
 
     public synchronized void connect() {

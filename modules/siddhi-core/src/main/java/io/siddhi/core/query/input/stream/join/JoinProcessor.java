@@ -43,8 +43,6 @@ import java.util.List;
  * Created on 12/8/14.
  */
 public class JoinProcessor implements Processor {
-
-    // TODO: 2020-09-10  
     private static final Logger log = Logger.getLogger(JoinProcessor.class);
     private boolean trigger;
     private boolean leftJoinProcessor = false;
@@ -77,7 +75,6 @@ public class JoinProcessor implements Processor {
      *
      * @param complexEventChunk event chunk to be processed
      */
-    // TODO: 2020-09-10 catch here 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {

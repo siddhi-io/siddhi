@@ -373,7 +373,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         try {
             updateStoreTableSize();
         } catch (ConnectionUnavailableException e) {
-            // TODO: 2020-09-10 Improve this error flow
             log.error(e);
         }
 

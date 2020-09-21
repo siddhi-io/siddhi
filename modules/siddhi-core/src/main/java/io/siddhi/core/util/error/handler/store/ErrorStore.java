@@ -91,7 +91,7 @@ public abstract class ErrorStore {
                         event.getEventAsBytes(), event.getCause(), event.getStackTraceAsBytes(),
                         event.getOriginalPayloadAsBytes(), event.getErrorOccurrence(), event.getEventType(),
                         event.getErrorType());
-        return new EventHandler[] {eventHandler};
+        return new EventHandler[]{eventHandler};
     }
 
     public abstract void setProperties(Map properties);
@@ -126,7 +126,7 @@ public abstract class ErrorStore {
     }
 
     public void saveStoreError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                                   String streamName, ErrorOccurrence errorOccurrence) {
+                               String streamName, ErrorOccurrence errorOccurrence) {
         try {
             save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.STORE);
         } catch (ErrorStoreException e) {
