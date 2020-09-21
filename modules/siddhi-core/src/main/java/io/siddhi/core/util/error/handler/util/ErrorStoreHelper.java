@@ -56,11 +56,6 @@ public class ErrorStoreHelper {
                             getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName,
                             occurrence);
                     break;
-                case STORE:
-                    errorStore.saveStoreError(siddhiAppName, (ErroneousEvent) erroneousEvent,
-                            getErroneousEventType(((ErroneousEvent) erroneousEvent).getEvent()), streamName,
-                            occurrence);
-                    break;
             }
         }
     }
@@ -68,11 +63,8 @@ public class ErrorStoreHelper {
     private static ErrorType getErrorType(ErrorOccurrence errorOccurrence) {
         if (errorOccurrence == ErrorOccurrence.BEFORE_SOURCE_MAPPING) {
             return ErrorType.MAPPING;
-        } else if (errorOccurrence == ErrorOccurrence.STORE_ON_SINK_ERROR ||
-                errorOccurrence == ErrorOccurrence.STORE_ON_STREAM_ERROR) {
-            return ErrorType.TRANSPORT;
         } else {
-            return ErrorType.STORE;
+            return ErrorType.TRANSPORT;
         }
     }
 

@@ -125,15 +125,6 @@ public abstract class ErrorStore {
         }
     }
 
-    public void saveStoreError(String siddhiAppName, ErroneousEvent erroneousEvent, ErroneousEventType eventType,
-                               String streamName, ErrorOccurrence errorOccurrence) {
-        try {
-            save(siddhiAppName, streamName, erroneousEvent, eventType, errorOccurrence, ErrorType.STORE);
-        } catch (ErrorStoreException e) {
-            log.error("Failed to save erroneous event.", e);
-        }
-    }
-
     protected void save(String siddhiAppName, String streamName, ErroneousEvent erroneousEvent,
                         ErroneousEventType eventType, ErrorOccurrence errorOccurrence, ErrorType errorType)
             throws ErrorStoreException {
