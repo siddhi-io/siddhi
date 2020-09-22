@@ -76,16 +76,12 @@ public class InputManager {
 
     public TableInputHandler getTableInputHandler(String tableId) {
         TableInputHandler tableInputHandler = tableInputHandlerMap.get(tableId);
-        if (tableInputHandler == null) {
-            synchronized (this) {
-                tableInputHandler = tableInputHandlerMap.get(tableId);
-                if (tableInputHandler == null) {
-                    return constructTableInputHandler(tableId);
-                }
-                return tableInputHandler;
+        synchronized (this) {
+            if (tableInputHandler == null) {
+                return constructTableInputHandler(tableId);
             }
+            return tableInputHandler;
         }
-        return tableInputHandler;
     }
 
     public synchronized void connect() {
