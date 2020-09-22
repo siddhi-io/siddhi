@@ -417,36 +417,6 @@ public abstract class AbstractRecordTable extends Table {
     }
 
     /**
-     * Compiled condition of the {@link AbstractRecordTable}
-     */
-    protected class RecordStoreCompiledCondition implements CompiledCondition {
-        private static final long serialVersionUID = -8058614410325410636L;
-        protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
-        private CompiledCondition compiledCondition;
-        private SiddhiQueryContext siddhiQueryContext;
-
-        RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
-                                     CompiledCondition compiledCondition,
-                                     SiddhiQueryContext siddhiQueryContext) {
-            this.variableExpressionExecutorMap = variableExpressionExecutorMap;
-            this.compiledCondition = compiledCondition;
-            this.siddhiQueryContext = siddhiQueryContext;
-        }
-
-        public CompiledCondition getCompiledCondition() {
-            return compiledCondition;
-        }
-
-        public SiddhiQueryContext getSiddhiQueryContext() {
-            return siddhiQueryContext;
-        }
-
-        public void setSiddhiAppContext(SiddhiAppContext siddhiAppContext) {
-            siddhiQueryContext.setSiddhiAppContext(siddhiAppContext);
-        }
-    }
-
-    /**
      * Compile the matching expression
      *
      * @param expressionBuilder helps visiting the conditions in order to compile the condition
