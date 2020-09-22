@@ -192,13 +192,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         for (String column: tableDefinition.getAttributeNameArray()) {
             errorStringBuilder.append(column).append("  |  ");
         }
-        errorStringBuilder.append("\n");
+        errorStringBuilder.append("<br/>");
         while (eventChunk.hasNext()) {
             StreamEvent streamEvent = eventChunk.next();
             for (Object item: streamEvent.getOutputData()) {
                 errorStringBuilder.append(item).append("  |  ");
             }
-            errorStringBuilder.append("\n");
+            errorStringBuilder.append("<br/>");
         }
         return errorStringBuilder.toString();
     }
@@ -208,7 +208,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         for (String column: tableDefinition.getAttributeNameArray()) {
             errorStringBuilder.append(column).append("  |  ");
         }
-        errorStringBuilder.append("\n");
+        errorStringBuilder.append("<br/>");
         while (eventChunk.hasNext()) {
             StateEvent stateEvent = eventChunk.next();
             for (StreamEvent streamEvent: stateEvent.getStreamEvents()) {
@@ -216,7 +216,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                     for (Object item : streamEvent.getOutputData()) {
                         errorStringBuilder.append(item).append("  |  ");
                     }
-                    errorStringBuilder.append("\n");
+                    errorStringBuilder.append("<br/>");
                 }
             }
         }
