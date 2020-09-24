@@ -101,6 +101,10 @@
 
     <!--core-->
     <Match>
+        <Class name="io.siddhi.core.config.SiddhiQueryContext"/>
+        <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
+    </Match>
+    <Match>
         <Class name="io.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
         <Bug pattern="VO_VOLATILE_INCREMENT"/>
     </Match>

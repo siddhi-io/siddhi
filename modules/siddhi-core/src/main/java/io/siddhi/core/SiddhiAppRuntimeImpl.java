@@ -41,6 +41,7 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.input.InputManager;
+import io.siddhi.core.stream.input.TableInputHandler;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.StreamCallback;
@@ -413,6 +414,10 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
 
     public InputHandler getInputHandler(String streamId) {
         return inputManager.getInputHandler(streamId);
+    }
+
+    public TableInputHandler getTableInputHandler(String tableId) {
+        return inputManager.getTableInputHandler(tableId);
     }
 
     public Collection<List<Source>> getSources() {

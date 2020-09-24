@@ -21,10 +21,12 @@ package io.siddhi.core.util.collection;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 
+import java.io.Serializable;
+
 /**
  * Extract a {@link StreamEvent} from a {@link StateEvent}
  */
-public class AddingStreamEventExtractor {
+public class AddingStreamEventExtractor implements Serializable {
     private int matchingStreamEventPosition;
 
     public AddingStreamEventExtractor(int matchingStreamEventPosition) {

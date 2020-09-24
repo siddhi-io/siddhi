@@ -36,7 +36,9 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
@@ -53,9 +55,8 @@ import java.util.Map;
  * developer can directly work with event data.
  */
 public abstract class AbstractRecordTable extends Table {
-
     private static final Logger log = Logger.getLogger(AbstractRecordTable.class);
-
+    private ThreadLocal<DynamicOptions> trpDynamicOptions;
     protected StreamEventFactory storeEventPool;
     protected RecordTableHandler recordTableHandler;
 
@@ -92,7 +93,7 @@ public abstract class AbstractRecordTable extends Table {
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         List<Object[]> records = new ArrayList<>();
         addingEventChunk.reset();
         long timestamp = 0L;
@@ -101,10 +102,14 @@ public abstract class AbstractRecordTable extends Table {
             records.add(event.getOutputData());
             timestamp = event.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.add(timestamp, records);
-        } else {
-            add(records);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.add(timestamp, records);
+            } else {
+                add(records);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD);
         }
     }
 
@@ -132,9 +137,9 @@ public abstract class AbstractRecordTable extends Table {
         Iterator<Object[]> records;
         if (recordTableHandler != null) {
             records = recordTableHandler.find(matchingEvent.getTimestamp(), findConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+                    recordStoreCompiledCondition.getCompiledCondition());
         } else {
-            records = find(findConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            records = find(findConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
         }
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>();
         if (records != null) {
@@ -173,9 +178,9 @@ public abstract class AbstractRecordTable extends Table {
         }
         if (recordTableHandler != null) {
             return recordTableHandler.contains(matchingEvent.getTimestamp(), containsConditionParameterMap,
-                    recordStoreCompiledCondition.compiledCondition);
+                    recordStoreCompiledCondition.getCompiledCondition());
         } else {
-            return contains(containsConditionParameterMap, recordStoreCompiledCondition.compiledCondition);
+            return contains(containsConditionParameterMap, recordStoreCompiledCondition.getCompiledCondition());
         }
     }
 
@@ -193,8 +198,7 @@ public abstract class AbstractRecordTable extends Table {
             throws ConnectionUnavailableException;
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
-            throws ConnectionUnavailableException {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         List<Map<String, Object>> deleteConditionParameterMaps = new ArrayList<>();
@@ -212,12 +216,17 @@ public abstract class AbstractRecordTable extends Table {
             deleteConditionParameterMaps.add(variableMap);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
-                    compiledCondition);
-        } else {
-            delete(deleteConditionParameterMaps, recordStoreCompiledCondition.compiledCondition);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.delete(timestamp, deleteConditionParameterMaps, recordStoreCompiledCondition.
+                        getCompiledCondition());
+            } else {
+                delete(deleteConditionParameterMaps, recordStoreCompiledCondition.getCompiledCondition());
+            }
+        } catch (ConnectionUnavailableException e) {
+            onDeleteError(deletingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_DELETE);
         }
+
     }
 
     protected void connectAndLoadCache() throws ConnectionUnavailableException {
@@ -241,7 +250,7 @@ public abstract class AbstractRecordTable extends Table {
 
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
+                       CompiledUpdateSet compiledUpdateSet) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -267,13 +276,18 @@ public abstract class AbstractRecordTable extends Table {
             updateSetParameterMaps.add(variableMapForUpdateSet);
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.update(timestamp, recordStoreCompiledCondition.compiledCondition,
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps);
-        } else {
-            update(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.update(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps);
+            } else {
+                update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onUpdateError(updatingEventChunk, compiledCondition, compiledUpdateSet, e,
+                    ErrorOccurrence.STORE_ON_TABLE_UPDATE);
         }
     }
 
@@ -297,8 +311,7 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                             CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                            AddingStreamEventExtractor addingStreamEventExtractor)
-            throws ConnectionUnavailableException {
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
         RecordStoreCompiledCondition recordStoreCompiledCondition =
                 ((RecordStoreCompiledCondition) compiledCondition);
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = (RecordTableCompiledUpdateSet) compiledUpdateSet;
@@ -326,15 +339,19 @@ public abstract class AbstractRecordTable extends Table {
             addingRecords.add(stateEvent.getStreamEvent(0).getOutputData());
             timestamp = stateEvent.getTimestamp();
         }
-        if (recordTableHandler != null) {
-            recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.compiledCondition,
-                    updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
-                    updateSetParameterMaps, addingRecords);
-        } else {
-            updateOrAdd(recordStoreCompiledCondition.compiledCondition, updateConditionParameterMaps,
-                    recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+        try {
+            if (recordTableHandler != null) {
+                recordTableHandler.updateOrAdd(timestamp, recordStoreCompiledCondition.getCompiledCondition(),
+                        updateConditionParameterMaps, recordTableCompiledUpdateSet.getUpdateSetMap(),
+                        updateSetParameterMaps, addingRecords);
+            } else {
+                updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
+                        recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
+            }
+        } catch (ConnectionUnavailableException e) {
+            onUpdateOrAddError(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    addingStreamEventExtractor, e, ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD);
         }
-
     }
 
     /**
@@ -420,30 +437,5 @@ public abstract class AbstractRecordTable extends Table {
     @Override
     public boolean isStateful() {
         return false;
-    }
-
-    /**
-     * Compiled condition of the {@link AbstractRecordTable}
-     */
-    protected class RecordStoreCompiledCondition implements CompiledCondition {
-        protected Map<String, ExpressionExecutor> variableExpressionExecutorMap;
-        private CompiledCondition compiledCondition;
-        private SiddhiQueryContext siddhiQueryContext;
-
-        RecordStoreCompiledCondition(Map<String, ExpressionExecutor> variableExpressionExecutorMap,
-                                     CompiledCondition compiledCondition,
-                                     SiddhiQueryContext siddhiQueryContext) {
-            this.variableExpressionExecutorMap = variableExpressionExecutorMap;
-            this.compiledCondition = compiledCondition;
-            this.siddhiQueryContext = siddhiQueryContext;
-        }
-
-        public CompiledCondition getCompiledCondition() {
-            return compiledCondition;
-        }
-
-        public SiddhiQueryContext getSiddhiQueryContext() {
-            return siddhiQueryContext;
-        }
     }
 }

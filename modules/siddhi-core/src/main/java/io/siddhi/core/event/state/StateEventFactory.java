@@ -19,10 +19,12 @@ package io.siddhi.core.event.state;
 
 import com.lmax.disruptor.EventFactory;
 
+import java.io.Serializable;
+
 /**
  * Event Factory to create new StateEvents
  */
-public class StateEventFactory implements EventFactory<StateEvent> {
+public class StateEventFactory implements EventFactory<StateEvent>, Serializable {
 
     private int eventSize;
     private int outputDataSize;

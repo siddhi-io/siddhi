@@ -234,7 +234,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) throws ConnectionUnavailableException {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         if (cacheEnabled) {
             readWriteLock.writeLock().lock();
             try {
@@ -249,8 +249,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     }
 
     @Override
-    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition)
-            throws ConnectionUnavailableException {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache;
         if (cacheEnabled) {
@@ -277,7 +276,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
-                       CompiledUpdateSet compiledUpdateSet) throws ConnectionUnavailableException {
+                       CompiledUpdateSet compiledUpdateSet) {
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet;
         CompiledConditionWithCache compiledConditionWithCache;
@@ -338,8 +337,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
                             CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                            AddingStreamEventExtractor addingStreamEventExtractor)
-            throws ConnectionUnavailableException {
+                            AddingStreamEventExtractor addingStreamEventExtractor) {
         if (cacheEnabled) {
             RecordStoreCompiledCondition compiledConditionTemp = (RecordStoreCompiledCondition) compiledCondition;
             CompiledConditionWithCache compiledConditionWithCache = (CompiledConditionWithCache)
@@ -372,7 +370,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
             throws ConnectionUnavailableException {
-        updateStoreTableSize();
+        try {
+            updateStoreTableSize();
+        } catch (ConnectionUnavailableException e) {
+            log.error(e);
+        }
+
         // handle compile condition type conv
         RecordStoreCompiledCondition recordStoreCompiledCondition;
         CompiledConditionWithCache compiledConditionWithCache = null;

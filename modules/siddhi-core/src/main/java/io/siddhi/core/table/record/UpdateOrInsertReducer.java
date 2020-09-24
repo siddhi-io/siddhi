@@ -9,6 +9,7 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.query.api.definition.Attribute;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.Map;
 /**
  * Class used to reduce the fail to update events to such that they can be inserted at once.
  */
-public class UpdateOrInsertReducer {
+public class UpdateOrInsertReducer implements Serializable {
 
     private final StreamEventFactory streamEventFactory;
     private final StateEventFactory stateEventFactory;
