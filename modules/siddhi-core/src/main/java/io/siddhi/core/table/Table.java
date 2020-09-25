@@ -76,7 +76,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
     private RecordTableHandler recordTableHandler;
-    private OnErrorAction onErrorAction;
+    private OnErrorAction onErrorAction = OnErrorAction.RETRY;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
     private LatencyTracker latencyTrackerUpdate;
