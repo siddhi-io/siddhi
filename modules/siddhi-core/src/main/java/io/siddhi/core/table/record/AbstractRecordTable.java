@@ -109,10 +109,8 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 add(records);
             }
-        } catch (ConnectionUnavailableException e) {
-            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD, true);
-        } catch (DatabaseConstraintViolationException e) {
-            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD, false);
+        } catch (ConnectionUnavailableException | DatabaseConstraintViolationException e) {
+            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD);
         }
         // TODO: 2020-09-25 catch  SiddhiAppRuntimeException and validate for RDBMS constraint violation exception
         //  and handle it. Don't give replay option for these types of errors

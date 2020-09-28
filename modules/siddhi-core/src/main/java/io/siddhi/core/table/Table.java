@@ -145,13 +145,15 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
-                           ErrorOccurrence errorOccurrence, boolean isFromConnectionUnavailableException) {
+                           ErrorOccurrence errorOccurrence) {
         OnErrorAction errorAction = onErrorAction;
         isConnected.set(false);
         try {
-            if (isFromConnectionUnavailableException) {
+            if (e instanceof ConnectionUnavailableException) {
+                if (!isTryingToConnect.get()) {
+                    connectWithRetry();
+                }
                 switch (errorAction) {
-                    // TODO: 2020-09-25 add connectWithRetry after storing
                     case STORE:
                         addingEventChunk.reset();
                         ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk),
@@ -159,14 +161,12 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
                         ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                                 errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
+                        LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
+                            + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e);
+                        }
                         break;
-//                case LOG: // TODO: 2020-09-25 remove this
-//                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-//                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug(e);
-//                    }
-//                    break;
                     default:
                         if (isTryingToConnect.get()) {
                             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
