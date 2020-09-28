@@ -26,7 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.exception.DatabaseConstraintViolationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
@@ -109,9 +109,9 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 add(records);
             }
-        } catch (ConnectionUnavailableException e) { // TODO: 2020-09-25 search about handling other DB errors 
+        } catch (ConnectionUnavailableException e) {
             onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD, true);
-        } catch (SiddhiAppRuntimeException e) { // TODO: 2020-09-28 introduce a new runtime error 
+        } catch (DatabaseConstraintViolationException e) {
             onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD, false);
         }
         // TODO: 2020-09-25 catch  SiddhiAppRuntimeException and validate for RDBMS constraint violation exception
