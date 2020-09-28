@@ -144,41 +144,54 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
-    public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, ConnectionUnavailableException e,
-                           ErrorOccurrence errorOccurrence) {
+    public void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e,
+                           ErrorOccurrence errorOccurrence, boolean isFromConnectionUnavailableException) {
         OnErrorAction errorAction = onErrorAction;
         isConnected.set(false);
         try {
-            switch (errorAction) {
-                case STORE:
+            if (isFromConnectionUnavailableException) {
+                switch (errorAction) {
+                    // TODO: 2020-09-25 add connectWithRetry after storing
+                    case STORE:
+                        addingEventChunk.reset();
+                        ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk),
+                                e, e.getMessage());
+                        erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
+                        ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                                errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
+                        break;
+//                case LOG: // TODO: 2020-09-25 remove this
+//                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
+//                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
+//                    if (LOG.isDebugEnabled()) {
+//                        LOG.debug(e);
+//                    }
+//                    break;
+                    default:
+                        if (isTryingToConnect.get()) {
+                            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
+                                    addingEventChunk + "', operation busy waiting at Table '"
+                                    + tableDefinition.getId() + "' as its trying to reconnect!");
+                            waitWhileConnect();
+                            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId()
+                                    + "' has become available for add operation for events '" + addingEventChunk + "'");
+                            add(addingEventChunk);
+                        } else {
+                            connectWithRetry();
+                            add(addingEventChunk);
+                        }
+                        break;
+                }
+            } else {
+                if (errorAction == OnErrorAction.STORE) {
                     addingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk), e,
-                            e.getMessage());
+                    ReplayableTableRecord record = new ReplayableTableRecord(addingEventChunk);
+                    record.setFromConnectionUnavailableException(false);
+                    ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
                     erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                             errorOccurrence, siddhiAppContext.getName(), erroneousEvent, tableDefinition.getId());
-                    break;
-                case LOG:
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-                            + tableDefinition.getId() + "'. Events dropped '" + addingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                    break;
-                default:
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
-                                addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                                "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                                "' has become available for add operation for events '" + addingEventChunk + "'");
-                        add(addingEventChunk);
-                    } else {
-                        connectWithRetry();
-                        add(addingEventChunk);
-                    }
-                    break;
+                }
             }
         } catch (Throwable t) {
             LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"

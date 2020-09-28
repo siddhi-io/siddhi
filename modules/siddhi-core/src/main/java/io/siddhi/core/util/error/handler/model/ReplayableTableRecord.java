@@ -36,6 +36,7 @@ public class ReplayableTableRecord implements Serializable {
     private StateEvent stateEvent;
     private CompiledUpdateSet compiledUpdateSet;
     private AddingStreamEventExtractor addingStreamEventExtractor;
+    private boolean isFromConnectionUnavailableException = true;
 
     /**
      * For onAddError
@@ -132,5 +133,13 @@ public class ReplayableTableRecord implements Serializable {
 
     public AddingStreamEventExtractor getAddingStreamEventExtractor() {
         return addingStreamEventExtractor;
+    }
+
+    public boolean isFromConnectionUnavailableException() {
+        return isFromConnectionUnavailableException;
+    }
+
+    public void setFromConnectionUnavailableException(boolean fromConnectionUnavailableException) {
+        isFromConnectionUnavailableException = fromConnectionUnavailableException;
     }
 }
