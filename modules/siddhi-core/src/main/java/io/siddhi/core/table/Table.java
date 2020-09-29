@@ -26,6 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.DatabaseRuntimeException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.table.record.RecordTableHandler;
@@ -146,64 +147,61 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     protected void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e) {
         OnErrorAction errorAction = onErrorAction;
-        isConnected.set(false);
-        try {
-            if (e instanceof ConnectionUnavailableException) {
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+            if (errorAction == OnErrorAction.STORE) {
+                addingEventChunk.reset();
+                ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk),
+                        e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
+                        + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
                 if (!isTryingToConnect.get()) {
                     connectWithRetry();
                 }
-                if (errorAction == OnErrorAction.STORE) {
-                    addingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk),
-                        e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-                        + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                } else {
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
+            } else {
+                if (isTryingToConnect.get()) {
+                    LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
                             addingEventChunk + "', operation busy waiting at Table '"
                             + tableDefinition.getId() + "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId()
+                    waitWhileConnect();
+                    LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId()
                             + "' has become available for add operation for events '" + addingEventChunk + "'");
-                        add(addingEventChunk);
-                    } else {
-                        connectWithRetry();
-                        add(addingEventChunk);
-                    }
-                }
-            } else {
-                if (errorAction == OnErrorAction.STORE) {
-                    addingEventChunk.reset();
-                    ReplayableTableRecord record = new ReplayableTableRecord(addingEventChunk);
-                    record.setFromConnectionUnavailableException(false);
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
-                        + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
+                    add(addingEventChunk);
+                } else {
+                    connectWithRetry();
+                    add(addingEventChunk);
                 }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                + "', events dropped '" + addingEventChunk.toString() + "'", e);
+        } else if (e instanceof DatabaseRuntimeException) {
+            if (errorAction == OnErrorAction.STORE) {
+                addingEventChunk.reset();
+                ReplayableTableRecord record = new ReplayableTableRecord(addingEventChunk);
+                record.setFromConnectionUnavailableException(false);
+                ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
+                        + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
+            } else {
+                throw (DatabaseRuntimeException) e;
+            }
         }
     }
 
     private String constructAddErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
+        // TODO: 2020-09-29 construct json and pass
         StringBuilder errorStringBuilder = new StringBuilder();
         for (String column : tableDefinition.getAttributeNameArray()) {
             errorStringBuilder.append(column).append("  |  ");
@@ -220,6 +218,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     private String constructErrorRecordString(ComplexEventChunk<StateEvent> eventChunk) {
+        // TODO: 2020-09-29 construct json and pass
         StringBuilder errorStringBuilder = new StringBuilder();
         for (String column : tableDefinition.getAttributeNameArray()) {
             errorStringBuilder.append(column).append("  |  ");
@@ -300,60 +299,56 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     protected void onDeleteError(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
                                  Exception e) {
         OnErrorAction errorAction = onErrorAction;
-        isConnected.set(false);
-        try {
-            if (e instanceof ConnectionUnavailableException) {
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+            if (errorAction == OnErrorAction.STORE) {
+                deletingEventChunk.reset();
+                ErroneousEvent erroneousEvent = new ErroneousEvent(
+                        new ReplayableTableRecord(deletingEventChunk, compiledCondition), e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(deletingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
+                        + tableDefinition.getId() + "'. Events saved '" + deletingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
                 if (!isTryingToConnect.get()) {
                     connectWithRetry();
                 }
-                if (errorAction == OnErrorAction.STORE) {
-                    deletingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(
-                        new ReplayableTableRecord(deletingEventChunk, compiledCondition), e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(deletingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
-                        + tableDefinition.getId() + "'. Events saved '" + deletingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                } else {
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
+            } else {
+                if (isTryingToConnect.get()) {
+                    LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
                             deletingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
                             "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    waitWhileConnect();
+                    LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                             "' has become available for delete operation for events '" + deletingEventChunk + "'");
-                        delete(deletingEventChunk, compiledCondition);
-                    } else {
-                        connectWithRetry();
-                        delete(deletingEventChunk, compiledCondition);
-                    }
-                }
-            } else {
-                if (errorAction == OnErrorAction.STORE) {
-                    deletingEventChunk.reset();
-                    ReplayableTableRecord record = new ReplayableTableRecord(deletingEventChunk, compiledCondition);
-                    record.setFromConnectionUnavailableException(false);
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(deletingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
-                        + tableDefinition.getId() + "'. Events saved '" + deletingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
+                    delete(deletingEventChunk, compiledCondition);
+                } else {
+                    connectWithRetry();
+                    delete(deletingEventChunk, compiledCondition);
                 }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                + "', events dropped '" + deletingEventChunk.toString() + "'", e);
+        } else if (e instanceof DatabaseRuntimeException) {
+            if (errorAction == OnErrorAction.STORE) {
+                deletingEventChunk.reset();
+                ReplayableTableRecord record = new ReplayableTableRecord(deletingEventChunk, compiledCondition);
+                record.setFromConnectionUnavailableException(false);
+                ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(deletingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing delete for events  at '"
+                        + tableDefinition.getId() + "'. Events saved '" + deletingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
+            } else {
+                throw (DatabaseRuntimeException) e;
+            }
         }
     }
 
@@ -376,65 +371,61 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     protected void onUpdateError(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
                                  CompiledUpdateSet compiledUpdateSet, Exception e) {
         OnErrorAction errorAction = onErrorAction;
-        isConnected.set(false);
-        try {
-            if (e instanceof ConnectionUnavailableException) {
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+            if (errorAction == OnErrorAction.STORE) {
+                updatingEventChunk.reset();
+                ErroneousEvent erroneousEvent = new ErroneousEvent(
+                        new ReplayableTableRecord(updatingEventChunk, compiledCondition, compiledUpdateSet), e,
+                        e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(updatingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  " +
+                        "at '" + tableDefinition.getId() + "'. Events saved '" + updatingEventChunk.toString() +
+                        "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
                 if (!isTryingToConnect.get()) {
                     connectWithRetry();
                 }
-                if (errorAction == OnErrorAction.STORE) {
-                    updatingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(
-                        new ReplayableTableRecord(updatingEventChunk, compiledCondition, compiledUpdateSet), e,
-                        e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(updatingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  " +
-                        "at '" + tableDefinition.getId() + "'. Events saved '" + updatingEventChunk.toString() +
-                        "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                } else {
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for " +
+            } else {
+                if (isTryingToConnect.get()) {
+                    LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for " +
                             "events '" + updatingEventChunk + "', operation busy waiting at Table '" +
                             tableDefinition.getId() + "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId()
+                    waitWhileConnect();
+                    LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId()
                             + "' has become available for update operation for events '" + updatingEventChunk
                             + "'");
-                        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
-                    } else {
-                        connectWithRetry();
-                        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
-                    }
-                }
-            } else {
-                if (errorAction == OnErrorAction.STORE) {
-                    updatingEventChunk.reset();
-                    ReplayableTableRecord record = new ReplayableTableRecord(updatingEventChunk, compiledCondition,
-                        compiledUpdateSet);
-                    record.setFromConnectionUnavailableException(false);
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(updatingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  " +
-                        "at '" + tableDefinition.getId() + "'. Events saved '" + updatingEventChunk.toString() +
-                        "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
+                    update(updatingEventChunk, compiledCondition, compiledUpdateSet);
+                } else {
+                    connectWithRetry();
+                    update(updatingEventChunk, compiledCondition, compiledUpdateSet);
                 }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                + "', events dropped '" + updatingEventChunk.toString() + "'", e);
+        } else if (e instanceof DatabaseRuntimeException) {
+            if (errorAction == OnErrorAction.STORE) {
+                updatingEventChunk.reset();
+                ReplayableTableRecord record = new ReplayableTableRecord(updatingEventChunk, compiledCondition,
+                        compiledUpdateSet);
+                record.setFromConnectionUnavailableException(false);
+                ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(updatingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update for events  " +
+                        "at '" + tableDefinition.getId() + "'. Events saved '" + updatingEventChunk.toString() +
+                        "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
+            } else {
+                throw (DatabaseRuntimeException) e;
+            }
         }
     }
 
@@ -462,67 +453,63 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                       AddingStreamEventExtractor addingStreamEventExtractor,
                                       Exception e) {
         OnErrorAction errorAction = onErrorAction;
-        isConnected.set(false);
-        try {
-            if (e instanceof ConnectionUnavailableException) {
+        if (e instanceof ConnectionUnavailableException) {
+            isConnected.set(false);
+            if (errorAction == OnErrorAction.STORE) {
+                updateOrAddingEventChunk.reset();
+                ErroneousEvent erroneousEvent = new ErroneousEvent(
+                        new ReplayableTableRecord(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                                addingStreamEventExtractor), e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(updateOrAddingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
+                        "events  at '" + tableDefinition.getId() + "'. Events saved '" +
+                        updateOrAddingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
                 if (!isTryingToConnect.get()) {
                     connectWithRetry();
                 }
-                if (errorAction == OnErrorAction.STORE) {
-                    updateOrAddingEventChunk.reset();
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(
-                        new ReplayableTableRecord(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
-                            addingStreamEventExtractor), e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(updateOrAddingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
-                        "events  at '" + tableDefinition.getId() + "'. Events saved '" +
-                        updateOrAddingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
-                } else {
-                    if (isTryingToConnect.get()) {
-                        LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
+            } else {
+                if (isTryingToConnect.get()) {
+                    LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
                             "events '" + updateOrAddingEventChunk + "', operation busy waiting at Table '" +
                             tableDefinition.getId() + "' as its trying to reconnect!");
-                        waitWhileConnect();
-                        LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    waitWhileConnect();
+                    LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                             "' has become available for update or add operation for events '" +
                             updateOrAddingEventChunk + "'");
-                        updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
                             addingStreamEventExtractor);
-                    } else {
-                        connectWithRetry();
-                        updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                } else {
+                    connectWithRetry();
+                    updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
                             addingStreamEventExtractor);
-                    }
-                }
-            } else {
-                if (errorAction == OnErrorAction.STORE) {
-                    updateOrAddingEventChunk.reset();
-                    ReplayableTableRecord record = new ReplayableTableRecord(updateOrAddingEventChunk,
-                        compiledCondition, compiledUpdateSet, addingStreamEventExtractor);
-                    record.setFromConnectionUnavailableException(false);
-                    ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
-                    erroneousEvent.setOriginalPayload(constructErrorRecordString(updateOrAddingEventChunk));
-                    ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
-                    LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
-                        "events  at '" + tableDefinition.getId() + "'. Events saved '" +
-                        updateOrAddingEventChunk.toString() + "'");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
-                    }
                 }
             }
-        } catch (Throwable t) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table  at '"
-                + tableDefinition.getId() + "' as there is an issue when handling the error: '" + t.getMessage()
-                + "', events dropped '" + updateOrAddingEventChunk.toString() + "'", e);
+        } else if (e instanceof DatabaseRuntimeException) {
+            if (errorAction == OnErrorAction.STORE) {
+                updateOrAddingEventChunk.reset();
+                ReplayableTableRecord record = new ReplayableTableRecord(updateOrAddingEventChunk,
+                        compiledCondition, compiledUpdateSet, addingStreamEventExtractor);
+                record.setFromConnectionUnavailableException(false);
+                ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
+                erroneousEvent.setOriginalPayload(constructErrorRecordString(updateOrAddingEventChunk));
+                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                        ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
+                        tableDefinition.getId());
+                LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing update or add for " +
+                        "events  at '" + tableDefinition.getId() + "'. Events saved '" +
+                        updateOrAddingEventChunk.toString() + "'");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
+            } else {
+                throw (DatabaseRuntimeException) e;
+            }
         }
     }
 

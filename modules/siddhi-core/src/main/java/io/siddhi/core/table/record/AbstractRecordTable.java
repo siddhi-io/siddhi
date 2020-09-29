@@ -26,7 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.exception.DatabaseConstraintViolationException;
+import io.siddhi.core.exception.DatabaseRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
@@ -108,7 +108,7 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 add(records);
             }
-        } catch (ConnectionUnavailableException | DatabaseConstraintViolationException e) {
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onAddError(addingEventChunk, e);
         }
         // TODO: 2020-09-25 catch  SiddhiAppRuntimeException and validate for RDBMS constraint violation exception
@@ -225,7 +225,7 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 delete(deleteConditionParameterMaps, recordStoreCompiledCondition.getCompiledCondition());
             }
-        } catch (ConnectionUnavailableException | DatabaseConstraintViolationException e) {
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onDeleteError(deletingEventChunk, compiledCondition, e);
         }
 
@@ -287,7 +287,7 @@ public abstract class AbstractRecordTable extends Table {
                 update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
             }
-        } catch (ConnectionUnavailableException | DatabaseConstraintViolationException e) {
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onUpdateError(updatingEventChunk, compiledCondition, compiledUpdateSet, e
             );
         }
@@ -350,7 +350,7 @@ public abstract class AbstractRecordTable extends Table {
                 updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
             }
-        } catch (ConnectionUnavailableException | DatabaseConstraintViolationException e) {
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onUpdateOrAddError(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
                     addingStreamEventExtractor, e);
         }
