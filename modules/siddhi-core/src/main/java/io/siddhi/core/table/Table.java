@@ -18,6 +18,8 @@
 
 package io.siddhi.core.table;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -48,6 +50,7 @@ import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import org.apache.log4j.Logger;
@@ -78,6 +81,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     private ScheduledExecutorService scheduledExecutorService;
     private RecordTableHandler recordTableHandler;
     private OnErrorAction onErrorAction = OnErrorAction.RETRY;
+    private boolean isObjectColumnPresent;
     private LatencyTracker latencyTrackerFind;
     private LatencyTracker latencyTrackerInsert;
     private LatencyTracker latencyTrackerUpdate;
@@ -104,6 +108,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         if (onErrorElement != null) {
             this.onErrorAction = OnErrorAction.valueOf(onErrorElement.getValue());
         }
+        this.isObjectColumnPresent = isObjectColumnPresent(tableDefinition);
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
                 SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
@@ -145,18 +150,21 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         return tableDefinition;
     }
 
+    private boolean isObjectColumnPresent(TableDefinition tableDefinition) {
+        for (Attribute attribute: tableDefinition.getAttributeList()) {
+            if (attribute.getType() == Attribute.Type.OBJECT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
             if (errorAction == OnErrorAction.STORE) {
-                addingEventChunk.reset();
-                ErroneousEvent erroneousEvent = new ErroneousEvent(new ReplayableTableRecord(addingEventChunk),
-                        e, e.getMessage());
-                erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
-                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
+                handleStoreAddError(addingEventChunk, true, e);
                 LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
                         + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
                 if (LOG.isDebugEnabled()) {
@@ -181,14 +189,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             }
         } else if (e instanceof DatabaseRuntimeException) {
             if (errorAction == OnErrorAction.STORE) {
-                addingEventChunk.reset();
-                ReplayableTableRecord record = new ReplayableTableRecord(addingEventChunk);
-                record.setFromConnectionUnavailableException(false);
-                ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
-                erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
-                ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
-                        ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
-                        tableDefinition.getId());
+                handleStoreAddError(addingEventChunk, false, e);
                 LOG.error("Error on '" + siddhiAppContext.getName() + "' while performing add for events  at '"
                         + tableDefinition.getId() + "'. Events saved '" + addingEventChunk.toString() + "'");
                 if (LOG.isDebugEnabled()) {
@@ -200,42 +201,66 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         }
     }
 
+    private void handleStoreAddError(ComplexEventChunk addingEventChunk, boolean isFromConnectionUnavailableException,
+                                     Exception e) {
+        addingEventChunk.reset();
+        ReplayableTableRecord record = new ReplayableTableRecord(addingEventChunk);
+        record.setFromConnectionUnavailableException(isFromConnectionUnavailableException);
+        record.setEditable(!isObjectColumnPresent);
+        ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
+        erroneousEvent.setOriginalPayload(constructAddErrorRecordString(addingEventChunk));
+        ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
+                ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
+                tableDefinition.getId());
+    }
+
     private String constructAddErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk) {
-        // TODO: 2020-09-29 construct json and pass
-        StringBuilder errorStringBuilder = new StringBuilder();
-        for (String column : tableDefinition.getAttributeNameArray()) {
-            errorStringBuilder.append(column).append("  |  ");
+        JsonObject payloadJson = new JsonObject();
+        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        JsonArray attributes = new JsonArray();
+        JsonArray records = new JsonArray();
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
+            JsonObject attributeJson = new JsonObject();
+            attributeJson.addProperty(attribute.getName(), String.valueOf(attribute.getType()));
+            attributes.add(attributeJson);
         }
-        errorStringBuilder.append("<br/>");
+        payloadJson.add("attributes", attributes);
         while (eventChunk.hasNext()) {
             StreamEvent streamEvent = eventChunk.next();
+            JsonArray record = new JsonArray();
             for (Object item : streamEvent.getOutputData()) {
-                errorStringBuilder.append(item).append("  |  ");
+                record.add(String.valueOf(item));
             }
-            errorStringBuilder.append("<br/>");
+            records.add(record);
         }
-        return errorStringBuilder.toString();
+        payloadJson.add("records", records);
+        return payloadJson.toString();
     }
 
     private String constructErrorRecordString(ComplexEventChunk<StateEvent> eventChunk) {
-        // TODO: 2020-09-29 construct json and pass
-        StringBuilder errorStringBuilder = new StringBuilder();
-        for (String column : tableDefinition.getAttributeNameArray()) {
-            errorStringBuilder.append(column).append("  |  ");
+        JsonObject payloadJson = new JsonObject();
+        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        JsonArray attributes = new JsonArray();
+        JsonArray records = new JsonArray();
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
+            JsonObject attributeJson = new JsonObject();
+            attributeJson.addProperty(attribute.getName(), String.valueOf(attribute.getType()));
+            attributes.add(attributeJson);
         }
-        errorStringBuilder.append("<br/>");
         while (eventChunk.hasNext()) {
             StateEvent stateEvent = eventChunk.next();
             for (StreamEvent streamEvent : stateEvent.getStreamEvents()) {
                 if (streamEvent != null) {
+                    JsonArray record = new JsonArray();
                     for (Object item : streamEvent.getOutputData()) {
-                        errorStringBuilder.append(item).append("  |  ");
+                        record.add(String.valueOf(item));
                     }
-                    errorStringBuilder.append("<br/>");
+                    records.add(record);
                 }
             }
         }
-        return errorStringBuilder.toString();
+        payloadJson.add("records", records);
+        return payloadJson.toString();
     }
 
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {

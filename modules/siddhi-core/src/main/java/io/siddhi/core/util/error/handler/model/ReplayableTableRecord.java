@@ -143,4 +143,12 @@ public class ReplayableTableRecord implements Serializable {
     public void setFromConnectionUnavailableException(boolean fromConnectionUnavailableException) {
         isFromConnectionUnavailableException = fromConnectionUnavailableException;
     }
+
+    public boolean isEditable() {
+        return isEditable;
+    }
+
+    public void setEditable(boolean editable) {
+        isEditable = editable;
+    }
 }
