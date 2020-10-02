@@ -218,13 +218,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         JsonObject payloadJson = new JsonObject();
         payloadJson.addProperty("isEditable", !isObjectColumnPresent);
         JsonArray attributes = new JsonArray();
+        JsonArray attributeTypes = new JsonArray();
         JsonArray records = new JsonArray();
         for (Attribute attribute : tableDefinition.getAttributeList()) {
-            JsonObject attributeJson = new JsonObject();
-            attributeJson.addProperty(attribute.getName(), String.valueOf(attribute.getType()));
-            attributes.add(attributeJson);
+            attributes.add(attribute.getName());
+            attributeTypes.add(String.valueOf(attribute.getType()));
         }
         payloadJson.add("attributes", attributes);
+        payloadJson.add("attributeTypes", attributeTypes);
         while (eventChunk.hasNext()) {
             StreamEvent streamEvent = eventChunk.next();
             JsonArray record = new JsonArray();
@@ -241,12 +242,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         JsonObject payloadJson = new JsonObject();
         payloadJson.addProperty("isEditable", !isObjectColumnPresent);
         JsonArray attributes = new JsonArray();
+        JsonArray attributeTypes = new JsonArray();
         JsonArray records = new JsonArray();
         for (Attribute attribute : tableDefinition.getAttributeList()) {
-            JsonObject attributeJson = new JsonObject();
-            attributeJson.addProperty(attribute.getName(), String.valueOf(attribute.getType()));
-            attributes.add(attributeJson);
+            attributes.add(attribute.getName());
+            attributeTypes.add(String.valueOf(attribute.getType()));
         }
+        payloadJson.add("attributes", attributes);
+        payloadJson.add("attributeTypes", attributeTypes);
         while (eventChunk.hasNext()) {
             StateEvent stateEvent = eventChunk.next();
             for (StreamEvent streamEvent : stateEvent.getStreamEvents()) {

@@ -37,7 +37,7 @@ public class ReplayableTableRecord implements Serializable {
     private CompiledUpdateSet compiledUpdateSet;
     private AddingStreamEventExtractor addingStreamEventExtractor;
     private boolean isFromConnectionUnavailableException = true;
-    private boolean isEditable; // TODO: 2020-09-29 make false is any column of table is object 
+    private boolean isEditable;
 
     /**
      * For onAddError
