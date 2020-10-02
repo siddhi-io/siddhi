@@ -18,6 +18,16 @@
 
 package io.siddhi.core.util.error.handler.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,5 +68,65 @@ public class ErrorHandlerUtils {
             return originalPayloadAsObject.toString();
         }
         return null;
+    }
+
+    public static String constructAddErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk,
+                                                       boolean isObjectColumnPresent, TableDefinition tableDefinition) {
+        JsonObject payloadJson = new JsonObject();
+        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        JsonArray attributes = new JsonArray();
+        JsonArray records = new JsonArray();
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
+            JsonObject attributeJson = new JsonObject();
+            attributeJson.add("name", new JsonPrimitive(attribute.getName()));
+            attributeJson.add("type", new JsonPrimitive(String.valueOf(attribute.getType())));
+            attributes.add(attributeJson);
+        }
+        payloadJson.add("attributes", attributes);
+        while (eventChunk.hasNext()) {
+            StreamEvent streamEvent = eventChunk.next();
+            JsonArray record = new JsonArray();
+            for (Object item : streamEvent.getOutputData()) {
+                if (item == null) {
+                    record.add(JsonNull.INSTANCE);
+                }
+                record.add(String.valueOf(item));
+            }
+            records.add(record);
+        }
+        payloadJson.add("records", records);
+        return payloadJson.toString();
+    }
+
+    public static String constructErrorRecordString(ComplexEventChunk<StateEvent> eventChunk,
+                                                    boolean isObjectColumnPresent, TableDefinition tableDefinition) {
+        JsonObject payloadJson = new JsonObject();
+        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        JsonArray attributes = new JsonArray();
+        JsonArray records = new JsonArray();
+        for (Attribute attribute : tableDefinition.getAttributeList()) {
+            JsonObject attributeJson = new JsonObject();
+            attributeJson.add("name", new JsonPrimitive(attribute.getName()));
+            attributeJson.add("type", new JsonPrimitive(String.valueOf(attribute.getType())));
+            attributes.add(attributeJson);
+        }
+        payloadJson.add("attributes", attributes);
+        while (eventChunk.hasNext()) {
+            StateEvent stateEvent = eventChunk.next();
+            for (StreamEvent streamEvent : stateEvent.getStreamEvents()) {
+                if (streamEvent != null) {
+                    JsonArray record = new JsonArray();
+                    for (Object item : streamEvent.getOutputData()) {
+                        if (item == null) {
+                            record.add(JsonNull.INSTANCE);
+                        }
+                        record.add(String.valueOf(item));
+                    }
+                    records.add(record);
+                }
+            }
+        }
+        payloadJson.add("records", records);
+        return payloadJson.toString();
     }
 }

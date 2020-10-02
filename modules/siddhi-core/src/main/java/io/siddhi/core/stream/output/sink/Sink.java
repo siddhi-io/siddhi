@@ -93,6 +93,11 @@ public abstract class Sink<S extends State> implements SinkListener {
         this.onErrorAction = OnErrorAction.valueOf(transportOptionHolder
                 .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
                 .getValue().toUpperCase());
+        if (this.onErrorAction == OnErrorAction.STORE && siddhiAppContext.getSiddhiContext().getErrorStore() == null) {
+            LOG.error("On error action is 'STORE' for sink connected to stream " + streamDefinition.getId()
+                    + " in Siddhi App " + siddhiAppContext.getName() + " but error store is not configured in Siddhi " +
+                    "Manager");
+        }
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     streamDefinition.getId(),

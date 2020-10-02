@@ -111,8 +111,6 @@ public abstract class AbstractRecordTable extends Table {
         } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onAddError(addingEventChunk, e);
         }
-        // TODO: 2020-09-25 catch  SiddhiAppRuntimeException and validate for RDBMS constraint violation exception
-        //  and handle it. Don't give replay option for these types of errors
     }
 
     /**
