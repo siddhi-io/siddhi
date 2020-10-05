@@ -44,7 +44,11 @@ public class EntryValveProcessor implements Processor, Schedulable {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         threadBarrier.pass();
-        next.process(complexEventChunk);
+        try {
+            next.process(complexEventChunk);
+        } finally {
+            threadBarrier.exit();
+        }
     }
 
     /**

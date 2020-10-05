@@ -18,17 +18,24 @@
 
 package org.wso2.siddhi.core.util;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadBarrier {
 
     private ReentrantLock lock = new ReentrantLock();
+    private AtomicInteger counter = new AtomicInteger();
 
     public void pass() {
         if (lock.isLocked()) {
             lock.lock();
             lock.unlock();
         }
+        counter.incrementAndGet();
+    }
+
+    public void exit() {
+        counter.decrementAndGet();
     }
 
     public void lock() {
@@ -37,6 +44,10 @@ public class ThreadBarrier {
 
     public void unlock() {
         lock.unlock();
+    }
+
+    public int getActiveThreads() {
+        return counter.get();
     }
 
 }
