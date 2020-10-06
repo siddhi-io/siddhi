@@ -213,7 +213,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         record.setEditable(!isObjectColumnPresent);
         ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
         erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructAddErrorRecordString(addingEventChunk,
-                isFromConnectionUnavailableException, tableDefinition));
+                isFromConnectionUnavailableException, tableDefinition, e));
         ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                 ErrorOccurrence.STORE_ON_TABLE_ADD, siddhiAppContext.getName(), erroneousEvent,
                 tableDefinition.getId());
@@ -287,7 +287,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 ErroneousEvent erroneousEvent = new ErroneousEvent(
                         new ReplayableTableRecord(deletingEventChunk, compiledCondition), e, e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(deletingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
@@ -320,7 +320,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 record.setFromConnectionUnavailableException(false);
                 ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(deletingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_DELETE, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
@@ -362,7 +362,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         new ReplayableTableRecord(updatingEventChunk, compiledCondition, compiledUpdateSet), e,
                         e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(updatingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
@@ -398,7 +398,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 record.setFromConnectionUnavailableException(false);
                 ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(updatingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_UPDATE, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
@@ -446,7 +446,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         new ReplayableTableRecord(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
                                 addingStreamEventExtractor), e, e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(updateOrAddingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
@@ -484,7 +484,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 record.setFromConnectionUnavailableException(false);
                 ErroneousEvent erroneousEvent = new ErroneousEvent(record, e, e.getMessage());
                 erroneousEvent.setOriginalPayload(ErrorHandlerUtils.constructErrorRecordString(updateOrAddingEventChunk,
-                        isObjectColumnPresent, tableDefinition));
+                        isObjectColumnPresent, tableDefinition, e));
                 ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
                         ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD, siddhiAppContext.getName(), erroneousEvent,
                         tableDefinition.getId());
