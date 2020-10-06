@@ -25,6 +25,7 @@ import com.google.gson.JsonPrimitive;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 
@@ -71,9 +72,14 @@ public class ErrorHandlerUtils {
     }
 
     public static String constructAddErrorRecordString(ComplexEventChunk<StreamEvent> eventChunk,
-                                                       boolean isObjectColumnPresent, TableDefinition tableDefinition) {
+                                                       boolean isObjectColumnPresent, TableDefinition tableDefinition,
+                                                       Exception e) {
         JsonObject payloadJson = new JsonObject();
-        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        if (isObjectColumnPresent || e instanceof ConnectionUnavailableException) {
+            payloadJson.addProperty("isEditable", false);
+        } else {
+            payloadJson.addProperty("isEditable", true);
+        }
         JsonArray attributes = new JsonArray();
         JsonArray records = new JsonArray();
         for (Attribute attribute : tableDefinition.getAttributeList()) {
@@ -99,9 +105,14 @@ public class ErrorHandlerUtils {
     }
 
     public static String constructErrorRecordString(ComplexEventChunk<StateEvent> eventChunk,
-                                                    boolean isObjectColumnPresent, TableDefinition tableDefinition) {
+                                                    boolean isObjectColumnPresent, TableDefinition tableDefinition,
+                                                    Exception e) {
         JsonObject payloadJson = new JsonObject();
-        payloadJson.addProperty("isEditable", !isObjectColumnPresent);
+        if (isObjectColumnPresent || e instanceof ConnectionUnavailableException) {
+            payloadJson.addProperty("isEditable", false);
+        } else {
+            payloadJson.addProperty("isEditable", true);
+        }
         JsonArray attributes = new JsonArray();
         JsonArray records = new JsonArray();
         for (Attribute attribute : tableDefinition.getAttributeList()) {
