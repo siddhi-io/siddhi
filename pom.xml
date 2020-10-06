@@ -754,7 +754,7 @@
         <guava.bundle.version>23.0.0</guava.bundle.version>
         <gson.version>2.8.5</gson.version>
         <commons-lang3.version>3.9</commons-lang3.version>
-        <classindex.version>3.9</classindex.version>
+        <classindex.version>3.10</classindex.version>
         <quartz.version>2.1.1.wso2v1</quartz.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.osgi.core.bundle.version>6.0.0.201403061837</org.osgi.core.bundle.version>
