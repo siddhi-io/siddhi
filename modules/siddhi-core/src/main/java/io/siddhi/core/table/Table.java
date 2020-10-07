@@ -108,39 +108,38 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             this.onErrorAction = OnErrorAction.valueOf(onErrorElement.getValue());
         }
         if (this.onErrorAction == OnErrorAction.STORE && siddhiAppContext.getSiddhiContext().getErrorStore() == null) {
-            // TODO: 2020-10-02 add in streams
             LOG.error("On error action is 'STORE' for table " + tableDefinition.getId() + " in Siddhi App "
                     + siddhiAppContext.getName() + " but error store is not configured in Siddhi Manager");
         }
         this.isObjectColumnPresent = isObjectColumnPresent(tableDefinition);
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
             latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
             latencyTrackerUpdate = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
             latencyTrackerDelete = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
             latencyTrackerUpdateOrInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
-                SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
+                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
             latencyTrackerContains = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
 
             throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext, tableDefinition.getId(),
-                SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
             throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
             throughputTrackerUpdate = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
             throughputTrackerDelete = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
             throughputTrackerUpdateOrInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
-                SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
+                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
             throughputTrackerContains = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
 
         }
         init(tableDefinition, storeEventPool, storeEventCloner, configReader, siddhiAppContext, recordTableHandler);
@@ -155,12 +154,8 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     private boolean isObjectColumnPresent(TableDefinition tableDefinition) {
-        for (Attribute attribute: tableDefinition.getAttributeList()) {
-            if (attribute.getType() == Attribute.Type.OBJECT) {
-                return true;
-            }
-        }
-        return false;
+        return tableDefinition.getAttributeList()
+                .stream().anyMatch(attribute -> attribute.getType() == Attribute.Type.OBJECT);
     }
 
     protected void onAddError(ComplexEventChunk<StreamEvent> addingEventChunk, Exception e) {
@@ -221,13 +216,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
         if (latencyTrackerInsert != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             latencyTrackerInsert.markIn();
         }
         addingEventChunk.reset();
         add(addingEventChunk);
         if (throughputTrackerInsert != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerInsert.eventsIn(noOfEvents);
         }
     }
@@ -238,35 +233,35 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         if (isConnected.get()) {
             try {
                 if (latencyTrackerFind != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerFind.markIn();
                 }
                 StreamEvent results = find(compiledCondition, matchingEvent);
                 if (throughputTrackerFind != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTrackerFind.eventIn();
                 }
                 return results;
             } catch (ConnectionUnavailableException e) {
                 isConnected.set(false);
                 LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                    " Connection unavailable at Table '" + tableDefinition.getId() +
-                    "', will retry connection immediately.", e);
+                        " Connection unavailable at Table '" + tableDefinition.getId() +
+                        "', will retry connection immediately.", e);
                 connectWithRetry();
                 return find(matchingEvent, compiledCondition);
             } finally {
                 if (latencyTrackerFind != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerFind.markOut();
                 }
             }
         } else if (isTryingToConnect.get()) {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
-                matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                "' as its trying to reconnect!");
+                    matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
             waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                "' has become available for find operation for events '" + matchingEvent + "'");
+                    "' has become available for find operation for events '" + matchingEvent + "'");
             return find(matchingEvent, compiledCondition);
         } else {
             connectWithRetry();
@@ -275,7 +270,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     protected abstract StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent)
-        throws ConnectionUnavailableException;
+            throws ConnectionUnavailableException;
 
     protected void onDeleteError(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
                                  Exception e) {
@@ -329,8 +324,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e);
                 }
-            } else {
-                throw (DatabaseRuntimeException) e;
             }
         }
     }
@@ -338,18 +331,18 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     public void deleteEvents(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
                              int noOfEvents) {
         if (latencyTrackerDelete != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             latencyTrackerDelete.markIn();
         }
         delete(deletingEventChunk, compiledCondition);
         if (throughputTrackerDelete != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerDelete.eventsIn(noOfEvents);
         }
     }
 
     public abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
-                                CompiledCondition compiledCondition);
+                                    CompiledCondition compiledCondition);
 
     protected void onUpdateError(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
                                  CompiledUpdateSet compiledUpdateSet, Exception e) {
@@ -408,16 +401,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e);
                 }
-            } else {
-                throw (DatabaseRuntimeException) e;
             }
         }
     }
 
 
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
-                             CompiledCondition compiledCondition,
-                             CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
+                                CompiledCondition compiledCondition,
+                                CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
         if (latencyTrackerUpdate != null &&
             Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             latencyTrackerUpdate.markIn();
@@ -434,9 +425,9 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                 CompiledUpdateSet compiledUpdateSet);
 
     protected void onUpdateOrAddError(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                      CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                                      AddingStreamEventExtractor addingStreamEventExtractor,
-                                      Exception e) {
+                                        CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
+                                        AddingStreamEventExtractor addingStreamEventExtractor,
+                                        Exception e) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
@@ -494,8 +485,6 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e);
                 }
-            } else {
-                throw (DatabaseRuntimeException) e;
             }
         }
     }
@@ -505,55 +494,55 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                   CompiledUpdateSet compiledUpdateSet,
                                   AddingStreamEventExtractor addingStreamEventExtractor, int noOfEvents) {
         if (latencyTrackerUpdateOrInsert != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             latencyTrackerUpdateOrInsert.markIn();
         }
         updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
-            addingStreamEventExtractor);
+                addingStreamEventExtractor);
         if (throughputTrackerUpdateOrInsert != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerUpdateOrInsert.eventsIn(noOfEvents);
         }
     }
 
     public abstract void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                     CompiledCondition compiledCondition,
-                                     CompiledUpdateSet compiledUpdateSet,
-                                     AddingStreamEventExtractor addingStreamEventExtractor);
+                                        CompiledCondition compiledCondition,
+                                        CompiledUpdateSet compiledUpdateSet,
+                                        AddingStreamEventExtractor addingStreamEventExtractor);
 
     public boolean containsEvent(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         if (isConnected.get()) {
             try {
                 if (latencyTrackerContains != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerContains.markIn();
                 }
                 boolean results = contains(matchingEvent, compiledCondition);
                 if (throughputTrackerContains != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTrackerContains.eventIn();
                 }
                 return results;
             } catch (ConnectionUnavailableException e) {
                 isConnected.set(false);
                 LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                    " Connection unavailable at Table '" + tableDefinition.getId() +
-                    "', will retry connection immediately.", e);
+                        " Connection unavailable at Table '" + tableDefinition.getId() +
+                        "', will retry connection immediately.", e);
                 connectWithRetry();
                 return containsEvent(matchingEvent, compiledCondition);
             } finally {
                 if (latencyTrackerContains != null &&
-                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerContains.markOut();
                 }
             }
         } else if (isTryingToConnect.get()) {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing contains check for event '" +
-                matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
-                "' as its trying to reconnect!");
+                    matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
             waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
-                "' has become available for contains check operation for matching event '" + matchingEvent + "'");
+                    "' has become available for contains check operation for matching event '" + matchingEvent + "'");
             return containsEvent(matchingEvent, compiledCondition);
         } else {
             connectWithRetry();
@@ -562,7 +551,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     protected abstract boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition)
-        throws ConnectionUnavailableException;
+            throws ConnectionUnavailableException;
 
     public void connectWithRetry() {
         if (!isConnected.get()) {
@@ -577,10 +566,10 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e,
-                    siddhiAppContext)) + " Error while connecting to Table '" +
-                    StringUtil.removeCRLFCharacters(tableDefinition.getId())
-                    + "', will retry in '" + StringUtil.removeCRLFCharacters(
-                    backoffRetryCounter.getTimeInterval()) + "'.", e);
+                        siddhiAppContext)) + " Error while connecting to Table '" +
+                        StringUtil.removeCRLFCharacters(tableDefinition.getId())
+                        + "', will retry in '" + StringUtil.removeCRLFCharacters(
+                        backoffRetryCounter.getTimeInterval()) + "'.", e);
                 scheduledExecutorService.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -590,8 +579,8 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 backoffRetryCounter.increment();
             } catch (RuntimeException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e,
-                    siddhiAppContext)) + " . Error while connecting to Table '" +
-                    StringUtil.removeCRLFCharacters(tableDefinition.getId()) + "'.", e);
+                        siddhiAppContext)) + " . Error while connecting to Table '" +
+                        StringUtil.removeCRLFCharacters(tableDefinition.getId()) + "'.", e);
                 throw e;
             }
         }
@@ -622,7 +611,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             }
         } catch (InterruptedException e) {
             throw new RuntimeException("Error on SiddhiApp '" + siddhiAppContext.getName() + "', interrupted while " +
-                "busy wait on connection retrying condition " + e.getMessage(), e);
+                    "busy wait on connection retrying condition " + e.getMessage(), e);
         }
     }
 

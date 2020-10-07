@@ -75,11 +75,7 @@ public class ErrorHandlerUtils {
                                                        boolean isObjectColumnPresent, TableDefinition tableDefinition,
                                                        Exception e) {
         JsonObject payloadJson = new JsonObject();
-        if (isObjectColumnPresent || e instanceof ConnectionUnavailableException) {
-            payloadJson.addProperty("isEditable", false);
-        } else {
-            payloadJson.addProperty("isEditable", true);
-        }
+        payloadJson.addProperty("isEditable", !(isObjectColumnPresent || e instanceof ConnectionUnavailableException));
         JsonArray attributes = new JsonArray();
         JsonArray records = new JsonArray();
         for (Attribute attribute : tableDefinition.getAttributeList()) {
