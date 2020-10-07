@@ -26,6 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.DatabaseRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
@@ -36,7 +37,6 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.definition.TableDefinition;
@@ -108,8 +108,8 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 add(records);
             }
-        } catch (ConnectionUnavailableException e) {
-            onAddError(addingEventChunk, e, ErrorOccurrence.STORE_ON_TABLE_ADD);
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
+            onAddError(addingEventChunk, e);
         }
     }
 
@@ -223,8 +223,8 @@ public abstract class AbstractRecordTable extends Table {
             } else {
                 delete(deleteConditionParameterMaps, recordStoreCompiledCondition.getCompiledCondition());
             }
-        } catch (ConnectionUnavailableException e) {
-            onDeleteError(deletingEventChunk, compiledCondition, e, ErrorOccurrence.STORE_ON_TABLE_DELETE);
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
+            onDeleteError(deletingEventChunk, compiledCondition, e);
         }
 
     }
@@ -285,9 +285,9 @@ public abstract class AbstractRecordTable extends Table {
                 update(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps);
             }
-        } catch (ConnectionUnavailableException e) {
-            onUpdateError(updatingEventChunk, compiledCondition, compiledUpdateSet, e,
-                    ErrorOccurrence.STORE_ON_TABLE_UPDATE);
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
+            onUpdateError(updatingEventChunk, compiledCondition, compiledUpdateSet, e
+            );
         }
     }
 
@@ -348,9 +348,9 @@ public abstract class AbstractRecordTable extends Table {
                 updateOrAdd(recordStoreCompiledCondition.getCompiledCondition(), updateConditionParameterMaps,
                         recordTableCompiledUpdateSet.getUpdateSetMap(), updateSetParameterMaps, addingRecords);
             }
-        } catch (ConnectionUnavailableException e) {
+        } catch (ConnectionUnavailableException | DatabaseRuntimeException e) {
             onUpdateOrAddError(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
-                    addingStreamEventExtractor, e, ErrorOccurrence.STORE_ON_TABLE_UPDATE_OR_ADD);
+                    addingStreamEventExtractor, e);
         }
     }
 
