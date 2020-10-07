@@ -91,8 +91,9 @@ public class ErrorHandlerUtils {
             for (Object item : streamEvent.getOutputData()) {
                 if (item == null) {
                     record.add(JsonNull.INSTANCE);
+                } else {
+                    record.add(String.valueOf(item));
                 }
-                record.add(String.valueOf(item));
             }
             records.add(record);
         }
@@ -126,8 +127,9 @@ public class ErrorHandlerUtils {
                     for (Object item : streamEvent.getOutputData()) {
                         if (item == null) {
                             record.add(JsonNull.INSTANCE);
+                        } else {
+                            record.add(String.valueOf(item));
                         }
-                        record.add(String.valueOf(item));
                     }
                     records.add(record);
                 }
