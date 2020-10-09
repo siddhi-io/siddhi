@@ -138,9 +138,9 @@ public abstract class Scheduler implements Snapshotable {
                 }
             }
             streamEventChunk.clear();
-
             toNotifyTime = toNotifyQueue.peek();
             currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            threadBarrier.exit();
         }
     }
 }

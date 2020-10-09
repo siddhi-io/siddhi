@@ -38,24 +38,40 @@ public class InputEntryValve implements InputProcessor {
     @Override
     public void send(Event event, int streamIndex) {
         barrier.pass();
-        inputProcessor.send(event, streamIndex);
+        try {
+            inputProcessor.send(event, streamIndex);
+        } finally {
+            barrier.exit();
+        }
     }
 
     @Override
     public void send(Event[] events, int streamIndex) {
         barrier.pass();
-        inputProcessor.send(events, streamIndex);
+        try {
+            inputProcessor.send(events, streamIndex);
+        } finally {
+            barrier.exit();
+        }
     }
 
     @Override
     public void send(List<Event> events, int streamIndex) {
         barrier.pass();
-        inputProcessor.send(events, streamIndex);
+        try {
+            inputProcessor.send(events, streamIndex);
+        } finally {
+            barrier.exit();
+        }
     }
 
     @Override
     public void send(long timeStamp, Object[] data, int streamIndex) {
         barrier.pass();
-        inputProcessor.send(timeStamp, data, streamIndex);
+        try {
+            inputProcessor.send(timeStamp, data, streamIndex);
+        } finally {
+            barrier.exit();
+        }
     }
 }
