@@ -45,7 +45,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>UNIX_TIMESTAMP(from_unixtime({{COLUMN}}/1000,"{{DURATION}}"))</timeConversionFunction>
+            <timeConversionFunction>UNIX_TIMESTAMP(from_unixtime({{COLUMN}}/1000,"{{DURATION}}"))*1000</timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
             <day>%Y-%m-%d</day>
@@ -120,7 +120,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>DATEDIFF(second , '19700101',DATEADD({{DURATION}} , DATEDIFF({{DURATION}} , 0, DATEADD(ss, {{COLUMN}}/1000, '19700101')), 0))</timeConversionFunction>
+            <timeConversionFunction>DATEDIFF(second , '19700101',DATEADD({{DURATION}} , DATEDIFF({{DURATION}} , 0, DATEADD(ss, {{COLUMN}}/1000, '19700101')), 0))*1000</timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
             <day>dd</day>
@@ -156,7 +156,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>select EXTRACT(epoch from date_trunc('{{DURATION}}',  to_timestamp({{COLUMN}}/1000)));
+            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}',  to_timestamp({{COLUMN}}/1000)))*1000;
             </timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
