@@ -28,6 +28,7 @@ import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.Map;
  * the base incremental values would be sum and count. The timestamp too is stored here.
  */
 public class BaseIncrementalValueStore {
+    private static final Logger log = Logger.getLogger(BaseIncrementalValueStore.class);
     private StateHolder<ValueState> valueStateHolder;
     private StateHolder<StoreState> storeStateHolder;
 
@@ -55,7 +57,6 @@ public class BaseIncrementalValueStore {
         this.initialTimestamp = initialTimestamp;
         this.expressionExecutors = expressionExecutors;
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
-
         this.streamEventFactory = streamEventFactory;
 
         if (!local) {

@@ -55,4 +55,5 @@ public interface Executor {
      */
     void setNextExecutor(Executor executor);
 
+    void setEmitTime(long emitTimeOfLatestEventInTable);
 }

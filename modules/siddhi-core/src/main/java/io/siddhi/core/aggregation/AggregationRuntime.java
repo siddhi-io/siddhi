@@ -18,6 +18,7 @@
 
 package io.siddhi.core.aggregation;
 
+import io.siddhi.core.aggregation.persistedaggregation.PersistedIncrementalExecutor;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
@@ -85,7 +86,8 @@ public class AggregationRuntime implements MemoryCalculable {
     private boolean isProcessingOnExternalTime;
     private boolean isDistributed;
     private List<TimePeriod.Duration> incrementalDurations;
-    private Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+    private List<TimePeriod.Duration> activeIncrementalDurations;
+    private Map<TimePeriod.Duration, Executor> incrementalExecutorMap;
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private List<String> tableAttributesNameList;
     private MetaStreamEvent aggregateMetaSteamEvent;
@@ -110,10 +112,11 @@ public class AggregationRuntime implements MemoryCalculable {
 
     private boolean isFirstEventArrived;
     private String timeZone;
+    private Map<String, Map<TimePeriod.Duration, Executor>> aggregationDurationExecutorMap;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition, boolean isProcessingOnExternalTime,
-                              boolean isDistributed, List<TimePeriod.Duration> incrementalDurations,
-                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
+                              boolean isDistributed, List<TimePeriod.Duration> aggregationDurations,
+                              Map<TimePeriod.Duration, Executor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
                               List<ExpressionExecutor> outputExpressionExecutors,
                               Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
@@ -131,7 +134,8 @@ public class AggregationRuntime implements MemoryCalculable {
         this.aggregationDefinition = aggregationDefinition;
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.isDistributed = isDistributed;
-        this.incrementalDurations = incrementalDurations;
+        this.incrementalDurations = aggregationDurations;
+        this.activeIncrementalDurations = aggregationDurations;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
         this.tableAttributesNameList = tableMetaStreamEvent.getInputDefinitions().get(0).getAttributeList()
@@ -156,6 +160,8 @@ public class AggregationRuntime implements MemoryCalculable {
 
         this.latencyTrackerFind = latencyTrackerFind;
         this.throughputTrackerFind = throughputTrackerFind;
+        this.aggregationDurationExecutorMap = new HashMap<>();
+        this.aggregationDurationExecutorMap.put(aggregationDefinition.getId(), incrementalExecutorMap);
 
     }
 
@@ -373,7 +379,7 @@ public class AggregationRuntime implements MemoryCalculable {
         additionalAttributes.add(new Attribute("_START", Attribute.Type.LONG));
         additionalAttributes.add(new Attribute("_END", Attribute.Type.LONG));
 
-        int lowerGranularitySize = this.incrementalDurations.size() - 1;
+        int lowerGranularitySize = this.activeIncrementalDurations.size() - 1;
         List<String> lowerGranularityAttributes = new ArrayList<>();
         if (isDistributed) {
             //Add additional attributes to get base aggregation timestamps based on current timestamps
@@ -387,7 +393,8 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Get table definition. Table definitions for all the tables used to persist aggregates are similar.
         // Therefore it's enough to get the definition from one table.
-        AbstractDefinition tableDefinition = aggregationTables.get(incrementalDurations.get(0)).getTableDefinition();
+        AbstractDefinition tableDefinition = aggregationTables.get(activeIncrementalDurations.get(0)).
+                getTableDefinition();
 
         boolean isOnDemandQuery = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 1;
 
@@ -485,7 +492,7 @@ public class AggregationRuntime implements MemoryCalculable {
             for (int i = 0; i < lowerGranularitySize; i++) {
                 Expression[] expressionArray = new Expression[]{
                         new AttributeFunction("", "currentTimeMillis", null),
-                        Expression.value(this.incrementalDurations.get(i + 1).toString())};
+                        Expression.value(this.activeIncrementalDurations.get(i + 1).toString())};
                 Expression filterExpression = new AttributeFunction("incrementalAggregator",
                         "getAggregationStartTime", expressionArray);
                 timestampFilterExecutors.add(ExpressionParser.parseExpression(filterExpression,
@@ -532,8 +539,8 @@ public class AggregationRuntime implements MemoryCalculable {
 
         boolean isQueryGroupBySameAsAggGroupBy =
                 queryGroupByListCopy.isEmpty() ||
-                    (queryGroupByListCopy.contains(timestampVariable) &&
-                            queryGroupByNamesList.equals(groupByVariablesList));
+                        (queryGroupByListCopy.contains(timestampVariable) &&
+                                queryGroupByNamesList.equals(groupByVariablesList));
 
         List<VariableExpressionExecutor> variableExpExecutorsForTableLookups = new ArrayList<>();
 
@@ -659,7 +666,7 @@ public class AggregationRuntime implements MemoryCalculable {
                                         Expression.variable(lowerGranularityAttributes.get(i)));
                     }
                 }
-                TimePeriod.Duration duration = this.incrementalDurations.get(i);
+                TimePeriod.Duration duration = this.activeIncrementalDurations.get(i);
                 String tableName = aggregationName + "_" + duration.toString();
                 CompiledCondition compiledCondition = tableMap.get(tableName).compileCondition(lowerGranularity,
                         metaInfoHolderForTableLookups, variableExpExecutorsForTableLookups, tableMap,
@@ -678,7 +685,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
         return new IncrementalAggregateCompileCondition(isOnDemandQuery, aggregationName, isProcessingOnExternalTime,
-                isDistributed, incrementalDurations, aggregationTables, outputExpressionExecutors,
+                isDistributed, activeIncrementalDurations, aggregationTables, outputExpressionExecutors,
                 isOptimisedTableLookup, withinTableCompiledSelection, withinTableCompiledConditions,
                 withinInMemoryCompileCondition, withinTableLowerGranularityCompileCondition, onCompiledCondition,
                 additionalAttributes, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
@@ -695,9 +702,16 @@ public class AggregationRuntime implements MemoryCalculable {
         // State only updated when first event arrives to IncrementalAggregationProcessor
         if (isFirstEventArrived) {
             this.isFirstEventArrived = true;
-            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+            for (Map.Entry<TimePeriod.Duration, Executor> durationIncrementalExecutorEntry :
                     this.incrementalExecutorMap.entrySet()) {
-                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(true);
+                if (activeIncrementalDurations.contains(durationIncrementalExecutorEntry.getKey())) {
+                    if (durationIncrementalExecutorEntry.getValue() instanceof IncrementalExecutor) {
+                        ((IncrementalExecutor) durationIncrementalExecutorEntry.getValue()).setProcessingExecutor(true);
+                    } else {
+                        ((PersistedIncrementalExecutor) durationIncrementalExecutorEntry.getValue())
+                                .setProcessingExecutor(true);
+                    }
+                }
             }
         }
         this.incrementalExecutorsInitialiser.initialiseExecutors();
@@ -705,5 +719,14 @@ public class AggregationRuntime implements MemoryCalculable {
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
         incrementalExecutorMap.get(incrementalDurations.get(0)).execute(streamEventComplexEventChunk);
+    }
+
+    public Map<String, Map<TimePeriod.Duration, Executor>> getAggregationDurationExecutorMap() {
+        return aggregationDurationExecutorMap;
+    }
+
+    public void setAggregationDurationExecutorMap(Map<String,
+            Map<TimePeriod.Duration, Executor>> aggregationDurationExecutorMap) {
+        this.aggregationDurationExecutorMap = aggregationDurationExecutorMap;
     }
 }

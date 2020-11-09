@@ -288,5 +288,14 @@
         <Package name="~io\.siddhi\.sample.*"/>
     </Match>
 
+    <Match>
+        <Class name="io.siddhi.core.aggregation.persistedaggregation.config.DBAggregationQueryConfiguration"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="io.siddhi.core.aggregation.persistedaggregation.config.DBAggregationQueryUtil"/>
+        <Bug pattern="LI_LAZY_INIT_STATIC"/>
+    </Match>
 
 </FindBugsFilter>

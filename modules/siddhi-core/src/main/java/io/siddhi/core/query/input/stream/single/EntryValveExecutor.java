@@ -80,4 +80,8 @@ public class EntryValveExecutor implements Executor, Schedulable {
     public void process(ComplexEventChunk complexEventChunk) {
         execute(complexEventChunk);
     }
+
+    @Override
+    public void setEmitTime(long emitTimeOfLatestEventInTable) {
+    }
 }

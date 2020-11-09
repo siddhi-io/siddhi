@@ -78,7 +78,7 @@ public class QuerySelector implements Processor {
             log.trace("event is processed by selector " + id + this);
         }
         ComplexEventChunk outputComplexEventChunk = null;
-        if (complexEventChunk.isBatch() && batchingEnabled) {
+            if (complexEventChunk.isBatch() && batchingEnabled) {
             if (isGroupBy) {
                 outputComplexEventChunk = processInBatchGroupBy(complexEventChunk);
             } else if (containsAggregator) {

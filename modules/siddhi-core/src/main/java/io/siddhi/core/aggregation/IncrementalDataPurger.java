@@ -79,15 +79,17 @@ public class IncrementalDataPurger implements Runnable {
             new EnumMap<>(TimePeriod.Duration.class);
     private Map<String, Table> tableMap = new HashMap<>();
     private AggregationDefinition aggregationDefinition;
+    private List<TimePeriod.Duration> activeIncrementalDurations;
 
     public void init(AggregationDefinition aggregationDefinition, StreamEventFactory streamEventFactory,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
-                     SiddhiQueryContext siddhiQueryContext) {
+                     SiddhiQueryContext siddhiQueryContext, List<TimePeriod.Duration> activeIncrementalDurations) {
         this.siddhiQueryContext = siddhiQueryContext;
         this.aggregationDefinition = aggregationDefinition;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
         this.streamEventFactory = streamEventFactory;
         this.aggregationTables = aggregationTables;
+        this.activeIncrementalDurations = activeIncrementalDurations;
         if (isProcessingOnExternalTime) {
             purgingTimestampField = AGG_EXTERNAL_TIMESTAMP_COL;
         } else {
@@ -154,7 +156,7 @@ public class IncrementalDataPurger implements Runnable {
                     List<Element> elements = retention.getElements();
                     for (Element element : elements) {
                         TimePeriod.Duration duration = normalizeDuration(element.getKey());
-                        if (!aggregationTables.keySet().contains(duration)) {
+                        if (!activeIncrementalDurations.contains(duration)) {
                             throw new SiddhiAppCreationException(duration + " granularity cannot be purged since " +
                                     "aggregation has not performed in " + duration + " granularity");
                         }
@@ -278,7 +280,8 @@ public class IncrementalDataPurger implements Runnable {
                                 TimeUnit.MILLISECONDS);
             }
             for (Map.Entry<TimePeriod.Duration, Long> entry : retentionPeriods.entrySet()) {
-                if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
+                if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL) &&
+                        activeIncrementalDurations.contains(entry.getKey())) {
                     tableNames.append(entry.getKey()).append(",");
                 }
             }
