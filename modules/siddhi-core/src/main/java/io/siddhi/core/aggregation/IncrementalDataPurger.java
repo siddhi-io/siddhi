@@ -20,6 +20,7 @@ package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -28,16 +29,23 @@ import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.DataPurgingException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.OnDemandQueryRuntime;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.parser.OnDemandQueryParser;
+import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.execution.query.OnDemandQuery;
+import io.siddhi.query.api.execution.query.input.store.InputStore;
+import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -63,6 +71,8 @@ public class IncrementalDataPurger implements Runnable {
     private static final Logger LOG = Logger.getLogger(IncrementalDataPurger.class);
     private static final Long RETAIN_ALL = -1L;
     private static final String RETAIN_ALL_VALUES = "all";
+    private static final String AGGREGATION_START_TIME = "aggregationStartTime";
+    private static final String AGGREGATION_NEXT_EMMIT_TIME = "nextEmmitTime";
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
     private boolean purgingEnabled = true;
     private Map<TimePeriod.Duration, Long> retentionPeriods = new EnumMap<>(TimePeriod.Duration.class);
@@ -80,16 +90,23 @@ public class IncrementalDataPurger implements Runnable {
     private Map<String, Table> tableMap = new HashMap<>();
     private AggregationDefinition aggregationDefinition;
     private List<TimePeriod.Duration> activeIncrementalDurations;
+    private String timeZone;
+    private Map<String, Window> windowMap;
+    private Map<String, AggregationRuntime> aggregationMap;
 
     public void init(AggregationDefinition aggregationDefinition, StreamEventFactory streamEventFactory,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
-                     SiddhiQueryContext siddhiQueryContext, List<TimePeriod.Duration> activeIncrementalDurations) {
+                     SiddhiQueryContext siddhiQueryContext, List<TimePeriod.Duration> activeIncrementalDurations,
+                     String timeZone, Map<String, Window> windowMap, Map<String, AggregationRuntime>
+                             aggregationMap) {
         this.siddhiQueryContext = siddhiQueryContext;
         this.aggregationDefinition = aggregationDefinition;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
         this.streamEventFactory = streamEventFactory;
         this.aggregationTables = aggregationTables;
         this.activeIncrementalDurations = activeIncrementalDurations;
+        this.windowMap = windowMap;
+        this.aggregationMap = aggregationMap;
         if (isProcessingOnExternalTime) {
             purgingTimestampField = AGG_EXTERNAL_TIMESTAMP_COL;
         } else {
@@ -128,7 +145,7 @@ public class IncrementalDataPurger implements Runnable {
                     minimumDurationMap.put(entry.getKey(), 0L);
             }
         }
-
+        this.timeZone = timeZone;
         Map<String, Annotation> annotationTypes = new HashMap<>();
         for (Annotation annotation : annotations) {
             annotationTypes.put(annotation.getName().toLowerCase(), annotation);
@@ -189,30 +206,43 @@ public class IncrementalDataPurger implements Runnable {
 
     @Override
     public void run() {
+        boolean isSafeToRunPurgingTask = true;
         long currentTime = System.currentTimeMillis();
         long purgeTime;
         Object[] purgeTimeArray = new Object[1];
+        int i = 0;
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
                 eventChunk.clear();
                 purgeTime = currentTime - retentionPeriods.get(entry.getKey());
                 purgeTimeArray[0] = purgeTime;
-                StateEvent secEvent = createStreamEvent(purgeTimeArray, currentTime);
-                eventChunk.add(secEvent);
-                Table table = aggregationTables.get(entry.getKey());
-                try {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
-                                " retention of timestamp : " + purgeTime);
+                if (retentionPeriods.size() > i + 1) {
+                    isSafeToRunPurgingTask = isSafeToPurgeTheDuration(purgeTime,
+                            aggregationTables.get(activeIncrementalDurations.get(i)), entry.getKey(), timeZone);
+                }
+                if (isSafeToRunPurgingTask) {
+                    StateEvent secEvent = createStreamEvent(purgeTimeArray, currentTime);
+                    eventChunk.add(secEvent);
+                    Table table = aggregationTables.get(entry.getKey());
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
+                                    " retention of timestamp : " + purgeTime);
+                        }
+                        table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
+                    } catch (RuntimeException e) {
+                        LOG.error("Exception occurred while deleting events from " +
+                                table.getTableDefinition().getId() + " table", e);
+                        throw new DataPurgingException("Exception occurred while deleting events from " +
+                                table.getTableDefinition().getId() + " table", e);
                     }
-                    table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
-                } catch (RuntimeException e) {
-                    LOG.error("Exception occurred while deleting events from " +
-                            table.getTableDefinition().getId() + " table", e);
-                    throw new DataPurgingException("Exception occurred while deleting events from " +
-                            table.getTableDefinition().getId() + " table", e);
+                } else {
+                    LOG.info("Purging task for table: " + aggregationTables.get(entry.getKey()).
+                            getTableDefinition().getId() + " with a retention of timestamp : " + purgeTime +
+                            " didn't executed since parent table does not contain values of above period ");
                 }
             }
+            i++;
         }
     }
 
@@ -236,7 +266,8 @@ public class IncrementalDataPurger implements Runnable {
         metaStateEvent.addEvent(metaStreamEventWithDeletePara);
         metaStateEvent.addEvent(metaStreamEventForTable);
         TableDefinition definition = table.getTableDefinition();
-        return new MatchingMetaInfoHolder(metaStateEvent, 0, 1, deleteTableDefinition, definition, 0);
+        return new MatchingMetaInfoHolder(metaStateEvent, 0, 1,
+                deleteTableDefinition, definition, 0);
     }
 
     /**
@@ -305,6 +336,92 @@ public class IncrementalDataPurger implements Runnable {
         StateEvent stateEvent = new StateEvent(2, 1);
         stateEvent.addEvent(0, streamEvent);
         return stateEvent;
+    }
+
+    private boolean isSafeToPurgeTheDuration(long purgeTime, Table parentTable, TimePeriod.Duration duration,
+                                             String timeZone) {
+        Event[] event;
+        Map<String, Long> purgingValidationTimeDurations = getPurgingValidationTimeDurations(duration, purgeTime,
+                timeZone);
+
+        OnDemandQuery onDemandQuery = getOnDemandQuery(parentTable, purgingValidationTimeDurations.
+                get(AGGREGATION_START_TIME), purgingValidationTimeDurations.get(AGGREGATION_NEXT_EMMIT_TIME));
+        onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+        OnDemandQueryRuntime onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
+                siddhiQueryContext.getSiddhiAppContext(), tableMap, windowMap, aggregationMap);
+        event = onDemandQueryRuntime.execute();
+
+        return event != null && event.length > 0;
+    }
+
+    private OnDemandQuery getOnDemandQuery(Table table, long timeFrom, long timeTo) {
+        Selector selector = Selector.selector().groupBy(Expression.variable(purgingTimestampField))
+                .limit(Expression.value(1));
+        InputStore inputStore = InputStore.store(table.getTableDefinition().getId()).
+                on(Expression.and(
+                        Expression.compare(
+                                Expression.variable(AGG_START_TIMESTAMP_COL),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(timeFrom)
+                        ),
+                        Expression.compare(
+                                Expression.variable(AGG_START_TIMESTAMP_COL),
+                                Compare.Operator.LESS_THAN,
+                                Expression.value(timeTo)
+                        )
+                ));
+
+        return OnDemandQuery.query().from(inputStore).select(selector);
+    }
+
+    private Map<String, Long> getPurgingValidationTimeDurations(TimePeriod.Duration duration, long purgeTime,
+                                                                String timeZone) {
+        long aggregtionStartTime;
+        long nextEmmitTime;
+        Map<String, Long> purgingValidationTimeDuration = new HashMap<>();
+        switch (duration) {
+            case SECONDS:
+                aggregtionStartTime = IncrementalTimeConverterUtil.
+                        getStartTimeOfAggregates(purgeTime, TimePeriod.Duration.MINUTES, timeZone);
+                nextEmmitTime = IncrementalTimeConverterUtil.getNextEmitTime(purgeTime, TimePeriod.Duration.MINUTES,
+                        timeZone);
+                purgingValidationTimeDuration.put(AGGREGATION_START_TIME, aggregtionStartTime);
+                purgingValidationTimeDuration.put(AGGREGATION_NEXT_EMMIT_TIME, nextEmmitTime);
+                return purgingValidationTimeDuration;
+            case MINUTES:
+                aggregtionStartTime = IncrementalTimeConverterUtil.
+                        getStartTimeOfAggregates(purgeTime, TimePeriod.Duration.HOURS, timeZone);
+                nextEmmitTime = IncrementalTimeConverterUtil.getNextEmitTime(purgeTime, TimePeriod.Duration.HOURS,
+                        timeZone);
+                purgingValidationTimeDuration.put(AGGREGATION_START_TIME, aggregtionStartTime);
+                purgingValidationTimeDuration.put(AGGREGATION_NEXT_EMMIT_TIME, nextEmmitTime);
+                return purgingValidationTimeDuration;
+            case HOURS:
+                aggregtionStartTime = IncrementalTimeConverterUtil.
+                        getStartTimeOfAggregates(purgeTime, TimePeriod.Duration.DAYS, timeZone);
+                nextEmmitTime = IncrementalTimeConverterUtil.getNextEmitTime(purgeTime, TimePeriod.Duration.DAYS,
+                        timeZone);
+                purgingValidationTimeDuration.put(AGGREGATION_START_TIME, aggregtionStartTime);
+                purgingValidationTimeDuration.put(AGGREGATION_NEXT_EMMIT_TIME, nextEmmitTime);
+                return purgingValidationTimeDuration;
+            case DAYS:
+                aggregtionStartTime = IncrementalTimeConverterUtil.
+                        getStartTimeOfAggregates(purgeTime, TimePeriod.Duration.MONTHS, timeZone);
+                nextEmmitTime = IncrementalTimeConverterUtil.getNextEmitTime(purgeTime, TimePeriod.Duration.MONTHS,
+                        timeZone);
+                purgingValidationTimeDuration.put(AGGREGATION_START_TIME, aggregtionStartTime);
+                purgingValidationTimeDuration.put(AGGREGATION_NEXT_EMMIT_TIME, nextEmmitTime);
+                return purgingValidationTimeDuration;
+            case MONTHS:
+                aggregtionStartTime = IncrementalTimeConverterUtil.
+                        getStartTimeOfAggregates(purgeTime, TimePeriod.Duration.YEARS, timeZone);
+                nextEmmitTime = IncrementalTimeConverterUtil.getNextEmitTime(purgeTime, TimePeriod.Duration.YEARS,
+                        timeZone);
+                purgingValidationTimeDuration.put(AGGREGATION_START_TIME, aggregtionStartTime);
+                purgingValidationTimeDuration.put(AGGREGATION_NEXT_EMMIT_TIME, nextEmmitTime);
+                return purgingValidationTimeDuration;
+        }
+        return purgingValidationTimeDuration;
     }
 }
 

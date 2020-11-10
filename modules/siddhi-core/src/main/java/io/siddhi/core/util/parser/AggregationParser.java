@@ -465,7 +465,8 @@ public class AggregationParser {
 
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
             incrementalDataPurger.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
-                    , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext, aggregationDurations);
+                    , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext, aggregationDurations, timeZone,
+                    windowMap, aggregationMap);
 
             //Recreate in-memory data from tables
             IncrementalExecutorsInitialiser incrementalExecutorsInitialiser = new IncrementalExecutorsInitialiser(
@@ -1224,7 +1225,8 @@ public class AggregationParser {
 
         if (isDistributed) {
             filterQueryBuilder.append(" AND ").append(AGG_SHARD_ID_COL).append(" = '").append(shardID).append("' ");
-            if (isProcessingOnExternalTime){
+            groupByQueryBuilder.add(AGG_SHARD_ID_COL);
+            if (isProcessingOnExternalTime) {
                 subSelectT1ColumnJoiner.add(AGG_SHARD_ID_COL);
             }
         }

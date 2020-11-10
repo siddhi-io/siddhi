@@ -124,8 +124,6 @@ public class IncrementalExecutor implements Executor {
                 executorState.startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
                         timestamp, duration, timeZone);
                 if (timestamp >= executorState.nextEmitTime) {
-                    LOG.info("Aggregation event dispatching for duration " + duration + " from " + startTime + " to " +
-                            timestamp);
                     executorState.nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(
                             timestamp, duration, timeZone);
                     dispatchAggregateEvents(executorState.startTimeOfAggregates);
