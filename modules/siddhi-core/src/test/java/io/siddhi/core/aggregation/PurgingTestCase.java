@@ -160,7 +160,7 @@ public class PurgingTestCase {
             );
             AssertJUnit.assertTrue("Data Matched",
                     SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
-            Thread.sleep(80000);
+            Thread.sleep(120000);
 
             events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");

@@ -211,8 +211,6 @@ public class IncrementalExecutor implements Executor {
             for (StreamEvent event : tableStreamEventMap.values()) {
                 tableEventChunk.add(event);
             }
-            LOG.info("Aggregation data is persisting to database table " + table.getTableDefinition().getId() +
-                    " event timestamp " + eventChunk.getFirst().getTimestamp());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
