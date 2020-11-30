@@ -18,7 +18,7 @@
 
 package io.siddhi.core.util.error.handler.store;
 
-import com.lmax.disruptor.BusySpinWaitStrategy;
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
@@ -56,7 +56,7 @@ public abstract class ErrorStore {
     public ErrorStore() {
         final ThreadFactory threadFactory = DaemonThreadFactory.INSTANCE;
         disruptor = new Disruptor<>(PublishableErrorEntry.EVENT_FACTORY, bufferSize, threadFactory, ProducerType.SINGLE,
-                new BusySpinWaitStrategy());
+                new BlockingWaitStrategy());
         disruptor.handleEventsWith(getEventHandler());
         ringBuffer = disruptor.start();
     }
