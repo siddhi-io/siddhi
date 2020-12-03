@@ -142,7 +142,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 variableExpExecutorsForTableLookups);
     }
 
-    // TODO: 11/2/20 Handle this for not Distributed use case
     public StreamEvent find(StateEvent matchingEvent,
                             Map<TimePeriod.Duration, Executor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, List<ExpressionExecutor>> aggregateProcessingExecutorsMap,
