@@ -19,6 +19,7 @@
 package io.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
+import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
@@ -89,6 +90,8 @@ public interface SiddhiAppRuntime {
      * @return Map of {@link AggregationDefinition}s.
      */
     Map<String, AggregationDefinition> getAggregationDefinitionMap();
+
+    Map<String, AggregationRuntime> getAggregationMap();
 
     /**
      * Get the names of the available queries.

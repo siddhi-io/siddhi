@@ -18,6 +18,7 @@
 package io.siddhi.core.event.stream;
 
 import io.siddhi.core.event.ComplexEvent;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -35,7 +36,7 @@ import static io.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX;
  * from StreamEvent before sending to relevant Queries.
  */
 public class StreamEvent implements ComplexEvent {
-
+    private static final Logger log = Logger.getLogger(StreamEvent.class);
     private static final long serialVersionUID = 8427059374772140103L;
     protected long timestamp = -1;
     protected Object[] outputData;              //Attributes to sent as output

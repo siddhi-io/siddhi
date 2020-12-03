@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiAppContext;
@@ -41,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Incremental executor class which is responsible for performing incremental aggregation.
@@ -53,6 +55,8 @@ public class IncrementalExecutor implements Executor {
     private final ExpressionExecutor timestampExpressionExecutor;
     private final StateHolder<ExecutorState> stateHolder;
     private final String siddhiAppName;
+    private final Lock lock = new ReentrantLock();
+    boolean waitUntillprocessFinish = false;
     private TimePeriod.Duration duration;
     private Table table;
     private boolean isRoot;
@@ -63,15 +67,15 @@ public class IncrementalExecutor implements Executor {
     private Scheduler scheduler;
     private ExecutorService executorService;
     private String timeZone;
-
     private BaseIncrementalValueStore baseIncrementalValueStore;
+
 
     public IncrementalExecutor(String aggregatorName, TimePeriod.Duration duration,
                                List<ExpressionExecutor> processExpressionExecutors,
                                ExpressionExecutor shouldUpdateTimestamp, GroupByKeyGenerator groupByKeyGenerator,
-                               boolean isRoot, Table table, IncrementalExecutor child,
+                               boolean isRoot, Table table, Executor child,
                                SiddhiQueryContext siddhiQueryContext, MetaStreamEvent metaStreamEvent,
-                               String timeZone) {
+                               String timeZone, boolean waitUntillprocessFinish) {
         this.timeZone = timeZone;
         this.aggregatorName = aggregatorName;
         this.duration = duration;
@@ -79,6 +83,7 @@ public class IncrementalExecutor implements Executor {
         this.table = table;
         this.next = child;
 
+        this.waitUntillprocessFinish = waitUntillprocessFinish;
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
 
@@ -115,6 +120,7 @@ public class IncrementalExecutor implements Executor {
             ExecutorState executorState = stateHolder.getState();
             try {
                 long timestamp = getTimestamp(streamEvent, executorState);
+                long startTime = executorState.startTimeOfAggregates;
                 executorState.startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
                         timestamp, duration, timeZone);
                 if (timestamp >= executorState.nextEmitTime) {
@@ -193,6 +199,7 @@ public class IncrementalExecutor implements Executor {
     }
 
     private void dispatchEvent(long startTimeOfNewAggregates, BaseIncrementalValueStore aBaseIncrementalValueStore) {
+        AtomicBoolean isProcessFinished = new AtomicBoolean(false);
         if (aBaseIncrementalValueStore.isProcessed()) {
             Map<String, StreamEvent> streamEventMap = aBaseIncrementalValueStore.getGroupedByEvents();
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>();
@@ -208,17 +215,27 @@ public class IncrementalExecutor implements Executor {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                executorService.execute(() -> {
-                            try {
-                                table.addEvents(tableEventChunk, streamEventMap.size());
-                            } catch (Throwable t) {
-                                LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
-                                        "' when performing table writes of aggregation '" + this.aggregatorName +
-                                        "' for duration '" + this.duration + "'. This should be investigated as this " +
-                                        "can cause accuracy loss.", t);
-                            }
-                        }
-                );
+                try {
+                    executorService.execute(() -> {
+                        table.addEvents(tableEventChunk, streamEventMap.size());
+                        isProcessFinished.set(true);
+                    });
+                } catch (Throwable t) {
+                    LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
+                            "' when performing table writes of aggregation '" + this.aggregatorName +
+                            "' for duration '" + this.duration + "'. This should be investigated as this " +
+                            "can cause accuracy loss.", t);
+                }
+            }
+            if (waitUntillprocessFinish) {
+                try {
+                    while (!isProcessFinished.get()) {
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    LOG.error("Error occurred while waiting until table update task finishes for duration " +
+                            duration, e);
+                }
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);

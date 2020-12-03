@@ -70,6 +70,7 @@ public class MaxAttributeAggregatorExecutor
         extends AttributeAggregatorExecutor<MaxAttributeAggregatorExecutor.MaxAggregatorState> {
 
     private Attribute.Type returnType;
+    private ExpressionExecutor attributeExpressionExecutor;
 
     /**
      * The initialization method for FunctionExecutor
@@ -94,6 +95,7 @@ public class MaxAttributeAggregatorExecutor
         if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
             trackFutureStates = true;
         }
+        attributeExpressionExecutor = attributeExpressionExecutors[0];
         returnType = attributeExpressionExecutors[0].getReturnType();
         boolean finalTrackFutureStates = trackFutureStates;
         return () -> {
@@ -114,6 +116,10 @@ public class MaxAttributeAggregatorExecutor
 
     public Attribute.Type getReturnType() {
         return returnType;
+    }
+
+    public ExpressionExecutor getAttributeExpressionExecutor() {
+        return attributeExpressionExecutor;
     }
 
     @Override

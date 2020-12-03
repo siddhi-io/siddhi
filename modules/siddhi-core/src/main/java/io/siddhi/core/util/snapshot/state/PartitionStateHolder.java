@@ -160,6 +160,4 @@ public class PartitionStateHolder implements StateHolder {
             }
         }
     }
-
-
 }

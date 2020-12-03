@@ -32,6 +32,7 @@ import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ import java.util.Set;
  * a different server (apart from the server, which was used to define the aggregation).
  */
 public class IncrementalDataAggregator {
+    private static final Logger log = Logger.getLogger(IncrementalDataAggregator.class);
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration durationToAggregate;
 
@@ -83,42 +85,45 @@ public class IncrementalDataAggregator {
     }
 
     public ComplexEventChunk<StreamEvent> aggregateInMemoryData(
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap) {
+            Map<TimePeriod.Duration, Executor> incrementalExecutorMap) {
         int startIndex = incrementalDurations.indexOf(durationToAggregate);
         Set<String> groupByKeys = new HashSet<>();
         for (int k = startIndex; k >= 0; k--) {
             TimePeriod.Duration duration = incrementalDurations.get(k);
-            IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(duration);
-
-            BaseIncrementalValueStore aBaseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
-            Map<String, StreamEvent> groupedByEvents = aBaseIncrementalValueStore.getGroupedByEvents();
-            for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
-                long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                        eventEntry.getValue().getTimestamp(), durationToAggregate, timeZone);
-                String groupByKey = eventEntry.getKey() + "-" + startTimeOfAggregates;
-                synchronized (this) {
-                    groupByKeys.add(groupByKey);
-                    SiddhiAppContext.startGroupByFlow(groupByKey);
-                    ValueState state = (ValueState) valueStateHolder.getState();
-                    try {
-                        boolean shouldUpdate = true;
-                        if (shouldUpdateTimestamp != null) {
-                            shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
-                        } else {
-                            state.lastTimestamp = oldestEventTimestamp;
-                        }
-                        // keeping timestamp value location as null
-                        for (int i = 0; i < baseExecutorsForFind.size(); i++) {
-                            ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
-                            if (shouldUpdate) {
-                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
-                            } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+            Executor incrementalExecutor = incrementalExecutorMap.get(duration);
+            if (incrementalExecutor instanceof IncrementalExecutor) {
+                BaseIncrementalValueStore aBaseIncrementalValueStore = ((IncrementalExecutor) incrementalExecutor)
+                        .getBaseIncrementalValueStore();
+                Map<String, StreamEvent> groupedByEvents = aBaseIncrementalValueStore.getGroupedByEvents();
+                for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
+                    long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
+                            eventEntry.getValue().getTimestamp(), durationToAggregate, timeZone);
+                    String groupByKey = eventEntry.getKey() + "-" + startTimeOfAggregates;
+                    synchronized (this) {
+                        groupByKeys.add(groupByKey);
+                        SiddhiAppContext.startGroupByFlow(groupByKey);
+                        ValueState state = (ValueState) valueStateHolder.getState();
+                        try {
+                            boolean shouldUpdate = true;
+                            if (shouldUpdateTimestamp != null) {
+                                shouldUpdate = shouldUpdate(shouldUpdateTimestamp.execute(eventEntry.getValue()),
+                                        state);
+                            } else {
+                                state.lastTimestamp = oldestEventTimestamp;
                             }
+                            // keeping timestamp value location as null
+                            for (int i = 0; i < baseExecutorsForFind.size(); i++) {
+                                ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
+                                if (shouldUpdate) {
+                                    state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                                } else if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                                    state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                                }
+                            }
+                        } finally {
+                            valueStateHolder.returnState(state);
+                            SiddhiAppContext.stopGroupByFlow();
                         }
-                    } finally {
-                        valueStateHolder.returnState(state);
-                        SiddhiAppContext.stopGroupByFlow();
                     }
                 }
             }

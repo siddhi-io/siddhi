@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rdbms-table-configuration>
+    <database name="mysql">
+        <selectQueryTemplate>
+            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
+            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
+            <whereClause>WHERE {{CONDITION}}</whereClause>
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            </selectQueryWithInnerSelect>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
+        </selectQueryTemplate>
+        <selectQueryFunctions>
+            <sumFunction>SUM({{COLUMN}})</sumFunction>
+            <countFunction>COUNT({{COLUMN}})</countFunction>
+            <maxFunction>MAX({{COLUMN}})</maxFunction>
+            <minFunction>MIN({{COLUMN}})</minFunction>
+            <timeConversionFunction>UNIX_TIMESTAMP(from_unixtime({{COLUMN}}/1000,"{{DURATION}}"))*1000</timeConversionFunction>
+        </selectQueryFunctions>
+        <timeConversionDurationMapping>
+            <day>%Y-%m-%d</day>
+            <month>%Y-%m-01</month>
+            <year>%Y-01-01</year>
+        </timeConversionDurationMapping>
+        <stringSize>254</stringSize>
+        <batchEnable>true</batchEnable>
+        <batchSize>1000</batchSize>
+        <typeMapping>
+            <binaryType>BLOB</binaryType>
+            <booleanType>TINYINT(1)</booleanType>
+            <doubleType>DOUBLE</doubleType>
+            <floatType>FLOAT</floatType>
+            <integerType>INTEGER</integerType>
+            <longType>BIGINT</longType>
+            <stringType>VARCHAR</stringType>
+        </typeMapping>
+        <collation>latin1_bin</collation>
+    </database>
+    <database name="oracle">
+        <selectQueryTemplate>
+            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
+            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
+            <whereClause>WHERE {{CONDITION}}</whereClause>
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            </selectQueryWithInnerSelect>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) t1 JOIN ({{INNER_QUERY}}) t2 ON {{CONDITION}}</joinClause>
+            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
+        </selectQueryTemplate>
+        <selectQueryFunctions>
+            <sumFunction>SUM({{COLUMN}})</sumFunction>
+            <countFunction>COUNT({{COLUMN}})</countFunction>
+            <maxFunction>MAX({{COLUMN}})</maxFunction>
+            <minFunction>MIN({{COLUMN}})</minFunction>
+            <timeConversionFunction>(to_date(trunc((to_date('19700101', 'YYYYMMDD') + ( 1 / 24 / 60 / 60 / 1000) *
+                {{COLUMN}}), '{{DURATION}}'), 'YYYY/MM/DD') - to_date('19700101', 'YYYYMMDD')) * 86400000
+            </timeConversionFunction>
+        </selectQueryFunctions>
+        <timeConversionDurationMapping>
+            <day>ddd</day>
+            <month>month</month>
+            <year>year</year>
+        </timeConversionDurationMapping>
+        <stringSize>254</stringSize>
+        <fieldSizeLimit>2000</fieldSizeLimit>
+        <batchEnable>false</batchEnable>
+        <batchSize>1000</batchSize>
+        <typeMapping>
+            <binaryType>BLOB</binaryType>
+            <booleanType>NUMBER(1)</booleanType>
+            <doubleType>NUMBER(19,4)</doubleType>
+            <floatType>NUMBER(19,4)</floatType>
+            <integerType>NUMBER(10)</integerType>
+            <longType>NUMBER(19)</longType>
+            <stringType>VARCHAR</stringType>
+            <bigStringType>CLOB</bigStringType>
+        </typeMapping>
+    </database>
+    <database name="Microsoft SQL Server">
+        <selectQueryTemplate>
+            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
+            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
+            <whereClause>WHERE {{CONDITION}}</whereClause>
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            </selectQueryWithInnerSelect>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
+        </selectQueryTemplate>
+        <selectQueryFunctions>
+            <sumFunction>SUM({{COLUMN}})</sumFunction>
+            <countFunction>COUNT({{COLUMN}})</countFunction>
+            <maxFunction>MAX({{COLUMN}})</maxFunction>
+            <minFunction>MIN({{COLUMN}})</minFunction>
+            <timeConversionFunction>DATEDIFF(second , '19700101',DATEADD({{DURATION}} , DATEDIFF({{DURATION}} , 0, DATEADD(ss, {{COLUMN}}/1000, '19700101')), 0))*1000</timeConversionFunction>
+        </selectQueryFunctions>
+        <timeConversionDurationMapping>
+            <day>dd</day>
+            <month>mm</month>
+            <year>yy</year>
+        </timeConversionDurationMapping>
+        <stringSize>254</stringSize>
+        <batchEnable>true</batchEnable>
+        <batchSize>1000</batchSize>
+        <typeMapping>
+            <binaryType>VARBINARY(maxFunction)</binaryType>
+            <booleanType>BIT</booleanType>
+            <doubleType>FLOAT(32)</doubleType>
+            <floatType>REAL</floatType>
+            <integerType>INTEGER</integerType>
+            <longType>BIGINT</longType>
+            <stringType>VARCHAR</stringType>
+        </typeMapping>
+        <collation>SQL_Latin1_General_CP1_CS_AS</collation>
+    </database>
+    <database name="PostgreSQL">
+        <selectQueryTemplate>
+            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
+            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
+            <whereClause>WHERE {{CONDITION}}</whereClause>
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            </selectQueryWithInnerSelect>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
+        </selectQueryTemplate>
+        <selectQueryFunctions>
+            <sumFunction>SUM({{COLUMN}})</sumFunction>
+            <countFunction>COUNT({{COLUMN}})</countFunction>
+            <maxFunction>MAX({{COLUMN}})</maxFunction>
+            <minFunction>MIN({{COLUMN}})</minFunction>
+            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}',  to_timestamp({{COLUMN}}/1000)))*1000;
+            </timeConversionFunction>
+        </selectQueryFunctions>
+        <timeConversionDurationMapping>
+            <day>day</day>
+            <month>month</month>
+            <year>year</year>
+        </timeConversionDurationMapping>
+        <stringSize>254</stringSize>
+        <batchEnable>true</batchEnable>
+        <batchSize>1000</batchSize>
+        <typeMapping>
+            <binaryType>BYTEA</binaryType>
+            <booleanType>BOOLEAN</booleanType>
+            <doubleType>DOUBLE PRECISION</doubleType>
+            <floatType>REAL</floatType>
+            <integerType>INTEGER</integerType>
+            <longType>BIGINT</longType>
+            <stringType>VARCHAR</stringType>
+        </typeMapping>
+    </database>
+</rdbms-table-configuration>
