@@ -146,8 +146,8 @@ public class PersistedIncrementalExecutor implements Executor {
                             try {
                                 Thread.sleep(3000);
                             } catch (InterruptedException interruptedException) {
-                                log.error("Thread sleep interrupted while waiting to re-execute the aggregation query " +
-                                        "for duration " + duration, interruptedException);
+                                log.error("Thread sleep interrupted while waiting to re-execute the " +
+                                        "aggregation query for duration " + duration, interruptedException);
                             }
                             continue;
                         }
