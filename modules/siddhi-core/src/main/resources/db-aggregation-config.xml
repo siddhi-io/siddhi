@@ -1,35 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <rdbms-table-configuration>
-<!--    <database name="h2">-->
-<!--        <selectQueryTemplate>-->
-<!--            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>-->
-<!--            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>-->
-<!--            <whereClause>WHERE {{CONDITION}}</whereClause>-->
-<!--            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})-->
-<!--            </selectQueryWithInnerSelect>-->
-<!--            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}-->
-<!--            </joinClause>-->
-<!--            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>-->
-<!--        </selectQueryTemplate>-->
-<!--        <selectQueryFunctions>-->
-<!--            <sumFunction>SUM({{COLUMN}})</sumFunction>-->
-<!--            <countFunction>COUNT({{COLUMN}})</countFunction>-->
-<!--            <maxFunction>MAX({{COLUMN}})</maxFunction>-->
-<!--            <minFunction>MIN({{COLUMN}})</minFunction>-->
-<!--        </selectQueryFunctions>-->
-<!--        <stringSize>254</stringSize>-->
-<!--        <batchEnable>true</batchEnable>-->
-<!--        <batchSize>1000</batchSize>-->
-<!--        <typeMapping>-->
-<!--            <binaryType>BLOB</binaryType>-->
-<!--            <booleanType>TINYINT(1)</booleanType>-->
-<!--            <doubleType>DOUBLE</doubleType>-->
-<!--            <floatType>FLOAT</floatType>-->
-<!--            <integerType>INTEGER</integerType>-->
-<!--            <longType>BIGINT</longType>-->
-<!--            <stringType>VARCHAR</stringType>-->
-<!--        </typeMapping>-->
-<!--    </database>-->
     <database name="mysql">
         <selectQueryTemplate>
             <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
@@ -172,65 +142,6 @@
             <booleanType>BOOLEAN</booleanType>
             <doubleType>DOUBLE PRECISION</doubleType>
             <floatType>REAL</floatType>
-            <integerType>INTEGER</integerType>
-            <longType>BIGINT</longType>
-            <stringType>VARCHAR</stringType>
-        </typeMapping>
-    </database>
-    <database name="DB2.*">
-        <selectQueryTemplate>
-            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
-            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
-            <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
-            </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
-            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
-        </selectQueryTemplate>
-        <selectQueryFunctions>
-            <sumFunction>SUM({{COLUMN}})</sumFunction>
-            <countFunction>COUNT({{COLUMN}})</countFunction>
-            <maxFunction>MAX({{COLUMN}})</maxFunction>
-            <minFunction>MIN({{COLUMN}})</minFunction>
-        </selectQueryFunctions>
-        <keyExplicitNotNull>true</keyExplicitNotNull>
-        <stringSize>254</stringSize>
-        <batchEnable>true</batchEnable>
-        <batchSize>1000</batchSize>
-        <typeMapping>
-            <binaryType>BLOB(64000)</binaryType>
-            <booleanType>SMALLINT</booleanType>
-            <doubleType>DOUBLE</doubleType>
-            <floatType>REAL</floatType>
-            <integerType>INTEGER</integerType>
-            <longType>BIGINT</longType>
-            <stringType>VARCHAR</stringType>
-        </typeMapping>
-    </database>
-    <database name="Apache Derby">
-        <selectQueryTemplate>
-            <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
-            <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
-            <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
-            </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
-            <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
-        </selectQueryTemplate>
-        <selectQueryFunctions>
-            <sumFunction>SUM({{COLUMN}})</sumFunction>
-            <countFunction>COUNT({{COLUMN}})</countFunction>
-            <maxFunction>MAX({{COLUMN}})</maxFunction>
-            <minFunction>MIN({{COLUMN}})</minFunction>
-        </selectQueryFunctions>
-        <stringSize>254</stringSize>
-        <batchEnable>true</batchEnable>
-        <batchSize>1000</batchSize>
-        <typeMapping>
-            <binaryType>BLOB</binaryType>
-            <booleanType>TINYINT(1)</booleanType>
-            <doubleType>DOUBLE</doubleType>
-            <floatType>FLOAT</floatType>
             <integerType>INTEGER</integerType>
             <longType>BIGINT</longType>
             <stringType>VARCHAR</stringType>

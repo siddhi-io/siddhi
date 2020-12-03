@@ -1396,11 +1396,8 @@ public class AggregationParser {
             return Database.ORACLE;
         } else if (databaseType.contains("mssql")) {
             return Database.MSSQL;
-        } else if (databaseType.contains("db2")) {
-            return Database.DB2;
-            //todo Need to fined a timeConversionFunction to handle external time base aggregation
-//        } else if (databaseType.contains("h2")) {
-//            return Database.H2;
+        } else if (databaseType.contains("postgres")) {
+            return Database.PostgreSQL;
         } else {
             log.warn("Provided database type " + databaseType + "is not recognized as a supported database type for" +
                     " persisted incremental aggregation, using MySQL as default ");
@@ -1480,6 +1477,7 @@ public class AggregationParser {
         ORACLE,
         MSSQL,
         DB2,
+        PostgreSQL,
         H2,
         DEFAULT
     }

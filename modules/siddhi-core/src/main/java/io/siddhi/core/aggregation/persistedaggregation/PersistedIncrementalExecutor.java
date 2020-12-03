@@ -143,12 +143,18 @@ public class PersistedIncrementalExecutor implements Executor {
                             log.error("Error occurred while executing the aggregation for data between " +
                                     startTimeOfNewAggregates + " - " + emittedTime + " for duration " + duration +
                                     " Retrying the transaction attempt " + (i - 1), e);
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException interruptedException) {
+                                log.error("Thread sleep interrupted while waiting to re-execute the aggregation query " +
+                                        "for duration " + duration, interruptedException);
+                            }
                             continue;
                         }
                         log.error("Error occurred while executing the aggregation for data between "
                                 + startTimeOfNewAggregates + " - " + emittedTime + " for duration " + duration +
-                                " Retry attempts  " + (i - 1) + " This Should be investigated since this will lead " +
-                                "to a data mismatch\n", e);
+                                ". Attempted re-executing the query for 9 seconds. " +
+                                "This Should be investigated since this will lead to a data mismatch\n", e);
                     } else {
                         log.error("Error occurred while executing the aggregation for data between "
                                 + startTimeOfNewAggregates + " - " + emittedTime + " for duration \n" + duration, e);
