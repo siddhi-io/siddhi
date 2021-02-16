@@ -241,10 +241,6 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         e -> (AggregationDefinition) e.getValue()));
     }
 
-    public Map<String, AggregationRuntime> getAggregationMap() {
-        return aggregationMap;
-    }
-
     /**
      * Get the names of the available queries.
      *
