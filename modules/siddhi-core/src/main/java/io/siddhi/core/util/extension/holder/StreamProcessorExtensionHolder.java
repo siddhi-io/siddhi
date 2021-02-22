@@ -36,10 +36,14 @@ public class StreamProcessorExtensionHolder extends AbstractExtensionHolder {
         ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap = siddhiAppContext.getSiddhiContext
                 ().getExtensionHolderMap();
         AbstractExtensionHolder abstractExtensionHolder = extensionHolderMap.get(clazz);
-        if (abstractExtensionHolder == null) {
+        if (abstractExtensionHolder != null && siddhiAppContext.getSiddhiContext().getSiddhiExtensions().size() !=
+                abstractExtensionHolder.extensionMap.size()) {
+            extensionHolderMap.remove(clazz);
             abstractExtensionHolder = new StreamProcessorExtensionHolder(siddhiAppContext);
-            extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
+        } else if (abstractExtensionHolder == null) {
+            abstractExtensionHolder = new StreamProcessorExtensionHolder(siddhiAppContext);
         }
+        extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
         return (StreamProcessorExtensionHolder) extensionHolderMap.get(clazz);
     }
 }
