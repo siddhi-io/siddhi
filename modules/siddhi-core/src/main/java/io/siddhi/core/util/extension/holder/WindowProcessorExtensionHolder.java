@@ -36,10 +36,14 @@ public class WindowProcessorExtensionHolder extends AbstractExtensionHolder {
         ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap = siddhiAppContext.getSiddhiContext
                 ().getExtensionHolderMap();
         AbstractExtensionHolder abstractExtensionHolder = extensionHolderMap.get(clazz);
-        if (abstractExtensionHolder == null) {
+        if (abstractExtensionHolder != null && siddhiAppContext.getSiddhiContext().getSiddhiExtensions().size() !=
+                abstractExtensionHolder.extensionMap.size()) {
+            extensionHolderMap.remove(clazz);
             abstractExtensionHolder = new WindowProcessorExtensionHolder(siddhiAppContext);
-            extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
+        } else if (abstractExtensionHolder == null) {
+            abstractExtensionHolder = new WindowProcessorExtensionHolder(siddhiAppContext);
         }
+        extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
         return (WindowProcessorExtensionHolder) extensionHolderMap.get(clazz);
     }
 }

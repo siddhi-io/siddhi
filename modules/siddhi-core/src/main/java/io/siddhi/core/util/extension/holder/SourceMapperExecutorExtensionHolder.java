@@ -37,10 +37,14 @@ public class SourceMapperExecutorExtensionHolder extends AbstractExtensionHolder
         ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap = siddhiAppContext.getSiddhiContext
                 ().getExtensionHolderMap();
         AbstractExtensionHolder abstractExtensionHolder = extensionHolderMap.get(clazz);
-        if (abstractExtensionHolder == null) {
+        if (abstractExtensionHolder != null && siddhiAppContext.getSiddhiContext().getSiddhiExtensions().size() !=
+                abstractExtensionHolder.extensionMap.size()) {
+            extensionHolderMap.remove(clazz);
             abstractExtensionHolder = new SourceMapperExecutorExtensionHolder(siddhiAppContext);
-            extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
+        } else if (abstractExtensionHolder == null) {
+            abstractExtensionHolder = new SourceMapperExecutorExtensionHolder(siddhiAppContext);
         }
+        extensionHolderMap.putIfAbsent(clazz, abstractExtensionHolder);
         return (SourceMapperExecutorExtensionHolder) extensionHolderMap.get(clazz);
     }
 }

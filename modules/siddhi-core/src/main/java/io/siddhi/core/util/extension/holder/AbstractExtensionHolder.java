@@ -41,14 +41,11 @@ public abstract class AbstractExtensionHolder {
                     if (extensionMap.containsKey(extensionKey)) {
                         log.error("Extension class " + extension.getName() + " not loaded, as there is already an" +
                                 " matching extension '" + extensionKey + "' implemented as " + extensionMap
-                                .get
-                                        (extensionKey).getName());
+                                .get(extensionKey).getName());
                     } else {
                         extensionMap.put(extensionKey, extension);
                     }
-
                 }
-
             }
         }
     }
