@@ -69,9 +69,7 @@ public class InputEventHandler {
                 latencyTracker.markOut();
             }
             Object[] transportProperties = trpProperties.get();
-            trpProperties.remove();
             String[] transportSyncProperties = trpSyncProperties.get();
-            trpSyncProperties.remove();
             if (event.getTimestamp() == -1) {
                 long currentTimestamp = timestampGenerator.currentTime();
                 event.setTimestamp(currentTimestamp);
@@ -87,9 +85,6 @@ public class InputEventHandler {
             LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error in applying transport property mapping for '" + sourceType
                     + "' source at '" + inputHandler.getStreamId() + "' stream.", e);
-        } finally {
-            trpProperties.remove();
-            trpSyncProperties.remove();
         }
     }
 
