@@ -22,6 +22,7 @@ import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.exception.ExtensionNotFoundException;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
@@ -437,7 +438,7 @@ public class ExpressionParser {
                         executor = SiddhiClassLoader.loadExtensionImplementation((AttributeFunction) expression,
                                 AttributeAggregatorExtensionHolder.getInstance(siddhiQueryContext.getSiddhiAppContext()));
                     } catch (SiddhiAppCreationException e) {
-                        throw new SiddhiAppCreationException("'" + ((AttributeFunction) expression).getName() + "' is"
+                        throw new ExtensionNotFoundException("'" + ((AttributeFunction) expression).getName() + "' is"
                                 + " neither a function extension nor an aggregated attribute extension",
                                 expression.getQueryContextStartIndex(), expression.getQueryContextEndIndex());
                     }
