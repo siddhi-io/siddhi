@@ -18,6 +18,7 @@
 package io.siddhi.core.util;
 
 import io.siddhi.core.exception.CannotLoadClassException;
+import io.siddhi.core.exception.ExtensionNotFoundException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
 import io.siddhi.query.api.extension.Extension;
@@ -41,7 +42,7 @@ public class SiddhiClassLoader {
                                                      AbstractExtensionHolder extensionHolder) {
         Class clazz = extensionHolder.getExtension(extension.getNamespace(), extension.getName());
         if (clazz == null) {
-            throw new SiddhiAppCreationException("No extension exist for " + extension.getNamespace() + ":" +
+            throw new ExtensionNotFoundException("No extension exist for " + extension.getNamespace() + ":" +
                     extension.getName(), true);
         }
         try {
