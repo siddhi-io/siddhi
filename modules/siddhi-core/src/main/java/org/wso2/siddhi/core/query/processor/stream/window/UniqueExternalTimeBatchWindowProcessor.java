@@ -308,6 +308,11 @@ public class UniqueExternalTimeBatchWindowProcessor extends WindowProcessor impl
             }
 
             // add reset event in front of current events
+            if (resetEvent == null) {
+                resetEvent = streamEventCloner.copyStreamEvent(currentEvents.entrySet().iterator().next().getValue());
+                resetEvent.setType(ComplexEvent.Type.RESET);
+            }
+
             StreamEvent toResetEvent = streamEventCloner.copyStreamEvent(resetEvent);
             toResetEvent.setTimestamp(currentTime);
             newEventChunk.add(toResetEvent);
