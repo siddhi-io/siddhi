@@ -210,4 +210,40 @@ public class TriggerTestCase {
 
     }
 
+    @Test(dependsOnMethods = "testQuery7")
+    public void testQuery8() throws InterruptedException {
+        //see https://github.com/siddhi-io/siddhi/issues/1542
+        log.info("test case for https://github.com/siddhi-io/siddhi/issues/1542");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String plan = "" +
+                "define trigger AlertTypeReadTrigger at 'start';" +
+                "@sink(type='log')\n" +
+                "define stream logStream (foo string);\n" +
+                "\n" +
+                "from AlertTypeReadTrigger\n" +
+                "select \"hello\" as foo\n" +
+                "insert into logStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(plan);
+
+        siddhiAppRuntime.addCallback("logStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count += events.length;
+                eventArrived = true;
+            }
+        });
+
+        siddhiAppRuntime.start();
+
+        Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertEquals(1, count);
+        AssertJUnit.assertEquals(true, eventArrived);
+    }
+
 }
