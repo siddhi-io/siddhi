@@ -45,6 +45,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
+import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.OutputAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
@@ -408,6 +409,7 @@ public class IncrementalDataPurger implements Runnable {
         outputAttributes.add(new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL)));
         Selector selector = Selector.selector().addSelectionList(outputAttributes)
                 .groupBy(Expression.variable(AGG_START_TIMESTAMP_COL))
+                .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
                 .limit(Expression.value(1));
         InputStore inputStore;
         if (timeTo != 0) {
