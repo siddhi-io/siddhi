@@ -5,9 +5,12 @@
             <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
+                {{ON_CONDITION}} WHERE {{CONDITION}}
             </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
+                {{CONDITION}}
+            </joinClause>
             <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
         </selectQueryTemplate>
         <selectQueryFunctions>
@@ -15,7 +18,8 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>UNIX_TIMESTAMP(from_unixtime({{COLUMN}}/1000,"{{DURATION}}"))*1000</timeConversionFunction>
+            <timeConversionFunction>UNIX_TIMESTAMP(from_unixtime({{COLUMN}}/1000,"{{DURATION}}"))*1000
+            </timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
             <day>%Y-%m-%d</day>
@@ -41,9 +45,12 @@
             <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) t3 ON
+                {{ON_CONDITION}} WHERE {{CONDITION}}
             </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) t1 JOIN ({{INNER_QUERY}}) t2 ON {{CONDITION}}</joinClause>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) t1 JOIN ({{INNER_QUERY_1}}) t2 ON
+                {{CONDITION}}
+            </joinClause>
             <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
         </selectQueryTemplate>
         <selectQueryFunctions>
@@ -75,14 +82,17 @@
             <bigStringType>CLOB</bigStringType>
         </typeMapping>
     </database>
-    <database name="Microsoft SQL Server">
+    <database name="MSSQL">
         <selectQueryTemplate>
             <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
+                {{ON_CONDITION}} WHERE {{CONDITION}}
             </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
+                {{CONDITION}}
+            </joinClause>
             <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
         </selectQueryTemplate>
         <selectQueryFunctions>
@@ -90,7 +100,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>DATEDIFF(second , '19700101',DATEADD({{DURATION}} , DATEDIFF({{DURATION}} , 0, DATEADD(ss, {{COLUMN}}/1000, '19700101')), 0))*1000</timeConversionFunction>
+            <timeConversionFunction>CAST(DATEDIFF(second , '19700101',DATEADD({{DURATION}} , DATEDIFF({{DURATION}} , 0, DATEADD(ss, {{COLUMN}}/1000, '19700101')), 0)) AS bigint)*1000</timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
             <day>dd</day>
@@ -116,9 +126,12 @@
             <recordInsertQuery>INSERT INTO {{TABLE_NAME}} ({{COLUMNS}})</recordInsertQuery>
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
-            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} WHERE {{COLUMN}} IN ({{INNER_QUERY}})
+            <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
+                {{ON_CONDITION}} WHERE {{CONDITION}}
             </selectQueryWithInnerSelect>
-            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY}}) AS t2 ON {{CONDITION}}</joinClause>
+            <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
+                {{CONDITION}}
+            </joinClause>
             <groupByClause>GROUP BY {{COLUMNS}}</groupByClause>
         </selectQueryTemplate>
         <selectQueryFunctions>
@@ -126,7 +139,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}',  to_timestamp({{COLUMN}}/1000)))*1000;
+            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}', to_timestamp({{COLUMN}}/1000)))*1000;
             </timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>

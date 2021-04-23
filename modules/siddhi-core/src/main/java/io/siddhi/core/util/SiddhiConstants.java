@@ -162,8 +162,10 @@ public final class SiddhiConstants {
     public static final String PLACEHOLDER_QUERY = "{{QUERY}}";
     public static final String PLACEHOLDER_SELECTORS = "{{SELECTORS}}";
     public static final String PLACEHOLDER_CONDITION = "{{CONDITION}}";
-    public static final String PLACEHOLDER_INNER_QUERY = "{{INNER_QUERY}}";
+    public static final String PLACEHOLDER_INNER_QUERY_1 = "{{INNER_QUERY_1}}";
+    public static final String PLACEHOLDER_INNER_QUERY_2 = "{{INNER_QUERY_2}}";
     public static final String PLACEHOLDER_FROM_CONDITION = "{{FROM_CONDITION}}";
+    public static final String PLACEHOLDER_ON_CONDITION = "{{ON_CONDITION}}";
 
     public static final String INSERT_TO_TABLE_NAME = "TO_TABLE_NAME";
     public static final String FROM_TABLE_NAME = "FROM_TABLE_NAME";
@@ -172,6 +174,7 @@ public final class SiddhiConstants {
     public static final String TO_TIMESTAMP = "TO_TIMESTAMP";
     public static final String SUB_SELECT_QUERY_REF_T2 = "t2";
     public static final String SUB_SELECT_QUERY_REF_T1 = "t1";
+    public static final String INNER_SELECT_QUERY_REF_T3 = "t3";
     public static final String EQUALS = " = ";
     public static final String SQL_AS = " AS ";
     public static final String SQL_AND = " AND ";
@@ -179,5 +182,6 @@ public final class SiddhiConstants {
     public static final String SQL_SELECT = " SELECT ";
     public static final String SQL_WHERE = " WHERE ";
     public static final String SQL_FROM = " FROM ";
+    public static final String SQL_NOT_NULL = " IS NOT NULL ";
 
 }
