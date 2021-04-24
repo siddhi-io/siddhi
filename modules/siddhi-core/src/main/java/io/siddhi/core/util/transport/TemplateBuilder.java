@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class TemplateBuilder {
 
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*\\}\\})|[{}]");
-    private static final String SPLIT_PATTERN = "(\\{\\{|\\}\\})";
+    private static final String SPLIT_PATTERN = "(\\{.\\{|\\}.\\})";
     private int[] positionArray;
     private String[] splitTemplateArray;
     private boolean isObjectMessage = false;
@@ -113,7 +113,7 @@ public class TemplateBuilder {
             if (m.group(1) != null) {
                 int attrIndex = attributes.indexOf(m.group(1).replaceAll("\\p{Ps}", "").replaceAll("\\p{Pe}", ""));
                 if (attrIndex >= 0) {
-                    m.appendReplacement(result, String.format("{{%s}}", attrIndex));
+                    m.appendReplacement(result, String.format("{.{%s}.}", attrIndex));
                 } else {
                     throw new NoSuchAttributeException(String.format("Attribute : %s does not exist in %s.",
                             m.group(1), streamDefinition));
