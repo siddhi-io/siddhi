@@ -210,7 +210,7 @@ public class TriggerTestCase {
 
     }
 
-    @Test(dependsOnMethods = "testQuery7")
+    @Test
     public void testQuery8() throws InterruptedException {
         //see https://github.com/siddhi-io/siddhi/issues/1542
         log.info("test case for https://github.com/siddhi-io/siddhi/issues/1542");
@@ -245,5 +245,4 @@ public class TriggerTestCase {
         AssertJUnit.assertEquals(1, count);
         AssertJUnit.assertEquals(true, eventArrived);
     }
-
 }
