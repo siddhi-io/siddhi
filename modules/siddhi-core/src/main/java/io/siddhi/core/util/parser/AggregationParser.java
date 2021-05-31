@@ -1255,7 +1255,6 @@ public class AggregationParser {
                             .equals(AGG_START_TIMESTAMP_COL)) {
                         outerSelectColumnJoiner.add(" ? " + SQL_AS + variableExpressionExecutor.getAttribute().getName());
                     } else if (!variableExpressionExecutor.getAttribute().getName().equals(AGG_EXTERNAL_TIMESTAMP_COL)) {
-                        subSelectT2ColumnJoiner.add(variableExpressionExecutor.getAttribute().getName());
                         if (groupByColumnNames.contains(variableExpressionExecutor.getAttribute().getName())) {
                             subSelectT2ColumnJoiner.add(INNER_SELECT_QUERY_REF_T3 + "." +
                                     variableExpressionExecutor.getAttribute().getName() + SQL_AS +
