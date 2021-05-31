@@ -215,17 +215,19 @@ public class IncrementalExecutor implements Executor {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                try {
-                    executorService.execute(() -> {
+                executorService.execute(() -> {
+                    try {
                         table.addEvents(tableEventChunk, streamEventMap.size());
+                    } catch (Throwable t) {
+                        LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
+                                "' when performing table writes of aggregation '" + this.aggregatorName +
+                                "' for duration '" + this.duration + "'. This should be investigated as this " +
+                                "can cause accuracy loss.", t);
+                    } finally {
                         isProcessFinished.set(true);
-                    });
-                } catch (Throwable t) {
-                    LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
-                            "' when performing table writes of aggregation '" + this.aggregatorName +
-                            "' for duration '" + this.duration + "'. This should be investigated as this " +
-                            "can cause accuracy loss.", t);
-                }
+                    }
+                });
+
             }
             if (waitUntillprocessFinish) {
                 try {
