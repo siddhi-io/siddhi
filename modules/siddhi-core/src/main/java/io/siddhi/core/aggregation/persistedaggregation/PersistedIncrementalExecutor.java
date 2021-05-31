@@ -33,7 +33,6 @@ import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import org.apache.log4j.Logger;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Incremental Executor implementation class for Persisted Aggregation
@@ -56,12 +56,14 @@ public class PersistedIncrementalExecutor implements Executor {
     private String timeZone;
     private Processor cudStreamProcessor;
     private boolean isProcessingExecutor;
+    private LinkedBlockingQueue<QueuedCudStreamProcessor> cudStreamProcessorQueue;
 
     public PersistedIncrementalExecutor(String aggregatorName, TimePeriod.Duration duration,
                                         List<ExpressionExecutor> processExpressionExecutors,
                                         Executor child, SiddhiQueryContext siddhiQueryContext,
                                         MetaStreamEvent metaStreamEvent, String timeZone,
-                                        Processor cudStreamProcessor) {
+                                        Processor cudStreamProcessor, LinkedBlockingQueue<QueuedCudStreamProcessor>
+                                                cudStreamProcessorQueue) {
         this.timeZone = timeZone;
         this.duration = duration;
         this.next = child;
@@ -75,6 +77,7 @@ public class PersistedIncrementalExecutor implements Executor {
                 aggregatorName + "-" + this.getClass().getName(), false,
                 () -> new ExecutorState());
         this.isProcessingExecutor = false;
+        this.cudStreamProcessorQueue = cudStreamProcessorQueue;
     }
 
     @Override
@@ -131,37 +134,8 @@ public class PersistedIncrementalExecutor implements Executor {
 
         if (isProcessingExecutor) {
             complexEventChunk.add(streamEvent);
-            int i = 0;
-            while (true) {
-                i++;
-                try {
-                    cudStreamProcessor.process(complexEventChunk);
-                    return;
-                } catch (Exception e) {
-                    if (e.getCause() instanceof SQLException) {
-                        if (e.getCause().getLocalizedMessage().contains("try restarting transaction") && i < 3) {
-                            log.error("Error occurred while executing the aggregation for data between " +
-                                    startTimeOfNewAggregates + " - " + emittedTime + " for duration " + duration +
-                                    " Retrying the transaction attempt " + (i - 1), e);
-                            try {
-                                Thread.sleep(3000);
-                            } catch (InterruptedException interruptedException) {
-                                log.error("Thread sleep interrupted while waiting to re-execute the " +
-                                        "aggregation query for duration " + duration, interruptedException);
-                            }
-                            continue;
-                        }
-                        log.error("Error occurred while executing the aggregation for data between "
-                                + startTimeOfNewAggregates + " - " + emittedTime + " for duration " + duration +
-                                ". Attempted re-executing the query for 9 seconds. " +
-                                "This Should be investigated since this will lead to a data mismatch\n", e);
-                    } else {
-                        log.error("Error occurred while executing the aggregation for data between "
-                                + startTimeOfNewAggregates + " - " + emittedTime + " for duration \n" + duration, e);
-                    }
-                    return;
-                }
-            }
+            cudStreamProcessorQueue.add(new QueuedCudStreamProcessor(cudStreamProcessor, streamEvent,
+                    startTimeOfNewAggregates, emittedTime, timeZone, duration));
         }
         if (getNextExecutor() != null) {
             next.execute(complexEventChunk);
