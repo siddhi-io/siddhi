@@ -50,15 +50,24 @@ public class CudStreamProcessorQueueManager implements Runnable {
                 log.warn("Thread interrupted. Error when trying to retrieve queued values." + e.getMessage());
             }
             if (null != queuedCudStreamProcessor) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Current queue size is = " + cudStreamProcessorQueue.size());
+                }
                 int i = 0;
                 while (true) {
                     i++;
                     try {
                         ComplexEventChunk complexEventChunk = new ComplexEventChunk();
                         complexEventChunk.add(queuedCudStreamProcessor.getStreamEvent());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Starting processing for duration " + queuedCudStreamProcessor.getDuration());
+                        }
                         queuedCudStreamProcessor.getCudStreamProcessor().
                                 process(complexEventChunk);
                         complexEventChunk.clear();
+                        if (log.isDebugEnabled()) {
+                            log.debug("End processing for duration " + queuedCudStreamProcessor.getDuration());
+                        }
                         break;
                     } catch (Exception e) {
                         if (e.getCause() instanceof SQLException) {
