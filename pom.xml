@@ -773,7 +773,7 @@
         <maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
         <freemarker.version>2.3.29</freemarker.version>
         <commons.io.version>1.3.2</commons.io.version>
-        <snakeyaml.version>1.25</snakeyaml.version>
+        <snakeyaml.version>1.26</snakeyaml.version>
         <org.jacoco.version>0.8.5</org.jacoco.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
