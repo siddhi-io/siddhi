@@ -48,6 +48,7 @@ public class SiddhiContext {
 
     private ExceptionHandler<Object> defaultDisrupterExceptionHandler;
     private Map<String, Class> siddhiExtensions = new HashMap<>();
+    private Map<String, Class> deprecatedSiddhiExtensions = new HashMap<>();
     private PersistenceStore persistenceStore = null;
     private IncrementalPersistenceStore incrementalPersistenceStore = null;
     private ErrorStore errorStore = null;
@@ -62,7 +63,7 @@ public class SiddhiContext {
     private Map<String, Object> attributes;
 
     public SiddhiContext() {
-        SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions, extensionHolderMap);
+        SiddhiExtensionLoader.loadSiddhiExtensions(siddhiExtensions, extensionHolderMap, deprecatedSiddhiExtensions);
         siddhiDataSources = new ConcurrentHashMap<String, DataSource>();
         statisticsConfiguration = new StatisticsConfiguration(new SiddhiMetricsFactory());
         configManager = new InMemoryConfigManager();
@@ -152,6 +153,10 @@ public class SiddhiContext {
 
     public ConcurrentHashMap<Class, AbstractExtensionHolder> getExtensionHolderMap() {
         return extensionHolderMap;
+    }
+
+    public Map<String, Class> getDeprecatedSiddhiExtensions() {
+        return deprecatedSiddhiExtensions;
     }
 
     public ExceptionHandler<Object> getDefaultDisrupterExceptionHandler() {

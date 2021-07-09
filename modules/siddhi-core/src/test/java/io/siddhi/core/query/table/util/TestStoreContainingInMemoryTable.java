@@ -69,6 +69,7 @@ import static io.siddhi.core.util.OnDemandQueryRuntimeUtil.executeSelector;
  */
 @Extension(
         name = "testStoreContainingInMemoryTable",
+        deprecated = true,
         namespace = "store",
         description = "Using this implementation a testing for store extension can be done.",
         examples = {

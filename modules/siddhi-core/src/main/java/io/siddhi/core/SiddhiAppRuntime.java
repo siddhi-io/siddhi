@@ -193,4 +193,10 @@ public interface SiddhiAppRuntime {
      */
     void enablePlayBack(boolean playBackEnabled, Long idleTime, Long incrementInMilliseconds);
 
+    /**
+     * Method to get Siddhi App runtime warnings.
+     *
+     * @return list of recorded runtime warnings.
+     */
+    Set<String> getWarnings();
 }

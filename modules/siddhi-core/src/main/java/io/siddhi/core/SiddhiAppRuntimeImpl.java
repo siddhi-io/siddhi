@@ -67,6 +67,7 @@ import io.siddhi.core.util.statistics.MemoryUsageTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.SiddhiApp;
+import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.Attribute;
@@ -84,6 +85,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,6 +138,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
     private boolean incrementalDataPurging = true;
+    private Set<String> warnings = new HashSet<>();
 
 
     public SiddhiAppRuntimeImpl(Map<String, AbstractDefinition> streamDefinitionMap,
@@ -176,7 +179,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
             onDemandQueryLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, "query",
                     SiddhiConstants.METRIC_INFIX_ON_DEMAND_QUERIES, null);
         }
-
+        collectDeprecateWarnings();
         for (Map.Entry<String, List<Sink>> sinkEntries : sinkMap.entrySet()) {
             addCallback(sinkEntries.getKey(),
                     new SinkCallback(sinkEntries.getValue(), streamDefinitionMap.get(sinkEntries.getKey())));
@@ -924,5 +927,38 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                 scheduler.switchToPlayBackMode();
             }
         }
+    }
+
+    private void collectDeprecateWarnings() {
+        Set<String> deprecatedExtensions = siddhiAppContext.getSiddhiContext().getDeprecatedSiddhiExtensions().keySet();
+        List<AbstractDefinition> extensionsInUse = new ArrayList<>();
+        extensionsInUse.addAll(streamDefinitionMap.values());
+        extensionsInUse.addAll(tableDefinitionMap.values());
+        extensionsInUse.addAll(windowDefinitionMap.values());
+        extensionsInUse.addAll(aggregationDefinitionMap.values());
+        for (AbstractDefinition extDefinition : extensionsInUse) {
+            for (Annotation annotation : extDefinition.getAnnotations()) {
+                String type = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
+                if (annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_SOURCE)) {
+                    type = "source:" + type;
+                }
+                if (annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_SINK)) {
+                    type = "sink:" + type;
+                }
+                if (annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_STORE)) {
+                    type = "store:" + type;
+                }
+                if (deprecatedExtensions.contains(type)) {
+                    String warning = type + " is being deprecated.";
+                    warnings.add(warning);
+                    log.warn(warning);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Set<String> getWarnings() {
+        return warnings;
     }
 }
