@@ -19,6 +19,7 @@
 package io.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.debugger.SiddhiDebugger;
@@ -930,7 +931,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
     }
 
     private void collectDeprecateWarnings() {
-        Set<String> deprecatedExtensions = siddhiAppContext.getSiddhiContext().getDeprecatedSiddhiExtensions().keySet();
+        Map<String, Class> deprecatedExtensions = siddhiAppContext.getSiddhiContext().getDeprecatedSiddhiExtensions();
         List<AbstractDefinition> extensionsInUse = new ArrayList<>();
         extensionsInUse.addAll(streamDefinitionMap.values());
         extensionsInUse.addAll(tableDefinitionMap.values());
@@ -948,8 +949,12 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                 if (annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_STORE)) {
                     type = "store:" + type;
                 }
-                if (deprecatedExtensions.contains(type)) {
-                    String warning = type + " is being deprecated.";
+                if (deprecatedExtensions.containsKey(type)) {
+                    Class ext = deprecatedExtensions.get(type);
+                    Extension extAnnotation = (Extension) ext.getAnnotation(Extension.class);
+                    String warning = extAnnotation.deprecationNotice().isEmpty()
+                            ? type + " is being deprecated."
+                            : extAnnotation.deprecationNotice();
                     warnings.add(warning);
                     log.warn(warning);
                 }

@@ -62,6 +62,8 @@ public @interface Extension {
 
     boolean deprecated() default false;
 
+    String deprecationNotice() default "";
+
     Parameter[] parameters() default {};
 
     ParameterOverload[] parameterOverloads() default {};

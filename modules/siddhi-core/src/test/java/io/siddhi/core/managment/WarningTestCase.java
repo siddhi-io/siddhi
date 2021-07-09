@@ -63,7 +63,7 @@ public class WarningTestCase {
         AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(1, siddhiAppRuntime.getWarnings().size());
         AssertJUnit.assertTrue(siddhiAppRuntime.getWarnings()
-                .contains("store:testStoreContainingInMemoryTable is being deprecated."));
+                .contains("store:testStoreContainingInMemoryTable is being deprecated for testing purposes."));
         siddhiAppRuntime.shutdown();
     }
 }
