@@ -949,7 +949,7 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                 if (annotation.getName().equalsIgnoreCase(SiddhiConstants.ANNOTATION_STORE)) {
                     type = "store:" + type;
                 }
-                if (deprecatedExtensions.containsKey(type)) {
+                if (type != null && deprecatedExtensions.containsKey(type)) {
                     Class ext = deprecatedExtensions.get(type);
                     Extension extAnnotation = (Extension) ext.getAnnotation(Extension.class);
                     String warning = extAnnotation.deprecationNotice().isEmpty()
