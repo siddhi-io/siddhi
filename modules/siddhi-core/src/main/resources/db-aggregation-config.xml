@@ -139,7 +139,7 @@
             <countFunction>COUNT({{COLUMN}})</countFunction>
             <maxFunction>MAX({{COLUMN}})</maxFunction>
             <minFunction>MIN({{COLUMN}})</minFunction>
-            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}', to_timestamp({{COLUMN}}/1000)))*1000;
+            <timeConversionFunction>EXTRACT(epoch from date_trunc('{{DURATION}}', to_timestamp({{COLUMN}}/1000)))*1000
             </timeConversionFunction>
         </selectQueryFunctions>
         <timeConversionDurationMapping>
