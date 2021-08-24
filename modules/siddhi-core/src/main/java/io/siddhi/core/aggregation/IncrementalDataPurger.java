@@ -393,8 +393,17 @@ public class IncrementalDataPurger implements Runnable {
             purgingCheckState.put(IS_PARENT_TABLE_HAS_AGGREGATED_DATA, dataInParentTable != null
                     && dataInParentTable.length > 0);
         } catch (Exception e) {
-            LOG.error("Error occurred while checking whether the data is safe to purge from aggregation " +
-                    "tables for the aggregation " + aggregationDefinition.getId(), e);
+            if (e.getMessage().contains("deadlocked")) {
+                errorMessage = "Deadlock observed while checking whether the data is safe to purge from aggregation " +
+                        "tables for the aggregation " + aggregationDefinition.getId() +
+                        ". If this occurred in an Active Active deployment, this error can be ignored if other node " +
+                        "doesn't have this error";
+            } else {
+                errorMessage = "Error occurred while checking whether the data is safe to purge from aggregation" +
+                        " tables for the aggregation " + aggregationDefinition.getId();
+
+            }
+            LOG.error(errorMessage, e);
             purgingCheckState.put(IS_DATA_AVAILABLE_TO_PURGE, false);
             purgingCheckState.put(IS_PARENT_TABLE_HAS_AGGREGATED_DATA, false);
             errorMessage = "Error occurred while checking whether the data is safe to purge from aggregation tables" +
