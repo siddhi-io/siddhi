@@ -399,8 +399,8 @@ public class IncrementalDataPurger implements Runnable {
                         ". If this occurred in an Active Active deployment, this error can be ignored if other node " +
                         "doesn't have this error";
             } else {
-                errorMessage = "Error occurred while checking whether the data is safe to purge from aggregation" +
-                        " tables for the aggregation " + aggregationDefinition.getId();
+                errorMessage = "Error occurred while checking whether the data is safe to purge from aggregation " +
+                        "tables for the aggregation " + aggregationDefinition.getId();
 
             }
             LOG.error(errorMessage, e);
