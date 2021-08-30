@@ -58,7 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SiddhiExtensionLoader {
 
     private static final Logger log = Logger.getLogger(SiddhiExtensionLoader.class);
-    private static List<Class> extensionNameSpaceList = new ArrayList<>();
     private static final Class ATTRIBUTE_AGGREGATOR_EXECUTOR_CLASS = AttributeAggregatorExecutor.class;
     private static final Class DISTRIBUTION_STRATEGY_CLASS = DistributionStrategy.class;
     private static final Class FUNCTION_EXECUTOR_CLASS = FunctionExecutor.class;
@@ -72,6 +71,7 @@ public class SiddhiExtensionLoader {
     private static final Class STREAM_PROCESSOR_CLASS = StreamProcessor.class;
     private static final Class TABLE_CLASS = Table.class;
     private static final Class WINDOW_PROCESSOR_CLASS = WindowProcessor.class;
+    private static List<Class> extensionNameSpaceList = new ArrayList<>();
 
     static {
         extensionNameSpaceList.add(DISTRIBUTION_STRATEGY_CLASS);
@@ -92,30 +92,34 @@ public class SiddhiExtensionLoader {
     /**
      * Helper method to load the Siddhi extensions.
      *
-     * @param siddhiExtensionsMap reference map for the Siddhi extension
-     * @param extensionHolderMap  reference map for the Siddhi extension holder
+     * @param siddhiExtensionsMap           reference map for the Siddhi extension
+     * @param extensionHolderMap            reference map for the Siddhi extension holder
+     * @param deprecatedSiddhiExtensionsMap reference map for the deprecated Siddhi extensions
      */
     public static void loadSiddhiExtensions(Map<String, Class> siddhiExtensionsMap,
-                                            ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap) {
-        loadLocalExtensions(siddhiExtensionsMap, extensionHolderMap);
+                                            ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap,
+                                            Map<String, Class> deprecatedSiddhiExtensionsMap) {
+        loadLocalExtensions(siddhiExtensionsMap, extensionHolderMap, deprecatedSiddhiExtensionsMap);
         BundleContext bundleContext = ReferenceHolder.getInstance().getBundleContext();
         if (bundleContext != null) {
-            loadExtensionOSGI(bundleContext, siddhiExtensionsMap, extensionHolderMap);
+            loadExtensionOSGI(bundleContext, siddhiExtensionsMap, extensionHolderMap, deprecatedSiddhiExtensionsMap);
         }
     }
 
     /**
      * Load Extensions in OSGi environment.
      *
-     * @param bundleContext       OSGi bundleContext
-     * @param siddhiExtensionsMap reference map for the Siddhi extension
-     * @param extensionHolderMap  reference map for the Siddhi extension holder
+     * @param bundleContext                 OSGi bundleContext
+     * @param siddhiExtensionsMap           reference map for the Siddhi extension
+     * @param extensionHolderMap            reference map for the Siddhi extension holder
+     * @param deprecatedSiddhiExtensionsMap reference map for the deprecated Siddhi extensions
      */
     private static void loadExtensionOSGI(BundleContext bundleContext,
                                           Map<String, Class> siddhiExtensionsMap,
-                                          ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap) {
+                                          ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap,
+                                          Map<String, Class> deprecatedSiddhiExtensionsMap) {
         ExtensionBundleListener extensionBundleListener
-                = new ExtensionBundleListener(siddhiExtensionsMap, extensionHolderMap);
+                = new ExtensionBundleListener(siddhiExtensionsMap, extensionHolderMap, deprecatedSiddhiExtensionsMap);
         bundleContext.addBundleListener(extensionBundleListener);
         extensionBundleListener.loadAllExtensions(bundleContext);
     }
@@ -123,14 +127,16 @@ public class SiddhiExtensionLoader {
     /**
      * Load Siddhi extensions in java non OSGi environment.
      *
-     * @param siddhiExtensionsMap reference map for the Siddhi extension
-     * @param extensionHolderMap reference map for the Siddhi extension holder
+     * @param siddhiExtensionsMap           reference map for the Siddhi extension
+     * @param extensionHolderMap            reference map for the Siddhi extension holder
+     * @param deprecatedSiddhiExtensionsMap reference map for the deprecated Siddhi extensions
      */
     private static void loadLocalExtensions(Map<String, Class> siddhiExtensionsMap,
-                                            ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap) {
+                                            ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap,
+                                            Map<String, Class> deprecatedSiddhiExtensionsMap) {
         Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class);
         for (Class extension : extensions) {
-            addExtensionToMap(extension, siddhiExtensionsMap, extensionHolderMap);
+            addExtensionToMap(extension, siddhiExtensionsMap, extensionHolderMap, deprecatedSiddhiExtensionsMap);
         }
 
         // load extensions related to incremental aggregation
@@ -149,13 +155,14 @@ public class SiddhiExtensionLoader {
     /**
      * Adding extensions to Siddhi siddhiExtensionsMap.
      *
-     * @param extensionClass      extension class
-     * @param siddhiExtensionsMap reference map for the Siddhi extension
-     * @param extensionHolderMap reference map for the Siddhi extension holder
+     * @param extensionClass                extension class
+     * @param siddhiExtensionsMap           reference map for the Siddhi extension
+     * @param extensionHolderMap            reference map for the Siddhi extension holder
+     * @param deprecatedSiddhiExtensionsMap reference map for the deprecated Siddhi extensions
      */
     private static void addExtensionToMap(Class extensionClass, Map<String, Class> siddhiExtensionsMap,
-                                          ConcurrentHashMap<Class, AbstractExtensionHolder>
-                                                  extensionHolderMap) {
+                                          ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap,
+                                          Map<String, Class> deprecatedSiddhiExtensionsMap) {
         Extension siddhiExtensionAnnotation = (Extension) extensionClass.getAnnotation(Extension.class);
         if (siddhiExtensionAnnotation != null) {
             if (!siddhiExtensionAnnotation.name().isEmpty()) {
@@ -166,6 +173,9 @@ public class SiddhiExtensionLoader {
                     Class existingValue = siddhiExtensionsMap.get(key);
                     if (existingValue == null) {
                         previousClass = siddhiExtensionsMap.put(key, extensionClass);
+                        if (siddhiExtensionAnnotation.deprecated()) {
+                            deprecatedSiddhiExtensionsMap.put(key, extensionClass);
+                        }
                         for (Class clazz : extensionNameSpaceList) {
                             putToExtensionHolderMap(clazz, extensionClass, key,
                                     extensionHolderMap);
@@ -179,6 +189,9 @@ public class SiddhiExtensionLoader {
                     }
                 } else {
                     previousClass = siddhiExtensionsMap.put(siddhiExtensionAnnotation.name(), extensionClass);
+                    if (siddhiExtensionAnnotation.deprecated()) {
+                        deprecatedSiddhiExtensionsMap.put(siddhiExtensionAnnotation.name(), extensionClass);
+                    }
                     if (previousClass != null) {
                         log.warn("Dropping extension '" + previousClass + "' as '" + extensionClass + "' is " +
                                 "loaded with the same name '" + siddhiExtensionAnnotation.name() + "'");
@@ -220,6 +233,7 @@ public class SiddhiExtensionLoader {
 
     /**
      * Remove extensions to Siddhi siddhiExtensionsHolderMap.
+     *
      * @param extensionKey                     fully qualified extension name (namespace:extensionName)
      * @param extension                        extension class (eg:HttpSource)
      * @param extensionHolderConcurrentHashMap reference map for the Siddhi extension holder
@@ -265,12 +279,15 @@ public class SiddhiExtensionLoader {
 
         private Map<Class, Integer> bundleExtensions = new HashMap<Class, Integer>();
         private Map<String, Class> siddhiExtensionsMap;
+        private Map<String, Class> deprecatedSiddhiExtensionsMap;
         private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderConcurrentHashMap;
 
         ExtensionBundleListener(Map<String, Class> siddhiExtensionsMap,
-                                ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderConcurrentHashMap) {
+                                ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderConcurrentHashMap,
+                                Map<String, Class> deprecatedSiddhiExtensionsMap) {
             this.siddhiExtensionsMap = siddhiExtensionsMap;
             this.extensionHolderConcurrentHashMap = extensionHolderConcurrentHashMap;
+            this.deprecatedSiddhiExtensionsMap = deprecatedSiddhiExtensionsMap;
         }
 
         @Override
@@ -286,7 +303,8 @@ public class SiddhiExtensionLoader {
             ClassLoader classLoader = bundle.adapt(BundleWiring.class).getClassLoader();
             Iterable<Class<?>> extensions = ClassIndex.getAnnotated(Extension.class, classLoader);
             for (Class extension : extensions) {
-                addExtensionToMap(extension, siddhiExtensionsMap, extensionHolderConcurrentHashMap);
+                addExtensionToMap(extension, siddhiExtensionsMap,
+                        extensionHolderConcurrentHashMap, deprecatedSiddhiExtensionsMap);
                 bundleExtensions.put(extension, (int) bundle.getBundleId());
             }
         }
