@@ -212,7 +212,7 @@ public class IncrementalExecutor implements Executor {
                 tableEventChunk.add(event);
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
+                LOG.debug("Event dispatched by aggregation " + aggregatorName + " for duration " + this.duration);
             }
             if (isProcessingExecutor) {
                 executorService.execute(() -> {
@@ -223,6 +223,9 @@ public class IncrementalExecutor implements Executor {
                                 "' when performing table writes of aggregation '" + this.aggregatorName +
                                 "' for duration '" + this.duration + "'. This should be investigated as this " +
                                 "can cause accuracy loss.", t);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Dropping Event chunk - \"" + eventChunk.toString() + "\"");
+                        }
                     } finally {
                         isProcessFinished.set(true);
                     }
@@ -236,7 +239,7 @@ public class IncrementalExecutor implements Executor {
                     }
                 } catch (InterruptedException e) {
                     LOG.error("Error occurred while waiting until table update task finishes for duration " +
-                            duration, e);
+                            duration + "in aggregation " + aggregatorName, e);
                 }
             }
             if (getNextExecutor() != null) {

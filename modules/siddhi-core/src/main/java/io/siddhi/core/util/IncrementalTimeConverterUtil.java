@@ -109,7 +109,7 @@ public class IncrementalTimeConverterUtil {
                         .of(zonedDateTime.getYear(), zonedDateTime.getMonthValue(), zonedDateTime.getDayOfMonth() + 1,
                                 0, 0, 0, 0, ZoneId.of(timeZone)).toEpochSecond() * 1000;
             }
-        } else  {
+        } else {
             return ZonedDateTime
                     .of(zonedDateTime.getYear(), zonedDateTime.getMonthValue(), zonedDateTime.getDayOfMonth(),
                             zonedDateTime.getHour() + 1, 0, 0, 0, ZoneId.of(timeZone)).toEpochSecond() * 1000;
@@ -228,5 +228,36 @@ public class IncrementalTimeConverterUtil {
                 throw new SiddhiAppRuntimeException("Cannot provide number of milliseconds per duration " + duration
                         + ".Number of milliseconds are only define for SECONDS, MINUTES, HOURS and DAYS");
         }
+    }
+
+    public static boolean isAggregationDataComplete(long timestamp, TimePeriod.Duration duration, String timeZone) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+                ZoneId.of(timeZone));
+        ZonedDateTime zonedCurrentDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.of(timeZone));
+        switch (duration) {
+            case SECONDS:
+                return false;
+            case MINUTES:
+                return zonedDateTime.getYear() == zonedCurrentDateTime.getYear() &&
+                        zonedDateTime.getMonthValue() == zonedCurrentDateTime.getDayOfMonth() &&
+                        zonedDateTime.getDayOfMonth() == zonedCurrentDateTime.getDayOfMonth() &&
+                        zonedDateTime.getHour() == zonedCurrentDateTime.getHour() &&
+                        zonedDateTime.getMinute() == (zonedCurrentDateTime.getMinute() - 1);
+            case HOURS:
+                return zonedDateTime.getYear() == zonedCurrentDateTime.getYear() &&
+                        zonedDateTime.getMonthValue() == zonedCurrentDateTime.getDayOfMonth() &&
+                        zonedDateTime.getDayOfMonth() == zonedCurrentDateTime.getDayOfMonth() &&
+                        zonedDateTime.getHour() == (zonedCurrentDateTime.getHour() - 1);
+            case DAYS:
+                return zonedDateTime.getYear() == zonedCurrentDateTime.getYear() &&
+                        zonedDateTime.getMonthValue() == zonedCurrentDateTime.getDayOfMonth() &&
+                        zonedDateTime.getDayOfMonth() == (zonedCurrentDateTime.getDayOfMonth() - 1);
+            case MONTHS:
+                return zonedDateTime.getYear() == zonedCurrentDateTime.getYear() &&
+                        zonedDateTime.getMonthValue() == (zonedCurrentDateTime.getMonthValue() - 1);
+            case YEARS:
+                return zonedDateTime.getYear() == (zonedCurrentDateTime.getYear() - 1);
+        }
+        return false;
     }
 }

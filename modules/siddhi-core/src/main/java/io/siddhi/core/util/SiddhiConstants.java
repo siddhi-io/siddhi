@@ -79,6 +79,7 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_IGNORE_EVENTS_OLDER_THAN_BUFFER = "IgnoreEventsOlderThanBuffer";
     public static final String ANNOTATION_ELEMENT_REF = "ref";
     public static final String ANNOTATION_ELEMENT_ENABLE = "enable";
+    public static final String ANNOTATION_ELEMENT_IS_READ_ONLY = "is.read.only";
     public static final String ANNOTATION_ELEMENT_IDLE_PERIOD = "idle.period";
     public static final String ANNOTATION_ELEMENT_INTERVAL = "interval";
     public static final String ANNOTATION_ELEMENT_INCLUDE = "include";

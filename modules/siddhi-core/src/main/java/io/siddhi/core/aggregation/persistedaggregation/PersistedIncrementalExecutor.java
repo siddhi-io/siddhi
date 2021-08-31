@@ -57,6 +57,7 @@ public class PersistedIncrementalExecutor implements Executor {
     private Processor cudStreamProcessor;
     private boolean isProcessingExecutor;
     private LinkedBlockingQueue<QueuedCudStreamProcessor> cudStreamProcessorQueue;
+    private String aggregatorName;
 
     public PersistedIncrementalExecutor(String aggregatorName, TimePeriod.Duration duration,
                                         List<ExpressionExecutor> processExpressionExecutors,
@@ -69,6 +70,7 @@ public class PersistedIncrementalExecutor implements Executor {
         this.next = child;
         this.cudStreamProcessor = cudStreamProcessor;
 
+        this.aggregatorName = aggregatorName;
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         setNextExecutor(child);
@@ -83,8 +85,8 @@ public class PersistedIncrementalExecutor implements Executor {
     @Override
     public void execute(ComplexEventChunk streamEventChunk) {
         if (log.isDebugEnabled()) {
-            log.debug("Event Chunk received by " + this.duration + " incremental executor: " +
-                    streamEventChunk.toString() + " will be dropped since persisted aggregation has been scheduled ");
+            log.debug("Event Chunk received by the Aggregation " + aggregatorName + " for duration " + this.duration +
+                    " will be dropped since persisted aggregation has been scheduled ");
         }
         streamEventChunk.reset();
         while (streamEventChunk.hasNext()) {
@@ -94,6 +96,7 @@ public class PersistedIncrementalExecutor implements Executor {
             try {
                 long timestamp = getTimestamp(streamEvent);
                 if (timestamp >= executorState.nextEmitTime) {
+                    log.debug("Next EmitTime: " + executorState.nextEmitTime + ", Current Time: " + timestamp);
                     long emittedTime = executorState.nextEmitTime;
                     long startedTime = executorState.startTimeOfAggregates;
                     executorState.startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
@@ -120,8 +123,8 @@ public class PersistedIncrementalExecutor implements Executor {
                 ZoneId.of(timeZone));
         ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(emittedTime),
                 ZoneId.of(timeZone));
-        log.info("Aggregation event dispatched for the duration " + duration + " to aggregate data from "
-                + startTime.toString() + " to " + endTime.toString() + " ");
+        log.info("Aggregation event dispatched for the duration " + duration + " for aggregation " + aggregatorName +
+                " to aggregate data from " + startTime + " to " + endTime + " ");
         ComplexEventChunk complexEventChunk = new ComplexEventChunk();
         StreamEvent streamEvent = streamEventFactory.newInstance();
         streamEvent.setType(ComplexEvent.Type.CURRENT);

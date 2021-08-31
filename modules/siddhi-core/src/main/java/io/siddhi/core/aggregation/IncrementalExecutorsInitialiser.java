@@ -64,6 +64,8 @@ public class IncrementalExecutorsInitialiser {
     private String timeZone;
 
     private boolean isInitialised;
+    private boolean isReadOnly;
+    private boolean isPersistedAggregation;
 
     public IncrementalExecutorsInitialiser(List<TimePeriod.Duration> incrementalDurations,
                                            Map<TimePeriod.Duration, Table> aggregationTables,
@@ -71,7 +73,8 @@ public class IncrementalExecutorsInitialiser {
                                            boolean isDistributed, String shardId, SiddhiAppContext siddhiAppContext,
                                            MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap,
                                            Map<String, Window> windowMap,
-                                           Map<String, AggregationRuntime> aggregationMap, String timeZone) {
+                                           Map<String, AggregationRuntime> aggregationMap, String timeZone,
+                                           boolean isReadOnly, boolean isPersistedAggregation) {
         this.timeZone = timeZone;
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
@@ -88,15 +91,18 @@ public class IncrementalExecutorsInitialiser {
         this.aggregationMap = aggregationMap;
 
         this.isInitialised = false;
+        this.isReadOnly = isReadOnly;
+        this.isPersistedAggregation = isPersistedAggregation;
     }
 
     public synchronized void initialiseExecutors() {
-        if (this.isInitialised) {
+        if (this.isInitialised || isReadOnly) {
             // Only cleared when executors change from reading to processing state in one node deployment
             return;
         }
         Event[] events;
         Long endOFLatestEventTimestamp = null;
+        Long lastData = null;
 
         // Get max(AGG_TIMESTAMP) from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
@@ -108,52 +114,113 @@ public class IncrementalExecutorsInitialiser {
         // Get latest event timestamp in tableForMaxDuration and get the end time of the aggregation record
         events = onDemandQueryRuntime.execute();
         if (events != null) {
-            Long lastData = (Long) events[events.length - 1].getData(0);
+            lastData = (Long) events[events.length - 1].getData(0);
             endOFLatestEventTimestamp = IncrementalTimeConverterUtil
                     .getNextEmitTime(lastData, incrementalDurations.get(incrementalDurations.size() - 1), timeZone);
         }
-        for (int i = incrementalDurations.size() - 1; i > 0; i--) {
-            TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
-            Executor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
-
-            // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
-            // for minute duration, take the second table [provided that aggregation is done for seconds])
-            // This lookup is filtered by endOFLatestEventTimestamp
-            Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
-
-            onDemandQuery = getOnDemandQuery(recreateFromTable, false, endOFLatestEventTimestamp);
-            onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
-            onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null, siddhiAppContext,
-                    tableMap, windowMap,
-                    aggregationMap);
-            events = onDemandQueryRuntime.execute();
-
-            if (events != null) {
-                long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
-                endOFLatestEventTimestamp = IncrementalTimeConverterUtil
-                        .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), timeZone);
-
-                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
-                for (Event event : events) {
-                    StreamEvent streamEvent = streamEventFactory.newInstance();
-                    streamEvent.setOutputData(event.getData());
-                    complexEventChunk.add(streamEvent);
+        if (isPersistedAggregation) {
+            for (int i = incrementalDurations.size() - 1; i > 0; i--) {
+                if (lastData != null && !IncrementalTimeConverterUtil.
+                        isAggregationDataComplete(lastData, incrementalDurations.get(i), timeZone)) {
+                    recreateState(lastData, incrementalDurations.get(i),
+                            aggregationTables.get(incrementalDurations.get(i - 1)), i == 1);
+                } else if (lastData == null) {
+                    recreateState(null, incrementalDurations.get(i),
+                            aggregationTables.get(incrementalDurations.get(i - 1)), i == 1);
                 }
-                incrementalExecutor.execute(complexEventChunk);
+                if (i > 1) {
+                    onDemandQuery = getOnDemandQuery(aggregationTables.get(incrementalDurations.get(i - 1)), true,
+                            endOFLatestEventTimestamp);
+                    onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+                    onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
+                            siddhiAppContext, tableMap, windowMap, aggregationMap);
+                    events = onDemandQueryRuntime.execute();
+                    if (events != null) {
+                        lastData = (Long) events[events.length - 1].getData(0);
+                    }
+                }
+            }
+        } else {
+            for (int i = incrementalDurations.size() - 1; i > 0; i--) {
 
-                if (i == 1) {
-                    TimePeriod.Duration rootDuration = incrementalDurations.get(0);
-                    Executor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
-                    long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
-                            referenceToNextLatestEvent, rootDuration, timeZone);
+                TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
+                Executor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
-                    rootIncrementalExecutor.setEmitTime(emitTimeOfLatestEventInTable);
 
+                // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
+                // for minute duration, take the second table [provided that aggregation is done for seconds])
+                // This lookup is filtered by endOFLatestEventTimestamp
+                Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
+
+                onDemandQuery = getOnDemandQuery(recreateFromTable, false, endOFLatestEventTimestamp);
+                onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+                onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null, siddhiAppContext,
+                        tableMap, windowMap,
+                        aggregationMap);
+                events = onDemandQueryRuntime.execute();
+
+                if (events != null) {
+                    long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
+                    endOFLatestEventTimestamp = IncrementalTimeConverterUtil
+                            .getNextEmitTime(referenceToNextLatestEvent, incrementalDurations.get(i - 1), timeZone);
+
+                    ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
+                    for (Event event : events) {
+                        StreamEvent streamEvent = streamEventFactory.newInstance();
+                        streamEvent.setOutputData(event.getData());
+                        complexEventChunk.add(streamEvent);
+                    }
+                    incrementalExecutor.execute(complexEventChunk);
+
+                    if (i == 1) {
+                        TimePeriod.Duration rootDuration = incrementalDurations.get(0);
+                        Executor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
+                        long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
+                                referenceToNextLatestEvent, rootDuration, timeZone);
+
+                        rootIncrementalExecutor.setEmitTime(emitTimeOfLatestEventInTable);
+
+                    }
                 }
             }
         }
         this.isInitialised = true;
+    }
+
+    private void recreateState(Long lastData, TimePeriod.Duration recreateForDuration,
+                               Table recreateFromTable, boolean isBeforeRoot) {
+        Long endOFLatestEventTimestamp = null;
+        Executor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
+        if (lastData != null) {
+            endOFLatestEventTimestamp = IncrementalTimeConverterUtil
+                    .getNextEmitTime(lastData, recreateForDuration, timeZone);
+        }
+        OnDemandQuery onDemandQuery = getOnDemandQuery(recreateFromTable, false, endOFLatestEventTimestamp);
+        onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+        OnDemandQueryRuntime onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null, siddhiAppContext,
+                tableMap, windowMap,
+                aggregationMap);
+        Event[] events = onDemandQueryRuntime.execute();
+        if (events != null) {
+            long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
+            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>();
+            for (Event event : events) {
+                StreamEvent streamEvent = streamEventFactory.newInstance();
+                streamEvent.setOutputData(event.getData());
+                complexEventChunk.add(streamEvent);
+            }
+            incrementalExecutor.execute(complexEventChunk);
+            if (isBeforeRoot) {
+                TimePeriod.Duration rootDuration = incrementalDurations.get(0);
+                Executor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
+                long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
+                        referenceToNextLatestEvent, rootDuration, timeZone);
+
+                rootIncrementalExecutor.setEmitTime(emitTimeOfLatestEventInTable);
+
+            }
+        }
     }
 
     private OnDemandQuery getOnDemandQuery(Table table, boolean isLargestGranularity, Long endOFLatestEventTimestamp) {
