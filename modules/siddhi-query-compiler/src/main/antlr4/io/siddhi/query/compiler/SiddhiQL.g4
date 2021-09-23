@@ -660,6 +660,15 @@ keyword
     | DOUBLE
     | BOOL
     | OBJECT
+    | FUNCTION
+    | TRIGGER
+    | OFFSET
+    | SET
+    | AT
+    | IN
+    | AGGREGATION
+    | AGGREGATE
+    | PER
     ;
 
 time_value
