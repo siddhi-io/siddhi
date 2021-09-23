@@ -1229,6 +1229,7 @@ public class AggregationParser {
         StringJoiner subSelectT2OnConditionBuilder = new StringJoiner(SQL_AND);
 
         StringJoiner groupByQueryBuilder = new StringJoiner(", ");
+        StringJoiner groupByT3QueryBuilder = new StringJoiner(", ");
         StringJoiner finalSelectQuery = new StringJoiner(" ");
         StringJoiner completeQuery = new StringJoiner(" ");
         StringJoiner insertIntoColumns = new StringJoiner(", ");
@@ -1257,6 +1258,7 @@ public class AggregationParser {
         if (isDistributed) {
             filterQueryBuilder.append(" AND ").append(AGG_SHARD_ID_COL).append(" = '").append(shardID).append("' ");
             groupByQueryBuilder.add(AGG_SHARD_ID_COL);
+            groupByT3QueryBuilder.add(INNER_SELECT_QUERY_REF_T3 + "." + AGG_SHARD_ID_COL);
             innerSelectT2ColumnJoiner.add(AGG_SHARD_ID_COL);
             subSelectT2OnConditionBuilder.add(parentAggregationTable.getTableDefinition().getId() + "." +
                     AGG_SHARD_ID_COL + EQUALS + INNER_SELECT_QUERY_REF_T3 + "." + AGG_SHARD_ID_COL);
@@ -1270,6 +1272,7 @@ public class AggregationParser {
             groupByVariableList.stream().forEach(variable -> {
                 groupByColumnNames.add(variable.getAttributeName());
                 groupByQueryBuilder.add(variable.getAttributeName());
+                groupByT3QueryBuilder.add(INNER_SELECT_QUERY_REF_T3 + "." + variable.getAttributeName());
                 onConditionBuilder.add(SUB_SELECT_QUERY_REF_T1 + "." + variable.getAttributeName() +
                         EQUALS + SUB_SELECT_QUERY_REF_T2 + "." + variable.getAttributeName());
                 subSelectT2OnConditionBuilder.add(parentAggregationTable.getTableDefinition().getId() + "." +
@@ -1298,7 +1301,10 @@ public class AggregationParser {
                             subSelectT1ColumnJoiner.add(variableExpressionExecutor.getAttribute().getName());
                             innerSelectT2ColumnJoiner.add(variableExpressionExecutor.getAttribute().getName());
                         } else {
-                            subSelectT2ColumnJoiner.add(variableExpressionExecutor.getAttribute().getName());
+                            subSelectT2ColumnJoiner.add(dbAggregationSelectFunctionTemplates.getMaxFunction().
+                                    replace(PLACEHOLDER_COLUMN, variableExpressionExecutor.
+                                            getAttribute().getName()) + SQL_AS + variableExpressionExecutor.
+                                    getAttribute().getName());
                             outerSelectColumnJoiner.add(SUB_SELECT_QUERY_REF_T2 + "." +
                                     variableExpressionExecutor.getAttribute().getName() +
                                     SQL_AS + attributeList.get(i).getName());
@@ -1325,8 +1331,9 @@ public class AggregationParser {
                     if (attributeList.get(i).getName().equals(AGG_LAST_TIMESTAMP_COL)) {
                         innerSelectT2ColumnJoiner.add(dbAggregationSelectFunctionTemplates.getMaxFunction().
                                 replace(PLACEHOLDER_COLUMN, attributeList.get(i).getName()) + SQL_AS + attributeList.get(i).getName());
-                        subSelectT2ColumnJoiner.add(INNER_SELECT_QUERY_REF_T3 + "." + attributeList.get(i).getName() +
-                                SQL_AS + attributeList.get(i).getName());
+                        subSelectT2ColumnJoiner.add(dbAggregationSelectFunctionTemplates.getMaxFunction().
+                                replace(PLACEHOLDER_COLUMN, INNER_SELECT_QUERY_REF_T3 + "." +
+                                        attributeList.get(i).getName()) + SQL_AS + attributeList.get(i).getName());
                         outerSelectColumnJoiner.add(SUB_SELECT_QUERY_REF_T2 + "." + attributeList.get(i).getName() +
                                 SQL_AS + attributeList.get(i).getName());
                         subSelectT2OnConditionBuilder.add(parentAggregationTable.getTableDefinition().getId() + "." +
@@ -1361,6 +1368,10 @@ public class AggregationParser {
                     replace(PLACEHOLDER_COLUMN, AGG_EXTERNAL_TIMESTAMP_COL).replace(PLACEHOLDER_DURATION,
                             dbAggregationTimeConversionDurationMapping.getDurationMapping(duration)));
 
+            groupByT3QueryBuilder.add(dbAggregationSelectFunctionTemplates.getTimeConversionFunction().
+                    replace(PLACEHOLDER_COLUMN, AGG_EXTERNAL_TIMESTAMP_COL).replace(PLACEHOLDER_DURATION,
+                    dbAggregationTimeConversionDurationMapping.getDurationMapping(duration)));
+
             groupByClause = dbAggregationSelectQueryTemplate.getGroupByClause().replace(PLACEHOLDER_COLUMNS,
                     groupByQueryBuilder.toString());
 
@@ -1376,7 +1387,8 @@ public class AggregationParser {
                     replace(PLACEHOLDER_TABLE_NAME, parentAggregationTable.getTableDefinition().getId()).
                     replace(PLACEHOLDER_INNER_QUERY_2, innerT2Query.toString()).
                     replace(PLACEHOLDER_ON_CONDITION, subSelectT2OnConditionBuilder.toString()).
-                    replace(PLACEHOLDER_CONDITION, innerT2WhereCondition));
+                    replace(PLACEHOLDER_CONDITION, innerT2WhereCondition).
+                    replace(PLACEHOLDER_COLUMNS, groupByT3QueryBuilder.toString()));
 
 
             finalSelectQuery.add(dbAggregationSelectQueryTemplate.getJoinClause().
