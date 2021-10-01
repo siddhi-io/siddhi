@@ -6,7 +6,7 @@
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
             <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
-                {{ON_CONDITION}} WHERE {{CONDITION}}
+                {{ON_CONDITION}} WHERE {{CONDITION}} GROUP BY {{COLUMNS}}
             </selectQueryWithInnerSelect>
             <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
                 {{CONDITION}}
@@ -46,7 +46,7 @@
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
             <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) t3 ON
-                {{ON_CONDITION}} WHERE {{CONDITION}}
+                {{ON_CONDITION}} WHERE {{CONDITION}} GROUP BY {{COLUMNS}}
             </selectQueryWithInnerSelect>
             <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) t1 JOIN ({{INNER_QUERY_1}}) t2 ON
                 {{CONDITION}}
@@ -88,7 +88,7 @@
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
             <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
-                {{ON_CONDITION}} WHERE {{CONDITION}}
+                {{ON_CONDITION}} WHERE {{CONDITION}} GROUP BY {{COLUMNS}}
             </selectQueryWithInnerSelect>
             <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
                 {{CONDITION}}
@@ -127,7 +127,7 @@
             <selectClause>SELECT {{SELECTORS}} FROM {{TABLE_NAME}}</selectClause>
             <whereClause>WHERE {{CONDITION}}</whereClause>
             <selectQueryWithInnerSelect>SELECT {{SELECTORS}} FROM {{TABLE_NAME}} LEFT JOIN ({{INNER_QUERY_2}}) AS t3 ON
-                {{ON_CONDITION}} WHERE {{CONDITION}}
+                {{ON_CONDITION}} WHERE {{CONDITION}} GROUP BY {{COLUMNS}}
             </selectQueryWithInnerSelect>
             <joinClause>SELECT {{SELECTORS}} FROM ({{FROM_CONDITION}}) AS t1 JOIN ({{INNER_QUERY_1}}) AS t2 ON
                 {{CONDITION}}
