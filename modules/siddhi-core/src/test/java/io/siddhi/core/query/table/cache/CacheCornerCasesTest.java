@@ -135,8 +135,10 @@ public class CacheCornerCasesTest {
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
-            if (message.contains(":")) {
+            if (message.contains(": ")) {
                 message = message.split(": ")[1];
+            } else if (message.contains(":")) {
+                message = message.split(":")[1];
             }
             logMessages.add(message);
         }
