@@ -66,10 +66,8 @@ public class CacheExpiryAndReloadTestCase {
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
-            if (message.contains(": ")) {
-                message = message.split(": ")[1];
-            } else if (message.contains(":")) {
-                message = message.split(":")[1];
+            if (message.contains(":")) {
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -156,10 +154,8 @@ public class CacheExpiryAndReloadTestCase {
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
-            if (message.contains(": ")) {
-                message = message.split(": ")[1];
-            } else if (message.contains(":")) {
-                message = message.split(":")[1];
+            if (message.contains(":")) {
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -247,10 +243,8 @@ public class CacheExpiryAndReloadTestCase {
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
-            if (message.contains(": ")) {
-                message = message.split(": ")[1];
-            } else if (message.contains(":")) {
-                message = message.split(":")[1];
+            if (message.contains(":")) {
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -339,10 +333,8 @@ public class CacheExpiryAndReloadTestCase {
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
-            if (message.contains(": ")) {
-                message = message.split(": ")[1];
-            } else if (message.contains(":")) {
-                message = message.split(":")[1];
+            if (message.contains(":")) {
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
