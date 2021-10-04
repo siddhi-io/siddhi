@@ -67,7 +67,7 @@ public class CacheExpiryAndReloadTestCase {
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -155,7 +155,7 @@ public class CacheExpiryAndReloadTestCase {
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -244,7 +244,7 @@ public class CacheExpiryAndReloadTestCase {
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -334,7 +334,7 @@ public class CacheExpiryAndReloadTestCase {
         for (LoggingEvent logEvent : log) {
             String message = String.valueOf(logEvent.getMessage());
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
