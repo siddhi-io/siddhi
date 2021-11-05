@@ -435,6 +435,7 @@ public abstract class Sink<S extends State> implements SinkListener {
                     }
                     break;
                 case STORE:
+                    connectWithRetry();
                     ErroneousEvent erroneousEvent = new ErroneousEvent(dynamicOptions.getEvent(), e, e.getMessage());
                     erroneousEvent.setOriginalPayload(payload);
                     ErrorStoreHelper.storeErroneousEvent(siddhiAppContext.getSiddhiContext().getErrorStore(),
