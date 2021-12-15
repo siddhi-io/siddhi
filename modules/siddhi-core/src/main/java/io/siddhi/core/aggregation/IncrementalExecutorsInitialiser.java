@@ -62,6 +62,7 @@ public class IncrementalExecutorsInitialiser {
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
     private String timeZone;
+    private Long endOFLatestEventTimestamp = null;
 
     private boolean isInitialised;
     private boolean isReadOnly;
@@ -101,7 +102,6 @@ public class IncrementalExecutorsInitialiser {
             return;
         }
         Event[] events;
-        Long endOFLatestEventTimestamp = null;
         Long lastData = null;
 
         // Get max(AGG_TIMESTAMP) from table corresponding to max duration
@@ -138,6 +138,8 @@ public class IncrementalExecutorsInitialiser {
                     events = onDemandQueryRuntime.execute();
                     if (events != null) {
                         lastData = (Long) events[events.length - 1].getData(0);
+                    } else {
+                        lastData = null;
                     }
                 }
             }
@@ -190,7 +192,6 @@ public class IncrementalExecutorsInitialiser {
 
     private void recreateState(Long lastData, TimePeriod.Duration recreateForDuration,
                                Table recreateFromTable, boolean isBeforeRoot) {
-        Long endOFLatestEventTimestamp = null;
         Executor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
         if (lastData != null) {
             endOFLatestEventTimestamp = IncrementalTimeConverterUtil
