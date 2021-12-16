@@ -45,7 +45,7 @@ import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
 
 /**
  * This class is used to recreate in-memory data from the tables (Such as RDBMS) in incremental aggregation.
- * This ensures that the aggregation calculations are done correctly in case of server restart
+ * This ensures that the aggregation calculations are done correctly in case of server restart.
  */
 public class IncrementalExecutorsInitialiser {
     private final List<TimePeriod.Duration> incrementalDurations;
