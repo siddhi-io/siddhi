@@ -21,10 +21,21 @@ package io.siddhi.core;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.mvel2.util.StringAppender;
 
-public class UnitTestAppender extends AppenderSkeleton {
+import java.io.Serializable;
+
+public class UnitTestAppender extends AbstractAppender {
     private StringAppender messages = new StringAppender();
+
+    protected UnitTestAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions, Property[] properties) {
+        super(name, filter, layout, ignoreExceptions, properties);
+    }
 
     public String getMessages() {
         String results = messages.toString();
@@ -35,17 +46,8 @@ public class UnitTestAppender extends AppenderSkeleton {
     }
 
     @Override
-    protected void append(LoggingEvent loggingEvent) {
-        messages.append(loggingEvent.getRenderedMessage());
+    public void append(LogEvent loggingEvent) {
+        messages.append(loggingEvent.getMessage());
     }
 
-    @Override
-    public void close() {
-
-    }
-
-    @Override
-    public boolean requiresLayout() {
-        return false;
-    }
 }

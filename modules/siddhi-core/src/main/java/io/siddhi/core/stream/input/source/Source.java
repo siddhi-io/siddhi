@@ -32,7 +32,8 @@ import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <S> current state of the Source
  */
 public abstract class Source<S extends State> {
-    private static final Logger LOG = Logger.getLogger(Source.class);
+    private static final Logger LOG = LogManager.getLogger(Source.class);
     private String type;
     private SourceMapper mapper;
     private StreamDefinition streamDefinition;

@@ -28,7 +28,8 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.FileReader;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.config.YAMLConfigManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -39,7 +40,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 public class YAMLConfigManagerTestCase {
-    private static final Logger log = Logger.getLogger(YAMLConfigManagerTestCase.class);
+    private static final Logger log = LogManager.getLogger(YAMLConfigManagerTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

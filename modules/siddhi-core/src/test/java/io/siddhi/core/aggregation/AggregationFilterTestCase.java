@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AggregationFilterTestCase {
-    private static final Logger LOG = Logger.getLogger(AggregationFilterTestCase.class);
+    private static final Logger LOG = LogManager.getLogger(AggregationFilterTestCase.class);
     private AtomicInteger inEventCount;
     private boolean eventArrived;
     private List<Object[]> inEventsList;
@@ -490,12 +491,12 @@ public class AggregationFilterTestCase {
                         "quantity int, timestamp long);";
         String query =
                 "@purge(enable='false')" +
-                "define aggregation stockAggregation " +
-                "from stockStream " +
-                "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
-                "(price * quantity) as lastTradeValue  " +
-                "group by symbol " +
-                "aggregate every sec...min ;";
+                        "define aggregation stockAggregation " +
+                        "from stockStream " +
+                        "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
+                        "(price * quantity) as lastTradeValue  " +
+                        "group by symbol " +
+                        "aggregate every sec...min ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 

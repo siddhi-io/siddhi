@@ -33,7 +33,8 @@ import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ import static io.siddhi.core.event.stream.Operation.Operator.REMOVE;
  */
 public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
-    private static final Logger log = Logger.getLogger(IndexEventHolder.class);
+    private static final Logger log = LogManager.getLogger(IndexEventHolder.class);
     private static final long serialVersionUID = 1272291743721603253L;
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     protected final Map<Object, StreamEvent> primaryKeyData;

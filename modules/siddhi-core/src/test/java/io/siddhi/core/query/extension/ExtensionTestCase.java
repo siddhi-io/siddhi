@@ -26,7 +26,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.config.InMemoryConfigManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ExtensionTestCase {
-    private static final Logger log = Logger.getLogger(ExtensionTestCase.class);
+    private static final Logger log = LogManager.getLogger(ExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

@@ -20,7 +20,8 @@ package io.siddhi.core.debugger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.util.snapshot.SnapshotService;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class SiddhiDebugger {
     /**
      * Logger to log events.
      */
-    private static final Logger log = Logger.getLogger(SiddhiDebugger.class);
+    private static final Logger log = LogManager.getLogger(SiddhiDebugger.class);
 
     /**
      * Thread local flag to indicate whether the next endpoint must be blocked or not.

@@ -19,7 +19,8 @@ package io.siddhi.core.stream.input;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * InputHandler is the {@link Event} entry point to Siddhi. Users can create an Input Handler and then use that to
@@ -27,7 +28,7 @@ import org.apache.log4j.Logger;
  */
 public class InputHandler {
 
-    private static final Logger log = Logger.getLogger(InputHandler.class);
+    private static final Logger log = LogManager.getLogger(InputHandler.class);
 
     protected String streamId;
     protected int streamIndex;

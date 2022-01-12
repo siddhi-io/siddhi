@@ -28,11 +28,11 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 /*
-* concat(string1, string2, ..., stringN)
-* Returns a string that is the result of concatenating two or more string values.
-* Accept Type(s): STRING. There should be at least two arguments.
-* Return Type(s): STRING
-* */
+ * concat(string1, string2, ..., stringN)
+ * Returns a string that is the result of concatenating two or more string values.
+ * Accept Type(s): STRING. There should be at least two arguments.
+ * Return Type(s): STRING
+ * */
 public class ConcatFunctionExtension extends FunctionExecutor {
 
     private Attribute.Type returnType = Attribute.Type.STRING;

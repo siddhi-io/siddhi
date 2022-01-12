@@ -28,7 +28,8 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -41,7 +42,7 @@ import java.util.Map;
  */
 public class CallbackTestCase {
 
-    private static final Logger log = Logger.getLogger(CallbackTestCase.class);
+    private static final Logger log = LogManager.getLogger(CallbackTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
     private volatile boolean eventArrived2;

@@ -18,7 +18,8 @@
 package io.siddhi.core.aggregation.persistedaggregation;
 
 import io.siddhi.core.event.ComplexEventChunk;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,7 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Implements functions to manage the queue
  **/
 public class CudStreamProcessorQueueManager implements Runnable {
-    private static final Logger log = Logger.getLogger(CudStreamProcessorQueueManager.class);
+    private static final Logger log = LogManager.getLogger(CudStreamProcessorQueueManager.class);
     private volatile boolean run = true;
     private LinkedBlockingQueue<QueuedCudStreamProcessor> cudStreamProcessorQueue;
 

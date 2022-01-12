@@ -46,7 +46,8 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.DuplicateAnnotationException;
 import io.siddhi.query.api.util.AnnotationHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.beans.ExceptionListener;
 import java.lang.reflect.Constructor;
@@ -62,7 +63,7 @@ import java.util.concurrent.ExecutorService;
  * events till they are consumed by registered Receivers.
  */
 public class StreamJunction implements EventBufferHolder {
-    private static final Logger log = Logger.getLogger(StreamJunction.class);
+    private static final Logger log = LogManager.getLogger(StreamJunction.class);
     private final SiddhiAppContext siddhiAppContext;
     private final StreamDefinition streamDefinition;
     private int batchSize;

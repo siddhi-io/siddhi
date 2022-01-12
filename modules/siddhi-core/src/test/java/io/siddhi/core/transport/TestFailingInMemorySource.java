@@ -25,7 +25,8 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.input.source.InMemorySource;
 import io.siddhi.core.util.snapshot.state.State;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implementation of Source to receive events through in-memory transport for unavailability checking.
@@ -44,7 +45,7 @@ import org.apache.log4j.Logger;
         )
 )
 public class TestFailingInMemorySource extends InMemorySource {
-    private static final Logger LOG = Logger.getLogger(InMemorySource.class);
+    private static final Logger LOG = LogManager.getLogger(InMemorySource.class);
     public static int numberOfErrorOccurred;
     public static boolean fail = false;
     public static ConnectionCallback connectionCallback;

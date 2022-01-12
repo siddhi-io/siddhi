@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class FirstGroupByPerTimeOutputRateLimiter
         extends OutputRateLimiter<FirstGroupByPerTimeOutputRateLimiter.RateLimiterState> implements Schedulable {
-    private static final Logger log = Logger.getLogger(FirstGroupByPerTimeOutputRateLimiter.class);
+    private static final Logger log = LogManager.getLogger(FirstGroupByPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
 

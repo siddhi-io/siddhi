@@ -23,13 +23,14 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertTrue;
 
 public class WindowDefinitionTestCase {
-    private static final Logger log = Logger.getLogger(WindowDefinitionTestCase.class);
+    private static final Logger log = LogManager.getLogger(WindowDefinitionTestCase.class);
 
     @Test
     public void testEventWindow1() throws InterruptedException {

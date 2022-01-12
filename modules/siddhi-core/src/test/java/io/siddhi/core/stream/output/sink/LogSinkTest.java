@@ -22,7 +22,8 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.UnitTestAppender;
 import io.siddhi.core.stream.input.InputHandler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
@@ -47,7 +48,7 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = Logger.getLogger(LogSink.class);
+        Logger logger = LogManager.getLogger(LogSink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -84,7 +85,7 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = Logger.getLogger(LogSink.class);
+        Logger logger = LogManager.getLogger(LogSink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -120,7 +121,7 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = Logger.getLogger(LogSink.class);
+        Logger logger = LogManager.getLogger(LogSink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -156,7 +157,7 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = Logger.getLogger(LogSink.class);
+        Logger logger = LogManager.getLogger(LogSink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {

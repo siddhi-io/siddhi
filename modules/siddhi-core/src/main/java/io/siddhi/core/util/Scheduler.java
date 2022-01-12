@@ -31,7 +31,8 @@ import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Scheduler implements ExternalReferencedHolder {
 
-    private static final Logger log = Logger.getLogger(Scheduler.class);
+    private static final Logger log = LogManager.getLogger(Scheduler.class);
     private final ThreadBarrier threadBarrier;
     private final Schedulable singleThreadEntryValve;
     private final Semaphore mutex;

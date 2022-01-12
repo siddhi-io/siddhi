@@ -23,7 +23,8 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public abstract class StreamCallback implements StreamJunction.Receiver {
 
-    private static final Logger log = Logger.getLogger(StreamCallback.class);
+    private static final Logger log = LogManager.getLogger(StreamCallback.class);
 
     private String streamId;
     private AbstractDefinition streamDefinition;

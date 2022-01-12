@@ -31,7 +31,8 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
 )
 
 public class InMemorySource extends Source {
-    private static final Logger LOG = Logger.getLogger(InMemorySource.class);
+    private static final Logger LOG = LogManager.getLogger(InMemorySource.class);
     private static final String TOPIC_KEY = "topic";
     private SourceEventListener sourceEventListener;
     private InMemoryBroker.Subscriber subscriber;

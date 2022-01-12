@@ -40,7 +40,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +119,7 @@ import java.util.List;
         }
 )
 public class LogStreamProcessor extends StreamProcessor<State> {
-    private static final Logger log = Logger.getLogger(LogStreamProcessor.class);
+    private static final Logger log = LogManager.getLogger(LogStreamProcessor.class);
     private ExpressionExecutor isLogEventExpressionExecutor = null;
     private ExpressionExecutor logMessageExpressionExecutor = null;
     private ExpressionExecutor logPriorityExpressionExecutor = null;

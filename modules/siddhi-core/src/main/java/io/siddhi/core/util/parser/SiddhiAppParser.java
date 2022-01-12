@@ -57,7 +57,8 @@ import io.siddhi.query.api.expression.condition.In;
 import io.siddhi.query.api.util.AnnotationHelper;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ import java.util.concurrent.Executors;
  * Class to parse {@link SiddhiApp}
  */
 public class SiddhiAppParser {
-    private static final Logger log = Logger.getLogger(SiddhiAppParser.class);
+    private static final Logger log = LogManager.getLogger(SiddhiAppParser.class);
 
     /**
      * Parse an SiddhiApp returning SiddhiAppRuntime

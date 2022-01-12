@@ -29,7 +29,8 @@ import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.transport.TestAsyncInMemory;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.transport.InMemoryBroker;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -40,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FaultStreamTestCase {
 
-    private static final Logger log = Logger.getLogger(CallbackTestCase.class);
+    private static final Logger log = LogManager.getLogger(CallbackTestCase.class);
     private volatile AtomicInteger count;
     private volatile AtomicInteger countStream;
     private volatile boolean eventArrived;
@@ -86,7 +87,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -135,7 +136,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -184,7 +185,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -237,7 +238,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -286,7 +287,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -336,7 +337,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -383,7 +384,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -443,7 +444,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -507,8 +508,8 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = Logger.getLogger(Sink.class);
-        Logger loggerStreamJunction = Logger.getLogger(StreamJunction.class);
+        Logger loggerSink = LogManager.getLogger(Sink.class);
+        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         loggerSink.addAppender(appender);
         loggerStreamJunction.addAppender(appender);
@@ -570,8 +571,8 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = Logger.getLogger(Sink.class);
-        Logger loggerStreamJunction = Logger.getLogger(StreamJunction.class);
+        Logger loggerSink = LogManager.getLogger(Sink.class);
+        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         loggerSink.addAppender(appender);
         loggerStreamJunction.addAppender(appender);
@@ -702,7 +703,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {
@@ -763,7 +764,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         TestAsyncInMemory.fail = true;
@@ -844,7 +845,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         TestAsyncInMemory.failOnce = true;
@@ -909,8 +910,8 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = Logger.getLogger(Sink.class);
-        Logger loggerStreamJunction = Logger.getLogger(StreamJunction.class);
+        Logger loggerSink = LogManager.getLogger(Sink.class);
+        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         loggerSink.addAppender(appender);
         loggerStreamJunction.addAppender(appender);
@@ -985,7 +986,7 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(Sink.class);
+        Logger logger = LogManager.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         TestAsyncInMemory.fail = true;

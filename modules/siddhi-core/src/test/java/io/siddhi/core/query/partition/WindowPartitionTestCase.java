@@ -23,14 +23,15 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class WindowPartitionTestCase {
-    private static final Logger log = Logger.getLogger(WindowPartitionTestCase.class);
+    private static final Logger log = LogManager.getLogger(WindowPartitionTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

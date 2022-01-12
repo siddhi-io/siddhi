@@ -24,7 +24,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +33,7 @@ import org.testng.annotations.Test;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GroupByTestCase {
-    private static final Logger log = Logger.getLogger(GroupByTestCase.class);
+    private static final Logger log = LogManager.getLogger(GroupByTestCase.class);
     private volatile int count;
     private AtomicBoolean eventArrived;
 

@@ -62,7 +62,8 @@ import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.TABLE;
 import static io.siddhi.core.event.stream.MetaStreamEvent.EventType.WINDOW;
 
 public class JoinInputStreamParser {
-    private static final Logger log = Logger.getLogger(JoinInputStreamParser.class);
+    private static final Logger log = LogManager.getLogger(JoinInputStreamParser.class);
 
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream, Query query,

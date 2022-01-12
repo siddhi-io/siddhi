@@ -29,7 +29,8 @@ import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -41,7 +42,7 @@ import java.util.Map;
  */
 public class LastGroupByPerTimeOutputRateLimiter
         extends OutputRateLimiter<LastGroupByPerTimeOutputRateLimiter.RateLimiterState> implements Schedulable {
-    private static final Logger log = Logger.getLogger(LastGroupByPerTimeOutputRateLimiter.class);
+    private static final Logger log = LogManager.getLogger(LastGroupByPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
     private Scheduler scheduler;

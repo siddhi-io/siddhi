@@ -26,7 +26,8 @@ import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * TableInputHandler is the {@link Event} entry point to Siddhi. Users can create an Input Handler and then use that to
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public class TableInputHandler {
 
-    private static final Logger log = Logger.getLogger(TableInputHandler.class);
+    private static final Logger log = LogManager.getLogger(TableInputHandler.class);
 
     protected SiddhiAppContext siddhiAppContext;
     protected Table table;

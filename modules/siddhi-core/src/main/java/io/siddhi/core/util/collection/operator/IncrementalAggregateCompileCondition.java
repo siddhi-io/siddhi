@@ -42,7 +42,8 @@ import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +58,7 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * based on the logical conditions defined herewith.
  */
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
-    private static final Logger LOG = Logger.getLogger(IncrementalAggregateCompileCondition.class);
+    private static final Logger LOG = LogManager.getLogger(IncrementalAggregateCompileCondition.class);
 
     private final boolean isOnDemandQuery;
 

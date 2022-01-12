@@ -33,7 +33,8 @@ import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Snapshot : PartitionId + PartitionGroupByKey + QueryName + ElementId + Item
  */
 public class SnapshotService {
-    private static final Logger log = Logger.getLogger(SnapshotService.class);
+    private static final Logger log = LogManager.getLogger(SnapshotService.class);
     private static final ThreadLocal<Boolean> skipStateStorageThreadLocal = new ThreadLocal<Boolean>();
     private final ThreadBarrier threadBarrier;
     private ConcurrentHashMap<String, PartitionIdStateHolder> partitionIdStates;

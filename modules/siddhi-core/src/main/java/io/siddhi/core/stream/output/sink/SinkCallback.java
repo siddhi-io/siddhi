@@ -22,7 +22,8 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.query.api.definition.AbstractDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
  * {@link StreamJunction} and send them to {@link SinkMapper}s to do the mapping.
  */
 public class SinkCallback extends StreamCallback {
-    private static final Logger log = Logger.getLogger(SinkCallback.class);
+    private static final Logger log = LogManager.getLogger(SinkCallback.class);
     private AbstractDefinition outputStreamDefinition;
     private List<Sink> sinks;
 

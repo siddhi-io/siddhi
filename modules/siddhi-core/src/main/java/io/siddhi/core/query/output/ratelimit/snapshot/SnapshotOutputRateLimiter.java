@@ -31,7 +31,8 @@ import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ import java.util.List;
  * @param <S> current state of the RateLimiter
  */
 public abstract class SnapshotOutputRateLimiter<S extends State> implements Schedulable {
-    private static final Logger log = Logger.getLogger(SnapshotOutputRateLimiter.class);
+    private static final Logger log = LogManager.getLogger(SnapshotOutputRateLimiter.class);
     protected final StateHolder<S> stateHolder;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;

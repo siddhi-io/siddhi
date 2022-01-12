@@ -21,12 +21,13 @@ package io.siddhi.core.managment;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ValidateTestCase {
-    private static final Logger log = Logger.getLogger(ValidateTestCase.class);
+    private static final Logger log = LogManager.getLogger(ValidateTestCase.class);
     private int count;
     private boolean eventArrived;
     private int inEventCount;

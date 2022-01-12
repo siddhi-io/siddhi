@@ -19,6 +19,11 @@ package io.siddhi.core.query.table.util;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +37,8 @@ public class TestAppenderToValidateLogsForCachingTests extends AppenderSkeleton 
     }
 
     @Override
-    protected void append(final LoggingEvent loggingEvent) {
+    public void append(final LogEvent loggingEvent) {
         log.add(loggingEvent);
     }
 
-    @Override
-    public void close() {
-    }
-
-    public List<LoggingEvent> getLog() {
-        return new ArrayList<>(log);
-    }
 }

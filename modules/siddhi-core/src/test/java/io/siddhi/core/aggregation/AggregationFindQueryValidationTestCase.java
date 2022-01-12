@@ -22,12 +22,13 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class AggregationFindQueryValidationTestCase {
 
-    private static final Logger LOG = Logger.getLogger(AggregationFindQueryValidationTestCase.class);
+    private static final Logger LOG = LogManager.getLogger(AggregationFindQueryValidationTestCase.class);
 
     @Test(expectedExceptions = OnDemandQueryCreationException.class)
     public void onDemandQueryValidationTestCase1() {

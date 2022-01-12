@@ -37,7 +37,8 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -98,7 +99,7 @@ import java.util.Map;
 )
 //todo fix support find and optimize data storage
 public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProcessor.WindowState> implements Job {
-    private static final Logger log = Logger.getLogger(CronWindowProcessor.class);
+    private static final Logger log = LogManager.getLogger(CronWindowProcessor.class);
     private final String jobGroup = "CronWindowGroup";
     private Scheduler scheduler;
     private String jobName;

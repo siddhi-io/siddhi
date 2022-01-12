@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +38,7 @@ import java.util.Arrays;
  */
 public class SequenceTestCase {
 
-    private static final Logger log = Logger.getLogger(SequenceTestCase.class);
+    private static final Logger log = LogManager.getLogger(SequenceTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
@@ -1318,27 +1319,27 @@ public class SequenceTestCase {
                         switch (inEventCount) {
                             case 1:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{new Object[]{29.6f}, 25.0f}),
+                                                new Object[]{new Object[]{29.6f}, 25.0f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 2:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{new Object[]{25.0f, 35.6f}, 25.5f}),
+                                                new Object[]{new Object[]{25.0f, 35.6f}, 25.5f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 3:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{new Object[]{25.5f, 57.6f, 58.6f}, 47.6f}),
+                                                new Object[]{new Object[]{25.5f, 57.6f, 58.6f}, 47.6f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 4:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{new Object[]{47.6f}, 27.6f}),
+                                                new Object[]{new Object[]{47.6f}, 27.6f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 5:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{new Object[]{27.6f, 49.6f}, 45.6f}),
+                                                new Object[]{new Object[]{27.6f, 49.6f}, 45.6f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             default:
@@ -1414,17 +1415,17 @@ public class SequenceTestCase {
                         switch (inEventCount) {
                             case 1:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{15.6f, 58.6f, 47.6f}),
+                                                new Object[]{15.6f, 58.6f, 47.6f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 2:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{27.6f, 49.6f, 45.6f}),
+                                                new Object[]{27.6f, 49.6f, 45.6f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             case 3:
                                 AssertJUnit.assertEquals(Arrays.deepToString(
-                                        new Object[]{27.7f, 49.7f, 45.7f}),
+                                                new Object[]{27.7f, 49.7f, 45.7f}),
                                         Arrays.deepToString(event.getData()));
                                 break;
                             default:

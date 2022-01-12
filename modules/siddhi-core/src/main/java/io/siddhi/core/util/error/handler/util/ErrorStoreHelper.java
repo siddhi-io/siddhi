@@ -31,15 +31,17 @@ import java.util.List;
  */
 public class ErrorStoreHelper {
 
-    private ErrorStoreHelper() {}
+    private ErrorStoreHelper() {
+    }
 
     /**
      * Sends an erroneous event to the error store in order to save that.
-     * @param errorStore        Error store object.
-     * @param occurrence        Occurrence point of the error.
-     * @param siddhiAppName     Siddhi app name.
-     * @param erroneousEvent    The event which was collected due to an error.
-     * @param streamName        The stream from which, error was collected.
+     *
+     * @param errorStore     Error store object.
+     * @param occurrence     Occurrence point of the error.
+     * @param siddhiAppName  Siddhi app name.
+     * @param erroneousEvent The event which was collected due to an error.
+     * @param streamName     The stream from which, error was collected.
      */
     public static void storeErroneousEvent(ErrorStore errorStore, ErrorOccurrence occurrence, String siddhiAppName,
                                            Object erroneousEvent, String streamName) {

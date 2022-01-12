@@ -23,8 +23,9 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.util.EventPrinter;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
@@ -37,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CachePreLoadingTestCase {
-    private static final Logger log = Logger.getLogger(CachePreLoadingTestCase.class);
+    private static final Logger log = LogManager.getLogger(CachePreLoadingTestCase.class);
 
     @BeforeClass
     public static void startTest() {

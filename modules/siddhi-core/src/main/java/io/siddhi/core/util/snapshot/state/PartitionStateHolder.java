@@ -20,7 +20,8 @@ package io.siddhi.core.util.snapshot.state;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +32,7 @@ import java.util.Set;
  * State holder for  partitioned use case
  */
 public class PartitionStateHolder implements StateHolder {
-    private static final Logger log = Logger.getLogger(PartitionStateHolder.class);
+    private static final Logger log = LogManager.getLogger(PartitionStateHolder.class);
     private StateFactory stateFactory;
     private Map<String, Map<String, State>> states = new HashMap<>();
 

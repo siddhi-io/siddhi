@@ -18,7 +18,8 @@
 
 package io.siddhi.core.util.snapshot.state;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Map;
  * State holder for non partition use case
  */
 public class SingleSyncStateHolder implements StateHolder {
-    private static final Logger log = Logger.getLogger(SingleSyncStateHolder.class);
+    private static final Logger log = LogManager.getLogger(SingleSyncStateHolder.class);
     final Map<String, State> groupByStates = new HashMap<>(1);
     final Map<String, Map<String, State>> allStates = new HashMap<>(1);
     private final StateFactory stateFactory;

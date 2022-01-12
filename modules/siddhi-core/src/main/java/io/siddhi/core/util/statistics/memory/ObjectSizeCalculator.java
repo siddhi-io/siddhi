@@ -35,7 +35,8 @@ import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.MemoryUsageTracker;
 import io.siddhi.core.util.statistics.StatisticsManager;
 import io.siddhi.core.util.statistics.ThroughputTracker;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
@@ -64,7 +65,7 @@ import java.util.Set;
  * @author Attila Szegedi
  */
 public class ObjectSizeCalculator {
-    private static final Logger log = Logger.getLogger(ObjectSizeCalculator.class);
+    private static final Logger log = LogManager.getLogger(ObjectSizeCalculator.class);
 
     // Fixed object header size for arrays.
     private final int arrayHeaderSize;
@@ -290,7 +291,7 @@ public class ObjectSizeCalculator {
         // Breadth-first traversal instead of naive depth-first with recursive
         // implementation, so we don't blow the stack traversing long linked lists.
         try {
-            for (;; ) {
+            for (; ; ) {
                 visit(obj, isFirst);
                 isFirst = false;
                 if (pending.isEmpty()) {

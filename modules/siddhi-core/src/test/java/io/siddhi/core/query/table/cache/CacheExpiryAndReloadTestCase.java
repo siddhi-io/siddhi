@@ -6,9 +6,9 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CacheExpiryAndReloadTestCase {
-    private static final Logger log = Logger.getLogger(CacheExpiryAndReloadTestCase.class);
+    private static final Logger log = LogManager.getLogger(CacheExpiryAndReloadTestCase.class);
 
     @Test
     public void expiryAndReloadTest0() throws InterruptedException, SQLException {
@@ -265,8 +265,9 @@ public class CacheExpiryAndReloadTestCase {
     @Test // with primary key and index
     public void expiryAndReloadTest3() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest3");
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender =
+                new TestAppenderToValidateLogsForCachingTests("CachingTestsValidatorLogger", null, null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();

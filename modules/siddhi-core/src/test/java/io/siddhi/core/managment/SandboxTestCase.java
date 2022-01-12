@@ -29,7 +29,8 @@ import io.siddhi.core.table.Table;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.compiler.SiddhiCompiler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SandboxTestCase {
-    private static final Logger log = Logger.getLogger(SandboxTestCase.class);
+    private static final Logger log = LogManager.getLogger(SandboxTestCase.class);
     private AtomicInteger inEventCount;
     private AtomicInteger removeEventCount;
     private boolean eventArrived;

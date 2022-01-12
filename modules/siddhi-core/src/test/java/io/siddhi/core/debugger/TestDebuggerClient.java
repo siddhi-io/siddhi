@@ -17,7 +17,8 @@
  */
 package io.siddhi.core.debugger;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +31,7 @@ import java.io.PrintStream;
 
 public class TestDebuggerClient {
 
-    private static final Logger log = Logger.getLogger(TestDebuggerClient.class);
+    private static final Logger log = LogManager.getLogger(TestDebuggerClient.class);
     private final PrintStream originalOut = System.out;
     private final InputStream originalIn = System.in;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();

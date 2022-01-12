@@ -26,7 +26,8 @@ import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ import java.util.List;
  */
 public class InputEventHandler {
 
-    private static final Logger LOG = Logger.getLogger(InputEventHandler.class);
+    private static final Logger LOG = LogManager.getLogger(InputEventHandler.class);
 
     private final ThreadLocal<Object[]> trpProperties;
     private final TimestampGenerator timestampGenerator;

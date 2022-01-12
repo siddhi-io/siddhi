@@ -39,7 +39,8 @@ import io.siddhi.query.api.SiddhiElement;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ import java.util.List;
  */
 public abstract class AbstractStreamProcessor<S extends State> implements Processor, ExternalReferencedHolder {
 
-    private static final Logger log = Logger.getLogger(AbstractStreamProcessor.class);
+    private static final Logger log = LogManager.getLogger(AbstractStreamProcessor.class);
 
     protected Processor nextProcessor;
     protected MetaStreamEvent metaStreamEvent;

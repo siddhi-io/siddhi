@@ -34,7 +34,8 @@ import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ import static io.siddhi.core.util.SiddhiConstants.TRUE;
  */
 public abstract class SourceMapper implements SourceEventListener {
 
-    private static final Logger log = Logger.getLogger(SourceMapper.class);
+    private static final Logger log = LogManager.getLogger(SourceMapper.class);
     private final ThreadLocal<Object[]> trpProperties = new ThreadLocal<>();
     private final ThreadLocal<String[]> trpSyncProperties = new ThreadLocal<>();
     protected String sourceType;
@@ -255,7 +256,7 @@ public abstract class SourceMapper implements SourceEventListener {
      * @param eventObject       Incoming event Object
      * @param inputEventHandler Handler to pass the converted Siddhi Event for processing
      * @throws MappingFailedException Throws MappingFailedException
-     * @throws InterruptedException Throws InterruptedException
+     * @throws InterruptedException   Throws InterruptedException
      */
     protected abstract void mapAndProcess(Object eventObject,
                                           InputEventHandler inputEventHandler)

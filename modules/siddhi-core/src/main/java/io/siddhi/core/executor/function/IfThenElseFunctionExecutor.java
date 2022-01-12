@@ -32,7 +32,8 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Executor class for ifThenElse function. Function execution logic is implemented in execute here.
@@ -93,7 +94,7 @@ import org.apache.log4j.Logger;
         }
 )
 public class IfThenElseFunctionExecutor extends FunctionExecutor {
-    private static final Logger log = Logger.getLogger(IfThenElseFunctionExecutor.class);
+    private static final Logger log = LogManager.getLogger(IfThenElseFunctionExecutor.class);
     Attribute.Type returnType;
 
     @Override

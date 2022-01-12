@@ -22,7 +22,8 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Log number of events received by each receiver
  **/
 public class ReceivedEventCounter implements Runnable {
-    private static final Logger log = Logger.getLogger(ReceivedEventCounter.class);
+    private static final Logger log = LogManager.getLogger(ReceivedEventCounter.class);
     private long totalEventCounter = 0;
     private long eventCounter = 0;
     private SiddhiAppContext siddhiAppContext;

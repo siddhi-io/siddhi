@@ -21,7 +21,8 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.aggregation.TimePeriod;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.List;
  * Processor implementation to read the results after executing the aggregation query
  **/
 public class PersistedAggregationResultsProcessor implements Processor {
-    private static final Logger log = Logger.getLogger(PersistedAggregationResultsProcessor.class);
+    private static final Logger log = LogManager.getLogger(PersistedAggregationResultsProcessor.class);
     private TimePeriod.Duration duration;
 
     public PersistedAggregationResultsProcessor(TimePeriod.Duration duration) {

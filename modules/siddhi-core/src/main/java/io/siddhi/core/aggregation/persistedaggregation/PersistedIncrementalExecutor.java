@@ -31,7 +31,8 @@ import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -46,7 +47,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Incremental Executor implementation class for Persisted Aggregation
  **/
 public class PersistedIncrementalExecutor implements Executor {
-    private static final Logger log = Logger.getLogger(PersistedIncrementalExecutor.class);
+    private static final Logger log = LogManager.getLogger(PersistedIncrementalExecutor.class);
 
     private final ExpressionExecutor timestampExpressionExecutor;
     private final StateHolder<ExecutorState> stateHolder;

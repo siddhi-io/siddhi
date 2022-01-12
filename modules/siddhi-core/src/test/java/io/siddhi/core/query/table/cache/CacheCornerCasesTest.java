@@ -24,9 +24,9 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CacheCornerCasesTest {
-    private static final Logger log = Logger.getLogger(CacheCornerCasesTest.class);
+    private static final Logger log = LogManager.getLogger(CacheCornerCasesTest.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
@@ -64,9 +64,9 @@ public class CacheCornerCasesTest {
     public void testTableJoinQuery1() throws InterruptedException {
         log.info("testTableJoinQuery1 - OUT 2");
         final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
-        logger.setLevel(Level.DEBUG);
-        logger.addAppender(appender);
+        final Logger logger = LogManager.getRootLogger();
+        logger.atLevel(Level.DEBUG);
+        logger.(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +

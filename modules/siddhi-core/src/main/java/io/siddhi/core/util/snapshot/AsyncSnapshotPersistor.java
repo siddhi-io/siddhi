@@ -21,13 +21,14 @@ package io.siddhi.core.util.snapshot;
 import io.siddhi.core.exception.NoPersistenceStoreException;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.core.util.persistence.util.PersistenceConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * {@link Runnable} which is responsible for persisting the snapshots that are taken
  */
 public class AsyncSnapshotPersistor implements Runnable {
-    private static final Logger log = Logger.getLogger(AsyncSnapshotPersistor.class);
+    private static final Logger log = LogManager.getLogger(AsyncSnapshotPersistor.class);
     private byte[] snapshots;
     private PersistenceStore persistenceStore;
     private String siddhiAppName;

@@ -26,13 +26,14 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class QueryAPITestCaseForTableWithCache {
-    private static final Logger log = Logger.getLogger(QueryAPITestCaseForTableWithCache.class);
+    private static final Logger log = LogManager.getLogger(QueryAPITestCaseForTableWithCache.class);
 
     @Test
     public void test0() throws InterruptedException {

@@ -21,7 +21,8 @@ package io.siddhi.core;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestSiddhiLatency {
-    private static final Logger log = Logger.getLogger(TestSiddhiLatency.class);
+    private static final Logger log = LogManager.getLogger(TestSiddhiLatency.class);
     private static InputHandler eligibilityStreamInputHandler;
     private static Map<String, ResultContainer> resultMap = new ConcurrentHashMap<String, ResultContainer>();
     private static Map<String, InputHandler> requestStreamInputHandlerMap = new ConcurrentHashMap<String,

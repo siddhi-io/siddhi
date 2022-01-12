@@ -19,7 +19,8 @@ package io.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.util.SiddhiConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ import java.util.Map;
  * Abstract Holder class to retrieve added extensions and store them in a map.
  */
 public abstract class AbstractExtensionHolder {
-    private static final Logger log = Logger.getLogger(AbstractExtensionHolder.class);
+    private static final Logger log = LogManager.getLogger(AbstractExtensionHolder.class);
 
     protected Map<String, Class> extensionMap = new HashMap<String, Class>();
 

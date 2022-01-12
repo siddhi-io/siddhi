@@ -26,7 +26,8 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.statistics.metrics.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public class StatisticsTestCase {
-    private static final Logger log = Logger.getLogger(StatisticsTestCase.class);
+    private static final Logger log = LogManager.getLogger(StatisticsTestCase.class);
     private int count;
     private boolean eventArrived;
     private long firstValue;

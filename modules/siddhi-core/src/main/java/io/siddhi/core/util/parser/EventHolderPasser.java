@@ -37,7 +37,8 @@ import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.util.AnnotationHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ import java.util.Map;
  * Class to parse {@link EventHolder}
  */
 public class EventHolderPasser {
-    private static final Logger log = Logger.getLogger(EventHolderPasser.class);
+    private static final Logger log = LogManager.getLogger(EventHolderPasser.class);
 
     public static EventHolder parse(AbstractDefinition tableDefinition, StreamEventFactory tableStreamEventFactory,
                                     SiddhiAppContext siddhiAppContext, boolean isCacheTable) {

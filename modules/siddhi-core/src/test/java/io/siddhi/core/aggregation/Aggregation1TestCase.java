@@ -30,7 +30,8 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Aggregation1TestCase {
 
-    private static final Logger LOG = Logger.getLogger(Aggregation1TestCase.class);
+    private static final Logger LOG = LogManager.getLogger(Aggregation1TestCase.class);
     private AtomicInteger inEventCount;
     private AtomicInteger removeEventCount;
     private boolean eventArrived;
@@ -682,7 +683,7 @@ public class Aggregation1TestCase {
         InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
         siddhiAppRuntime.start();
 
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = LogManager.getLogger(StreamJunction.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
         try {

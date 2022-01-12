@@ -67,6 +67,7 @@ public class IncrementalExecutorsInitialiser {
     private boolean isInitialised;
     private boolean isReadOnly;
     private boolean isPersistedAggregation;
+    private Long endOFLatestEventTimestamp = null;
 
     public IncrementalExecutorsInitialiser(List<TimePeriod.Duration> incrementalDurations,
                                            Map<TimePeriod.Duration, Table> aggregationTables,

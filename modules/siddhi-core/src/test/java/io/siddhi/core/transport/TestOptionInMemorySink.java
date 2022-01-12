@@ -33,7 +33,8 @@ import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Extension(
         name = "testOptionInMemory",
@@ -55,7 +56,7 @@ import org.apache.log4j.Logger;
 )
 public class TestOptionInMemorySink extends InMemorySink {
 
-    private static final Logger log = Logger.getLogger(TestOptionInMemorySink.class);
+    private static final Logger log = LogManager.getLogger(TestOptionInMemorySink.class);
     private String topicPrefix;
 
     @Override
