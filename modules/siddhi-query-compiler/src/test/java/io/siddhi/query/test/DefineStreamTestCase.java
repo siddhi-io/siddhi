@@ -33,6 +33,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void test1() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream cseStream ( symbol " +
                 "string, price int, volume float )");
         AssertJUnit.assertEquals(StreamDefinition.
@@ -45,6 +46,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void test2() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream `define` ( `string` " +
                 "string, price int, volume float );");
         AssertJUnit.assertEquals(StreamDefinition.
@@ -59,6 +61,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testCreatingStreamDefinition() {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream StockStream ( symbol " +
                 "string, price int, volume float );");
         StreamDefinition api = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING)
@@ -68,6 +71,7 @@ public class DefineStreamTestCase {
 
     @Test(expectedExceptions = SiddhiParserException.class)
     public void testCreatingStreamWithDuplicateAttribute() {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream StockStream ( symbol " +
                 "string, symbol int, volume float );");
 //        StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("symbol", Attribute
@@ -76,6 +80,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testCreatingStreamDefinition2() {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream StockStream ( symbol " +
                 "string, price int, volume double, data Object );");
         StreamDefinition api = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING)
@@ -86,6 +91,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testEqualObjects() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("@Foo(name='bar','Custom')define " +
                 "stream cseStream ( symbol string, price int, volume float )");
         AssertJUnit.assertEquals(StreamDefinition.
@@ -99,6 +105,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testMultilevelNestedAnnotations1() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition(
                 "@sink(url='http://foo.com/test/{{data}}', " +
                         "   @map(type='xml', " +
@@ -124,6 +131,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testMultilevelNestedAnnotations2() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("" +
                 "@source(" +
                 "   type='http', " +
@@ -163,6 +171,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testMultilevelNestedAnnotations3() throws SiddhiParserException {
+
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition(
                 "@sink(url='http://foo.com/test/{{data}}', " +
                         "   @map(type=\"\"\"xml\"\"\", " +

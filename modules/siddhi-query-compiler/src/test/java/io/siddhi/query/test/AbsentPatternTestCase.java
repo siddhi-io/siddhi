@@ -58,6 +58,7 @@ public class AbsentPatternTestCase {
 
     @Test
     public void test4() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from e1=Stream1[price>20] -> not Stream2[price>e1.price] for 2 sec " +
                 "select e1.symbol as symbol1 " +
                 "insert into OutputStream ;");

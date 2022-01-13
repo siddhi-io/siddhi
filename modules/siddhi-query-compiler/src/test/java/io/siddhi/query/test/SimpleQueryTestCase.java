@@ -39,6 +39,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test1() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -65,6 +66,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test2() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream [price >= 20]#window.lengthBatch(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -91,6 +93,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test3() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from AllStockQuotes#window.time(10 min)\n" +
                 "select symbol as symbol, price, avg(price) as averagePrice \n" +
                 "group by symbol \n" +
@@ -120,6 +123,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test4() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  AllStockQuotes#window.lengthBatch(50)  " +
                 "select symbol, avg(price) as avgPrice " +
                 "return ;"
@@ -135,9 +139,9 @@ public class SimpleQueryTestCase {
         AssertJUnit.assertEquals(api, query);
     }
 
-
     @Test
     public void test5() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  AllStockQuotes[price==Foo.price and Foo.try<5]  " +
                 "select symbol, avg(price) as avgPrice " +
                 "return ;"
@@ -160,6 +164,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test6() {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[7+9.5 > price and 100 >= volume]  " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -202,6 +207,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test7() {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[7+9.5 < price or 100 <= volume]#window.length(50) " +
                 " " +
                 "select symbol, avg(price) as avgPrice " +
@@ -245,6 +251,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test8() {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[7-9.5 > price and 100 >= volume]#window.length(50)" +
                 "#[symbol=='WSO2']  " +
                 "select symbol, avg(price) as avgPrice " +
@@ -348,6 +355,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void testCreatingFilterQueryWithDuplicateOutputAttribute() {
+
         SiddhiCompiler.parseQuery("from  StockStream[7*9.5 > price and 100 >= volume]#window.length(50) " +
                 "select symbol, avg(price) as price, price as price " +
                 "group by symbol " +
@@ -415,6 +423,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -438,9 +447,9 @@ public class SimpleQueryTestCase {
 
     }
 
-
     @Test
     public void testCreatingReturnFilterQueryWithExtension() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -465,6 +474,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQueryWithFunction() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -489,6 +499,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test10() {
+
         Query queryString = SiddhiCompiler.parseQuery("" +
                 "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
                 " " +
@@ -539,6 +550,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test11() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -569,6 +581,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test12() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -599,6 +612,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test13() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -631,6 +645,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test14() {
+
         Query queryString = SiddhiCompiler.parseQuery("" +
                 "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
                 " " +
@@ -680,6 +695,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test15() {
+
         Query queryString = SiddhiCompiler.parseQuery("" +
                 "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
                 " " +
@@ -720,6 +736,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test16() {
+
         Query queryString = SiddhiCompiler.parseQuery("" +
                 "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
                 " " +
@@ -769,6 +786,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test17() {
+
         Query queryString = SiddhiCompiler.parseQuery("" +
                 "from  StockStream[7+9.5 > price and 100 >= volume]#window.length(50) " +
                 " " +
@@ -820,16 +838,18 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test18() throws SiddhiParserException {
+
         String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
                 "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
                 "attributeName='symbol'}}], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
                 "offset=null}";
-        String selector  = Selector.selector().select(Expression.variable("symbol")).toString();
+        String selector = Selector.selector().select(Expression.variable("symbol")).toString();
         AssertJUnit.assertEquals(selector, selectorString);
     }
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void test19() throws SiddhiParserException {
+
         Query query = SiddhiCompiler.parseQuery("from  StockStream[price>3]#window.length(50) " +
                 "select symbol, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -860,6 +880,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCompilerParse() {
+
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long, available " +
                 "bool);";
 
@@ -868,6 +889,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testFunctionDefinition() throws SiddhiParserException {
+
         FunctionDefinition functionDefinition = SiddhiCompiler.
                 parseFunctionDefinition("define function concatFn[javascript] return string " +
                         "{var str1 = data[0];};");

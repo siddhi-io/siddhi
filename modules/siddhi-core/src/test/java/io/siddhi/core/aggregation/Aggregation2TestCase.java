@@ -32,7 +32,9 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -48,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Aggregation2TestCase {
 
-    private static final Logger LOG = LogManager.getLogger(Aggregation2TestCase.class);
+    private static final Logger LOG = (Logger) LogManager.getLogger(Aggregation2TestCase.class);
     private boolean eventArrived;
     private AtomicInteger inEventCount;
     private List<Object[]> inEventsList;
@@ -556,8 +558,11 @@ public class Aggregation2TestCase {
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest56"})
     public void incrementalStreamProcessorTest57() throws InterruptedException {
         LOG.info("Check interrupted exception being thrown when SiddhiRuntime has already been shutdown");
-        Logger logger = LogManager.getLogger(Scheduler.class);
-        UnitTestAppender appender = new UnitTestAppender();
+        Logger logger = (Logger) LogManager.getLogger(Scheduler.class);
+
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         String stockStream =

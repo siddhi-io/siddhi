@@ -34,6 +34,7 @@ public class QueryStoreTestCase {
 
     @Test
     public void test1() throws SiddhiParserException {
+
         StoreQuery query = SiddhiCompiler.parseStoreQuery("" +
                 "from StockTable " +
                 "on price>3 " +
@@ -64,7 +65,6 @@ public class QueryStoreTestCase {
 
         AssertJUnit.assertEquals(api, query);
 
-
     }
 
     @Test
@@ -77,7 +77,6 @@ public class QueryStoreTestCase {
                 "having (7 > price) ;"
         );
         AssertJUnit.assertNotNull(query);
-
 
         StoreQuery api = StoreQuery.query().
                 from(
@@ -100,6 +99,7 @@ public class QueryStoreTestCase {
 
     @Test
     public void test3() {
+
         OnDemandQuery query = SiddhiCompiler.parseOnDemandQuery("" +
                 "from StockTable " +
                 "on price > 40 " +
@@ -130,9 +130,9 @@ public class QueryStoreTestCase {
 
     }
 
-
     @Test
     public void test4() {
+
         StoreQuery query = SiddhiCompiler.parseStoreQuery("" +
                 "from StockTable " +
                 "on price > 40 " +

@@ -30,6 +30,7 @@ public class DefineTableTestCase {
 
     @Test
     public void test1() throws SiddhiParserException {
+
         TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol " +
                 "string, price int, volume float )");
         AssertJUnit.assertEquals(TableDefinition.
@@ -42,6 +43,7 @@ public class DefineTableTestCase {
 
     @Test
     public void test2() throws SiddhiParserException {
+
         TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table `define` ( `string` " +
                 "string, price int, volume float );");
         AssertJUnit.assertEquals(TableDefinition.
@@ -54,6 +56,7 @@ public class DefineTableTestCase {
 
     @Test
     public void test3() throws SiddhiParserException {
+
         TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol " +
                 "string, price int, volume float )");
         AssertJUnit.assertEquals(TableDefinition.
@@ -66,6 +69,7 @@ public class DefineTableTestCase {
 
     @Test
     public void test4() throws SiddhiParserException {
+
         TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("" +
                 " @from(datasource='MyDatabase','CUSTOM')" +
                 " define table cseStream ( symbol string, price int, volume float )");
