@@ -19,13 +19,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class CacheExpiryAndReloadTestCase {
-    private static final Logger log = LogManager.getLogger(CacheExpiryAndReloadTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(CacheExpiryAndReloadTestCase.class);
 
     @Test
     public void expiryAndReloadTest0() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest0");
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -62,10 +63,12 @@ public class CacheExpiryAndReloadTestCase {
                 "from StockTable ");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
-        final List<LoggingEvent> log = appender.getLog();
+        logger.getAppenders();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
                 message = message.split(":")[1].trim();
             }
@@ -82,14 +85,16 @@ public class CacheExpiryAndReloadTestCase {
         Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
         Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test
     public void expiryAndReloadTest1() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest1");
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -150,10 +155,11 @@ public class CacheExpiryAndReloadTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
                 message = message.split(":")[1].trim();
             }
@@ -170,14 +176,16 @@ public class CacheExpiryAndReloadTestCase {
         Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
         Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test // with primary key => IndexOperator
     public void expiryAndReloadTest2() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest2");
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -239,10 +247,11 @@ public class CacheExpiryAndReloadTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
                 message = message.split(":")[1].trim();
             }
@@ -259,14 +268,15 @@ public class CacheExpiryAndReloadTestCase {
         Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
         Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test // with primary key and index
     public void expiryAndReloadTest3() throws InterruptedException, SQLException {
         log.info("expiryAndReloadTest3");
-        final TestAppenderToValidateLogsForCachingTests appender =
-                new TestAppenderToValidateLogsForCachingTests("CachingTestsValidatorLogger", null, null);
+        TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
         final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -330,10 +340,11 @@ public class CacheExpiryAndReloadTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
                 message = message.split(":")[1].trim();
             }
@@ -350,6 +361,7 @@ public class CacheExpiryAndReloadTestCase {
         Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
         Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 }

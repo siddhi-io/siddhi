@@ -54,11 +54,13 @@ import javax.tools.Diagnostic;
  * messager : the messager used to report errors, warnings, and other notices when validation error throws..
  */
 public class SiddhiAnnotationProcessor extends AbstractProcessor {
+
     private final List<Class<? extends Annotation>> annotationsClasses = new ArrayList<>();
     private Messager messager;
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
+
         super.init(env);
         messager = env.getMessager();
 
@@ -194,6 +196,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
+
         HashSet<String> annotationTypes = new HashSet<>();
         for (Class<? extends Annotation> annotationClass : annotationsClasses) {
             annotationTypes.add(annotationClass.getCanonicalName());
@@ -203,10 +206,12 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
+
         return SourceVersion.RELEASE_8;
     }
 
     private String getMatchingSuperClass(Element elementToValidate, String[] superClassNames) {
+
         TypeMirror superType = ((TypeElement) elementToValidate).getSuperclass();
         String superClass = null;
         // Looping the inheritance hierarchy to check if the element inherits at least one of the super
@@ -225,6 +230,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
     }
 
     public void showBuildError(String message, Element element) {
+
         messager.printMessage(Diagnostic.Kind.ERROR, message, element);
     }
 }

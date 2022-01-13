@@ -29,7 +29,9 @@ import java.text.MessageFormat;
  * This processor will extend the validation rules for validate Distribution Strategy specific annotation contents.
  */
 public class DistributionStrategyValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+
     public DistributionStrategyValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
@@ -64,6 +66,7 @@ public class DistributionStrategyValidationAnnotationProcessor extends AbstractA
 
     @Override
     public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
+
         if (parameters != null && parameters.length > 0) {
             throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
                             "cannot be annotated in class {0}. As this class extends from super class {1}.",
@@ -73,6 +76,7 @@ public class DistributionStrategyValidationAnnotationProcessor extends AbstractA
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         if (returnAttributes != null && returnAttributes.length > 0) {
             //Throw error for other classes as only in the classes extending
             //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.

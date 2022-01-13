@@ -27,7 +27,9 @@ import java.text.MessageFormat;
  * This processor will extend the validation rules for validate Sink specific annotation contents.
  */
 public class SinkValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+
     public SinkValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
@@ -48,7 +50,8 @@ public class SinkValidationAnnotationProcessor extends AbstractAnnotationProcess
         if (namespace.isEmpty()) {
             //The namespace cannot be null or empty as @Extension extends from namespace reserved super class.
             throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace " +
-                    "cannot be null or empty, annotated class {1} extends from namespace reserved super class {2}.",
+                            "cannot be null or empty, annotated class {1} extends from namespace reserved super " +
+                            "class {2}.",
                     name, extensionClassFullName, AnnotationConstants.SINK_SUPER_CLASS));
         } else {
             //Check if namespace provided matches with the reserved namespace.
@@ -62,6 +65,7 @@ public class SinkValidationAnnotationProcessor extends AbstractAnnotationProcess
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         if (returnAttributes != null && returnAttributes.length > 0) {
             //Throw error for other classes as only in the classes extending
             //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.

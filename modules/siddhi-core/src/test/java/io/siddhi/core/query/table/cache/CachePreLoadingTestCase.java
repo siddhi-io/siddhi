@@ -22,10 +22,9 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
@@ -38,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CachePreLoadingTestCase {
-    private static final Logger log = LogManager.getLogger(CachePreLoadingTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(CachePreLoadingTestCase.class);
 
     @BeforeClass
     public static void startTest() {
@@ -52,8 +51,9 @@ public class CachePreLoadingTestCase {
 
     @Test
     public void cachePreLoadingTestCase0() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         //Configure siddhi to insert events data to table only from specific fields of the stream.
@@ -73,12 +73,13 @@ public class CachePreLoadingTestCase {
         AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(2, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -93,7 +94,7 @@ public class CachePreLoadingTestCase {
         Assert.assertEquals(logMessages.contains("store also miss. sending null"), false);
         Assert.assertEquals(logMessages.contains("sending results from cache after loading from store"), false);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 }

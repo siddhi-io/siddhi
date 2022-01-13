@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 public class SinkMapperValidationAnnotationProcessor extends AbstractAnnotationProcessor {
 
     public SinkMapperValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
@@ -63,6 +64,7 @@ public class SinkMapperValidationAnnotationProcessor extends AbstractAnnotationP
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         if (returnAttributes != null && returnAttributes.length > 0) {
             //Throw error for other classes as only in the classes extending
             //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.

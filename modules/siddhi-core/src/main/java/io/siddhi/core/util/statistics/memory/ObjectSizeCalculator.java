@@ -291,7 +291,7 @@ public class ObjectSizeCalculator {
         // Breadth-first traversal instead of naive depth-first with recursive
         // implementation, so we don't blow the stack traversing long linked lists.
         try {
-            for (; ; ) {
+            for (;;) {
                 visit(obj, isFirst);
                 isFirst = false;
                 if (pending.isEmpty()) {

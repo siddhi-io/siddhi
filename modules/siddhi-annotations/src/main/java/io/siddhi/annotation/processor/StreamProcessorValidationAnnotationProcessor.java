@@ -27,12 +27,15 @@ import java.text.MessageFormat;
  * This processor will extend the validation rules for validate Stream Processor specific annotation contents.
  */
 public class StreamProcessorValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+
     public StreamProcessorValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
     @Override
     public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
+
         for (Parameter parameter : parameters) {
             String parameterName = parameter.name();
             //Check if the @Parameter name is empty.
@@ -71,6 +74,7 @@ public class StreamProcessorValidationAnnotationProcessor extends AbstractAnnota
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         for (ReturnAttribute returnAttribute : returnAttributes) {
             String returnAttributeName = returnAttribute.name();
             //Check if the @ReturnAttributes name is empty.

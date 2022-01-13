@@ -22,8 +22,11 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.UnitTestAppender;
 import io.siddhi.core.stream.input.InputHandler;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
@@ -31,6 +34,13 @@ import org.testng.annotations.Test;
 public class LogSinkTest {
     @Test
     public void testWithAllOptions() throws Exception {
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "@App:name(\"HelloWorldApp\")\n" +
                 "define stream CargoStream (weight int);";
@@ -48,16 +58,17 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = LogManager.getLogger(LogSink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{2});
-            AssertJUnit.assertTrue(appender.getMessages().contains("My Log"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[2, 2]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("My Log"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[2, 2]"));
             inputHandler.send(new Object[]{3});
-            AssertJUnit.assertTrue(appender.getMessages().contains("My Log"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[3, 5]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("My Log"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[3, 5]"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing with all options", e);
         } finally {
@@ -68,6 +79,13 @@ public class LogSinkTest {
 
     @Test
     public void testWithDefaultPrefix() throws Exception {
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "@App:name(\"HelloWorldApp\")\n" +
                 "define stream CargoStream (weight int);";
@@ -85,16 +103,17 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = LogManager.getLogger(LogSink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{2});
-            AssertJUnit.assertTrue(appender.getMessages().contains("HelloWorldApp : OutputStream"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[2, 2]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("HelloWorldApp : OutputStream"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[2, 2]"));
             inputHandler.send(new Object[]{3});
-            AssertJUnit.assertTrue(appender.getMessages().contains("HelloWorldApp : OutputStream"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[3, 5]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("HelloWorldApp : OutputStream"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[3, 5]"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing with default prefix", e);
         } finally {
@@ -104,6 +123,13 @@ public class LogSinkTest {
 
     @Test
     public void testWithDefaultPriority() throws Exception {
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "@App:name(\"HelloWorldApp\")\n" +
                 "define stream CargoStream (weight int);";
@@ -121,16 +147,17 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = LogManager.getLogger(LogSink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{2});
-            AssertJUnit.assertTrue(appender.getMessages().contains("My Log"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[2, 2]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("My Log"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[2, 2]"));
             inputHandler.send(new Object[]{3});
-            AssertJUnit.assertTrue(appender.getMessages().contains("My Log"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[3, 5]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("My Log"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[3, 5]"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing with default priority", e);
         } finally {
@@ -140,6 +167,13 @@ public class LogSinkTest {
 
     @Test
     public void testWithDefaultOptions() throws Exception {
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "@App:name(\"HelloWorldApp\")\n" +
                 "define stream CargoStream (weight int);";
@@ -157,16 +191,17 @@ public class LogSinkTest {
         siddhiAppRuntime.start();
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("CargoStream");
 
-        Logger logger = LogManager.getLogger(LogSink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{2});
-            AssertJUnit.assertTrue(appender.getMessages().contains("HelloWorldApp : OutputStream"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[2, 2]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("HelloWorldApp : OutputStream"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[2, 2]"));
             inputHandler.send(new Object[]{3});
-            AssertJUnit.assertTrue(appender.getMessages().contains("HelloWorldApp : OutputStream"));
-            AssertJUnit.assertTrue(appender.getMessages().contains("data=[3, 5]"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("HelloWorldApp : OutputStream"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("data=[3, 5]"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing with default options", e);
         } finally {

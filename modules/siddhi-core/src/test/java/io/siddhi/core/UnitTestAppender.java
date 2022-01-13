@@ -19,25 +19,38 @@
 
 package io.siddhi.core;
 
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.mvel2.util.StringAppender;
 
-import java.io.Serializable;
-
+@Plugin(name = "UnitTestAppender",
+        category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class UnitTestAppender extends AbstractAppender {
+
     private StringAppender messages = new StringAppender();
 
-    protected UnitTestAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions, Property[] properties) {
-        super(name, filter, layout, ignoreExceptions, properties);
+    public UnitTestAppender(String name, Filter filter) {
+
+        super(name, filter, null);
+    }
+
+    @PluginFactory
+    public static UnitTestAppender createAppender(
+            @PluginAttribute("name") String name,
+            @PluginElement("Filter") Filter filter) {
+
+        return new UnitTestAppender(name, filter);
     }
 
     public String getMessages() {
+
         String results = messages.toString();
         if (results.isEmpty()) {
             return null;
@@ -46,8 +59,9 @@ public class UnitTestAppender extends AbstractAppender {
     }
 
     @Override
-    public void append(LogEvent loggingEvent) {
-        messages.append(loggingEvent.getMessage());
+    public void append(LogEvent event) {
+
+        messages.append(event.getMessage().getFormattedMessage());
     }
 
 }

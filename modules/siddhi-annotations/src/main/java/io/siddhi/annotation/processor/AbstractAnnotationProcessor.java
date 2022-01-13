@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
  * CAMEL_CASE_PATTERN: regex pattern for check the camelCase naming convention.
  */
 public class AbstractAnnotationProcessor {
+
     protected static final Pattern CORE_PACKAGE_PATTERN = Pattern.compile("^io.siddhi.core.");
     protected static final Pattern PARAMETER_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$");
     protected static final String REPETITIVE_PARAMETER_NOTATION = "...";
@@ -47,6 +48,7 @@ public class AbstractAnnotationProcessor {
     protected String extensionClassFullName;
 
     public AbstractAnnotationProcessor(String extensionClassFullName) {
+
         this.extensionClassFullName = extensionClassFullName;
     }
 
@@ -90,6 +92,7 @@ public class AbstractAnnotationProcessor {
      *                                       exception with proper message.
      */
     public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
+
         for (Parameter parameter : parameters) {
             String parameterName = parameter.name();
             //Check if the @Parameter name is empty.
@@ -205,6 +208,7 @@ public class AbstractAnnotationProcessor {
      *                                       exception with proper message.
      */
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         for (ReturnAttribute returnAttribute : returnAttributes) {
             String returnAttributeName = returnAttribute.name();
             //Check if the @ReturnAttributes name is empty.

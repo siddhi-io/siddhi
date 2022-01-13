@@ -29,8 +29,9 @@ import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.transport.TestAsyncInMemory;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.transport.InMemoryBroker;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FaultStreamTestCase {
 
-    private static final Logger log = LogManager.getLogger(CallbackTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(FaultStreamTestCase.class);
     private volatile AtomicInteger count;
     private volatile AtomicInteger countStream;
     private volatile boolean eventArrived;
@@ -61,6 +62,11 @@ public class FaultStreamTestCase {
     @Test
     public void faultStreamTest1() throws InterruptedException {
         log.info("faultStreamTest1-Tests logging by default when fault handling is not configured explicitly.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -87,12 +93,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). " +
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Error when running faultAdd(). " +
                     "Exception on class 'io.siddhi.core.stream.FaultFunctionExtension'"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
@@ -109,6 +113,11 @@ public class FaultStreamTestCase {
     @Test(dependsOnMethods = "faultStreamTest1")
     public void faultStreamTest2() throws InterruptedException {
         log.info("faultStreamTest2-Tests logging when fault handling is set to log.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -136,12 +145,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on " +
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Error when running faultAdd(). Exception on " +
                     "class 'io.siddhi.core.stream.FaultFunctionExtension'"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
@@ -158,6 +165,10 @@ public class FaultStreamTestCase {
     public void faultStreamTest3() throws InterruptedException {
         log.info("faultStreamTest3-Tests fault handling when it's set to stream. " +
                 "No errors would be logged since exceptions are being gracefully handled.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        Logger logger = (Logger) LogManager.getLogger(StreamJunction.class);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -185,12 +196,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages() == null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -200,13 +209,16 @@ public class FaultStreamTestCase {
 
         AssertJUnit.assertEquals(0, count.get());
         AssertJUnit.assertFalse(eventArrived);
-
     }
 
     @Test(dependsOnMethods = "faultStreamTest3")
     public void faultStreamTest4() throws InterruptedException {
         log.info("faultStreamTest4-Tests fault handling when it's set to stream. " +
                 "Events would be available in the corresponding fault stream");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        Logger logger = (Logger) LogManager.getLogger(StreamJunction.class);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -238,12 +250,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages() == null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -259,6 +269,10 @@ public class FaultStreamTestCase {
     public void faultStreamTest5() throws InterruptedException {
         log.info("faultStreamTest5-Tests fault handling when it's set to stream. " +
                 "Events would be available in the corresponding fault stream");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        Logger logger = (Logger) LogManager.getLogger(StreamJunction.class);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -287,12 +301,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages() == null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -309,6 +321,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest6() throws InterruptedException {
         log.info("faultStreamTest6-Tests logging by default when fault handling is not configured "
                 + "explicitly at sink level during publishing failures.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -337,12 +354,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Dropping event at Sink 'inMemory' at"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Dropping event at Sink 'inMemory' at"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -356,6 +371,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest7() throws InterruptedException {
         log.info("faultStreamTest7-Tests fault handling when it's set to log. " +
                 "Events would be logged and dropped during publishing failure at Sink");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -384,12 +404,10 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Dropping event at Sink 'inMemory' at"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Dropping event at Sink 'inMemory' at"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -402,6 +420,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest8() throws InterruptedException {
         log.info("faultStreamTest8-Tests fault handling when it's set to wait. " +
                 "Thread would be waiting until Sink reconnects.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
             @Override
@@ -444,9 +467,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             Thread thread = new Thread() {
                 @Override
@@ -459,7 +479,8 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(2000);
-            Assert.assertTrue(appender.getMessages().contains(
+            Assert.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains(
                     "error while connecting Sink 'inMemory' at 'outputStream', will retry every"));
             Assert.assertEquals(count.get(), 0);
             Assert.assertEquals(countStream.get(), 0);
@@ -480,6 +501,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest9() throws InterruptedException {
         log.info("faultStreamTest9-Tests fault handling when it's set to stream at Sink but, " +
                 "the fault stream is not configured. Events will be logged and dropped.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -508,11 +534,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = LogManager.getLogger(Sink.class);
-        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        loggerSink.addAppender(appender);
-        loggerStreamJunction.addAppender(appender);
         try {
             Thread thread = new Thread() {
                 @Override
@@ -525,13 +546,13 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(500);
-            AssertJUnit.assertTrue(appender.getMessages().contains("after consuming events from Stream " +
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("after consuming events from Stream " +
                     "'outputStream', Subscriber for topic 'IBM' is unavailable. Hence, dropping event"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
-            loggerSink.removeAppender(appender);
-            loggerStreamJunction.removeAppender(appender);
+            logger.removeAppender(appender);
             siddhiAppRuntime.shutdown();
         }
     }
@@ -540,6 +561,13 @@ public class FaultStreamTestCase {
     public void faultStreamTest10() throws InterruptedException {
         log.info("faultStreamTest10-Tests fault handling when it's set to stream at Sink. " +
                 "The events will be available in the corresponding fault stream.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+
+        Logger loggerSink = (Logger) LogManager.getLogger(Sink.class);
+        Logger loggerStreamJunction = (Logger) LogManager.getLogger(StreamJunction.class);
+        loggerSink.addAppender(appender);
+        loggerStreamJunction.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -571,11 +599,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = LogManager.getLogger(Sink.class);
-        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        loggerSink.addAppender(appender);
-        loggerStreamJunction.addAppender(appender);
         try {
             Thread thread = new Thread() {
                 @Override
@@ -588,7 +611,9 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(500);
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            AssertJUnit.assertTrue(((UnitTestAppender) loggerSink.getAppenders().
+                    get("UnitTestAppender")).getMessages() == null && ((UnitTestAppender) loggerStreamJunction.
+                    getAppenders().get("UnitTestAppender")).getMessages() == null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -675,6 +700,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest12() throws InterruptedException {
         log.info("faultStreamTest12-Tests fault handling for async when it's set to log. " +
                 "Events would be logged and dropped during publishing failure at Sink");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -703,13 +733,11 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
             Thread.sleep(6000);
-            AssertJUnit.assertTrue(appender.getMessages().contains("Dropping event at Sink 'testAsyncInMemory' at"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Dropping event at Sink 'testAsyncInMemory' at"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -722,6 +750,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest13() throws InterruptedException {
         log.info("faultStreamTest13-Tests fault handling when async set to wait. " +
                 "Thread would be waiting until Sink reconnects.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -764,9 +797,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         TestAsyncInMemory.fail = true;
         try {
             Thread thread = new Thread() {
@@ -784,7 +814,8 @@ public class FaultStreamTestCase {
             Thread.sleep(2000);
             Assert.assertEquals(countStream.get(), 1);
             Assert.assertEquals(count.get(), 0);
-            Assert.assertTrue(appender.getMessages().contains("error while connecting Sink 'testAsyncInMemory'" +
+            Assert.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("error while connecting Sink 'testAsyncInMemory'" +
                     " at 'outputStream', will retry every"));
             TestAsyncInMemory.fail = false;
             Thread.sleep(11000);
@@ -803,6 +834,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest14() throws InterruptedException {
         log.info("faultStreamTest14-Tests fault handling when async set to wait. " +
                 "Thread would be waiting until Sink reconnects.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -845,9 +881,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         TestAsyncInMemory.failOnce = true;
         try {
             Thread thread = new Thread() {
@@ -862,7 +895,8 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(11000);
-            Assert.assertTrue(appender.getMessages().contains("Connection unavailable during publishing, " +
+            Assert.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("Connection unavailable during publishing, " +
                     "error while connecting Sink 'testAsyncInMemory' at 'outputStream', will retry"));
             Assert.assertEquals(count.get(), 2);
             Assert.assertEquals(countStream.get(), 2);
@@ -879,6 +913,12 @@ public class FaultStreamTestCase {
     public void faultStreamTest15() throws InterruptedException {
         log.info("faultStreamTest15-Tests fault handling when async set to stream at Sink. " +
                 "The events will be available in the corresponding fault stream.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        Logger loggerSink = (Logger) LogManager.getLogger(Sink.class);
+        Logger loggerStreamJunction = (Logger) LogManager.getLogger(StreamJunction.class);
+        loggerSink.addAppender(appender);
+        loggerStreamJunction.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -910,11 +950,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger loggerSink = LogManager.getLogger(Sink.class);
-        Logger loggerStreamJunction = LogManager.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        loggerSink.addAppender(appender);
-        loggerStreamJunction.addAppender(appender);
         try {
             Thread thread = new Thread() {
                 @Override
@@ -927,7 +962,9 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(500);
-            AssertJUnit.assertTrue(appender.getMessages() == null);
+            AssertJUnit.assertTrue(((UnitTestAppender) loggerSink.getAppenders().
+                    get("UnitTestAppender")).getMessages() == null && ((UnitTestAppender) loggerStreamJunction.
+                    getAppenders().get("UnitTestAppender")).getMessages() == null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -944,6 +981,11 @@ public class FaultStreamTestCase {
     public void faultStreamTest16() throws InterruptedException {
         log.info("faultStreamTest13-Tests fault handling when async set to wait. " +
                 "Thread would be waiting until Sink reconnects.");
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -986,9 +1028,6 @@ public class FaultStreamTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        Logger logger = LogManager.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
         TestAsyncInMemory.fail = true;
         TestAsyncInMemory.failRuntime = true;
         try {
@@ -1004,7 +1043,8 @@ public class FaultStreamTestCase {
             };
             thread.start();
             Thread.sleep(6000);
-            AssertJUnit.assertTrue(appender.getMessages().contains("as on.error='wait' does not handle"));
+            AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains("as on.error='wait' does not handle"));
             Assert.assertEquals(count.get(), 0);
             Assert.assertEquals(countStream.get(), 2);
         } catch (Exception e) {
