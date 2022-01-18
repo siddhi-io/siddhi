@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.math;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import java.util.concurrent.CountDownLatch;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class PercentileFunctionExtensionTestCase {
-    private static Logger logger = Logger.getLogger(PercentileFunctionExtensionTestCase.class);
+    private static Log logger = LogFactory.getLog(PercentileFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
     private CountDownLatch countDownLatch;
     private volatile int count;

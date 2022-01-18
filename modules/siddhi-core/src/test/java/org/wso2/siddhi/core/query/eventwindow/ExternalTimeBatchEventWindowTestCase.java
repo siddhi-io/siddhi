@@ -15,7 +15,8 @@
  */
 package org.wso2.siddhi.core.query.eventwindow;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExternalTimeBatchEventWindowTestCase {
 
 
-    private static final Logger log = Logger.getLogger(ExternalTimeBatchEventWindowTestCase.class);
+    private static final Log log = LogFactory.getLog(ExternalTimeBatchEventWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private long sum;

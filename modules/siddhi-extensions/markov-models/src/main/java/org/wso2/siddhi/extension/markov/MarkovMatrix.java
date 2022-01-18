@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.markov;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 public class MarkovMatrix implements Serializable {
 
-    private static final Logger log = Logger.getLogger(MarkovMatrix.class);
+    private static final Log log = LogFactory.getLog(MarkovMatrix.class);
     private static final long serialVersionUID = -6731569100412292454L;
     private Map<String, Double> transitionCount = new HashMap<String, Double>();
     private Map<String, Double> startStateCount = new HashMap<String, Double>();

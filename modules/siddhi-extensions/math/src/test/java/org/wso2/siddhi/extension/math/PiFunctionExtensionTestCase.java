@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.math;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -29,7 +30,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class PiFunctionExtensionTestCase {
-    private static Logger logger = Logger.getLogger(PiFunctionExtensionTestCase.class);
+    private static Log logger = LogFactory.getLog(PiFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
 
     @Test

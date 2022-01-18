@@ -18,14 +18,15 @@
 
 package org.wso2.siddhi.core.managment;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class ValidateTestCase {
-    static final Logger log = Logger.getLogger(ValidateTestCase.class);
+    static final Log log = LogFactory.getLog(ValidateTestCase.class);
     private int count;
     private boolean eventArrived;
     private int inEventCount;

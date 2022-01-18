@@ -19,7 +19,8 @@
 package org.wso2.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.SiddhiExtensionLoader;
 import org.wso2.siddhi.core.util.extension.holder.AbstractExtensionHolder;
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SiddhiContext {
 
-    private static final Logger log = Logger.getLogger(SiddhiContext.class);
+    private static final Log log = LogFactory.getLog(SiddhiContext.class);
 
     private ExceptionHandler<Object> defaultDisrupterExceptionHandler;
     private Map<String, Class> siddhiExtensions;

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.eventtable.rdbms;
 
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.exception.CannotLoadConfigurationException;
 import org.wso2.siddhi.extension.eventtable.jaxbMappings.Element;
 import org.wso2.siddhi.extension.eventtable.jaxbMappings.Mapping;
@@ -42,7 +43,7 @@ import java.util.Map;
 public class DBQueryHelper {
 
     private static Map<String, Map<String, String>> dbTypeMappings;
-    private static final Logger log = Logger.getLogger(DBQueryHelper.class);
+    private static final Log log = LogFactory.getLog(DBQueryHelper.class);
 
     private DBQueryHelper() {
 

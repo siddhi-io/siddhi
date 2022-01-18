@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.table;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 
 public class InsertOverwriteTableTestCase {
-    private static final Logger log = Logger.getLogger(InsertOverwriteTableTestCase.class);
+    private static final Log log = LogFactory.getLog(InsertOverwriteTableTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

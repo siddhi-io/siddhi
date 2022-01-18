@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.map;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -37,7 +38,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateFunctionExtensionTestCase {
-    private static final Logger log = Logger.getLogger(CreateFunctionExtensionTestCase.class);
+    private static final Log log = LogFactory.getLog(CreateFunctionExtensionTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
     private volatile boolean eventArrived;
 

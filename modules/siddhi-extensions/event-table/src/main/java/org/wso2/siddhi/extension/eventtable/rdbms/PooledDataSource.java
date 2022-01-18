@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.eventtable.rdbms;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.wso2.siddhi.query.api.annotation.Element;
@@ -36,7 +37,7 @@ public class PooledDataSource {
     private static final String validationQuery = "SELECT 1";
     private static final long validationInterval = 30000;
     private static final boolean defaultAutoCommit = false;
-    private static final Logger log = Logger.getLogger(PooledDataSource.class);
+    private static final Log log = LogFactory.getLog(PooledDataSource.class);
 
 
     private PooledDataSource() {

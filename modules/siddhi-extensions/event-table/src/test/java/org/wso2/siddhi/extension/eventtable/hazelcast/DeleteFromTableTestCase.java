@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.eventtable.hazelcast;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DeleteFromTableTestCase {
-    private static final Logger log = Logger.getLogger(DeleteFromTableTestCase.class);
+    private static final Log log = LogFactory.getLog(DeleteFromTableTestCase.class);
     private static final long RESULT_WAIT = 500;
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private int removeEventCount;

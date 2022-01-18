@@ -18,7 +18,8 @@
 package org.wso2.siddhi.core.debugger;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import java.io.PrintStream;
 
 public class TestDebuggerClient {
 
-    private static final Logger log = Logger.getLogger(TestDebuggerClient.class);
+    private static final Log log = LogFactory.getLog(TestDebuggerClient.class);
     private final PrintStream originalOut = System.out;
     private final InputStream originalIn = System.in;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();

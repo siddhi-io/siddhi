@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.eventtable.rdbms;
 
 import org.apache.hadoop.util.bloom.CountingBloomFilter;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -46,7 +47,7 @@ import javax.sql.DataSource;
  */
 public class DBHandler {
 
-    private static final Logger log = Logger.getLogger(DBHandler.class);
+    private static final Log log = LogFactory.getLog(DBHandler.class);
     private String tableName;
     private Map<String, String> elementMappings;
     private ExecutionInfo executionInfo;

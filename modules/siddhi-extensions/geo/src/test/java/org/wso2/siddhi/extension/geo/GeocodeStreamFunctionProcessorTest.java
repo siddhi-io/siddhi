@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.geo;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -32,7 +33,7 @@ import java.util.List;
 
 public class GeocodeStreamFunctionProcessorTest {
 
-    private static final Logger LOGGER = Logger.getLogger(GeocodeStreamFunctionProcessorTest.class);
+    private static final Log LOGGER = LogFactory.getLog(GeocodeStreamFunctionProcessorTest.class);
     private static int eventCount = 0;
 
     @Test

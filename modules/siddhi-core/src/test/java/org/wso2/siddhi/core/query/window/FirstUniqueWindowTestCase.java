@@ -19,7 +19,8 @@
 package org.wso2.siddhi.core.query.window;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -33,7 +34,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirstUniqueWindowTestCase {
-    private static final Logger log = Logger.getLogger(FirstUniqueWindowTestCase.class);
+    private static final Log log = LogFactory.getLog(FirstUniqueWindowTestCase.class);
     private int count;
     private boolean eventArrived;
     private AtomicInteger atomicCount;

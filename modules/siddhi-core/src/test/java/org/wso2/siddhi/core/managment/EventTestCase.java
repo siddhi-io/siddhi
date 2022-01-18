@@ -18,14 +18,15 @@
 
 package org.wso2.siddhi.core.managment;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.event.Event;
 
 public class EventTestCase {
-    static final Logger log = Logger.getLogger(EventTestCase.class);
+    static final Log log = LogFactory.getLog(EventTestCase.class);
     private int count;
     private boolean eventArrived;
     private long firstValue;

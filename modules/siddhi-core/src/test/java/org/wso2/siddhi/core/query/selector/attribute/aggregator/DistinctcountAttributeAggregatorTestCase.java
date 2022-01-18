@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.selector.attribute.aggregator;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
 public class DistinctcountAttributeAggregatorTestCase {
-    private static final Logger log = Logger.getLogger(DistinctcountAttributeAggregatorTestCase.class);
+    private static final Log log = LogFactory.getLog(DistinctcountAttributeAggregatorTestCase.class);
     private volatile int count;
 
     @Before

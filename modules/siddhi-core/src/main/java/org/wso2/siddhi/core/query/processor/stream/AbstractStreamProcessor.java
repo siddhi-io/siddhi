@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.query.processor.stream;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
@@ -39,7 +40,7 @@ import java.util.List;
 
 public abstract class AbstractStreamProcessor implements Processor, EternalReferencedHolder, Snapshotable {
 
-    protected static final Logger log = Logger.getLogger(AbstractStreamProcessor.class);
+    protected static final Log log = LogFactory.getLog(AbstractStreamProcessor.class);
 
     protected Processor nextProcessor;
 

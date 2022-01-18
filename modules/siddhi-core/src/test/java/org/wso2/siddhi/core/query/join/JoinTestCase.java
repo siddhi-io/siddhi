@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.query.join;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.Assert;
 
 public class JoinTestCase {
-    private static final Logger log = Logger.getLogger(JoinTestCase.class);
+    private static final Log log = LogFactory.getLog(JoinTestCase.class);
     private AtomicInteger inEventCount;
     private AtomicInteger removeEventCount;
     private boolean eventArrived;

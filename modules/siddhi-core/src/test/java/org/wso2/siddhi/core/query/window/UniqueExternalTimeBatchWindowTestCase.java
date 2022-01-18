@@ -16,7 +16,8 @@
  */
 package org.wso2.siddhi.core.query.window;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 public class UniqueExternalTimeBatchWindowTestCase {
 
 
-    private static final Logger log = Logger.getLogger(TimeWindowTestCase.class);
+    private static final Log log = LogFactory.getLog(TimeWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

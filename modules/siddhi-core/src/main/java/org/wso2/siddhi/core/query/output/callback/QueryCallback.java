@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -32,7 +33,7 @@ import java.util.List;
 
 public abstract class QueryCallback {
 
-    private static final Logger log = Logger.getLogger(QueryCallback.class);
+    private static final Log log = LogFactory.getLog(QueryCallback.class);
 
     private ExecutionPlanContext executionPlanContext;
     private Query query;

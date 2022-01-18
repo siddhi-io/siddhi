@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.markov;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * MarkovChain discontinues training.
  */
 public class MarkovChainTestCase {
-    private static final Logger logger = Logger.getLogger(MarkovChainTestCase.class);
+    private static final Log logger = LogFactory.getLog(MarkovChainTestCase.class);
     protected static SiddhiManager siddhiManager;
     private CountDownLatch countDownLatch;
     private volatile int count;

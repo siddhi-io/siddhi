@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.util;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class SystemTimeBasedScheduler extends Scheduler {
-    private static final Logger log = Logger.getLogger(SystemTimeBasedScheduler.class);
+    private static final Log log = LogFactory.getLog(SystemTimeBasedScheduler.class);
     private EventCaller eventCaller;
     private volatile boolean running = false;
     private ScheduledExecutorService scheduledExecutorService;

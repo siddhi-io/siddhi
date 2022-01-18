@@ -21,7 +21,8 @@ package org.wso2.siddhi.extension.eventtable.hazelcast;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +55,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefineTableTestCase {
-    private static final Logger log = Logger.getLogger(DefineTableTestCase.class);
+    private static final Log log = LogFactory.getLog(DefineTableTestCase.class);
     private static final long RESULT_WAIT = 500;
     private static List<String> instances;
     private AtomicInteger inEventCount = new AtomicInteger(0);

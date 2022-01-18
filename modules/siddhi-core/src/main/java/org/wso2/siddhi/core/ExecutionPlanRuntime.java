@@ -18,7 +18,8 @@
 package org.wso2.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
@@ -50,7 +51,7 @@ import java.util.concurrent.ConcurrentMap;
  * and streamJunctions and inputHandlers used
  */
 public class ExecutionPlanRuntime {
-    private static final Logger log = Logger.getLogger(ExecutionPlanRuntime.class);
+    private static final Log log = LogFactory.getLog(ExecutionPlanRuntime.class);
     private ConcurrentMap<String, AbstractDefinition> streamDefinitionMap = new ConcurrentHashMap<String, AbstractDefinition>(); // Contains stream definition.
     private ConcurrentMap<String, AbstractDefinition> tableDefinitionMap = new ConcurrentHashMap<String, AbstractDefinition>(); // Contains table definition.
     private InputManager inputManager;

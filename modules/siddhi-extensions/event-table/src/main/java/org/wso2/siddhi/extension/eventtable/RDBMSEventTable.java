@@ -19,7 +19,8 @@
 
 package org.wso2.siddhi.extension.eventtable;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -61,7 +62,7 @@ public class RDBMSEventTable implements EventTable {
     private CachingTable cachedTable;
     private String cacheSizeInString;
     private boolean isCachingEnabled;
-    private static final Logger log = Logger.getLogger(RDBMSEventTable.class);
+    private static final Log log = LogFactory.getLog(RDBMSEventTable.class);
 
     /*
     Loads rdbms-table-config.xml file which provides DB mapping details

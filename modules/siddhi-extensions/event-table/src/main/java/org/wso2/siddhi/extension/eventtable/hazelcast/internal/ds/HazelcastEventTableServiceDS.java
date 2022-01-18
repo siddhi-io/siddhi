@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.eventtable.hazelcast.internal.ds;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 
@@ -28,7 +29,7 @@ import org.osgi.service.component.annotations.*;
         immediate = true
 )
 public class HazelcastEventTableServiceDS {
-    private static final Logger logger = Logger.getLogger(HazelcastEventTableServiceDS.class);
+    private static final Log logger = LogFactory.getLog(HazelcastEventTableServiceDS.class);
 
     @Activate
     protected void activate(ComponentContext context) {

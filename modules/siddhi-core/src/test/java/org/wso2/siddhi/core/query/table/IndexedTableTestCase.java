@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.table;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class IndexedTableTestCase {
-    private static final Logger log = Logger.getLogger(IndexedTableTestCase.class);
+    private static final Log log = LogFactory.getLog(IndexedTableTestCase.class);
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private int removeEventCount;
     private boolean eventArrived;

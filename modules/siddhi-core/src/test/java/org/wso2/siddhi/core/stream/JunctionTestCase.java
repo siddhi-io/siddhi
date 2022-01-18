@@ -18,7 +18,8 @@
 package org.wso2.siddhi.core.stream;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
@@ -35,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class JunctionTestCase {
-    static final Logger log = Logger.getLogger(JunctionTestCase.class);
+    static final Log log = LogFactory.getLog(JunctionTestCase.class);
     private int count;
     private boolean eventArrived;
     private ExecutorService executorService;

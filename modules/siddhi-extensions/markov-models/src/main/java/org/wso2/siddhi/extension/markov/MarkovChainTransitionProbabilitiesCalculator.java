@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.markov;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 
 import java.io.Serializable;
@@ -39,7 +40,7 @@ import java.util.LinkedHashMap;
 public class MarkovChainTransitionProbabilitiesCalculator implements Serializable {
 
     private static final long serialVersionUID = -7632888859752532839L;
-    private static final Logger log = Logger.getLogger(MarkovChainTransitionProbabilitiesCalculator.class);
+    private static final Log log = LogFactory.getLog(MarkovChainTransitionProbabilitiesCalculator.class);
     private long durationToKeep;
     private long notificationsHoldLimit;
     private double alertThresholdProbability;

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.core.query.join;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -32,7 +33,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 public class OuterJoinTestCase {
-    private static final Logger log = Logger.getLogger(OuterJoinTestCase.class);
+    private static final Log log = LogFactory.getLog(OuterJoinTestCase.class);
     private int inEventCount;
     private boolean eventArrived;
 

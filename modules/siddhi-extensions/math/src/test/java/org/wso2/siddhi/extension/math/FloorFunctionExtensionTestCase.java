@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.math;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class FloorFunctionExtensionTestCase {
-    private static Logger logger = Logger.getLogger(FloorFunctionExtensionTestCase.class);
+    private static Log logger = LogFactory.getLog(FloorFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
     private boolean eventArrived;
 

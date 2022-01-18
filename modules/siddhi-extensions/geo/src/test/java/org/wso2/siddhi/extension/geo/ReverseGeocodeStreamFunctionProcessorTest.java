@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.geo;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -31,7 +32,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class ReverseGeocodeStreamFunctionProcessorTest {
 
-    private static final Logger LOGGER = Logger.getLogger(ReverseGeocodeStreamFunctionProcessorTest.class);
+    private static final Log LOGGER = LogFactory.getLog(ReverseGeocodeStreamFunctionProcessorTest.class);
 
     @Test
     public void testReverseGeocode1() throws Exception {

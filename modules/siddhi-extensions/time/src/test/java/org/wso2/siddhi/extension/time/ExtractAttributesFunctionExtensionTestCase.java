@@ -21,7 +21,8 @@ package org.wso2.siddhi.extension.time;
 import junit.framework.Assert;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -39,7 +40,7 @@ import java.util.Date;
 
 public class ExtractAttributesFunctionExtensionTestCase {
 
-    static final Logger log = Logger.getLogger(ExtractAttributesFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(ExtractAttributesFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

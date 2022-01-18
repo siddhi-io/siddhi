@@ -17,7 +17,9 @@
  */
 package org.wso2.siddhi.core;
 
-import org.apache.log4j.Logger;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class ResultContainer {
-    private static final Logger log = Logger.getLogger(ResultContainer.class);
+    private static final Log log = LogFactory.getLog(ResultContainer.class);
     private CountDownLatch latch;
     private List<ThrottleInfoHolder> results;
 

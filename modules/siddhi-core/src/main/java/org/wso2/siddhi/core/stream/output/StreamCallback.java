@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.stream.output;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
@@ -30,7 +31,7 @@ import java.util.List;
 
 public abstract class StreamCallback implements StreamJunction.Receiver {
 
-    private static final Logger log = Logger.getLogger(StreamCallback.class);
+    private static final Log log = LogFactory.getLog(StreamCallback.class);
 
     private String streamId;
     private AbstractDefinition streamDefinition;

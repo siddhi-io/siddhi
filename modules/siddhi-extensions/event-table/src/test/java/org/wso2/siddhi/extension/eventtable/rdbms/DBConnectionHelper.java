@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.eventtable.rdbms;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -28,7 +29,7 @@ import java.sql.SQLException;
 
 public class DBConnectionHelper {
 
-    private Logger log = Logger.getLogger(DBConnectionHelper.class);
+    private Log log = LogFactory.getLog(DBConnectionHelper.class);
     private static DBConnectionHelper dbConnectionHelper;
 
     private DBConnectionHelper() {

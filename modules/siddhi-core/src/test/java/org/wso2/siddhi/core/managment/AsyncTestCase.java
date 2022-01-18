@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.managment;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class AsyncTestCase {
-    static final Logger log = Logger.getLogger(AsyncTestCase.class);
+    static final Log log = LogFactory.getLog(AsyncTestCase.class);
     private int count;
     private boolean eventArrived;
     private long firstValue;

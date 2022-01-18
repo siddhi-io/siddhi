@@ -17,12 +17,13 @@
  */
 package org.wso2.siddhi.core.stream.input;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.Event;
 
 public class InputHandler {
 
-    private static final Logger log = Logger.getLogger(InputHandler.class);
+    private static final Log log = LogFactory.getLog(InputHandler.class);
 
     protected String streamId;
     protected int streamIndex;

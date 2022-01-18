@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.snapshot;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 
 public abstract class SnapshotOutputRateLimiter implements Schedulable {
-    static final Logger log = Logger.getLogger(SnapshotOutputRateLimiter.class);
+    static final Log log = LogFactory.getLog(SnapshotOutputRateLimiter.class);
     private WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter;
     protected ExecutionPlanContext executionPlanContext;
     protected StreamEventCloner streamEventCloner;
