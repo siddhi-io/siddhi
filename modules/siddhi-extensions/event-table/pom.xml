@@ -70,7 +70,11 @@
             <groupId>org.wso2.orbit.com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--&lt;!&ndash; Temporary Dependencies&ndash;&gt;-->
         <!--<dependency>-->
         <!--<groupId>com.h2database</groupId>-->
