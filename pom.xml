@@ -292,6 +292,12 @@
                 <artifactId>siddhi-extension-timeseries</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.17</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
