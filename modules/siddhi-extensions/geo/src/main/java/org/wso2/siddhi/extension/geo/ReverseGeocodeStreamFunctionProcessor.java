@@ -24,7 +24,8 @@ import com.google.code.geocoder.model.GeocodeResponse;
 import com.google.code.geocoder.model.GeocoderAddressComponent;
 import com.google.code.geocoder.model.GeocoderRequest;
 import com.google.code.geocoder.model.LatLng;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
@@ -49,7 +50,7 @@ import java.util.List;
  */
 public class ReverseGeocodeStreamFunctionProcessor extends StreamFunctionProcessor {
 
-    private static final Logger LOGGER = Logger.getLogger(ReverseGeocodeStreamFunctionProcessor.class);
+    private static final Log LOGGER = LogFactory.getLog(ReverseGeocodeStreamFunctionProcessor.class);
     private final Geocoder geocoder = new Geocoder();
     private boolean debugModeOn;
 

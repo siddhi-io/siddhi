@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.time;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExtractDateFunctionExtensionTestCase {
 
-    static final Logger log = Logger.getLogger(ExtractDateFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(ExtractDateFunctionExtensionTestCase.class);
     private volatile AtomicInteger count;
     private volatile boolean eventArrived;
 

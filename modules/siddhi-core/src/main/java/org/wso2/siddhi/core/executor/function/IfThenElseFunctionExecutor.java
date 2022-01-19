@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.executor.function;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -25,7 +26,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class IfThenElseFunctionExecutor extends FunctionExecutor {
-    private static final Logger log = Logger.getLogger(IfThenElseFunctionExecutor.class);
+    private static final Log log = LogFactory.getLog(IfThenElseFunctionExecutor.class);
     Attribute.Type returnType;
 
     @Override

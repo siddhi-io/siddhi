@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.util.persistence;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.util.ThreadBarrier;
@@ -25,7 +26,7 @@ import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 
 public class PersistenceService {
 
-    private static final Logger LOGGER = Logger.getLogger(PersistenceService.class);
+    private static final Log LOGGER = LogFactory.getLog(PersistenceService.class);
     private String executionPlanName;
     private PersistenceStore persistenceStore;
     private SnapshotService snapshotService;

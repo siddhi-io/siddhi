@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.eventtable.cache;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
@@ -32,7 +33,7 @@ import java.util.LinkedList;
 
 public class CachingTable {
 
-    private static final Logger log = Logger.getLogger(CachingTable.class);
+    private static final Log log = LogFactory.getLog(CachingTable.class);
     private final LinkedList<StreamEvent> list;
     private final ZeroStreamEventConverter eventConverter;
     private final StreamEventPool streamEventPool;

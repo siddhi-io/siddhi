@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.query.table;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class InsertIntoTableTestCase {
-    private static final Logger log = Logger.getLogger(InsertIntoTableTestCase.class);
+    private static final Log log = LogFactory.getLog(InsertIntoTableTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

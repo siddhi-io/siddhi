@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.query.selector;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -39,7 +40,7 @@ import java.util.Map;
 public class QuerySelector implements Processor {
 
 
-    private static final Logger log = Logger.getLogger(QuerySelector.class);
+    private static final Log log = LogFactory.getLog(QuerySelector.class);
     private static final ThreadLocal<String> keyThreadLocal = new ThreadLocal<String>();
     private Selector selector;
     private ExecutionPlanContext executionPlanContext;

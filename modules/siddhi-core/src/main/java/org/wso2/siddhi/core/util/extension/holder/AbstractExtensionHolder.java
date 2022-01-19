@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.util.extension.holder;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 public abstract class AbstractExtensionHolder {
     private static final String EXTENSION_SEPARATOR = ":";
-    private static final Logger log = Logger.getLogger(AbstractExtensionHolder.class);
+    private static final Log log = LogFactory.getLog(AbstractExtensionHolder.class);
 
     protected Map<String, Class> extensionMap = new HashMap<String, Class>();
 

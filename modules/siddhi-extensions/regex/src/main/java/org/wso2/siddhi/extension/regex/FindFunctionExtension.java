@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.regex;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -50,7 +51,7 @@ import java.util.regex.Pattern;
  */
 public class FindFunctionExtension extends FunctionExecutor {
     Attribute.Type returnType = Attribute.Type.BOOL;
-    private final static Logger log = Logger.getLogger(FindFunctionExtension.class);
+    private final static Log log = LogFactory.getLog(FindFunctionExtension.class);
 
     //state-variables
     private boolean isRegexConstant = false;

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.eventtable.rdbms;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
@@ -46,7 +47,7 @@ import java.util.Map;
 
 public class RDBMSOperatorParser {
 
-    private static final Logger log = Logger.getLogger(RDBMSOperatorParser.class);
+    private static final Log log = LogFactory.getLog(RDBMSOperatorParser.class);
 
     private RDBMSOperatorParser() {
     }

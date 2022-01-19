@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ComplexPatternTestCase {
 
-    private static final Logger log = Logger.getLogger(ComplexPatternTestCase.class);
+    private static final Log log = LogFactory.getLog(ComplexPatternTestCase.class);
     private int inEventCount;
     private AtomicInteger count;
     private int removeEventCount;

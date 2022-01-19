@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.math;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class RandomFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(RandomFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(RandomFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.debugger;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
@@ -37,7 +38,7 @@ public class SiddhiDebugger {
     /**
      * Logger to log events.
      */
-    private static final Logger log = Logger.getLogger(SiddhiDebugger.class);
+    private static final Log log = LogFactory.getLog(SiddhiDebugger.class);
 
     /**
      * SiddhiDebugger allows to add breakpoints only at the beginning and the end of a query.

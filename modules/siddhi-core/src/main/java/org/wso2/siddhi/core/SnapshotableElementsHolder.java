@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotableElement;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 
 public class SnapshotableElementsHolder {
-    private static final Logger LOGGER = Logger.getLogger(SnapshotableElementsHolder.class);
+    private static final Log LOGGER = LogFactory.getLog(SnapshotableElementsHolder.class);
     private static final Map<String, SnapshotableElement> SNAPSHOTABLE_ELEMENT_MAP =
             new HashMap<String, SnapshotableElement>();
     private static Map<String, Map<String, Object>> existingStates = new HashMap<String, Map<String, Object>>();

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.processor.stream.window;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ExternalTimeWindowProcessor extends WindowProcessor implements FindableProcessor {
-    static final Logger log = Logger.getLogger(ExternalTimeWindowProcessor.class);
+    static final Log log = LogFactory.getLog(ExternalTimeWindowProcessor.class);
     private long timeToKeep;
     private ComplexEventChunk<StreamEvent> expiredEventChunk;
     private VariableExpressionExecutor timeStampVariableExpressionExecutor;

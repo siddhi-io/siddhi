@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.table;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class JoinTableTestCase {
-    private static final Logger log = Logger.getLogger(JoinTableTestCase.class);
+    private static final Log log = LogFactory.getLog(JoinTableTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

@@ -16,7 +16,8 @@
 
 package org.wso2.siddhi.core.query.eventwindow;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -27,7 +28,7 @@ import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 import static org.junit.Assert.assertTrue;
 
 public class EventWindowDefinitionTestCase {
-    private static final Logger log = Logger.getLogger(EventWindowDefinitionTestCase.class);
+    private static final Log log = LogFactory.getLog(EventWindowDefinitionTestCase.class);
 
     @Test
     public void testEventWindow1() throws InterruptedException {

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.time;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 
 public class ExtractDayOfWeekFunctionExtensionTestCase {
 
-    static final Logger log = Logger.getLogger(ExtractDayOfWeekFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(ExtractDayOfWeekFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.string;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -38,7 +39,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
  */
 public class ContainsFunctionExtension extends FunctionExecutor {
     Attribute.Type returnType = Attribute.Type.BOOL;
-    private final static Logger log = Logger.getLogger(ContainsFunctionExtension.class);
+    private final static Log log = LogFactory.getLog(ContainsFunctionExtension.class);
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {

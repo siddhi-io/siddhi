@@ -20,7 +20,8 @@ package org.wso2.siddhi.core.query.ratelimit;
 
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -31,7 +32,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class TimeOutputRateLimitTestCase {
-    static final Logger log = Logger.getLogger(TimeOutputRateLimitTestCase.class);
+    static final Log log = LogFactory.getLog(TimeOutputRateLimitTestCase.class);
     private volatile int count;
     private volatile int inEventCount;
     private volatile int removeEventCount;

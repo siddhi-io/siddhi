@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.util;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.*;
@@ -33,7 +34,7 @@ public class SiddhiExtensionLoader {
     private static final String CLASS_EXT = "[^#]\\S+=\\S+";
     private static final String SIDDHI_EXT = ".*\\.siddhiext";
     private static final String JAR = ".*\\.jar";
-    private static final Logger log = Logger.getLogger(SiddhiExtensionLoader.class);
+    private static final Log log = LogFactory.getLog(SiddhiExtensionLoader.class);
 
     /**
      * Helper method to load the siddhi extensions

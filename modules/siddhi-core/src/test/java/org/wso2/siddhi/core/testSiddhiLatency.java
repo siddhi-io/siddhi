@@ -1,6 +1,7 @@
 package org.wso2.siddhi.core;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class testSiddhiLatency {
-    private static final Logger log = Logger.getLogger(testSiddhiLatency.class);
+    private static final Log log = LogFactory.getLog(testSiddhiLatency.class);
     private static InputHandler eligibilityStreamInputHandler;
     private static Map<String, ResultContainer> resultMap = new ConcurrentHashMap<String, ResultContainer>();
     private static Map<String, InputHandler> requestStreamInputHandlerMap = new ConcurrentHashMap<String, InputHandler>();

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.evalscript;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class EvalScriptTestCase {
 
-    static final Logger log = Logger.getLogger(EvalScriptTestCase.class);
+    static final Log log = LogFactory.getLog(EvalScriptTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
 
     @Before

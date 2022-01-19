@@ -18,13 +18,14 @@
 
 package org.wso2.siddhi.core.util.snapshot;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 
 
 public class ByteSerializer {
-    private static final Logger log = Logger.getLogger(ByteSerializer.class);
+    private static final Log log = LogFactory.getLog(ByteSerializer.class);
 
     private ByteSerializer() {
     }

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.managment;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public class StatisticsTestCase {
-    static final Logger log = Logger.getLogger(StatisticsTestCase.class);
+    static final Log log = LogFactory.getLog(StatisticsTestCase.class);
     private int count;
     private boolean eventArrived;
     private long firstValue;

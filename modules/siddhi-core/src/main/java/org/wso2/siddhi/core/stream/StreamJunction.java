@@ -22,7 +22,8 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -45,7 +46,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 public class StreamJunction {
-    private static final Logger log = Logger.getLogger(StreamJunction.class);
+    private static final Log log = LogFactory.getLog(StreamJunction.class);
     private final ExecutionPlanContext executionPlanContext;
     private final StreamDefinition streamDefinition;
     private int bufferSize;

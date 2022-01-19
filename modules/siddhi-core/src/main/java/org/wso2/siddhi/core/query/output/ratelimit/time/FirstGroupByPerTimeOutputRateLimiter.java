@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.time;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.GroupedComplexEvent;
@@ -35,7 +36,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter implements Schedulable {
-    static final Logger log = Logger.getLogger(FirstGroupByPerTimeOutputRateLimiter.class);
+    static final Log log = LogFactory.getLog(FirstGroupByPerTimeOutputRateLimiter.class);
 
     private String id;
     private final Long value;

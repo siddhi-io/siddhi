@@ -41,10 +41,6 @@
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.log4j.wso2</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -65,8 +61,7 @@
                             org.wso2.siddhi.extension.markov.*;version="${siddhi.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.siddhi.*;version="${siddhi.version}",
-                            org.apache.log4j;version="${log4j.imp.pkg.version.range}"
+                            org.wso2.siddhi.*;version="${siddhi.version}"
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

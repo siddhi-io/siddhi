@@ -18,7 +18,8 @@
 package org.wso2.siddhi.core.util.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
@@ -53,7 +54,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 
 public class ExecutionPlanParser {
-    private static final Logger log = Logger.getLogger(ExecutionPlanRuntimeBuilder.class);
+    private static final Log log = LogFactory.getLog(ExecutionPlanRuntimeBuilder.class);
 
     /**
      * Parse an ExecutionPlan returning ExecutionPlanRuntime

@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.time;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
@@ -41,7 +42,7 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
     private long scheduledTime;
     private String queryName;
 
-    static final Logger log = Logger.getLogger(LastPerTimeOutputRateLimiter.class);
+    static final Log log = LogFactory.getLog(LastPerTimeOutputRateLimiter.class);
 
 
     public LastPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, String queryName) {

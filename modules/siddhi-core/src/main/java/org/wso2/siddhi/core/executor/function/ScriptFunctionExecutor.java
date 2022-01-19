@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.executor.function;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.function.EvalScript;
@@ -26,7 +27,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class ScriptFunctionExecutor extends FunctionExecutor {
 
-    static final Logger log = Logger.getLogger(ScriptFunctionExecutor.class);
+    static final Log log = LogFactory.getLog(ScriptFunctionExecutor.class);
 
     private String functionId;
     Attribute.Type returnType;

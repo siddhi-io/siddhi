@@ -18,11 +18,12 @@
 package org.wso2.siddhi.core.query.output.ratelimit;
 
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 
 public class PassThroughOutputRateLimiter extends OutputRateLimiter {
-    private static final Logger log = Logger.getLogger(PassThroughOutputRateLimiter.class);
+    private static final Log log = LogFactory.getLog(PassThroughOutputRateLimiter.class);
     private String id;
 
     public PassThroughOutputRateLimiter(String id) {

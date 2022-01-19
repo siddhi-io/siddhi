@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.trigger;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
@@ -31,7 +32,7 @@ import org.wso2.siddhi.query.api.definition.TriggerDefinition;
  */
 public class CronEventTrigger implements EventTrigger, Job {
 
-    protected static final Logger log = Logger.getLogger(CronEventTrigger.class);
+    protected static final Log log = LogFactory.getLog(CronEventTrigger.class);
 
     private TriggerDefinition triggerDefinition;
     private ExecutionPlanContext executionPlanContext;

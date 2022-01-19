@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.core.query.table;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -33,7 +34,7 @@ import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
  * Created on 1/17/15.
  */
 public class DefineTableTestCase {
-    static final Logger log = Logger.getLogger(DefineTableTestCase.class);
+    static final Log log = LogFactory.getLog(DefineTableTestCase.class);
 
     @Test
     public void testQuery1() throws InterruptedException {

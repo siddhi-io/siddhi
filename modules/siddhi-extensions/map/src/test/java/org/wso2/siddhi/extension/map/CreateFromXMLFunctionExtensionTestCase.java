@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.map;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateFromXMLFunctionExtensionTestCase {
-    private static final Logger log = Logger.getLogger(CreateFromXMLFunctionExtensionTestCase.class);
+    private static final Log log = LogFactory.getLog(CreateFromXMLFunctionExtensionTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
     private volatile boolean eventArrived;
 

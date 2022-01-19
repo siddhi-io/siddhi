@@ -22,7 +22,8 @@ import junit.framework.Assert;
 import org.apache.axiom.om.impl.exception.XMLComparisonException;
 import org.apache.axiom.om.impl.llom.util.XMLComparator;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -39,7 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ToXMLFunctionExtensionTestCase {
-    private static final Logger log = Logger.getLogger(ToXMLFunctionExtensionTestCase.class);
+    private static final Log log = LogFactory.getLog(ToXMLFunctionExtensionTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
     private volatile boolean eventArrived;
 

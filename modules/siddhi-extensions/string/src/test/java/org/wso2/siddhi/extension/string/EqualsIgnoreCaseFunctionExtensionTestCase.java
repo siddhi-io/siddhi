@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -35,7 +36,7 @@ import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class EqualsIgnoreCaseFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(EqualsIgnoreCaseFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(EqualsIgnoreCaseFunctionExtensionTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
     private volatile boolean eventArrived;
 

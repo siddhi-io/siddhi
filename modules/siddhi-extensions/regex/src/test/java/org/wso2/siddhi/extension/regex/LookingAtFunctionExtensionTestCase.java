@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.regex;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -31,7 +32,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class LookingAtFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(LookingAtFunctionExtensionTestCase.class);
+    static final Log log = LogFactory.getLog(LookingAtFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

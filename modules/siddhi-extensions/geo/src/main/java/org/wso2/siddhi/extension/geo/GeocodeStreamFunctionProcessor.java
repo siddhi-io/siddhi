@@ -22,7 +22,8 @@ import com.google.code.geocoder.Geocoder;
 import com.google.code.geocoder.GeocoderRequestBuilder;
 import com.google.code.geocoder.model.GeocodeResponse;
 import com.google.code.geocoder.model.GeocoderRequest;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
@@ -41,7 +42,7 @@ import java.util.List;
  */
 public class GeocodeStreamFunctionProcessor extends StreamFunctionProcessor {
 
-    private static final Logger LOGGER = Logger.getLogger(GeocodeStreamFunctionProcessor.class);
+    private static final Log LOGGER = LogFactory.getLog(GeocodeStreamFunctionProcessor.class);
     private final Geocoder geocoder = new Geocoder();
     private boolean debugModeOn;
 

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.time;
 
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -43,7 +44,7 @@ import java.util.Date;
  */
 public class TimestampInMillisecondsFunctionExtension extends FunctionExecutor {
 
-    private static final Logger log = Logger.getLogger(TimestampInMillisecondsFunctionExtension.class);
+    private static final Log log = LogFactory.getLog(TimestampInMillisecondsFunctionExtension.class);
     private Attribute.Type returnType = Attribute.Type.LONG;
     private boolean useDefaultDateFormat = false;
     private String dateFormat = null;

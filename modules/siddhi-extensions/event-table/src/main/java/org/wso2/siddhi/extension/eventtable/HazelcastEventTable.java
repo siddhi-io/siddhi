@@ -24,7 +24,8 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -61,7 +62,7 @@ import java.util.Map;
  * Hazelcast event table implementation of SiddhiQL.
  */
 public class HazelcastEventTable implements EventTable {
-    private static final Logger logger = Logger.getLogger(HazelcastEventTable.class);
+    private static final Log logger = LogFactory.getLog(HazelcastEventTable.class);
     private final ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
     private TableDefinition tableDefinition;
     private ExecutionPlanContext executionPlanContext;

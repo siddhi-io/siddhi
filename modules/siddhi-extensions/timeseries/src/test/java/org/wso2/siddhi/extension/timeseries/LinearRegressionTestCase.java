@@ -18,7 +18,8 @@
 
 package org.wso2.siddhi.extension.timeseries;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 
 public class LinearRegressionTestCase {
-    static final Logger logger = Logger.getLogger(LinearRegressionTestCase.class);
+    static final Log logger = LogFactory.getLog(LinearRegressionTestCase.class);
     protected static SiddhiManager siddhiManager;
     private int count;
     private double betaZero, betaTwo, forecastY;

@@ -19,7 +19,8 @@
 package org.wso2.siddhi.core.query.selector.attribute.aggregator;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -34,7 +35,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class StddevAttributeAggregatorTestCase {
-    static final Logger log = Logger.getLogger(StddevAttributeAggregatorTestCase.class);
+    static final Log log = LogFactory.getLog(StddevAttributeAggregatorTestCase.class);
     private final double epsilon = 0.00001; // difference threshold for two doubles to be treated distinct
     private int inEventCount; // Only used in the Test #1 and #6
     private AtomicInteger atomicEventCount;

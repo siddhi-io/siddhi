@@ -18,7 +18,8 @@
 package org.wso2.siddhi.core.query;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -40,7 +41,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 public class FilterTestCase {
-    static final Logger log = Logger.getLogger(FilterTestCase.class);
+    static final Log log = LogFactory.getLog(FilterTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 

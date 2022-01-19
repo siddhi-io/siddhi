@@ -17,7 +17,8 @@
 package org.wso2.siddhi.core.query.eventwindow;
 
 import junit.framework.Assert;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -33,7 +34,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 public class CustomJoinEventWindowTestCase {
-    private static final Logger log = Logger.getLogger(CustomJoinEventWindowTestCase.class);
+    private static final Log log = LogFactory.getLog(CustomJoinEventWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private int count;

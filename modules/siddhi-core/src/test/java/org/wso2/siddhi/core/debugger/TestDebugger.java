@@ -17,7 +17,8 @@
  */
 package org.wso2.siddhi.core.debugger;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class TestDebugger {
-    private static final Logger log = Logger.getLogger(TestDebugger.class);
+    private static final Log log = LogFactory.getLog(TestDebugger.class);
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private AtomicInteger debugEventCount = new AtomicInteger(0);
     private static volatile int count;
