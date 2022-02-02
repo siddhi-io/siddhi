@@ -64,19 +64,19 @@ public class LatestAggregationTestCase {
                         "quantity int, timestamp long);";
         String query =
                 "define aggregation stockAggregation " +
-                        "from stockStream " +
-                        "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
-                        "aggregate by timestamp every sec...year ;" +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
+                "aggregate by timestamp every sec...year ;" +
 
-                        "define stream inputStream (symbol string); " +
+                "define stream inputStream (symbol string); " +
 
-                        "@info(name = 'query1') " +
-                        "from inputStream as i join stockAggregation as s " +
-                        "within 1496200000000L, 1596535449000L " +
-                        "per \"seconds\" " +
-                        "select AGG_TIMESTAMP, s.symbol, s.latestPrice " +
-                        "order by AGG_TIMESTAMP " +
-                        "insert all events into outputStream; ";
+                "@info(name = 'query1') " +
+                "from inputStream as i join stockAggregation as s " +
+                "within 1496200000000L, 1596535449000L " +
+                "per \"seconds\" " +
+                "select AGG_TIMESTAMP, s.symbol, s.latestPrice " +
+                "order by AGG_TIMESTAMP " +
+                "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -162,20 +162,20 @@ public class LatestAggregationTestCase {
                         "quantity int, timestamp long);";
         String query =
                 "define aggregation stockAggregation " +
-                        "from stockStream " +
-                        "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
-                        "aggregate by timestamp every sec...year ;" +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
+                "aggregate by timestamp every sec...year ;" +
 
-                        "define stream inputStream (symbol string); " +
+                "define stream inputStream (symbol string); " +
 
-                        "@info(name = 'query1') " +
-                        "from inputStream as i join stockAggregation as s " +
-                        "within 1496200000000L, 1596535449000L " +
-                        "per \"seconds\" " +
-                        "select s.symbol, s.latestPrice " +
-                        "group by s.symbol " +
-                        "order by AGG_TIMESTAMP " +
-                        "insert all events into outputStream; ";
+                "@info(name = 'query1') " +
+                "from inputStream as i join stockAggregation as s " +
+                "within 1496200000000L, 1596535449000L " +
+                "per \"seconds\" " +
+                "select s.symbol, s.latestPrice " +
+                "group by s.symbol " +
+                "order by AGG_TIMESTAMP " +
+                "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -260,19 +260,19 @@ public class LatestAggregationTestCase {
                         "quantity int, timestamp long);";
         String query =
                 "define aggregation stockAggregation " +
-                        "from stockStream " +
-                        "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
-                        "aggregate by timestamp every sec...year ;" +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
+                "aggregate by timestamp every sec...year ;" +
 
-                        "define stream inputStream (symbol string); " +
+                "define stream inputStream (symbol string); " +
 
-                        "@info(name = 'query1') " +
-                        "from inputStream as i join stockAggregation as s " +
-                        "within 1496200000000L, 1596535449000L " +
-                        "per \"seconds\" " +
-                        "select AGG_TIMESTAMP, s.symbol, s.latestPrice, s.avgPrice " +
-                        "order by AGG_TIMESTAMP " +
-                        "insert all events into outputStream; ";
+                "@info(name = 'query1') " +
+                "from inputStream as i join stockAggregation as s " +
+                "within 1496200000000L, 1596535449000L " +
+                "per \"seconds\" " +
+                "select AGG_TIMESTAMP, s.symbol, s.latestPrice, s.avgPrice " +
+                "order by AGG_TIMESTAMP " +
+                "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -359,20 +359,20 @@ public class LatestAggregationTestCase {
                         "quantity int, timestamp long);";
         String query =
                 "define aggregation stockAggregation " +
-                        "from stockStream " +
-                        "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
-                        "aggregate by timestamp every sec...year ;" +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, (price * quantity) as latestPrice " +
+                "aggregate by timestamp every sec...year ;" +
 
-                        "define stream inputStream (symbol string); " +
+                "define stream inputStream (symbol string); " +
 
-                        "@info(name = 'query1') " +
-                        "from inputStream as i join stockAggregation as s " +
-                        "within 1496200000000L, 1596535449000L " +
-                        "per \"seconds\" " +
-                        "select s.symbol, s.latestPrice, sum(s.avgPrice) as totalAvg " +
-                        "group by s.symbol " +
-                        "order by AGG_TIMESTAMP " +
-                        "insert all events into outputStream; ";
+                "@info(name = 'query1') " +
+                "from inputStream as i join stockAggregation as s " +
+                "within 1496200000000L, 1596535449000L " +
+                "per \"seconds\" " +
+                "select s.symbol, s.latestPrice, sum(s.avgPrice) as totalAvg " +
+                "group by s.symbol " +
+                "order by AGG_TIMESTAMP " +
+                "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
