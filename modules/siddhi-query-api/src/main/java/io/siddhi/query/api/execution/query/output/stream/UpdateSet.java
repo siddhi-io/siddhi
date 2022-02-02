@@ -36,16 +36,19 @@ public class UpdateSet implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public UpdateSet set(Variable tableVariable, Expression assignmentExpression) {
+
         setAttributeList.add(new SetAttribute(tableVariable, assignmentExpression));
         return this;
     }
 
     public List<SetAttribute> getSetAttributeList() {
+
         return setAttributeList;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -61,11 +64,13 @@ public class UpdateSet implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         return setAttributeList != null ? setAttributeList.hashCode() : 0;
     }
 
     @Override
     public String toString() {
+
         return "UpdateSet{" +
                 "setAttributeList=" + setAttributeList +
                 '}';
@@ -73,21 +78,25 @@ public class UpdateSet implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 
@@ -103,20 +112,24 @@ public class UpdateSet implements SiddhiElement {
         private int[] queryContextEndIndex;
 
         public SetAttribute(Variable tableVariable, Expression assignmentExpression) {
+
             this.tableVariable = tableVariable;
             this.assignmentExpression = assignmentExpression;
         }
 
         public Variable getTableVariable() {
+
             return tableVariable;
         }
 
         public Expression getAssignmentExpression() {
+
             return assignmentExpression;
         }
 
         @Override
         public boolean equals(Object o) {
+
             if (this == o) {
                 return true;
             }
@@ -135,6 +148,7 @@ public class UpdateSet implements SiddhiElement {
 
         @Override
         public int hashCode() {
+
             int result = tableVariable != null ? tableVariable.hashCode() : 0;
             result = 31 * result + (assignmentExpression != null ? assignmentExpression.hashCode() : 0);
             return result;
@@ -142,6 +156,7 @@ public class UpdateSet implements SiddhiElement {
 
         @Override
         public String toString() {
+
             return "SetAttribute{" +
                     "tableVariable=" + tableVariable +
                     ", assignmentExpression=" + assignmentExpression +
@@ -150,21 +165,25 @@ public class UpdateSet implements SiddhiElement {
 
         @Override
         public int[] getQueryContextStartIndex() {
+
             return queryContextStartIndex;
         }
 
         @Override
         public void setQueryContextStartIndex(int[] lineAndColumn) {
+
             queryContextStartIndex = lineAndColumn;
         }
 
         @Override
         public int[] getQueryContextEndIndex() {
+
             return queryContextEndIndex;
         }
 
         @Override
         public void setQueryContextEndIndex(int[] lineAndColumn) {
+
             queryContextEndIndex = lineAndColumn;
         }
     }

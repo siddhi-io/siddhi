@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api.execution.query.input.stream;
 
-
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.output.stream.ReturnStream;
@@ -33,6 +32,7 @@ public class AnonymousInputStream extends SingleInputStream {
     private Query query;
 
     public AnonymousInputStream(Query query) {
+
         super("Anonymous-" + UUID.randomUUID());
         if (query.getOutputStream() != null && !(query.getOutputStream() instanceof ReturnStream)) {
             throw new SiddhiAppValidationException("OutputStream of the query is not on type Return!",
@@ -44,19 +44,21 @@ public class AnonymousInputStream extends SingleInputStream {
     }
 
     public Query getQuery() {
+
         return query;
     }
 
     @Override
     public String toString() {
+
         return "AnonymousInputStream{" +
                 "query=" + query +
                 "}";
     }
 
-
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -72,6 +74,7 @@ public class AnonymousInputStream extends SingleInputStream {
 
     @Override
     public int hashCode() {
+
         int result = super.hashCode();
         result = 31 * result + (query != null ? query.hashCode() : 0);
         return result;

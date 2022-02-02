@@ -31,6 +31,7 @@ public class DefineTableTestCase {
 
     @Test
     public void testCreatingTableDefinition() {
+
         SiddhiApp.siddhiApp("test").defineTable(TableDefinition.id("StockStream").attribute("symbol",
                 Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
                 .FLOAT));
@@ -38,12 +39,14 @@ public class DefineTableTestCase {
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void testCreatingStreamWithDuplicateAttribute() {
+
         TableDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("symbol", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT);
     }
 
     @Test
     public void testCreatingSQLTableDefinition() {
+
         TableDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT).annotation(Annotation.annotation("From").element
                 ("datasource.id", "cepDataSource"));
@@ -51,18 +54,21 @@ public class DefineTableTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testTableDefinitionNull() {
+
         TableDefinition tableDefinition = null;
         SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testTableIdNull() {
+
         TableDefinition tableDefinition = TableDefinition.id(null);
         SiddhiApp.siddhiApp("test").defineTable(tableDefinition);
     }
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
     public void testCreatingTableDefinition2() {
+
         SiddhiApp.siddhiApp("test").defineTable(TableDefinition.id("StockStream").attribute("symbol",
                 Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
                 .FLOAT)).defineTable(TableDefinition.id("StockStream"));

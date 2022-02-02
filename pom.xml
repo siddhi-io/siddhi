@@ -144,9 +144,9 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
 
             <!--metrics-->
@@ -768,9 +768,9 @@
 
         <awaitility.version>4.0.2</awaitility.version>
         <testng.version>7.1.0</testng.version>
-        <log4j.version>2.17.0</log4j.version>
-        <log4j.imp.pkg.version.range>[1.2.17, 3.0.0)</log4j.imp.pkg.version.range>
-        <slf4j.version>1.7.12</slf4j.version>
+        <log4j.version>2.17.1</log4j.version>
+        <log4j.imp.pkg.version.range>[2.0, 3.0)</log4j.imp.pkg.version.range>
+        <slf4j.version>1.7.35</slf4j.version>
         <mvel2.version>2.4.5.Final</mvel2.version>
         <antlr.runtime.version>4.7.2</antlr.runtime.version>
         <disruptor.version>3.4.2.wso2v1</disruptor.version>

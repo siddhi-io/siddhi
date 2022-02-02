@@ -40,6 +40,7 @@ public class JoinInputStream extends InputStream {
     public JoinInputStream(SingleInputStream leftInputStream, Type type,
                            SingleInputStream rightInputStream, Expression onCompare,
                            EventTrigger trigger, Within within, Expression per) {
+
         this.leftInputStream = leftInputStream;
         this.type = type;
         this.rightInputStream = rightInputStream;
@@ -50,35 +51,43 @@ public class JoinInputStream extends InputStream {
     }
 
     public InputStream getLeftInputStream() {
+
         return leftInputStream;
     }
 
     public Type getType() {
+
         return type;
     }
 
     public InputStream getRightInputStream() {
+
         return rightInputStream;
     }
 
     public Expression getOnCompare() {
+
         return onCompare;
     }
 
     public EventTrigger getTrigger() {
+
         return trigger;
     }
 
     public Within getWithin() {
+
         return within;
     }
 
     public Expression getPer() {
+
         return per;
     }
 
     @Override
     public List<String> getAllStreamIds() {
+
         List<String> list = new ArrayList<String>();
         for (String streamId : leftInputStream.getAllStreamIds()) {
             if (!list.contains(streamId)) {
@@ -95,6 +104,7 @@ public class JoinInputStream extends InputStream {
 
     @Override
     public List<String> getUniqueStreamIds() {
+
         List<String> list = new ArrayList<String>();
         for (String streamId : leftInputStream.getAllStreamIds()) {
             if (!list.contains(streamId)) {
@@ -111,6 +121,7 @@ public class JoinInputStream extends InputStream {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -144,6 +155,7 @@ public class JoinInputStream extends InputStream {
 
     @Override
     public int hashCode() {
+
         int result = leftInputStream != null ? leftInputStream.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (rightInputStream != null ? rightInputStream.hashCode() : 0);
@@ -156,6 +168,7 @@ public class JoinInputStream extends InputStream {
 
     @Override
     public String toString() {
+
         return "JoinInputStream{" +
                 "leftInputStream=" + leftInputStream +
                 ", type=" + type +

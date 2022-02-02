@@ -24,16 +24,19 @@ public class DuplicateDefinitionException extends SiddhiAppValidationException {
 
     public DuplicateDefinitionException(String message, Throwable throwable, int[] queryContextStartIndex,
                                         int[] queryContextEndIndex) {
+
         super(message, throwable, queryContextStartIndex, queryContextEndIndex);
     }
 
     public DuplicateDefinitionException(String message, int[] queryContextStartIndex,
                                         int[] queryContextEndIndex) {
+
         super(message, queryContextStartIndex, queryContextEndIndex);
     }
 
     public DuplicateDefinitionException(String message, Throwable throwable, int[] queryContextStartIndex,
                                         int[] queryContextEndIndex, String siddhiAppName, String siddhiAppString) {
+
         super(message, throwable, queryContextStartIndex, queryContextEndIndex, siddhiAppName, siddhiAppString);
     }
 }

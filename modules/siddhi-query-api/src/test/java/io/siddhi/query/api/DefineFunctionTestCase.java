@@ -28,6 +28,7 @@ public class DefineFunctionTestCase {
 
     @Test
     public void testFunction1() {
+
         SiddhiApp siddhiApp = SiddhiApp.siddhiApp("test").defineFunction(
                 new FunctionDefinition().id("foo").language("JS").type(Attribute.Type.STRING)
                         .body("return 'hello world!'"));
@@ -43,6 +44,7 @@ public class DefineFunctionTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testFunction2() {
+
         SiddhiApp.siddhiApp("test").defineFunction(
                 new FunctionDefinition().id("foo").type(Attribute.Type.STRING)
                         .body("return 'hello world!'"));
@@ -51,6 +53,7 @@ public class DefineFunctionTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testFunction3() {
+
         SiddhiApp.siddhiApp("test").defineFunction(
                 new FunctionDefinition().id("foo").language("JS")
                         .body("return 'hello world!'"));
@@ -59,6 +62,7 @@ public class DefineFunctionTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testFunction4() {
+
         SiddhiApp.siddhiApp("test").defineFunction(
                 new FunctionDefinition().language("JS").type(Attribute.Type.STRING)
                         .body("return 'hello world!'"));
@@ -67,6 +71,7 @@ public class DefineFunctionTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testFunction5() {
+
         SiddhiApp.siddhiApp("test").defineFunction(
                 new FunctionDefinition().id("foo").language("JS").type(Attribute.Type.STRING));
 

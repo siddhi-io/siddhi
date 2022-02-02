@@ -35,31 +35,38 @@ public class Annotation implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public Annotation(String name) {
+
         this.name = name;
     }
 
     public static Annotation annotation(String name) {
+
         return new Annotation(name);
     }
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public List<Element> getElements() {
+
         return elements;
     }
 
     public void setElements(List<Element> elements) {
+
         this.elements.clear();
         this.elements.addAll(elements);
     }
 
     public String getElement(String key) {
+
         for (Element element : elements) {
             if (element.getKey() != null && element.getKey().equalsIgnoreCase(key)) {
                 return element.getValue();
@@ -69,30 +76,36 @@ public class Annotation implements SiddhiElement {
     }
 
     public Annotation element(String key, String value) {
+
         elements.add(new Element(key, value));
         return this;
     }
 
     public Annotation element(String value) {
+
         elements.add(new Element(null, value));
         return this;
     }
 
     public Annotation element(Element element) {
+
         this.elements.add(element);
         return this;
     }
 
     public List<Annotation> getAnnotations() {
+
         return annotations;
     }
 
     public void setAnnotations(List<Annotation> annotations) {
+
         this.annotations.clear();
         this.annotations.addAll(annotations);
     }
 
     public List<Annotation> getAnnotations(String name) {
+
         List<Annotation> results = new ArrayList<>();
         for (Annotation annotation : annotations) {
             if (annotation.getName().equalsIgnoreCase(name)) {
@@ -103,12 +116,14 @@ public class Annotation implements SiddhiElement {
     }
 
     public Annotation annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     @Override
     public String toString() {
+
         boolean isFirst = true;
         StringBuilder definitionBuilder = new StringBuilder("@").append(name).append("( ");
         if (elements != null && elements.size() > 0) {
@@ -139,6 +154,7 @@ public class Annotation implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -160,6 +176,7 @@ public class Annotation implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (elements != null ? elements.hashCode() : 0);
         result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
@@ -168,21 +185,25 @@ public class Annotation implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

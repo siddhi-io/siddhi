@@ -31,20 +31,24 @@ public class Attribute implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public Attribute(String name, Type type) {
+
         this.name = name;
         this.type = type;
     }
 
     public String getName() {
+
         return name;
     }
 
     public Type getType() {
+
         return type;
     }
 
     @Override
     public String toString() {
+
         return "Attribute{" +
                 "id='" + name + '\'' +
                 ", type=" + type +
@@ -53,6 +57,7 @@ public class Attribute implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -74,6 +79,7 @@ public class Attribute implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
@@ -81,21 +87,25 @@ public class Attribute implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

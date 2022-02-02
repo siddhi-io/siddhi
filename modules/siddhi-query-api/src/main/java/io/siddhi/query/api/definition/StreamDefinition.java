@@ -27,27 +27,33 @@ public class StreamDefinition extends AbstractDefinition {
     private static final long serialVersionUID = 1L;
 
     public StreamDefinition() {
+
     }
 
     protected StreamDefinition(String streamId) {
+
         super(streamId);
     }
 
     public static StreamDefinition id(String streamId) {
+
         return new StreamDefinition(streamId);
     }
 
     public StreamDefinition attribute(String attributeName, Attribute.Type type) {
+
         super.attribute(attributeName, type);
         return this;
     }
 
     public StreamDefinition annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     public StreamDefinition clone() {
+
         StreamDefinition streamDefinition = new StreamDefinition(this.id);
         for (Attribute attribute : this.attributeList) {
             streamDefinition.attribute(attribute.getName(), attribute.getType());

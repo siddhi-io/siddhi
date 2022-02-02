@@ -28,15 +28,18 @@ public class DoubleConstant extends Expression implements Constant {
     private Double value;
 
     public DoubleConstant(double value) {
+
         this.value = value;
     }
 
     public Double getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         return "DoubleConstant{" +
                 "value=" + value +
                 '}';
@@ -44,6 +47,7 @@ public class DoubleConstant extends Expression implements Constant {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -62,6 +66,7 @@ public class DoubleConstant extends Expression implements Constant {
 
     @Override
     public int hashCode() {
+
         return value != null ? value.hashCode() : 0;
     }
 }

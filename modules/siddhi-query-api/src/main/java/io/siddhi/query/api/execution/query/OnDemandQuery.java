@@ -49,6 +49,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return a new OnDemandQuery instance
      */
     public static OnDemandQuery query() {
+
         return new OnDemandQuery();
     }
 
@@ -59,6 +60,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return updated on-demand query
      */
     public OnDemandQuery from(InputStore inputStore) {
+
         this.inputStore = inputStore;
         return this;
     }
@@ -69,6 +71,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return inputStore
      */
     public InputStore getInputStore() {
+
         return inputStore;
     }
 
@@ -79,6 +82,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return updated on-demand query
      */
     public OnDemandQuery select(Selector selector) {
+
         this.selector = selector;
         return this;
     }
@@ -90,6 +94,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return updated on-demand query
      */
     public OnDemandQuery outStream(OutputStream outputStream) {
+
         this.outputStream = outputStream;
         if (outputStream != null && outputStream.getOutputEventType() == null) {
             outputStream.setOutputEventType(OutputStream.OutputEventType.CURRENT_EVENTS);
@@ -104,6 +109,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @param onDeletingExpression expression for the delete operation defined in the on-demand query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
+
         this.outputStream = new DeleteStream(outputTableId, CURRENT_EVENTS, onDeletingExpression);
     }
 
@@ -114,6 +120,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @param onUpdateExpression expression for the update operation defined in the on-demand query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, onUpdateExpression);
     }
 
@@ -125,6 +132,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update operation defined in the on-demand query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, updateSetAttributes, onUpdateExpression);
     }
 
@@ -136,6 +144,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update or insert operation defined in the on-demand query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateOrInsertStream(outputTableId, CURRENT_EVENTS,
                 updateSetAttributes, onUpdateExpression);
     }
@@ -146,6 +155,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return selector of the on-demand query
      */
     public Selector getSelector() {
+
         return selector;
     }
 
@@ -155,11 +165,13 @@ public class OnDemandQuery implements SiddhiElement {
      * @return outputStream of the on-demand query
      */
     public OutputStream getOutputStream() {
+
         return outputStream;
     }
 
     @Override
     public String toString() {
+
         return "OnDemandQuery{" +
                 "inputStore=" + inputStore +
                 ", selector=" + selector +
@@ -170,6 +182,7 @@ public class OnDemandQuery implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -196,30 +209,34 @@ public class OnDemandQuery implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = inputStore != null ? inputStore.hashCode() : 0;
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
         result = 31 * result + (outputStream != null ? outputStream.hashCode() : 0);
         return result;
     }
 
-
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 
@@ -229,6 +246,7 @@ public class OnDemandQuery implements SiddhiElement {
      * @return type of given on-demand query
      */
     public OnDemandQueryType getType() {
+
         return type;
     }
 
@@ -236,6 +254,7 @@ public class OnDemandQuery implements SiddhiElement {
      * This method sets the type of given on-demand query.
      */
     public void setType(OnDemandQueryType type) {
+
         this.type = type;
     }
 

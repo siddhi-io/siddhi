@@ -28,11 +28,13 @@ import io.siddhi.query.api.expression.constant.TimeConstant;
  * Rate limiting of query output
  */
 public abstract class OutputRate implements SiddhiElement {
+
     private static final long serialVersionUID = 1L;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
 
     public static EventOutputRate perEvents(Constant events) {
+
         if (events instanceof LongConstant) {
             return new EventOutputRate(((LongConstant) events).getValue().intValue());
         } else if (events instanceof IntConstant) {
@@ -43,38 +45,46 @@ public abstract class OutputRate implements SiddhiElement {
     }
 
     public static TimeOutputRate perTimePeriod(TimeConstant timeConstant) {
+
         return new TimeOutputRate(timeConstant.value());
     }
 
     public static TimeOutputRate perTimePeriod(LongConstant longConstant) {
+
         return new TimeOutputRate(longConstant.getValue());
     }
 
     public static SnapshotOutputRate perSnapshot(TimeConstant timeConstant) {
+
         return new SnapshotOutputRate(timeConstant.value());
     }
 
     public static SnapshotOutputRate perSnapshot(LongConstant longConstant) {
+
         return new SnapshotOutputRate(longConstant.getValue());
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

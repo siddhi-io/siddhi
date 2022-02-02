@@ -51,121 +51,143 @@ public class Query implements ExecutionElement, SiddhiElement {
     private int[] queryContextEndIndex;
 
     public static Query query() {
+
         return new Query();
     }
 
     public Query from(InputStream inputStream) {
+
         this.inputStream = inputStream;
         return this;
     }
 
     public InputStream getInputStream() {
+
         return inputStream;
     }
 
     public Query select(Selector selector) {
+
         this.selector = selector;
         return this;
     }
 
     public Selector getSelector() {
+
         return selector;
     }
 
     public Query outStream(OutputStream outputStream) {
+
         this.outputStream = outputStream;
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertInto(String outputStreamId, OutputStream.OutputEventType outputEventType) {
+
         this.outputStream = new InsertIntoStream(outputStreamId, outputEventType);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertInto(String outputStreamId) {
+
         this.outputStream = new InsertIntoStream(outputStreamId);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoInner(String outputStreamId, OutputStream.OutputEventType outputEventType) {
+
         this.outputStream = new InsertIntoStream(outputStreamId, true, outputEventType);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoInner(String outputStreamId) {
+
         this.outputStream = new InsertIntoStream(outputStreamId, true);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoFault(String outputStreamId, OutputStream.OutputEventType outputEventType) {
+
         this.outputStream = new InsertIntoStream(outputStreamId, false, true, outputEventType);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoFault(String outputStreamId) {
+
         this.outputStream = new InsertIntoStream(outputStreamId, false, true);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query returns() {
+
         this.outputStream = new ReturnStream();
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query returns(OutputStream.OutputEventType outputEventType) {
+
         this.outputStream = new ReturnStream(outputEventType);
         updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
+
         this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void deleteBy(String outputTableId, OutputStream.OutputEventType outputEventType, Expression
             onDeletingExpression) {
+
         this.outputStream = new DeleteStream(outputTableId, outputEventType, onDeletingExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                          Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, outputEventType, null, onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                          UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateStream(outputTableId, outputEventType, updateSetAttributes, onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateOrInsertBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                                  UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         this.outputStream = new UpdateOrInsertStream(outputTableId, outputEventType, updateSetAttributes,
                 onUpdateExpression);
         updateOutputEventType(outputRate, outputStream);
@@ -173,15 +195,18 @@ public class Query implements ExecutionElement, SiddhiElement {
     }
 
     public OutputStream getOutputStream() {
+
         return outputStream;
     }
 
     public void output(OutputRate outputRate) {
+
         this.outputRate = outputRate;
         updateOutputEventType(outputRate, outputStream);
     }
 
     private void updateOutputEventType(OutputRate outputRate, OutputStream outputStream) {
+
         if (outputStream != null && outputStream.getOutputEventType() == null) {
             if (outputRate instanceof SnapshotOutputRate) {
                 outputStream.setOutputEventType(OutputStream.OutputEventType.ALL_EVENTS);
@@ -192,20 +217,24 @@ public class Query implements ExecutionElement, SiddhiElement {
     }
 
     public OutputRate getOutputRate() {
+
         return outputRate;
     }
 
     public Query annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     public List<Annotation> getAnnotations() {
+
         return annotations;
     }
 
     @Override
     public String toString() {
+
         return "Query{" +
                 "stream=" + inputStream +
                 ", selector=" + selector +
@@ -217,6 +246,7 @@ public class Query implements ExecutionElement, SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -247,6 +277,7 @@ public class Query implements ExecutionElement, SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = inputStream != null ? inputStream.hashCode() : 0;
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
         result = 31 * result + (outputStream != null ? outputStream.hashCode() : 0);
@@ -257,21 +288,25 @@ public class Query implements ExecutionElement, SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

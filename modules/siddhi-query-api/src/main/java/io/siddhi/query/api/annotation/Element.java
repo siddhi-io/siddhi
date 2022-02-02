@@ -31,20 +31,24 @@ public class Element implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public Element(String key, String value) {
+
         this.key = key;
         this.value = value;
     }
 
     public String getKey() {
+
         return key;
     }
 
     public String getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         if (key != null) {
             return key + " = \"" + value + "\"";
         } else {
@@ -54,6 +58,7 @@ public class Element implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -75,6 +80,7 @@ public class Element implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = key != null ? key.hashCode() : 0;
         result = 31 * result + (value != null ? value.hashCode() : 0);
         return result;
@@ -82,21 +88,25 @@ public class Element implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

@@ -28,15 +28,18 @@ public class StringConstant extends Expression implements Constant {
     private String value;
 
     public StringConstant(String value) {
+
         this.value = value;
     }
 
     public String getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         return "StringConstant{" +
                 "value='" + value + '\'' +
                 '}';
@@ -44,6 +47,7 @@ public class StringConstant extends Expression implements Constant {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -62,6 +66,7 @@ public class StringConstant extends Expression implements Constant {
 
     @Override
     public int hashCode() {
+
         return value != null ? value.hashCode() : 0;
     }
 }

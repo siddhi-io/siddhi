@@ -24,10 +24,12 @@ public class DuplicateAttributeException extends SiddhiAppValidationException {
 
     public DuplicateAttributeException(String message, int[] queryContextStartIndex,
                                        int[] queryContextEndIndex, String siddhiAppName, String siddhiAppString) {
+
         super(message, queryContextStartIndex, queryContextEndIndex, siddhiAppName, siddhiAppString);
     }
 
     public DuplicateAttributeException(String message, int[] queryContextStartIndex, int[] queryContextEndIndex) {
+
         super(message, queryContextStartIndex, queryContextEndIndex);
     }
 }

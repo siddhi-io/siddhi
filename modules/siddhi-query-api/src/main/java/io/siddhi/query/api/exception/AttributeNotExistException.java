@@ -23,14 +23,17 @@ package io.siddhi.query.api.exception;
 public class AttributeNotExistException extends SiddhiAppValidationException {
 
     public AttributeNotExistException(String message) {
+
         super(message);
     }
 
     public AttributeNotExistException(String message, Throwable throwable) {
+
         super(message, throwable);
     }
 
     public AttributeNotExistException(Throwable throwable) {
+
         super(throwable);
     }
 }

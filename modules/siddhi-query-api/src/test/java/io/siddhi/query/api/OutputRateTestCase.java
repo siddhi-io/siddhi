@@ -33,6 +33,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -65,6 +66,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery1() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -97,6 +99,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -129,6 +132,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery3() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -161,6 +165,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery4() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -191,6 +196,7 @@ public class OutputRateTestCase {
 
     @Test
     public void testCreatingQuery5() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -221,6 +227,7 @@ public class OutputRateTestCase {
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void testCreatingQuery6() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").

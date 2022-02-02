@@ -30,6 +30,7 @@ public class UpdateOrInsertStream extends OutputStream {
 
     public UpdateOrInsertStream(String tableId, OutputEventType outputEventType, UpdateSet updateSet,
                                 Expression onUpdateExpression) {
+
         this.updateSetter = updateSet;
         this.id = tableId;
         this.outputEventType = outputEventType;
@@ -37,6 +38,7 @@ public class UpdateOrInsertStream extends OutputStream {
     }
 
     public UpdateOrInsertStream(String tableId, UpdateSet updateSet, Expression onUpdateExpression) {
+
         this.updateSetter = updateSet;
         this.id = tableId;
         this.outputEventType = null;
@@ -45,39 +47,47 @@ public class UpdateOrInsertStream extends OutputStream {
 
     public UpdateOrInsertStream(String tableId, OutputEventType outputEventType,
                                 Expression onUpdateExpression) {
+
         this.id = tableId;
         this.outputEventType = outputEventType;
         this.onUpdateExpression = onUpdateExpression;
     }
 
     public UpdateOrInsertStream(String tableId, Expression onUpdateExpression) {
+
         this.id = tableId;
         this.outputEventType = null;
         this.onUpdateExpression = onUpdateExpression;
     }
 
     public static UpdateSet updateSet() {
+
         return new UpdateSet();
     }
 
     public Expression getOnUpdateExpression() {
+
         return onUpdateExpression;
     }
 
     public void setOnUpdateExpression(Expression onUpdateExpression) {
+
         this.onUpdateExpression = onUpdateExpression;
     }
 
     public UpdateSet getUpdateSet() {
+
         return updateSetter;
     }
 
     public void setUpdateSet(UpdateSet updateSet) {
+
         this.updateSetter = updateSet;
     }
 
     @Override
     public String toString() {
+
         return "UpdateOrInsertStream{" +
                 "onUpdateExpression=" + onUpdateExpression +
                 ", updateSet=" + updateSetter +
@@ -86,6 +96,7 @@ public class UpdateOrInsertStream extends OutputStream {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -107,6 +118,7 @@ public class UpdateOrInsertStream extends OutputStream {
 
     @Override
     public int hashCode() {
+
         int result = super.hashCode();
         result = 31 * result + (onUpdateExpression != null ? onUpdateExpression.hashCode() : 0);
         result = 31 * result + (updateSetter != null ? updateSetter.hashCode() : 0);

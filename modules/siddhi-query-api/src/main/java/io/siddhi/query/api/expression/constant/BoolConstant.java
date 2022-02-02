@@ -29,15 +29,18 @@ public class BoolConstant extends Expression implements Constant {
     private Boolean value;
 
     public BoolConstant(boolean value) {
+
         this.value = value;
     }
 
     public Boolean getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         return "BoolConstant{" +
                 "value=" + value +
                 '}';
@@ -45,6 +48,7 @@ public class BoolConstant extends Expression implements Constant {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -63,6 +67,7 @@ public class BoolConstant extends Expression implements Constant {
 
     @Override
     public int hashCode() {
+
         return value != null ? value.hashCode() : 0;
     }
 }

@@ -23,6 +23,7 @@ package io.siddhi.query.api.exception;
 public class UnsupportedAttributeTypeException extends SiddhiAppValidationException {
 
     public UnsupportedAttributeTypeException(String message) {
+
         super(message);
     }
 

@@ -41,22 +41,27 @@ public class SingleInputStream extends InputStream {
     protected int windowPosition = -1;
 
     protected SingleInputStream(String streamId) {
+
         this(streamId, false);
     }
 
     protected SingleInputStream(String streamId, boolean isInnerStream) {
+
         this(null, streamId, isInnerStream);
     }
 
     public SingleInputStream(String streamReferenceId, String streamId) {
+
         this(streamReferenceId, streamId, false);
     }
 
     public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream) {
+
         this(streamReferenceId, streamId, isInnerStream, false);
     }
 
     public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream, boolean isFaultStream) {
+
         this.streamReferenceId = streamReferenceId;
         this.isFaultStream = isFaultStream;
         this.isInnerStream = isInnerStream;
@@ -77,6 +82,7 @@ public class SingleInputStream extends InputStream {
     }
 
     public SingleInputStream(BasicSingleInputStream basicSingleInputStream, Window window) {
+
         streamId = basicSingleInputStream.getStreamId();
         isFaultStream = basicSingleInputStream.isFaultStream();
         isInnerStream = basicSingleInputStream.isInnerStream();
@@ -87,72 +93,87 @@ public class SingleInputStream extends InputStream {
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     public String getStreamReferenceId() {
+
         return streamReferenceId;
     }
 
     public List<String> getAllStreamIds() {
+
         List<String> streamIds = new ArrayList<String>();
         streamIds.add(streamId);
         return streamIds;
     }
 
     public List<String> getUniqueStreamIds() {
+
         return getAllStreamIds();
     }
 
     public SingleInputStream as(String streamReferenceId) {
+
         this.streamReferenceId = streamReferenceId;
         return this;
     }
 
     public List<StreamHandler> getStreamHandlers() {
+
         return streamHandlers;
     }
 
     public void addStreamHandlers(List<StreamHandler> streamHandlers) {
+
         this.streamHandlers.addAll(streamHandlers);
     }
 
     public SingleInputStream filter(Expression filterExpression) {
+
         streamHandlers.add(new Filter(filterExpression));
         return this;
     }
 
     public SingleInputStream filter(Filter filter) {
+
         streamHandlers.add(filter);
         return this;
     }
 
     public SingleInputStream function(String name, Expression... parameters) {
+
         streamHandlers.add(new StreamFunction(name, parameters));
         return this;
     }
 
     public SingleInputStream function(String extensionNamespace, String functionName,
                                       Expression... parameters) {
+
         streamHandlers.add(new StreamFunction(extensionNamespace, functionName, parameters));
         return this;
     }
 
     public SingleInputStream function(StreamFunction streamFunction) {
+
         streamHandlers.add(streamFunction);
         return this;
     }
 
     public boolean isFaultStream() {
+
         return isFaultStream;
     }
 
     public boolean isInnerStream() {
+
         return isInnerStream;
     }
 
     @Override
     public String toString() {
+
         return "SingleInputStream{" +
                 "isFaultStream=" + isFaultStream +
                 ", isInnerStream=" + isInnerStream +
@@ -165,6 +186,7 @@ public class SingleInputStream extends InputStream {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -199,6 +221,7 @@ public class SingleInputStream extends InputStream {
 
     @Override
     public int hashCode() {
+
         int result = (isFaultStream ? 1 : 0);
         result = 31 * result + (isInnerStream ? 1 : 0);
         result = 31 * result + (streamId != null ? streamId.hashCode() : 0);

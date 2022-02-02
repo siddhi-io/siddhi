@@ -32,25 +32,30 @@ public class Compare extends Expression {
 
     public Compare(Expression leftExpression, Operator operator,
                    Expression rightExpression) {
+
         this.rightExpression = rightExpression;
         this.operator = operator;
         this.leftExpression = leftExpression;
     }
 
     public Expression getRightExpression() {
+
         return rightExpression;
     }
 
     public Operator getOperator() {
+
         return operator;
     }
 
     public Expression getLeftExpression() {
+
         return leftExpression;
     }
 
     @Override
     public String toString() {
+
         return "Compare{" +
                 "rightExpression=" + rightExpression +
                 ", operator=" + operator +
@@ -60,6 +65,7 @@ public class Compare extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -85,6 +91,7 @@ public class Compare extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = rightExpression != null ? rightExpression.hashCode() : 0;
         result = 31 * result + (operator != null ? operator.hashCode() : 0);
         result = 31 * result + (leftExpression != null ? leftExpression.hashCode() : 0);

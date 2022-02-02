@@ -31,25 +31,30 @@ public class LogicalStateElement implements StateElement {
 
     public LogicalStateElement(StreamStateElement streamStateElement1, Type type,
                                StreamStateElement streamStateElement2) {
+
         this.streamStateElement1 = streamStateElement1;
         this.type = type;
         this.streamStateElement2 = streamStateElement2;
     }
 
     public StreamStateElement getStreamStateElement1() {
+
         return streamStateElement1;
     }
 
     public StreamStateElement getStreamStateElement2() {
+
         return streamStateElement2;
     }
 
     public Type getType() {
+
         return type;
     }
 
     @Override
     public String toString() {
+
         return "LogicalStateElement{" +
                 "streamStateElement1=" + streamStateElement1 +
                 ", type=" + type +
@@ -59,6 +64,7 @@ public class LogicalStateElement implements StateElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -84,6 +90,7 @@ public class LogicalStateElement implements StateElement {
 
     @Override
     public int hashCode() {
+
         int result = streamStateElement1 != null ? streamStateElement1.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (streamStateElement2 != null ? streamStateElement2.hashCode() : 0);
@@ -92,21 +99,25 @@ public class LogicalStateElement implements StateElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

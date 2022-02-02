@@ -27,24 +27,29 @@ public class EventOutputRate extends OutputRate {
     private OutputRate.Type type = OutputRate.Type.ALL;
 
     public EventOutputRate(Integer value) {
+
         this.value = value;
     }
 
     public OutputRate output(OutputRate.Type type) {
+
         this.type = type;
         return this;
     }
 
     public Integer getValue() {
+
         return value;
     }
 
     public OutputRate.Type getType() {
+
         return type;
     }
 
     @Override
     public String toString() {
+
         return "EventOutputRate{" +
                 "value=" + value +
                 ", type=" + type +
@@ -53,6 +58,7 @@ public class EventOutputRate extends OutputRate {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -74,6 +80,7 @@ public class EventOutputRate extends OutputRate {
 
     @Override
     public int hashCode() {
+
         int result = value != null ? value.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;

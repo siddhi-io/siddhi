@@ -30,25 +30,30 @@ public class BasicSelector extends Selector {
     private static final long serialVersionUID = 1L;
 
     public BasicSelector select(String rename, Expression expression) {
+
         return (BasicSelector) super.select(rename, expression);
     }
 
     public BasicSelector select(Variable variable) {
+
         return (BasicSelector) super.select(variable);
 
     }
 
     public BasicSelector groupBy(Variable variable) {
+
         return (BasicSelector) super.groupBy(variable);
 
     }
 
     public BasicSelector addGroupByList(List<Variable> list) {
+
         return (BasicSelector) super.addGroupByList(list);
 
     }
 
     public BasicSelector addSelectionList(List<OutputAttribute> projectionList) {
+
         return (BasicSelector) super.addSelectionList(projectionList);
 
     }

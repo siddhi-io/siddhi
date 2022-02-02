@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.state.State;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -39,6 +38,7 @@ public class SequenceQueryTestCase {
 
     @Test
     public void testSequenceQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.sequenceStream(
@@ -55,7 +55,6 @@ public class SequenceQueryTestCase {
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
 
-
         );
 
     }
@@ -68,6 +67,7 @@ public class SequenceQueryTestCase {
 
     @Test
     public void testSequenceQueryWithWithin() {
+
         Query query = Query.query();
         query.from(
                 InputStream.sequenceStream(
@@ -83,7 +83,6 @@ public class SequenceQueryTestCase {
                         having(Expression.compare(Expression.variable("avgPrice"),
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
-
 
         );
 

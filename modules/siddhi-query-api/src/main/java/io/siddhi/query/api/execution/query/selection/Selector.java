@@ -45,14 +45,17 @@ public class Selector implements SiddhiElement {
     private Constant offset;
 
     public static Selector selector() {
+
         return new Selector();
     }
 
     public static BasicSelector basicSelector() {
+
         return new BasicSelector();
     }
 
     public Selector select(String rename, Expression expression) {
+
         OutputAttribute outputAttribute = new OutputAttribute(rename, expression);
         checkSelection(outputAttribute);
         selectionList.add(outputAttribute);
@@ -60,6 +63,7 @@ public class Selector implements SiddhiElement {
     }
 
     public Selector select(Variable variable) {
+
         OutputAttribute outputAttribute = new OutputAttribute(variable);
         checkSelection(outputAttribute);
         selectionList.add(outputAttribute);
@@ -67,6 +71,7 @@ public class Selector implements SiddhiElement {
     }
 
     private void checkSelection(OutputAttribute newAttribute) {
+
         for (OutputAttribute attribute : selectionList) {
             if (attribute.getRename().equals(newAttribute.getRename())) {
                 throw new DuplicateAttributeException(newAttribute.getRename() + " is already defined as an output " +
@@ -76,16 +81,19 @@ public class Selector implements SiddhiElement {
     }
 
     public Selector having(Expression havingExpression) {
+
         this.havingExpression = havingExpression;
         return this;
     }
 
     public Selector groupBy(Variable variable) {
+
         groupByList.add(variable);
         return this;
     }
 
     public Selector addGroupByList(List<Variable> list) {
+
         if (list != null) {
             groupByList.addAll(list);
         }
@@ -93,16 +101,19 @@ public class Selector implements SiddhiElement {
     }
 
     public Selector orderBy(Variable variable) {
+
         orderByList.add(new OrderByAttribute(variable));
         return this;
     }
 
     public Selector orderBy(Variable variable, OrderByAttribute.Order order) {
+
         orderByList.add(new OrderByAttribute(variable, order));
         return this;
     }
 
     public Selector addOrderByList(List<OrderByAttribute> list) {
+
         if (list != null) {
             orderByList.addAll(list);
         }
@@ -110,6 +121,7 @@ public class Selector implements SiddhiElement {
     }
 
     public Selector limit(Constant constant) {
+
         if (constant instanceof IntConstant || constant instanceof LongConstant) {
             limit = constant;
             return this;
@@ -120,6 +132,7 @@ public class Selector implements SiddhiElement {
     }
 
     public Selector offset(Constant constant) {
+
         if (constant instanceof IntConstant || constant instanceof LongConstant) {
             offset = constant;
             return this;
@@ -130,30 +143,37 @@ public class Selector implements SiddhiElement {
     }
 
     public List<OutputAttribute> getSelectionList() {
+
         return selectionList;
     }
 
     public List<Variable> getGroupByList() {
+
         return groupByList;
     }
 
     public Expression getHavingExpression() {
+
         return havingExpression;
     }
 
     public List<OrderByAttribute> getOrderByList() {
+
         return orderByList;
     }
 
     public Constant getLimit() {
+
         return limit;
     }
 
     public Constant getOffset() {
+
         return offset;
     }
 
     public Selector addSelectionList(List<OutputAttribute> projectionList) {
+
         for (OutputAttribute outputAttribute : projectionList) {
             checkSelection(outputAttribute);
             this.selectionList.add(outputAttribute);
@@ -163,6 +183,7 @@ public class Selector implements SiddhiElement {
 
     @Override
     public String toString() {
+
         return "Selector{" +
                 "selectionList=" + selectionList +
                 ", groupByList=" + groupByList +
@@ -175,6 +196,7 @@ public class Selector implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -205,6 +227,7 @@ public class Selector implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = selectionList != null ? selectionList.hashCode() : 0;
         result = 31 * result + (groupByList != null ? groupByList.hashCode() : 0);
         result = 31 * result + (orderByList != null ? orderByList.hashCode() : 0);
@@ -216,21 +239,25 @@ public class Selector implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

@@ -31,25 +31,30 @@ public class CountStateElement implements StateElement {
     private int[] queryContextEndIndex;
 
     public CountStateElement(StreamStateElement streamStateElement, int minCount, int maxCount) {
+
         this.streamStateElement = streamStateElement;
         this.minCount = minCount;
         this.maxCount = maxCount;
     }
 
     public int getMinCount() {
+
         return minCount;
     }
 
     public int getMaxCount() {
+
         return maxCount;
     }
 
     public StreamStateElement getStreamStateElement() {
+
         return streamStateElement;
     }
 
     @Override
     public String toString() {
+
         return "CountStateElement{" +
                 "streamStateElement=" + streamStateElement +
                 ", minCount=" + minCount +
@@ -59,6 +64,7 @@ public class CountStateElement implements StateElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -83,6 +89,7 @@ public class CountStateElement implements StateElement {
 
     @Override
     public int hashCode() {
+
         int result = streamStateElement != null ? streamStateElement.hashCode() : 0;
         result = 31 * result + minCount;
         result = 31 * result + maxCount;
@@ -91,21 +98,25 @@ public class CountStateElement implements StateElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

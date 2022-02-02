@@ -34,18 +34,21 @@ public class DefineTriggerTestCase {
 
     @Test
     public void testCreatingTableDefinition() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.day(5).value()));
     }
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void testCreatingStreamWithDuplicateAttribute() {
+
         TableDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("symbol", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT);
     }
 
     @Test
     public void testCreatingSQLTableDefinition() {
+
         TableDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT).annotation(Annotation.annotation("From").element
                 ("datasource.id", "cepDataSource"));
@@ -53,30 +56,35 @@ public class DefineTriggerTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testTriggerEventNull() {
+
         TriggerDefinition trigger = null;
         SiddhiApp.siddhiApp("test").defineTrigger(trigger);
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testTriggerEventIdNull() {
+
         TriggerDefinition trigger = TriggerDefinition.id(null);
         SiddhiApp.siddhiApp("test").defineTrigger(trigger);
     }
 
     @Test
     public void testCreatingTableDefinition2() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.week(10L).value()));
     }
 
     @Test
     public void testCreatingTableDefinition3() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.week(1).value()));
     }
 
     @Test
     public void testTriggerDefinition() {
+
         TriggerDefinition triggerDefinition = new TriggerDefinition();
         triggerDefinition.setQueryContextEndIndex(new int[1]);
         triggerDefinition.setQueryContextStartIndex(new int[1]);
@@ -86,30 +94,35 @@ public class DefineTriggerTestCase {
 
     @Test
     public void testTriggerDefinition2() {
+
         SiddhiApp app = new SiddhiApp().defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.year(1).value()));
     }
 
     @Test
     public void testTriggerDefinition3() {
+
         SiddhiApp.siddhiApp().defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.month(1).value()));
     }
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
     public void testTriggerDefinition4() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.day(5).value())).defineStream(StreamDefinition.id("TriggerStream"));
     }
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
     public void testTriggerDefinition5() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").atEvery(Expression
                 .Time.day(5).value())).defineTrigger(TriggerDefinition.id("TriggerStream"));
     }
 
     @Test
     public void testTriggerDefinition6() {
+
         SiddhiApp.siddhiApp("test").defineTrigger(TriggerDefinition.id("TriggerStream").
                 atEvery(new TimeConstant(1000)).at("start"));
     }

@@ -18,7 +18,6 @@
 
 package io.siddhi.query.api;
 
-
 import java.io.Serializable;
 
 /**

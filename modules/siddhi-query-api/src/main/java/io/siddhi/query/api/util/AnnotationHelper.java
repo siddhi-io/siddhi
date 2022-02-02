@@ -32,6 +32,7 @@ import java.util.List;
 public class AnnotationHelper {
 
     public static Annotation getAnnotation(String[] annotationNames, List<Annotation> annotationList) {
+
         if (annotationNames.length == 1) {
             return getAnnotation(annotationNames[0], annotationList);
         } else {
@@ -42,6 +43,7 @@ public class AnnotationHelper {
     }
 
     public static Annotation getAnnotation(String annotationName, List<Annotation> annotationList) {
+
         Annotation annotation = null;
         for (Annotation aAnnotation : annotationList) {
             if (annotationName.equalsIgnoreCase(aAnnotation.getName())) {
@@ -57,6 +59,7 @@ public class AnnotationHelper {
     }
 
     public static List<Annotation> getAnnotations(String annotationName, List<Annotation> annotationList) {
+
         List<Annotation> annotations = new LinkedList<>();
         for (Annotation aAnnotation : annotationList) {
             if (annotationName.equalsIgnoreCase(aAnnotation.getName())) {
@@ -69,6 +72,7 @@ public class AnnotationHelper {
     // TODO: 1/28/17 update helper methods to work with nested annotations.
     public static Element getAnnotationElement(String annotationName, String elementName,
                                                List<Annotation> annotationList) {
+
         Annotation annotation = getAnnotation(annotationName, annotationList);
         if (annotation != null) {
             Element element = null;

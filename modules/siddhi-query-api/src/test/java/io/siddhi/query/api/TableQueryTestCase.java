@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -32,6 +31,7 @@ public class TableQueryTestCase {
 
     @Test
     public void testCreatingDeleteQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -55,9 +55,9 @@ public class TableQueryTestCase {
 
     }
 
-
     @Test
     public void testCreatingDeleteByTypeQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -83,6 +83,7 @@ public class TableQueryTestCase {
 
     @Test
     public void testCreatingUpdateByQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -110,6 +111,7 @@ public class TableQueryTestCase {
 
     @Test
     public void testCreatingUpdateByTypeQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -145,9 +147,9 @@ public class TableQueryTestCase {
 
     }
 
-
     @Test
     public void testCreatingInQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").
@@ -182,6 +184,7 @@ public class TableQueryTestCase {
 
     @Test
     public void testQuery1() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -253,6 +256,7 @@ public class TableQueryTestCase {
 
     @Test
     public void testQuery2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("cseEventStream").

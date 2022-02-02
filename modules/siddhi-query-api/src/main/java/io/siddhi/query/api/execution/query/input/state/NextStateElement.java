@@ -29,20 +29,24 @@ public class NextStateElement implements StateElement {
     private int[] queryContextEndIndex;
 
     public NextStateElement(StateElement stateElement, StateElement nextStateElement) {
+
         this.stateElement = stateElement;
         this.nextStateElement = nextStateElement;
     }
 
     public StateElement getStateElement() {
+
         return stateElement;
     }
 
     public StateElement getNextStateElement() {
+
         return nextStateElement;
     }
 
     @Override
     public String toString() {
+
         return "NextStateElement{" +
                 "stateElement=" + stateElement +
                 ", nextStateElement=" + nextStateElement +
@@ -51,6 +55,7 @@ public class NextStateElement implements StateElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -72,6 +77,7 @@ public class NextStateElement implements StateElement {
 
     @Override
     public int hashCode() {
+
         int result = stateElement != null ? stateElement.hashCode() : 0;
         result = 31 * result + (nextStateElement != null ? nextStateElement.hashCode() : 0);
         return result;
@@ -79,21 +85,25 @@ public class NextStateElement implements StateElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

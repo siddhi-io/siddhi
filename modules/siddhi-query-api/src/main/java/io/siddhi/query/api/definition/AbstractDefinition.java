@@ -45,30 +45,37 @@ public abstract class AbstractDefinition implements SiddhiElement {
     }
 
     protected AbstractDefinition(String id) {
+
         this.id = id;
     }
 
     public static Annotation annotation(String name) {
+
         return new Annotation(name);
     }
 
     public String getId() {
+
         return id;
     }
 
     public void setId(String id) {
+
         this.id = id;
     }
 
     public List<Attribute> getAttributeList() {
+
         return attributeList;
     }
 
     public List<Annotation> getAnnotations() {
+
         return annotations;
     }
 
     protected AbstractDefinition attribute(String attributeName, Attribute.Type type) {
+
         checkAttribute(attributeName);
         this.attributeList.add(new Attribute(attributeName, type));
         this.hasDefinitionChanged = true;
@@ -76,6 +83,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
     }
 
     protected void checkAttribute(String attributeName) {
+
         for (Attribute attribute : attributeList) {
             if (attribute.getName().equals(attributeName)) {
                 throw new DuplicateAttributeException("'" + attributeName + "' is already defined for with type '" +
@@ -86,6 +94,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
     }
 
     public Attribute.Type getAttributeType(String attributeName) {
+
         for (Attribute attribute : attributeList) {
             if (attribute.getName().equals(attributeName)) {
                 return attribute.getType();
@@ -96,6 +105,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
     }
 
     public int getAttributePosition(String attributeName) {
+
         for (int i = 0, attributeListSize = attributeList.size(); i < attributeListSize; i++) {
             Attribute attribute = attributeList.get(i);
             if (attribute.getName().equals(attributeName)) {
@@ -109,6 +119,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
     // overriding the base implementation to remove hotspot on this method call
     // iterating the attribute list only if there is a change
     public String[] getAttributeNameArray() {
+
         if (hasDefinitionChanged) {
             int attributeListSize = attributeList.size();
             this.attributeNameArray = new String[attributeListSize];
@@ -122,10 +133,12 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     @Override
     public String toString() {
+
         return toString("stream");
     }
 
     protected String toString(String type) {
+
         StringBuilder definitionBuilder = new StringBuilder();
         if (annotations != null && annotations.size() > 0) {
             for (Annotation annotation : annotations) {
@@ -149,6 +162,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -173,14 +187,15 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (attributeList != null ? attributeList.hashCode() : 0);
         result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
         return result;
     }
 
-
     public boolean equalsIgnoreAnnotations(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -202,21 +217,25 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

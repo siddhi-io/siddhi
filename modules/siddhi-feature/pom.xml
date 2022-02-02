@@ -42,12 +42,12 @@
             <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -200,8 +200,8 @@
                                     <version>${slf4j.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>slf4j.log4j12</symbolicName>
-                                    <version>${slf4j.version}</version>
+                                    <symbolicName>org.apache.logging.log4j.slf4j-impl</symbolicName>
+                                    <version>${log4j.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.antlr.antlr4-runtime</symbolicName>

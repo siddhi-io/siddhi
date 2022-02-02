@@ -38,15 +38,16 @@ public class DefineStreamTestCase {
 
     @Test
     public void testCreatingStreamDefinition() {
+
         SiddhiApp.siddhiApp("Test").defineStream(StreamDefinition.id("StockStream").attribute("symbol",
                 Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
                 .FLOAT));
-
 
     }
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void testCreatingStreamWithDuplicateAttribute() {
+
         StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("symbol", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT);
 
@@ -54,12 +55,14 @@ public class DefineStreamTestCase {
 
     @Test
     public void testCreatingStreamDefinitionWithObject() {
+
         StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute
                 .Type.INT).attribute("volume", Attribute.Type.FLOAT).attribute("data", Attribute.Type.OBJECT);
     }
 
     @Test
     public void testAnnotatingStreamDefinition() {
+
         SiddhiApp.siddhiApp("Test").defineStream(StreamDefinition.id("StockStream").attribute("symbol",
                 Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
                 .FLOAT).annotation(Annotation.annotation("distribute").element("true")));
@@ -68,6 +71,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testAttribute() {
+
         StreamDefinition streamDefinition = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
         AssertJUnit.assertEquals(1, streamDefinition.getAttributePosition("price"));
@@ -76,19 +80,21 @@ public class DefineStreamTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testStreamdefintionNull() {
+
         StreamDefinition streamDefinition = null;
         SiddhiApp.siddhiApp("Test").defineStream(streamDefinition);
     }
 
-
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testStreamIdNull() {
+
         StreamDefinition streamDefinition = StreamDefinition.id(null);
         SiddhiApp.siddhiApp("Test").defineStream(streamDefinition);
     }
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
     public void testCreatingStreamDefinition2() {
+
         SiddhiApp.siddhiApp("Test").defineStream(StreamDefinition.id("StockStream").attribute("symbol",
                 Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
                 .FLOAT)).defineStream(StreamDefinition.id("StockStream").attribute("index",
@@ -98,6 +104,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testAnnotatingStreamDefinition2() {
+
         Annotation annotation = AbstractDefinition.annotation("distribute");
 
         StreamDefinition streamDefinition = StreamDefinition.id("StockStream").attribute("symbol",
@@ -113,6 +120,7 @@ public class DefineStreamTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testStreamDefinition() {
+
         StreamDefinition streamDefinition = new StreamDefinition();
 
         SiddhiApp.siddhiApp("Test").defineStream(streamDefinition);
@@ -120,6 +128,7 @@ public class DefineStreamTestCase {
 
     @Test(expectedExceptions = AttributeNotExistException.class)
     public void testStreamDefinition2() {
+
         StreamDefinition streamDefinition = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
         streamDefinition.getAttributeType("stockprice");
@@ -127,6 +136,7 @@ public class DefineStreamTestCase {
 
     @Test(expectedExceptions = AttributeNotExistException.class)
     public void testStreamDefinition3() {
+
         StreamDefinition streamDefinition = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
         streamDefinition.getAttributePosition("stockprice");
@@ -134,6 +144,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testStreamDefinition4() {
+
         String attributeList = "[Attribute{id='symbol', type=STRING}, Attribute{id='price', type=INT}," +
                 " Attribute{id='volume', type=FLOAT}]";
 
@@ -145,6 +156,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testStreamDefinition5() {
+
         StreamDefinition streamDefinition = StreamDefinition.id("StockStream").attribute("symbol", Attribute.Type
                 .STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type.FLOAT);
         String[] list = new String[]{"symbol", "price", "volume"};
@@ -154,6 +166,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testAnnotatingStreamDefinition3() {
+
         Element element = new Element("name", "query1");
 
         String annotationString = "[@map( type = \"xml\", namespace = \"h=uri, a=uri\", @attributes( \"//h:time\", " +
@@ -190,6 +203,7 @@ public class DefineStreamTestCase {
 
     @Test
     public void testStreamDefinition6() {
+
         StreamDefinition streamDefinition = StreamDefinition.id("Foo");
         streamDefinition.setId("StockStream");
         streamDefinition.attribute("symbol", Attribute.Type

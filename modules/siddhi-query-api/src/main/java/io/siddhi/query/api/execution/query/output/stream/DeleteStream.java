@@ -28,27 +28,32 @@ public class DeleteStream extends OutputStream {
     protected Expression onDeleteExpression;
 
     public DeleteStream(String tableId, OutputEventType outputEventType, Expression onDeleteExpression) {
+
         this.id = tableId;
         this.outputEventType = outputEventType;
         this.onDeleteExpression = onDeleteExpression;
     }
 
     public DeleteStream(String tableId, Expression onDeleteExpression) {
+
         this.id = tableId;
         this.outputEventType = null;
         this.onDeleteExpression = onDeleteExpression;
     }
 
     public Expression getOnDeleteExpression() {
+
         return onDeleteExpression;
     }
 
     public void setOnDeleteExpression(Expression onDeleteExpression) {
+
         this.onDeleteExpression = onDeleteExpression;
     }
 
     @Override
     public String toString() {
+
         return "DeleteStream{" +
                 "onDeleteExpression=" + onDeleteExpression +
                 "} " + super.toString();
@@ -56,6 +61,7 @@ public class DeleteStream extends OutputStream {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -75,6 +81,7 @@ public class DeleteStream extends OutputStream {
 
     @Override
     public int hashCode() {
+
         return onDeleteExpression != null ? onDeleteExpression.hashCode() : 0;
     }
 }

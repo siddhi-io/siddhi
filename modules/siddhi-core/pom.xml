@@ -116,6 +116,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
+                            org.apache.logging.log4j.*;,
                             io.siddhi.core;version="${project.version}",
                             io.siddhi.core.*;version="${project.version}"
                         </Export-Package>
