@@ -28,7 +28,8 @@ import io.siddhi.core.table.holder.IndexedEventHolder;
 import io.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
 import io.siddhi.core.util.collection.AddingStreamEventExtractor;
 import io.siddhi.core.util.collection.executor.CollectionExecutor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -39,7 +40,7 @@ import java.util.Set;
  */
 public class IndexOperator implements Operator {
 
-    private static final Logger log = Logger.getLogger(IndexOperator.class);
+    private static final Logger log = LogManager.getLogger(IndexOperator.class);
     protected String queryName;
     private CollectionExecutor collectionExecutor;
 

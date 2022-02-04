@@ -38,60 +38,73 @@ public class AggregationDefinition extends AbstractDefinition {
     private TimePeriod timePeriod = null;
 
     protected AggregationDefinition(String id) {
+
         super(id);
     }
 
     public static AggregationDefinition id(String aggregationName) {
+
         return new AggregationDefinition(aggregationName);
     }
 
     public AggregationDefinition select(BasicSelector selector) {
+
         this.selector = selector;
         return this;
     }
 
     public Selector getSelector() {
+
         return this.selector;
     }
 
     public AggregationDefinition aggregateBy(Variable aggregateAttribute) {
+
         this.aggregateAttribute = aggregateAttribute;
         return this;
     }
 
     public Variable getAggregateAttribute() {
+
         return this.aggregateAttribute;
     }
 
     public AggregationDefinition every(TimePeriod timePeriod) {
+
         this.timePeriod = timePeriod;
         return this;
     }
 
     public TimePeriod getTimePeriod() {
+
         return this.timePeriod;
     }
 
     public AggregationDefinition from(BasicSingleInputStream basicSingleInputStream) {
+
         this.basicSingleInputStream = basicSingleInputStream;
         return this;
     }
 
     public BasicSingleInputStream getBasicSingleInputStream() {
+
         return this.basicSingleInputStream;
     }
 
     public AggregationDefinition annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     public List<Annotation> getAnnotations() {
+
         return this.annotations;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -122,6 +135,7 @@ public class AggregationDefinition extends AbstractDefinition {
 
     @Override
     public int hashCode() {
+
         int result = super.hashCode();
         result = 31 * result + basicSingleInputStream.hashCode();
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
@@ -133,6 +147,7 @@ public class AggregationDefinition extends AbstractDefinition {
 
     @Override
     public String toString() {
+
         return super.toString("aggregation");
     }
 

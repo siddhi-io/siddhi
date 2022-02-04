@@ -25,10 +25,12 @@ public class ReturnStream extends OutputStream {
     private static final long serialVersionUID = 1L;
 
     public ReturnStream(OutputEventType outputEventType) {
+
         this.outputEventType = outputEventType;
     }
 
     public ReturnStream() {
+
         this(null);
     }
 }

@@ -33,81 +33,99 @@ public class BasicSingleInputStream extends SingleInputStream {
     private static final long serialVersionUID = 1L;
 
     protected BasicSingleInputStream(String streamId) {
+
         this(streamId, false);
     }
 
     protected BasicSingleInputStream(String streamId, boolean isInnerStream) {
+
         super(streamId, isInnerStream);
     }
 
     public BasicSingleInputStream(String streamReferenceId, String streamId) {
+
         this(streamReferenceId, streamId, false);
     }
 
     public BasicSingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream) {
+
         super(streamReferenceId, streamId, isInnerStream, false);
     }
 
     public BasicSingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream,
                                   boolean isFaultStream) {
+
         super(streamReferenceId, streamId, isInnerStream, isFaultStream);
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     public String getStreamReferenceId() {
+
         return streamReferenceId;
     }
 
     public BasicSingleInputStream as(String streamReferenceId) {
+
         this.streamReferenceId = streamReferenceId;
         return this;
     }
 
     public List<StreamHandler> getStreamHandlers() {
+
         return streamHandlers;
     }
 
     public void addStreamHandlers(List<StreamHandler> streamHandlers) {
+
         this.streamHandlers = streamHandlers;
     }
 
     public BasicSingleInputStream filter(Expression filterExpression) {
+
         streamHandlers.add(new Filter(filterExpression));
         return this;
     }
 
     public BasicSingleInputStream filter(Filter filter) {
+
         streamHandlers.add(filter);
         return this;
     }
 
     public SingleInputStream window(String name, Expression... parameters) {
+
         return new SingleInputStream(this, new Window(name, parameters));
     }
 
     public SingleInputStream window(String namespace, String function, Expression... parameters) {
+
         return new SingleInputStream(this, new Window(namespace, function, parameters));
     }
 
     public SingleInputStream window(Window window) {
+
         return new SingleInputStream(this, window);
     }
 
     public BasicSingleInputStream function(String name, Expression... parameters) {
+
         streamHandlers.add(new StreamFunction(name, parameters));
         return this;
     }
 
     public BasicSingleInputStream function(String extensionNamespace, String functionName,
                                            Expression... parameters) {
+
         streamHandlers.add(new StreamFunction(extensionNamespace, functionName, parameters));
         return this;
     }
 
     public BasicSingleInputStream function(StreamFunction streamFunction) {
+
         streamHandlers.add(streamFunction);
         return this;
     }

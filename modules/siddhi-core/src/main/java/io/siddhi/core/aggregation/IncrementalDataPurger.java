@@ -51,7 +51,8 @@ import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -70,7 +71,7 @@ import static io.siddhi.query.api.expression.Expression.Time.timeToLong;
  * This class implements the logic which is needed to purge data which are related to incremental
  **/
 public class IncrementalDataPurger implements Runnable {
-    private static final Logger LOG = Logger.getLogger(IncrementalDataPurger.class);
+    private static final Logger LOG = LogManager.getLogger(IncrementalDataPurger.class);
     private static final Long RETAIN_ALL = -1L;
     private static final String RETAIN_ALL_VALUES = "all";
     private static final String AGGREGATION_START_TIME = "aggregationStartTime";

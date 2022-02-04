@@ -47,10 +47,6 @@ public class ErroneousEvent {
         this.cause = cause;
     }
 
-    public void setOriginalPayload(Object originalPayload) {
-        this.originalPayload = originalPayload;
-    }
-
     public Object getEvent() {
         return event;
     }
@@ -65,5 +61,9 @@ public class ErroneousEvent {
 
     public Object getOriginalPayload() {
         return originalPayload;
+    }
+
+    public void setOriginalPayload(Object originalPayload) {
+        this.originalPayload = originalPayload;
     }
 }

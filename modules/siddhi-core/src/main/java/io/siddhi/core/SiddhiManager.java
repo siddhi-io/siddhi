@@ -35,7 +35,8 @@ import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.compiler.SiddhiCompiler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ import javax.sql.DataSource;
  */
 public class SiddhiManager {
 
-    private static final Logger log = Logger.getLogger(SiddhiManager.class);
+    private static final Logger log = LogManager.getLogger(SiddhiManager.class);
     private SiddhiContext siddhiContext;
     private ConcurrentMap<String, SiddhiAppRuntime> siddhiAppRuntimeMap = new ConcurrentHashMap<String,
             SiddhiAppRuntime>();

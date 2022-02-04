@@ -74,7 +74,8 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class OnDemandQueryParser {
      * @param aggregationMap   keyvalue containing aggregation runtimes.
      * @return OnDemandQueryRuntime
      */
-    private static final Logger log = Logger.getLogger(OnDemandQueryParser.class);
+    private static final Logger log = LogManager.getLogger(OnDemandQueryParser.class);
 
     public static OnDemandQueryRuntime parse(OnDemandQuery onDemandQuery, String onDemandQueryString,
                                              SiddhiAppContext siddhiAppContext,

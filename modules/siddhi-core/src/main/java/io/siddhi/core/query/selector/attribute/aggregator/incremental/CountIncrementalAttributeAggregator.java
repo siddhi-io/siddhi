@@ -24,7 +24,8 @@ import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * {@link IncrementalAttributeAggregator} to calculate count based on an event attribute.
@@ -49,7 +50,7 @@ import org.apache.log4j.Logger;
 )
 public class CountIncrementalAttributeAggregator extends IncrementalAttributeAggregator {
 
-    private static final Logger LOG = Logger.getLogger(CountIncrementalAttributeAggregator.class);
+    private static final Logger LOG = LogManager.getLogger(CountIncrementalAttributeAggregator.class);
     private Attribute[] baseAttributes;
     private Expression[] baseAttributesInitialValues;
 

@@ -86,7 +86,7 @@ public class TestTrpSourceMapper extends PassThroughSourceMapper {
             } else {
                 throw new MappingFailedException(Collections.singletonList(new ErroneousEvent(eventObject,
                         "Event object must be either Event[], Event or Object[] " +
-                        "but found " + eventObject.getClass().getCanonicalName())));
+                                "but found " + eventObject.getClass().getCanonicalName())));
             }
         }
     }

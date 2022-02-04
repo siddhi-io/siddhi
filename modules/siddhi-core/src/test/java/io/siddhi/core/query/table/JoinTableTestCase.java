@@ -26,14 +26,15 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class JoinTableTestCase {
-    private static final Logger log = Logger.getLogger(JoinTableTestCase.class);
+    private static final Logger log = LogManager.getLogger(JoinTableTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

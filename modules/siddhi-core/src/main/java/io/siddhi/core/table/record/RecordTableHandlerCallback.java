@@ -21,7 +21,8 @@ import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 public class RecordTableHandlerCallback {
 
-    private static final Logger log = Logger.getLogger(RecordTableHandlerCallback.class);
+    private static final Logger log = LogManager.getLogger(RecordTableHandlerCallback.class);
 
     private AbstractRecordTable abstractRecordTable;
 

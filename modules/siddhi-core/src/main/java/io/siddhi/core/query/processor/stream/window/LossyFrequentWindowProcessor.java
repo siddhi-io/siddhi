@@ -41,7 +41,8 @@ import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Deprecated
 public class LossyFrequentWindowProcessor extends
         SlidingFindableWindowProcessor<LossyFrequentWindowProcessor.WindowState> {
-    private static final Logger log = Logger.getLogger(LossyFrequentWindowProcessor.class);
+    private static final Logger log = LogManager.getLogger(LossyFrequentWindowProcessor.class);
     private VariableExpressionExecutor[] variableExpressionExecutors;
 
     private double support;           // these will be initialize during init

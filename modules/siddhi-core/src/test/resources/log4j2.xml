@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="io.siddhi.core" >
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT"/>
+        <TestAppenderToValidateLogsForCachingTests name="TestAppenderToValidateLogsForCachingTests"/>
+        <UnitTestAppender name="UnitTestAppender"/>
+    </Appenders>
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="ConsoleAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

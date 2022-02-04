@@ -24,7 +24,8 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.query.api.execution.query.Query;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ import java.util.List;
  */
 public abstract class QueryCallback {
 
-    private static final Logger log = Logger.getLogger(QueryCallback.class);
+    private static final Logger log = LogManager.getLogger(QueryCallback.class);
 
     private SiddhiAppContext siddhiAppContext;
     private Query query;
@@ -46,12 +47,12 @@ public abstract class QueryCallback {
         this.query = query;
     }
 
-    public void setQueryName(String queryName) {
-        this.queryName = queryName;
-    }
-
     public String getQueryName() {
         return queryName;
+    }
+
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
     }
 
     public void setContext(SiddhiAppContext siddhiAppContext) {

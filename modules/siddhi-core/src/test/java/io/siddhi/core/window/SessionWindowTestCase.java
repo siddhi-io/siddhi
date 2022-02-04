@@ -31,7 +31,10 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -44,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SessionWindowTestCase {
 
-    private static final Logger log = Logger.getLogger(SessionWindowTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(SessionWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
@@ -744,11 +747,13 @@ public class SessionWindowTestCase {
         log.info("SessionWindow Test16: Testing session window, "
                 + "late event which does not belong to the current "
                 + "session window without an allowedLatency time period");
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        Logger logger = Logger.getLogger(SessionWindowProcessor.class);
-        UnitTestAppender appender = new UnitTestAppender();
+        Logger logger = (Logger) LogManager.getLogger(SessionWindowProcessor.class);
         logger.addAppender(appender);
 
         String purchaseEventStream = ""
@@ -815,11 +820,13 @@ public class SessionWindowTestCase {
                 + "three late events are coming, one belongs to the current session"
                 + "and the another belongs to the previous session and the other "
                 + "does not belong to the previous session");
+        LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        UnitTestAppender appender = config.getAppender("UnitTestAppender");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        Logger logger = Logger.getLogger(SessionWindowProcessor.class);
-        UnitTestAppender appender = new UnitTestAppender();
+        Logger logger = (Logger) LogManager.getLogger(SessionWindowProcessor.class);
         logger.addAppender(appender);
 
         String purchaseEventStream = ""

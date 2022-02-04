@@ -61,6 +61,7 @@ import java.util.regex.Pattern;
 public class SiddhiCompiler {
 
     public static SiddhiApp parse(String siddhiApp) {
+
         CharStream input = CharStreams.fromString(siddhiApp);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -78,6 +79,7 @@ public class SiddhiCompiler {
     }
 
     public static StreamDefinition parseStreamDefinition(String streamDefinition) {
+
         CharStream input = CharStreams.fromString(streamDefinition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -94,6 +96,7 @@ public class SiddhiCompiler {
     }
 
     public static TableDefinition parseTableDefinition(String tableDefinition) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(tableDefinition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -111,6 +114,7 @@ public class SiddhiCompiler {
 
     public static AggregationDefinition parseAggregationDefinition(String aggregationDefinition)
             throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(aggregationDefinition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -127,6 +131,7 @@ public class SiddhiCompiler {
     }
 
     public static Partition parsePartition(String partition) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(partition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -143,6 +148,7 @@ public class SiddhiCompiler {
     }
 
     public static Query parseQuery(String query) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(query);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -159,6 +165,7 @@ public class SiddhiCompiler {
     }
 
     public static FunctionDefinition parseFunctionDefinition(String functionDefinition) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(functionDefinition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -175,6 +182,7 @@ public class SiddhiCompiler {
     }
 
     public static TimeConstant parseTimeConstantDefinition(String timeConstantDefinition) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(timeConstantDefinition);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -191,6 +199,7 @@ public class SiddhiCompiler {
     }
 
     public static OnDemandQuery parseOnDemandQuery(String onDemandQueryString) throws SiddhiParserException {
+
         CharStream input = CharStreams.fromString(onDemandQueryString);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -208,12 +217,13 @@ public class SiddhiCompiler {
     }
 
     public static StoreQuery parseStoreQuery(String storeQuery) throws SiddhiParserException {
+
         OnDemandQuery onDemandQuery = parseOnDemandQuery(storeQuery);
         return new StoreQuery(onDemandQuery);
     }
 
-
     public static Expression parseExpression(String expression) {
+
         CharStream input = CharStreams.fromString(expression);
         SiddhiQLLexer lexer = new SiddhiQLLexer(input);
         lexer.removeErrorListeners();
@@ -229,8 +239,8 @@ public class SiddhiCompiler {
         return (Expression) eval.visit(tree);
     }
 
-
     public static String updateVariables(String siddhiApp) {
+
         String updatedSiddhiApp = siddhiApp;
         if (siddhiApp.contains("$")) {
             Pattern variablePattern = Pattern.compile("\\$\\{(\\w+)\\}");

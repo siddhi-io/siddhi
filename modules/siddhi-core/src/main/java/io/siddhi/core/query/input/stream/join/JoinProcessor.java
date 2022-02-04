@@ -34,7 +34,8 @@ import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.List;
  * Created on 12/8/14.
  */
 public class JoinProcessor implements Processor {
-    private static final Logger log = Logger.getLogger(JoinProcessor.class);
+    private static final Logger log = LogManager.getLogger(JoinProcessor.class);
     private boolean trigger;
     private boolean leftJoinProcessor = false;
     private boolean outerJoinProcessor = false;

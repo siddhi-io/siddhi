@@ -30,21 +30,24 @@ public class And extends Expression {
     private Expression rightExpression;
 
     public And(Expression leftExpression, Expression rightExpression) {
+
         this.leftExpression = leftExpression;
         this.rightExpression = rightExpression;
     }
 
-
     public Expression getLeftExpression() {
+
         return leftExpression;
     }
 
     public Expression getRightExpression() {
+
         return rightExpression;
     }
 
     @Override
     public String toString() {
+
         return "And{" +
                 "leftExpression=" + leftExpression +
                 ", rightExpression=" + rightExpression +
@@ -53,6 +56,7 @@ public class And extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -74,6 +78,7 @@ public class And extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = leftExpression != null ? leftExpression.hashCode() : 0;
         result = 31 * result + (rightExpression != null ? rightExpression.hashCode() : 0);
         return result;

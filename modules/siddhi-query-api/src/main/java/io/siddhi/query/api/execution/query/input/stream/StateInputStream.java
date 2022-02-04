@@ -42,6 +42,7 @@ public class StateInputStream extends InputStream {
     private TimeConstant withinTime;
 
     public StateInputStream(Type stateType, StateElement stateElement, TimeConstant withinTime) {
+
         this.stateType = stateType;
         this.stateElement = stateElement;
         this.streamIdList = collectStreamIds(stateElement, new ArrayList<>());
@@ -50,24 +51,29 @@ public class StateInputStream extends InputStream {
     }
 
     public StateElement getStateElement() {
+
         return stateElement;
     }
 
     public Type getStateType() {
+
         return stateType;
     }
 
     @Override
     public List<String> getAllStreamIds() {
+
         return streamIdList;
     }
 
     public List<StreamHandler> getStreamHandlers() {
+
         return streamHandlers;
     }
 
     @Override
     public List<String> getUniqueStreamIds() {
+
         List<String> uniqueStreams = new ArrayList<String>();
         for (String aStreamId : streamIdList) {
             if (!uniqueStreams.contains(aStreamId)) {
@@ -79,6 +85,7 @@ public class StateInputStream extends InputStream {
 
     private List<String> collectStreamIds(StateElement stateElement,
                                           List<String> streamIds) {
+
         if (stateElement instanceof LogicalStateElement) {
             collectStreamIds(((LogicalStateElement) stateElement).getStreamStateElement1(), streamIds);
             collectStreamIds(((LogicalStateElement) stateElement).getStreamStateElement2(), streamIds);
@@ -99,6 +106,7 @@ public class StateInputStream extends InputStream {
 
     private List<StreamHandler> collectStreamHanders(StateElement stateElement,
                                                      List<StreamHandler> streamHandlers) {
+
         if (stateElement instanceof LogicalStateElement) {
             collectStreamHanders(((LogicalStateElement) stateElement).getStreamStateElement1(), streamHandlers);
             collectStreamHanders(((LogicalStateElement) stateElement).getStreamStateElement2(), streamHandlers);
@@ -118,6 +126,7 @@ public class StateInputStream extends InputStream {
     }
 
     public int getStreamCount(String streamId) {
+
         int count = 0;
         for (String aStreamId : streamIdList) {
             if (streamId.equals(aStreamId)) {
@@ -128,11 +137,13 @@ public class StateInputStream extends InputStream {
     }
 
     public TimeConstant getWithinTime() {
+
         return withinTime;
     }
 
     @Override
     public String toString() {
+
         return "StateInputStream{" +
                 "stateType=" + stateType +
                 ", stateElement=" + stateElement +
@@ -143,6 +154,7 @@ public class StateInputStream extends InputStream {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -166,6 +178,7 @@ public class StateInputStream extends InputStream {
 
     @Override
     public int hashCode() {
+
         int result = stateType != null ? stateType.hashCode() : 0;
         result = 31 * result + (stateElement != null ? stateElement.hashCode() : 0);
         result = 31 * result + (streamIdList != null ? streamIdList.hashCode() : 0);

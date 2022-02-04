@@ -17,7 +17,8 @@
  */
 package io.siddhi.core;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class ResultContainer {
-    private static final Logger log = Logger.getLogger(ResultContainer.class);
+    private static final Logger log = LogManager.getLogger(ResultContainer.class);
     private CountDownLatch latch;
     private List<ThrottleInfoHolder> results;
 

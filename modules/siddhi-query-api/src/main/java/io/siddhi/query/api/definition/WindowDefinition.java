@@ -45,6 +45,7 @@ public class WindowDefinition extends StreamDefinition {
      * @param id the window id
      */
     protected WindowDefinition(String id) {
+
         super(id);
     }
 
@@ -55,6 +56,7 @@ public class WindowDefinition extends StreamDefinition {
      * @return new instance of WindowDefinition
      */
     public static WindowDefinition id(String id) {
+
         return new WindowDefinition(id);
     }
 
@@ -65,6 +67,7 @@ public class WindowDefinition extends StreamDefinition {
      * @return the WindowDefinition object for chained method call
      */
     public WindowDefinition window(Window window) {
+
         this.window = window;
         return this;
     }
@@ -75,6 +78,7 @@ public class WindowDefinition extends StreamDefinition {
      * @return the output event type
      */
     public OutputStream.OutputEventType getOutputEventType() {
+
         return outputEventType;
     }
 
@@ -85,6 +89,7 @@ public class WindowDefinition extends StreamDefinition {
      * @param outputEventType the output event type
      */
     public void setOutputEventType(OutputStream.OutputEventType outputEventType) {
+
         this.outputEventType = outputEventType;
     }
 
@@ -94,11 +99,13 @@ public class WindowDefinition extends StreamDefinition {
      * @return the internal window
      */
     public Window getWindow() {
+
         return this.window;
     }
 
     @Override
     public String toString() {
+
         return super.toString("window") + " " + window.toString();
     }
 }

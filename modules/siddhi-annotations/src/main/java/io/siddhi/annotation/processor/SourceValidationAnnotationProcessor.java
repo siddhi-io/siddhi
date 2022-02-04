@@ -28,7 +28,9 @@ import java.text.MessageFormat;
  * This processor will extend the validation rules for validate Source specific annotation contents.
  */
 public class SourceValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+
     public SourceValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
@@ -63,6 +65,7 @@ public class SourceValidationAnnotationProcessor extends AbstractAnnotationProce
 
     @Override
     public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
+
         for (Parameter parameter : parameters) {
             String parameterName = parameter.name();
             //Check if the @Parameter name is empty.
@@ -106,6 +109,7 @@ public class SourceValidationAnnotationProcessor extends AbstractAnnotationProce
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         if (returnAttributes != null && returnAttributes.length > 0) {
             //Throw error for other classes as only in the classes extending
             //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.

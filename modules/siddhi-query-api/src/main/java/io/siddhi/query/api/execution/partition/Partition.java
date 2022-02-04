@@ -48,35 +48,42 @@ public class Partition implements ExecutionElement, SiddhiElement {
     private int[] queryContextEndIndex;
 
     public static Partition partition() {
+
         return new Partition();
     }
 
     public static RangePartitionType.RangePartitionProperty range(String partitionKey, Expression condition) {
+
         return new RangePartitionType.RangePartitionProperty(partitionKey, condition);
     }
 
     public Map<String, PartitionType> getPartitionTypeMap() {
+
         return partitionTypeMap;
     }
 
     public Partition with(String streamId, Expression expression) {
+
         ValuePartitionType valuePartitionType = new ValuePartitionType(streamId, expression);
         addPartitionType(valuePartitionType);
         return this;
     }
 
     public Partition with(String streamId, RangePartitionType.RangePartitionProperty... rangePartitionProperties) {
+
         PartitionType rangePartitionType = new RangePartitionType(streamId, rangePartitionProperties);
         addPartitionType(rangePartitionType);
         return this;
     }
 
     public Partition with(PartitionType partitionType) {
+
         addPartitionType(partitionType);
         return this;
     }
 
     public Partition addQuery(Query query) {
+
         if (query == null) {
             throw new SiddhiAppValidationException("Query should not be null");
         }
@@ -97,6 +104,7 @@ public class Partition implements ExecutionElement, SiddhiElement {
     }
 
     private void addPartitionType(PartitionType partitionType) {
+
         String partitionedStream = partitionType.getStreamId();
         if (partitionTypeMap.containsKey(partitionedStream)) {
             throw new SiddhiAppValidationException("Duplicate partition for Stream " + partitionedStream + "!, "
@@ -108,20 +116,24 @@ public class Partition implements ExecutionElement, SiddhiElement {
     }
 
     public List<Query> getQueryList() {
+
         return queryList;
     }
 
     public Partition annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     public List<Annotation> getAnnotations() {
+
         return annotations;
     }
 
     @Override
     public String toString() {
+
         return "Partition{" +
                 "partitionTypeMap=" + partitionTypeMap +
                 ", queryList=" + queryList +
@@ -131,6 +143,7 @@ public class Partition implements ExecutionElement, SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -156,6 +169,7 @@ public class Partition implements ExecutionElement, SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = partitionTypeMap != null ? partitionTypeMap.hashCode() : 0;
         result = 31 * result + (queryList != null ? queryList.hashCode() : 0);
         result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
@@ -164,21 +178,25 @@ public class Partition implements ExecutionElement, SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

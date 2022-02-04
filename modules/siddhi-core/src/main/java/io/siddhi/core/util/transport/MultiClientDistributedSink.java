@@ -32,7 +32,8 @@ import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.extension.Extension;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ import java.util.Map;
  * with Sink interface and it does not make any assumptions on the underlying transport implementation.
  */
 public class MultiClientDistributedSink extends DistributedTransport {
-    private static final Logger log = Logger.getLogger(MultiClientDistributedSink.class);
+    private static final Logger log = LogManager.getLogger(MultiClientDistributedSink.class);
 
     private List<Sink> transports = new ArrayList<>();
 

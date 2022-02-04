@@ -35,7 +35,8 @@ import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FilterTestCase1 {
-    private static final Logger log = Logger.getLogger(FilterTestCase1.class);
+    private static final Logger log = LogManager.getLogger(FilterTestCase1.class);
     private AtomicInteger count;
     private AtomicBoolean eventArrived;
 
@@ -1911,7 +1912,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -1951,7 +1952,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -1991,7 +1992,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2031,7 +2032,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2388,7 +2389,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2467,7 +2468,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2508,7 +2509,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2548,7 +2549,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();
@@ -2589,7 +2590,7 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition cseEventStream = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type
-                .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
+                        .STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.DOUBLE)
                 .attribute("quantity", Attribute.Type.INT);
 
         Query query = new Query();

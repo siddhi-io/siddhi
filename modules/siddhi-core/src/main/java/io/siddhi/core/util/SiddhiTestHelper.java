@@ -18,7 +18,8 @@
 
 package io.siddhi.core.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Helper class ot be used by siddhi tests. Any extension can utilize methods in here
  */
 public class SiddhiTestHelper {
-    private static final Logger LOG = Logger.getLogger(SiddhiTestHelper.class);
+    private static final Logger LOG = LogManager.getLogger(SiddhiTestHelper.class);
 
     private SiddhiTestHelper() {
 

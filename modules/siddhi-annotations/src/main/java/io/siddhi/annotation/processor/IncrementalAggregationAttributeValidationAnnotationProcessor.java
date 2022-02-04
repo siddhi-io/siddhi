@@ -28,12 +28,15 @@ import java.text.MessageFormat;
  * annotation contents.
  */
 public class IncrementalAggregationAttributeValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+
     public IncrementalAggregationAttributeValidationAnnotationProcessor(String extensionClassFullName) {
+
         super(extensionClassFullName);
     }
 
     @Override
     public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
+
         for (Parameter parameter : parameters) {
             String parameterName = parameter.name();
             //Check if the @Parameter name is empty.
@@ -64,6 +67,7 @@ public class IncrementalAggregationAttributeValidationAnnotationProcessor extend
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
+
         if (returnAttributes.length == 0) {
             //Throw error if the @ReturnAttributes empty.
             throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +

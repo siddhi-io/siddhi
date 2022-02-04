@@ -68,7 +68,8 @@ import io.siddhi.query.api.execution.query.selection.OutputAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotation;
  * developer can directly work with event data.
  */
 public abstract class AbstractQueryableRecordTable extends AbstractRecordTable implements QueryableProcessor {
-    private static final Logger log = Logger.getLogger(AbstractQueryableRecordTable.class);
+    private static final Logger log = LogManager.getLogger(AbstractQueryableRecordTable.class);
     public static ThreadLocal<Boolean> queryStoreWithoutCheckingCache = ThreadLocal.withInitial(() -> Boolean.FALSE);
     protected StateEvent findMatchingEvent;
     protected Selector selectorForTestOnDemandQuery;

@@ -28,7 +28,8 @@ import io.siddhi.core.util.extension.validator.InputParameterValidator;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Parent abstract class for Function Executors. Function executor will have one or more input parameters and single
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class FunctionExecutor<S extends State> implements ExpressionExecutor {
 
-    private static final Logger log = Logger.getLogger(FunctionExecutor.class);
+    private static final Logger log = LogManager.getLogger(FunctionExecutor.class);
     protected ExpressionExecutor[] attributeExpressionExecutors;
     protected SiddhiQueryContext siddhiQueryContext;
     protected String functionId;

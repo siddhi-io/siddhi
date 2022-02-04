@@ -38,7 +38,8 @@ import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.atteo.classindex.ClassIndex;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -57,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SiddhiExtensionLoader {
 
-    private static final Logger log = Logger.getLogger(SiddhiExtensionLoader.class);
+    private static final Logger log = LogManager.getLogger(SiddhiExtensionLoader.class);
     private static final Class ATTRIBUTE_AGGREGATOR_EXECUTOR_CLASS = AttributeAggregatorExecutor.class;
     private static final Class DISTRIBUTION_STRATEGY_CLASS = DistributionStrategy.class;
     private static final Class FUNCTION_EXECUTOR_CLASS = FunctionExecutor.class;

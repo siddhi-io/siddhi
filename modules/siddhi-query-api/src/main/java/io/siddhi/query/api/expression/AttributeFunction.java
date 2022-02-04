@@ -32,29 +32,35 @@ public class AttributeFunction extends Expression implements Extension {
     private String extensionNamespace;
 
     public AttributeFunction(String extensionNamespace, String functionName, Expression... parameters) {
+
         this.functionName = functionName;
         this.parameters = parameters;
         this.extensionNamespace = extensionNamespace;
     }
 
     public String getNamespace() {
+
         return extensionNamespace;
     }
 
     public String getName() {
+
         return functionName;
     }
 
     public Expression[] getParameters() {
+
         return parameters;
     }
 
     public void setParameters(Expression[] parameters) {
+
         this.parameters = parameters;
     }
 
     @Override
     public String toString() {
+
         return "AttributeFunction{" +
                 "extensionNamespace='" + extensionNamespace + '\'' +
                 ", functionName='" + functionName + '\'' +
@@ -64,6 +70,7 @@ public class AttributeFunction extends Expression implements Extension {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -89,6 +96,7 @@ public class AttributeFunction extends Expression implements Extension {
 
     @Override
     public int hashCode() {
+
         int result = extensionNamespace != null ? extensionNamespace.hashCode() : 0;
         result = 31 * result + (functionName != null ? functionName.hashCode() : 0);
         result = 31 * result + (parameters != null ? Arrays.hashCode(parameters) : 0);

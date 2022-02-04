@@ -23,7 +23,8 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,7 +34,7 @@ import org.testng.annotations.Test;
 import java.sql.SQLException;
 
 public class InTestStoreTestCase {
-    private static final Logger log = Logger.getLogger(InTestStoreTestCase.class);
+    private static final Logger log = LogManager.getLogger(InTestStoreTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

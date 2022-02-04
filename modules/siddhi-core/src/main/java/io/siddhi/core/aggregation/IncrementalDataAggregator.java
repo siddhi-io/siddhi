@@ -32,7 +32,8 @@ import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ import java.util.Set;
  * a different server (apart from the server, which was used to define the aggregation).
  */
 public class IncrementalDataAggregator {
-    private static final Logger log = Logger.getLogger(IncrementalDataAggregator.class);
+    private static final Logger log = LogManager.getLogger(IncrementalDataAggregator.class);
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration durationToAggregate;
 

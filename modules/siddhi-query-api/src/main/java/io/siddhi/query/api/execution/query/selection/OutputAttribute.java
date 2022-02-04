@@ -33,25 +33,30 @@ public class OutputAttribute implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public OutputAttribute(String rename, Expression expression) {
+
         this.rename = rename;
         this.expression = expression;
     }
 
     public OutputAttribute(Variable variable) {
+
         this.rename = variable.getAttributeName();
         this.expression = variable;
     }
 
     public String getRename() {
+
         return rename;
     }
 
     public Expression getExpression() {
+
         return expression;
     }
 
     @Override
     public String toString() {
+
         return "OutputAttribute{" +
                 "rename='" + rename + '\'' +
                 ", expression=" + expression +
@@ -60,6 +65,7 @@ public class OutputAttribute implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -81,6 +87,7 @@ public class OutputAttribute implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = rename != null ? rename.hashCode() : 0;
         result = 31 * result + (expression != null ? expression.hashCode() : 0);
         return result;
@@ -88,21 +95,25 @@ public class OutputAttribute implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

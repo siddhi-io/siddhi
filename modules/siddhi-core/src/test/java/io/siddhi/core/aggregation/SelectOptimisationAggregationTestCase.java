@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SelectOptimisationAggregationTestCase {
 
-    private static final Logger LOG = Logger.getLogger(SelectOptimisationAggregationTestCase.class);
+    private static final Logger LOG = LogManager.getLogger(SelectOptimisationAggregationTestCase.class);
     private boolean eventArrived;
     private AtomicInteger inEventCount;
     private List<Object[]> inEventsList;
@@ -718,9 +719,9 @@ public class SelectOptimisationAggregationTestCase {
         String query =
 
                 "define aggregation stockAggregation " +
-                "from stockStream " +
-                "select count() as count " +
-                "aggregate by timestamp every sec, min ;";
+                        "from stockStream " +
+                        "select count() as count " +
+                        "aggregate by timestamp every sec, min ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -796,10 +797,10 @@ public class SelectOptimisationAggregationTestCase {
         String query =
 
                 "define aggregation stockAggregation " +
-                "from stockStream " +
-                "select symbol, count() as count " +
-                "group by symbol " +
-                "aggregate by timestamp every sec, min ;";
+                        "from stockStream " +
+                        "select symbol, count() as count " +
+                        "group by symbol " +
+                        "aggregate by timestamp every sec, min ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 

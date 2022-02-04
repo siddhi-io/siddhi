@@ -21,7 +21,8 @@ package io.siddhi.core.aggregation.persistedaggregation.config;
 import com.google.common.collect.Maps;
 import io.siddhi.core.exception.CannotLoadConfigurationException;
 import io.siddhi.core.util.parser.AggregationParser;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +36,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import static io.siddhi.core.util.SiddhiConstants.DB_AGGREGATION_CONFIG_FILE;
+
 /**
  * Util class for reading persisted aggregation queries
- * **/
+ **/
 public class DBAggregationQueryUtil {
 
-    private static final Logger LOG = Logger.getLogger(DBAggregationQueryUtil.class);
+    private static final Logger LOG = LogManager.getLogger(DBAggregationQueryUtil.class);
     private static DBAggregationConfigurationMapper mapper;
 
     /**

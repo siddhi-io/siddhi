@@ -34,60 +34,73 @@ public class TriggerDefinition implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public TriggerDefinition() {
+
     }
 
     protected TriggerDefinition(String id) {
+
         this.id = id;
     }
 
     public static TriggerDefinition id(String id) {
+
         return new TriggerDefinition(id);
     }
 
     public String getId() {
+
         return id;
     }
 
     public Long getAtEvery() {
+
         return atEvery;
     }
 
     public String getAt() {
+
         return at;
     }
 
     public TriggerDefinition atEvery(long timeInMilliSeconds) {
+
         this.atEvery = timeInMilliSeconds;
         return this;
     }
 
     public TriggerDefinition at(String interval) {
+
         this.at = interval;
         return this;
     }
 
     public TriggerDefinition atEvery(TimeConstant time) {
+
         this.atEvery = time.value();
         return this;
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

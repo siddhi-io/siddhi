@@ -34,14 +34,12 @@ public class StoreQuery implements SiddhiElement {
     private OnDemandQuery onDemandQuery = new OnDemandQuery();
 
     public StoreQuery(OnDemandQuery onDemandQuery) {
+
         this.onDemandQuery = onDemandQuery;
     }
 
     public StoreQuery() {
-    }
 
-    public OnDemandQuery getOnDemandQuery() {
-        return onDemandQuery;
     }
 
     /**
@@ -50,7 +48,13 @@ public class StoreQuery implements SiddhiElement {
      * @return a new storeQuery instance
      */
     public static StoreQuery query() {
+
         return new StoreQuery();
+    }
+
+    public OnDemandQuery getOnDemandQuery() {
+
+        return onDemandQuery;
     }
 
     /**
@@ -60,6 +64,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery from(InputStore inputStore) {
+
         onDemandQuery.from(inputStore);
         return this;
     }
@@ -70,6 +75,7 @@ public class StoreQuery implements SiddhiElement {
      * @return inputStore
      */
     public InputStore getInputStore() {
+
         return onDemandQuery.getInputStore();
     }
 
@@ -80,6 +86,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery select(Selector selector) {
+
         onDemandQuery.select(selector);
         return this;
     }
@@ -91,6 +98,7 @@ public class StoreQuery implements SiddhiElement {
      * @return updated store query
      */
     public StoreQuery outStream(OutputStream outputStream) {
+
         onDemandQuery.outStream(outputStream);
         return this;
     }
@@ -102,6 +110,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onDeletingExpression expression for the delete operation defined in the store query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
+
         onDemandQuery.deleteBy(outputTableId, onDeletingExpression);
     }
 
@@ -112,6 +121,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
+
         onDemandQuery.updateBy(outputTableId, onUpdateExpression);
     }
 
@@ -123,6 +133,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         onDemandQuery.updateBy(outputTableId, updateSetAttributes, onUpdateExpression);
     }
 
@@ -134,6 +145,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update or insert operation defined in the store query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+
         onDemandQuery.updateBy(outputTableId, updateSetAttributes, onUpdateExpression);
     }
 
@@ -143,6 +155,7 @@ public class StoreQuery implements SiddhiElement {
      * @return selector of the store query
      */
     public Selector getSelector() {
+
         return onDemandQuery.getSelector();
     }
 
@@ -152,16 +165,19 @@ public class StoreQuery implements SiddhiElement {
      * @return outputStream of the store query
      */
     public OutputStream getOutputStream() {
+
         return onDemandQuery.getOutputStream();
     }
 
     @Override
     public String toString() {
+
         return onDemandQuery.toString();
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         } else if (o instanceof OnDemandQuery) {
@@ -173,27 +189,31 @@ public class StoreQuery implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         return onDemandQuery.hashCode();
     }
 
-
     @Override
     public int[] getQueryContextStartIndex() {
+
         return onDemandQuery.getQueryContextStartIndex();
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         onDemandQuery.setQueryContextStartIndex(lineAndColumn);
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return onDemandQuery.getQueryContextEndIndex();
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         onDemandQuery.setQueryContextEndIndex(lineAndColumn);
     }
 
@@ -203,6 +223,7 @@ public class StoreQuery implements SiddhiElement {
      * @return type of given store query
      */
     public StoreQueryType getType() {
+
         switch (onDemandQuery.getType()) {
             case INSERT:
                 return StoreQueryType.INSERT;
@@ -224,6 +245,7 @@ public class StoreQuery implements SiddhiElement {
      * This method sets the type of given store query.
      */
     public void setType(StoreQueryType type) {
+
         switch (type) {
 
             case INSERT:

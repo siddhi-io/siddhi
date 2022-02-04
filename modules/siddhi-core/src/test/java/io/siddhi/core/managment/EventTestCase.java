@@ -19,13 +19,14 @@
 package io.siddhi.core.managment;
 
 import io.siddhi.core.event.Event;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class EventTestCase {
-    private static final Logger log = Logger.getLogger(EventTestCase.class);
+    private static final Logger log = LogManager.getLogger(EventTestCase.class);
     private int count;
     private boolean eventArrived;
     private long firstValue;

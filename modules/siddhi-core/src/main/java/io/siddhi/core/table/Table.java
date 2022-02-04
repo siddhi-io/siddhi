@@ -52,7 +52,8 @@ import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ import static io.siddhi.query.api.util.AnnotationHelper.getAnnotationElement;
  */
 public abstract class Table implements FindableProcessor, MemoryCalculable {
 
-    private static final Logger LOG = Logger.getLogger(Table.class);
+    private static final Logger LOG = LogManager.getLogger(Table.class);
     public Map<String, Table> tableMap;
     protected TableDefinition tableDefinition;
     protected SiddhiAppContext siddhiAppContext;
@@ -103,7 +104,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         this.siddhiAppContext = siddhiAppContext;
         this.recordTableHandler = recordTableHandler;
         Element onErrorElement = getAnnotationElement(ANNOTATION_STORE, ANNOTATION_ELEMENT_ON_ERROR,
-            tableDefinition.getAnnotations());
+                tableDefinition.getAnnotations());
         if (onErrorElement != null) {
             this.onErrorAction = OnErrorAction.valueOf(onErrorElement.getValue());
         }
@@ -342,7 +343,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public abstract void delete(ComplexEventChunk<StateEvent> deletingEventChunk,
-                                    CompiledCondition compiledCondition);
+                                CompiledCondition compiledCondition);
 
     protected void onUpdateError(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
                                  CompiledUpdateSet compiledUpdateSet, Exception e) {
@@ -407,15 +408,15 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
 
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
-                                CompiledCondition compiledCondition,
-                                CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
+                             CompiledCondition compiledCondition,
+                             CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
         if (latencyTrackerUpdate != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             latencyTrackerUpdate.markIn();
         }
         update(updatingEventChunk, compiledCondition, compiledUpdateSet);
         if (throughputTrackerUpdate != null &&
-            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTrackerUpdate.eventsIn(noOfEvents);
         }
     }
@@ -425,9 +426,9 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                 CompiledUpdateSet compiledUpdateSet);
 
     protected void onUpdateOrAddError(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                        CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                                        AddingStreamEventExtractor addingStreamEventExtractor,
-                                        Exception e) {
+                                      CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
+                                      AddingStreamEventExtractor addingStreamEventExtractor,
+                                      Exception e) {
         OnErrorAction errorAction = onErrorAction;
         if (e instanceof ConnectionUnavailableException) {
             isConnected.set(false);
@@ -506,9 +507,9 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public abstract void updateOrAdd(ComplexEventChunk<StateEvent> updateOrAddingEventChunk,
-                                        CompiledCondition compiledCondition,
-                                        CompiledUpdateSet compiledUpdateSet,
-                                        AddingStreamEventExtractor addingStreamEventExtractor);
+                                     CompiledCondition compiledCondition,
+                                     CompiledUpdateSet compiledUpdateSet,
+                                     AddingStreamEventExtractor addingStreamEventExtractor);
 
     public boolean containsEvent(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         if (isConnected.get()) {

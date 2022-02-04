@@ -61,7 +61,8 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.BoolConstant;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * Aggregation runtime managing aggregation operations for aggregation definition.
  */
 public class AggregationRuntime implements MemoryCalculable {
-    private static final Logger LOG = Logger.getLogger(AggregationRuntime.class);
+    private static final Logger LOG = LogManager.getLogger(AggregationRuntime.class);
 
     private AggregationDefinition aggregationDefinition;
     private boolean isProcessingOnExternalTime;

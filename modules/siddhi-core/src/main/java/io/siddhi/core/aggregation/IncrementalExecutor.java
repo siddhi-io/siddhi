@@ -33,7 +33,8 @@ import io.siddhi.core.util.parser.AggregationParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Incremental executor class which is responsible for performing incremental aggregation.
  */
 public class IncrementalExecutor implements Executor {
-    private static final Logger LOG = Logger.getLogger(IncrementalExecutor.class);
+    private static final Logger LOG = LogManager.getLogger(IncrementalExecutor.class);
 
     private final String aggregatorName;
     private final StreamEvent resetEvent;

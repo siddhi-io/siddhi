@@ -29,15 +29,18 @@ public class Not extends Expression {
     private Expression expression;
 
     public Not(Expression expression) {
+
         this.expression = expression;
     }
 
     public Expression getExpression() {
+
         return expression;
     }
 
     @Override
     public String toString() {
+
         return "Not{" +
                 "expression=" + expression +
                 "}";
@@ -45,6 +48,7 @@ public class Not extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -63,6 +67,7 @@ public class Not extends Expression {
 
     @Override
     public int hashCode() {
+
         return expression != null ? expression.hashCode() : 0;
     }
 

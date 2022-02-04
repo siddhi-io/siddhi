@@ -27,14 +27,15 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class OnDemandQueryTableTestCase {
 
-    private static final Logger log = Logger.getLogger(OnDemandQueryTableTestCase.class);
+    private static final Logger log = LogManager.getLogger(OnDemandQueryTableTestCase.class);
 
     @Test
     public void test1() throws InterruptedException {
@@ -875,7 +876,7 @@ public class OnDemandQueryTableTestCase {
 
         try {
             siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
-                "'minutes' select AGG_TIMESTAMP2, symbol, totalPrice, avgPrice ");
+                    "'minutes' select AGG_TIMESTAMP2, symbol, totalPrice, avgPrice ");
             Thread.sleep(100);
             Assert.fail("Expected OnDemandQueryCreationException exception");
         } catch (OnDemandQueryCreationException e) {

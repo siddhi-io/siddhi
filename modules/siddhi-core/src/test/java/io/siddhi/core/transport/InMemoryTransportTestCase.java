@@ -30,7 +30,8 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -43,7 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryTransportTestCase {
-    private static final Logger log = Logger.getLogger(InMemoryTransportTestCase.class);
+    private static final Logger log = LogManager.getLogger(InMemoryTransportTestCase.class);
     private AtomicInteger wso2Count = new AtomicInteger(0);
     private AtomicInteger ibmCount = new AtomicInteger(0);
 

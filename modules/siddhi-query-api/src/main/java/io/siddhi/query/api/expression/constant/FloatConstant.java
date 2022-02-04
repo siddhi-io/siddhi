@@ -28,15 +28,18 @@ public class FloatConstant extends Expression implements Constant {
     private Float value;
 
     public FloatConstant(float value) {
+
         this.value = value;
     }
 
     public Float getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         return "FloatConstant{" +
                 "value=" + value +
                 '}';
@@ -44,6 +47,7 @@ public class FloatConstant extends Expression implements Constant {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -62,6 +66,7 @@ public class FloatConstant extends Expression implements Constant {
 
     @Override
     public int hashCode() {
+
         return value != null ? value.hashCode() : 0;
     }
 }

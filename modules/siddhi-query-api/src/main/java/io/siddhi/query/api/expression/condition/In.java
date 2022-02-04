@@ -30,20 +30,24 @@ public class In extends Expression {
     private String sourceId;
 
     public In(Expression expression, String sourceId) {
+
         this.expression = expression;
         this.sourceId = sourceId;
     }
 
     public Expression getExpression() {
+
         return expression;
     }
 
     public String getSourceId() {
+
         return sourceId;
     }
 
     @Override
     public String toString() {
+
         return "In{" +
                 "expression=" + expression +
                 ", sourceId='" + sourceId + '\'' +
@@ -52,6 +56,7 @@ public class In extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -73,6 +78,7 @@ public class In extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = expression != null ? expression.hashCode() : 0;
         result = 31 * result + (sourceId != null ? sourceId.hashCode() : 0);
         return result;

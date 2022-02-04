@@ -30,11 +30,13 @@ public class Filter implements StreamHandler {
     private int[] queryContextEndIndex;
 
     public Filter(Expression filterExpression) {
+
         this.filterExpression = filterExpression;
     }
 
     @Override
     public String toString() {
+
         return "Filter{" +
                 "filterExpression=" + filterExpression +
                 '}';
@@ -42,6 +44,7 @@ public class Filter implements StreamHandler {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -60,31 +63,37 @@ public class Filter implements StreamHandler {
 
     @Override
     public int hashCode() {
+
         return filterExpression.hashCode();
     }
 
     @Override
     public Expression[] getParameters() {
+
         return new Expression[]{filterExpression};
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

@@ -20,7 +20,8 @@ package io.siddhi.core.util.snapshot;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.util.ExceptionUtil;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +33,7 @@ import java.io.ObjectOutputStream;
  * Serializer used by {@link SnapshotService} to do Object to Byte[] conversion and vise-versa
  */
 public class ByteSerializer {
-    private static final Logger log = Logger.getLogger(ByteSerializer.class);
+    private static final Logger log = LogManager.getLogger(ByteSerializer.class);
 
     private ByteSerializer() {
     }

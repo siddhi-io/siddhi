@@ -31,27 +31,32 @@ public class AggregationInputStore extends ConditionInputStore {
     private final Expression per;
 
     protected AggregationInputStore(Store store, Expression onCondition, Within within, Expression per) {
+
         super(store, onCondition);
         this.within = within;
         this.per = per;
     }
 
     protected AggregationInputStore(Store store, Within within, Expression per) {
+
         super(store, null);
         this.within = within;
         this.per = per;
     }
 
     public Within getWithin() {
+
         return within;
     }
 
     public Expression getPer() {
+
         return per;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -75,6 +80,7 @@ public class AggregationInputStore extends ConditionInputStore {
 
     @Override
     public int hashCode() {
+
         int result = within != null ? within.hashCode() : 0;
         result = 31 * result + (per != null ? per.hashCode() : 0);
         return result;
@@ -82,6 +88,7 @@ public class AggregationInputStore extends ConditionInputStore {
 
     @Override
     public String toString() {
+
         return "AggregationInputStore{" +
                 "store=" + store +
                 ", onCondition=" + onCondition +

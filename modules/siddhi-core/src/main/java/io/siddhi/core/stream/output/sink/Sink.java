@@ -44,7 +44,8 @@ import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class Sink<S extends State> implements SinkListener {
 
-    private static final Logger LOG = Logger.getLogger(Sink.class);
+    private static final Logger LOG = LogManager.getLogger(Sink.class);
     protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private StreamDefinition streamDefinition;
     private String type;

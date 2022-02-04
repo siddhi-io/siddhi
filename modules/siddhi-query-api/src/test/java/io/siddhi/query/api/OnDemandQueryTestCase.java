@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
@@ -33,6 +32,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test1() {
+
         StoreQuery.query().
                 from(
                         InputStore.store("cseEventTable")).
@@ -52,6 +52,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test2() {
+
         StoreQuery.query().
                 from(
                         InputStore.store("cseEventTable").
@@ -71,9 +72,9 @@ public class OnDemandQueryTestCase {
                 );
     }
 
-
     @Test
     public void test3() {
+
         StoreQuery.query().
                 from(
                         InputStore.store("cseEventTable").
@@ -96,6 +97,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test4() {
+
         StoreQuery storeQuery = StoreQuery.query();
         storeQuery.
                 from(
@@ -115,6 +117,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test5() {
+
         StoreQuery storeQuery = StoreQuery.query();
         storeQuery.
                 from(
@@ -132,6 +135,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test6() {
+
         StoreQuery storeQuery = StoreQuery.query();
         storeQuery.
                 from(
@@ -155,6 +159,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test7() {
+
         OnDemandQuery storeQuery = OnDemandQuery.query();
         storeQuery.
                 from(
@@ -178,6 +183,7 @@ public class OnDemandQueryTestCase {
 
     @Test
     public void test8() {
+
         OnDemandQuery.query().
                 from(
                         InputStore.store("cseEventTable").

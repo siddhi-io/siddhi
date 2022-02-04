@@ -41,15 +41,18 @@ public class RangePartitionType implements PartitionType {
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     public RangePartitionProperty[] getRangePartitionProperties() {
+
         return Arrays.copyOfRange(rangePartitionProperties, 0, rangePartitionProperties.length);
     }
 
     @Override
     public String toString() {
+
         return "RangePartitionType{" +
                 "id='" + streamId + '\'' +
                 ", rangePartitionProperties=" + Arrays.toString(rangePartitionProperties) +
@@ -58,6 +61,7 @@ public class RangePartitionType implements PartitionType {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -79,6 +83,7 @@ public class RangePartitionType implements PartitionType {
 
     @Override
     public int hashCode() {
+
         int result = streamId != null ? streamId.hashCode() : 0;
         result = 31 * result + (rangePartitionProperties != null ? Arrays.hashCode(rangePartitionProperties) : 0);
         return result;
@@ -86,21 +91,25 @@ public class RangePartitionType implements PartitionType {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 
@@ -108,6 +117,7 @@ public class RangePartitionType implements PartitionType {
      * Each range partition property
      */
     public static class RangePartitionProperty implements SiddhiElement {
+
         private static final long serialVersionUID = 1L;
         private final String partitionKey;
         private final Expression condition;
@@ -121,15 +131,18 @@ public class RangePartitionType implements PartitionType {
         }
 
         public String getPartitionKey() {
+
             return partitionKey;
         }
 
         public Expression getCondition() {
+
             return condition;
         }
 
         @Override
         public String toString() {
+
             return "RangePartitionProperty{" +
                     "partitionKey='" + partitionKey + '\'' +
                     ", condition=" + condition +
@@ -138,6 +151,7 @@ public class RangePartitionType implements PartitionType {
 
         @Override
         public boolean equals(Object o) {
+
             if (this == o) {
                 return true;
             }
@@ -159,6 +173,7 @@ public class RangePartitionType implements PartitionType {
 
         @Override
         public int hashCode() {
+
             int result = partitionKey.hashCode();
             result = 31 * result + condition.hashCode();
             return result;
@@ -166,21 +181,25 @@ public class RangePartitionType implements PartitionType {
 
         @Override
         public int[] getQueryContextStartIndex() {
+
             return queryContextStartIndex;
         }
 
         @Override
         public void setQueryContextStartIndex(int[] lineAndColumn) {
+
             queryContextStartIndex = lineAndColumn;
         }
 
         @Override
         public int[] getQueryContextEndIndex() {
+
             return queryContextEndIndex;
         }
 
         @Override
         public void setQueryContextEndIndex(int[] lineAndColumn) {
+
             queryContextEndIndex = lineAndColumn;
         }
     }

@@ -39,6 +39,7 @@ public class ExceptionUtil {
 
     public static String getMessageWithContext(String siddhiAppName, int[] queryContextStartIndex,
                                                int[] queryContextEndIndex, String siddhiAppPortion, String message) {
+
         if (siddhiAppName != null) {
             if (queryContextStartIndex != null && queryContextEndIndex != null) {
                 if (siddhiAppPortion != null) {
@@ -114,6 +115,7 @@ public class ExceptionUtil {
     }
 
     public static String getContext(int[] startIndex, int[] endIndex, String siddhiApp) {
+
         int startLinePosition = ordinalIndexOf(siddhiApp, "\n", startIndex[0]);
         int endLinePosition = ordinalIndexOf(siddhiApp, "\n", endIndex[0]);
         return siddhiApp.substring(startLinePosition + startIndex[1], endLinePosition +
@@ -121,12 +123,12 @@ public class ExceptionUtil {
     }
 
     private static int ordinalIndexOf(String str, String substr, int n) {
+
         int pos = 0;
         while (--n > 0) {
             pos = str.indexOf(substr, pos) + 1;
         }
         return pos;
     }
-
 
 }

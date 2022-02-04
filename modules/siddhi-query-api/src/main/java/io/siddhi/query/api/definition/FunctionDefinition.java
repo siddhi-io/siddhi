@@ -24,6 +24,7 @@ import io.siddhi.query.api.SiddhiElement;
  * Siddhi inline function definition
  */
 public class FunctionDefinition implements SiddhiElement {
+
     private static final long serialVersionUID = 42L;
     private String language;
     private String body;
@@ -33,58 +34,70 @@ public class FunctionDefinition implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public Attribute.Type getReturnType() {
+
         return returnType;
     }
 
     public String getLanguage() {
+
         return language;
     }
 
     public String getBody() {
+
         return body;
     }
 
     public String getId() {
+
         return id;
     }
 
     public FunctionDefinition language(String language) {
+
         this.language = language;
         return this;
     }
 
     public FunctionDefinition body(String body) {
+
         this.body = body;
         return this;
     }
 
     public FunctionDefinition id(String functionID) {
+
         this.id = functionID;
         return this;
     }
 
     public FunctionDefinition type(Attribute.Type type) {
+
         this.returnType = type;
         return this;
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

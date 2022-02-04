@@ -29,6 +29,7 @@ public class DefineWindowTestCase {
 
     @Test
     public void testCreatingFunctionDefinition() {
+
         SiddhiApp.siddhiApp("Test").defineWindow(WindowDefinition.id("StockWindow")).
                 defineStream(StreamDefinition.id("stockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
@@ -37,6 +38,7 @@ public class DefineWindowTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testCreatingFunctionDefinition3() {
+
         SiddhiApp.siddhiApp("Test").defineWindow(WindowDefinition.id(null)).
                 defineStream(StreamDefinition.id("stockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type
@@ -45,6 +47,7 @@ public class DefineWindowTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testCreatingFunctionDefinition4() {
+
         SiddhiApp.siddhiApp("Test").defineWindow(null).
                 defineStream(StreamDefinition.id("stockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume", Attribute.Type

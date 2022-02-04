@@ -21,7 +21,8 @@ package io.siddhi.core.util.event.handler;
 import com.lmax.disruptor.EventHandler;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.beans.ExceptionListener;
 import java.util.LinkedList;
@@ -32,7 +33,7 @@ import java.util.List;
  */
 public class StreamHandler implements EventHandler<EventExchangeHolder> {
 
-    private static final Logger log = Logger.getLogger(StreamHandler.class);
+    private static final Logger log = LogManager.getLogger(StreamHandler.class);
     private final String streamName;
     private final String siddhiAppName;
     private final StreamJunction faultStreamJunction;

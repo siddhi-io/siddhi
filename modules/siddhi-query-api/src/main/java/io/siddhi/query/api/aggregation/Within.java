@@ -34,28 +34,34 @@ public class Within implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     private Within(Expression start, Expression end) {
+
         timeRange.add(start);
         timeRange.add(end);
     }
 
     private Within(Expression pattern) {
+
         timeRange.add(pattern);
     }
 
     public static Within within(Expression start, Expression end) {
+
         return new Within(start, end);
     }
 
     public static Within within(Expression pattern) {
+
         return new Within(pattern);
     }
 
     public List<Expression> getTimeRange() {
+
         return timeRange;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -70,11 +76,13 @@ public class Within implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         return timeRange != null ? timeRange.hashCode() : 0;
     }
 
     @Override
     public String toString() {
+
         return "Within{" +
                 "timeRange=" + timeRange +
                 '}';
@@ -82,21 +90,25 @@ public class Within implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

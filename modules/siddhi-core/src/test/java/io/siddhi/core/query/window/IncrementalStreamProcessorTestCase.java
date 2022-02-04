@@ -21,11 +21,12 @@ package io.siddhi.core.query.window;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class IncrementalStreamProcessorTestCase {
-    private static final Logger log = Logger.getLogger(IncrementalStreamProcessorTestCase.class);
+    private static final Logger log = LogManager.getLogger(IncrementalStreamProcessorTestCase.class);
 
     @Test
     public void incrementalStreamProcessorTest1() {

@@ -23,28 +23,34 @@ import io.siddhi.query.api.annotation.Annotation;
  * Siddhi Table Definition.
  */
 public class TableDefinition extends AbstractDefinition {
+
     private static final long serialVersionUID = 1L;
 
     protected TableDefinition(String id) {
+
         super(id);
     }
 
     public static TableDefinition id(String id) {
+
         return new TableDefinition(id);
     }
 
     public TableDefinition attribute(String attributeName, Attribute.Type type) {
+
         super.attribute(attributeName, type);
         return this;
     }
 
     public TableDefinition annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     @Override
     public String toString() {
+
         return super.toString("table");
     }
 

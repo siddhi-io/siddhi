@@ -35,7 +35,8 @@ import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implementation of {@link Sink} which represents in-memory transport. This implementation can send incoming objects
@@ -63,7 +64,7 @@ import org.apache.log4j.Logger;
 )
 public class InMemorySink extends Sink<State> {
     protected static final String TOPIC_KEY = "topic";
-    private static final Logger log = Logger.getLogger(InMemorySink.class);
+    private static final Logger log = LogManager.getLogger(InMemorySink.class);
     protected Option topicOption;
 
     @Override

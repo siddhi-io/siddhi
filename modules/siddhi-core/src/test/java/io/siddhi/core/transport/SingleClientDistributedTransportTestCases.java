@@ -23,7 +23,8 @@ import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class SingleClientDistributedTransportTestCases {
-    private static final Logger log = Logger.getLogger(SingleClientDistributedTransportTestCases.class);
+    private static final Logger log = LogManager.getLogger(SingleClientDistributedTransportTestCases.class);
     private AtomicInteger topic1Count = new AtomicInteger(0);
     private AtomicInteger topic2Count = new AtomicInteger(0);
 

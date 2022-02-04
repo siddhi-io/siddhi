@@ -24,9 +24,9 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.table.util.TestAppenderToValidateLogsForCachingTests;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class CacheLRUTestCase {
-    private static final Logger log = Logger.getLogger(CacheLRUTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(CacheLRUTestCase.class);
     private int inEventCount;
     private boolean eventArrived;
     private int removeEventCount;
@@ -52,8 +52,9 @@ public class CacheLRUTestCase {
 
     @Test(description = "cacheLRUTestCase0") // using query api and 2 primary keys & LRu
     public void cacheLRUTestCase0() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -91,12 +92,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -115,15 +117,16 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase1", dependsOnMethods = {"cacheLRUTestCase0"})
     // using query api and 1 primary key & LRu
     public void cacheLRUTestCase1() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -161,12 +164,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -184,15 +188,16 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase2", dependsOnMethods = {"cacheLRUTestCase1"})
     // 1 primary key & LRu & cointains api (in)
     public void cacheLRUTestCase2() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -253,8 +258,9 @@ public class CacheLRUTestCase {
     @Test(description = "cacheLRUTestCase3", dependsOnMethods = {"cacheLRUTestCase2"})
     // 2 primary keys & LRu & cointains api (in)
     public void cacheLRUTestCase3() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -318,12 +324,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -341,15 +348,16 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase4", dependsOnMethods = {"cacheLRUTestCase3"})
     // 1 primary key & LRu & update func
     public void cacheLRUTestCase4() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -407,12 +415,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -430,15 +439,16 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase5", dependsOnMethods = {"cacheLRUTestCase4"})
     // 2 primary keys & LRu & update func
     public void cacheLRUTestCase5() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -496,12 +506,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -519,15 +530,16 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase6", dependsOnMethods = {"cacheLRUTestCase5"})
     // 1 primary key & LRu & update or add func
     public void cacheLRUTestCase6() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -582,8 +594,9 @@ public class CacheLRUTestCase {
     @Test(description = "cacheLRUTestCase7", dependsOnMethods = {"cacheLRUTestCase6"})
     // 2 primary keys & LRu & update or add func
     public void cacheLRUTestCase7() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -638,8 +651,9 @@ public class CacheLRUTestCase {
     @Test(description = "cacheLRUTestCase8", dependsOnMethods = {"cacheLRUTestCase7"})
     // 2 primary keys & LRu & update or add func with update
     public void cacheLRUTestCase8() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -696,12 +710,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -719,14 +734,15 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase9", dependsOnMethods = {"cacheLRUTestCase8"})
     public void cacheLRUTestCase9() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        final TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
         log.info("cacheLRUTestCase9 - OUT 1");
@@ -793,12 +809,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -818,14 +835,15 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 
     @Test(description = "cacheLRUTestCase9", dependsOnMethods = {"cacheLRUTestCase9"})
     public void cacheLRUTestCase10() throws InterruptedException, SQLException {
-        final TestAppenderToValidateLogsForCachingTests appender = new TestAppenderToValidateLogsForCachingTests();
-        final Logger logger = Logger.getRootLogger();
+        TestAppenderToValidateLogsForCachingTests appender = new
+                TestAppenderToValidateLogsForCachingTests("TestAppenderToValidateLogsForCachingTests", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
 //        logger.removeAllAppenders();
         logger.setLevel(Level.DEBUG);
         logger.addAppender(appender);
@@ -892,12 +910,13 @@ public class CacheLRUTestCase {
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
 
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppenderToValidateLogsForCachingTests) logger.getAppenders().
+                get("TestAppenderToValidateLogsForCachingTests")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            String message = String.valueOf(logEvent.getMessage());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
             if (message.contains(":")) {
-                message = message.split(": ")[1];
+                message = message.split(":")[1].trim();
             }
             logMessages.add(message);
         }
@@ -917,7 +936,7 @@ public class CacheLRUTestCase {
         Assert.assertEquals(Collections.frequency(logMessages, "sending results from cache after loading from store"),
                 1);
         Assert.assertEquals(logMessages.contains("sending results from store"), false);
-
+        logger.removeAppender(appender);
         siddhiAppRuntime.shutdown();
     }
 

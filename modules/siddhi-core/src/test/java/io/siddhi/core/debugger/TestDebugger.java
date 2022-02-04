@@ -24,7 +24,8 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class TestDebugger {
-    private static final Logger log = Logger.getLogger(TestDebugger.class);
+    private static final Logger log = LogManager.getLogger(TestDebugger.class);
     private static volatile int count;
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private AtomicInteger debugEventCount = new AtomicInteger(0);

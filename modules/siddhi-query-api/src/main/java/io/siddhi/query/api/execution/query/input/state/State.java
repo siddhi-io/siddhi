@@ -27,21 +27,24 @@ import io.siddhi.query.api.expression.constant.TimeConstant;
 public class State {
 
     public static StateElement every(StateElement stateElement) {
+
         return new EveryStateElement(stateElement);
     }
 
-
     public static StateElement logicalAnd(StreamStateElement streamStateElement1,
                                           StreamStateElement streamStateElement2) {
+
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.AND, streamStateElement2);
     }
 
     public static StateElement logicalOr(StreamStateElement streamStateElement1,
                                          StreamStateElement streamStateElement2) {
+
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.OR, streamStateElement2);
     }
 
     public static AbsentStreamStateElement logicalNot(StreamStateElement streamStateElement, TimeConstant time) {
+
         if (streamStateElement.getBasicSingleInputStream().getStreamReferenceId() != null) {
             throw new SiddhiAppValidationException("NOT pattern cannot have reference id but found " +
                     streamStateElement.getBasicSingleInputStream().getStreamReferenceId());
@@ -70,34 +73,42 @@ public class State {
 
     public static StateElement next(StateElement stateElement,
                                     StateElement followedByStateElement) {
+
         return new NextStateElement(stateElement, followedByStateElement);
     }
 
     public static StateElement count(StreamStateElement streamStateElement, int min, int max) {
+
         return new CountStateElement(streamStateElement, min, max);
     }
 
     public static StateElement countMoreThanEqual(StreamStateElement streamStateElement, int min) {
+
         return new CountStateElement(streamStateElement, min, CountStateElement.ANY);
     }
 
     public static StateElement countLessThanEqual(StreamStateElement streamStateElement, int max) {
+
         return new CountStateElement(streamStateElement, CountStateElement.ANY, max);
     }
 
     public static StreamStateElement stream(BasicSingleInputStream basicSingleInputStream) {
+
         return new StreamStateElement(basicSingleInputStream);
     }
 
     public static StateElement zeroOrMany(StreamStateElement streamStateElement) {
+
         return new CountStateElement(streamStateElement, 0, CountStateElement.ANY);
     }
 
     public static StateElement zeroOrOne(StreamStateElement streamStateElement) {
+
         return new CountStateElement(streamStateElement, 0, 1);
     }
 
     public static StateElement oneOrMany(StreamStateElement streamStateElement) {
+
         return new CountStateElement(streamStateElement, 1, CountStateElement.ANY);
     }
 

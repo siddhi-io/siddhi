@@ -29,8 +29,10 @@ import org.testng.annotations.Test;
  * Partition testing testcase
  */
 public class DefinePartitionTestCase {
+
     @Test
     public void test1() {
+
         Partition partition = SiddhiCompiler.parsePartition("partition with (200>volume as 'LessValue' or 200<=volume" +
                 " as 'HighValue' of cseEventStream) begin from cseEventStream select sum(volume) as sumvolume insert " +
                 "into StockStream ;  end ");
@@ -54,6 +56,7 @@ public class DefinePartitionTestCase {
 
     @Test
     public void test2() {
+
         Partition partition = SiddhiCompiler.parsePartition("partition with (symbol of cseEventStream) begin from " +
                 "cseEventStream select sum(volume) as sumvolume insert into StockStream ;  end ");
 

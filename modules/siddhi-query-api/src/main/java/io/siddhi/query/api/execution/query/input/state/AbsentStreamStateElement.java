@@ -32,16 +32,19 @@ public class AbsentStreamStateElement extends StreamStateElement {
     private int[] queryContextEndIndex;
 
     public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant waitingTime) {
+
         super(basicSingleInputStream);
         this.waitingTime = waitingTime;
     }
 
     public TimeConstant getWaitingTime() {
+
         return waitingTime;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -59,6 +62,7 @@ public class AbsentStreamStateElement extends StreamStateElement {
 
     @Override
     public int hashCode() {
+
         int result = super.hashCode();
         result = 31 * result + (waitingTime != null ? waitingTime.hashCode() : 0);
         return result;
@@ -66,21 +70,25 @@ public class AbsentStreamStateElement extends StreamStateElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

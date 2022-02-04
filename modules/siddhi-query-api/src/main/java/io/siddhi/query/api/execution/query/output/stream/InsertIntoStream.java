@@ -29,27 +29,33 @@ public class InsertIntoStream extends OutputStream {
     private boolean isInnerStream;
 
     public InsertIntoStream(String streamId) {
+
         this(streamId, false, null);
     }
 
     public InsertIntoStream(String streamId, OutputEventType outputEventType) {
+
         this(streamId, false, outputEventType);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream) {
+
         this(streamId, isInnerStream, null);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream, boolean isFaultStream) {
+
         this(streamId, isInnerStream, isFaultStream, null);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream, OutputEventType outputEventType) {
+
         this(streamId, isInnerStream, false, outputEventType);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream, boolean isFaultStream,
                             OutputEventType outputEventType) {
+
         this.isInnerStream = isInnerStream;
         this.isFaultStream = isFaultStream;
         if (isInnerStream) {
@@ -62,15 +68,18 @@ public class InsertIntoStream extends OutputStream {
     }
 
     public boolean isInnerStream() {
+
         return isInnerStream;
     }
 
     public boolean isFaultStream() {
+
         return isFaultStream;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -93,6 +102,7 @@ public class InsertIntoStream extends OutputStream {
 
     @Override
     public String toString() {
+
         return "InsertIntoStream{" +
                 "isFaultStream=" + isFaultStream +
                 ", isInnerStream=" + isInnerStream +
@@ -101,6 +111,7 @@ public class InsertIntoStream extends OutputStream {
 
     @Override
     public int hashCode() {
+
         int result = super.hashCode();
         result = 31 * result + (isFaultStream ? 1 : 0);
         result = 31 * result + (isInnerStream ? 1 : 0);

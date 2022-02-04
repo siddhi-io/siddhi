@@ -25,14 +25,15 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Executor class for Script function. Function execution logic is implemented in execute here.
  */
 public class ScriptFunctionExecutor extends FunctionExecutor {
 
-    static final Logger LOG = Logger.getLogger(ScriptFunctionExecutor.class);
+    static final Logger LOG = LogManager.getLogger(ScriptFunctionExecutor.class);
     Attribute.Type returnType;
     Script script;
 

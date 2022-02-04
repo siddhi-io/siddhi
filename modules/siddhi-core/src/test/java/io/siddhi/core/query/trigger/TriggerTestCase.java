@@ -28,13 +28,14 @@ import io.siddhi.query.api.definition.TriggerDefinition;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TriggerTestCase {
-    private static final Logger log = Logger.getLogger(TriggerTestCase.class);
+    private static final Logger log = LogManager.getLogger(TriggerTestCase.class);
     private volatile int count;
     private volatile long lastTimeStamp;
     private volatile boolean eventArrived;

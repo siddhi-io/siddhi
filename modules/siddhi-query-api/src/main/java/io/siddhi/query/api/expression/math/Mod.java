@@ -29,20 +29,24 @@ public class Mod extends Expression {
     private Expression rightValue;
 
     public Mod(Expression leftValue, Expression rightValue) {
+
         this.leftValue = leftValue;
         this.rightValue = rightValue;
     }
 
     public Expression getLeftValue() {
+
         return leftValue;
     }
 
     public Expression getRightValue() {
+
         return rightValue;
     }
 
     @Override
     public String toString() {
+
         return "Mod{" +
                 "leftValue=" + leftValue +
                 ", rightValue=" + rightValue +
@@ -51,6 +55,7 @@ public class Mod extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -72,6 +77,7 @@ public class Mod extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = leftValue != null ? leftValue.hashCode() : 0;
         result = 31 * result + (rightValue != null ? rightValue.hashCode() : 0);
         return result;

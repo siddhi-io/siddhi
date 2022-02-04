@@ -27,7 +27,8 @@ import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.query.api.definition.TriggerDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -45,7 +46,7 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class CronTrigger extends AbstractTrigger implements Job {
 
-    protected static final Logger LOG = Logger.getLogger(CronTrigger.class);
+    protected static final Logger LOG = LogManager.getLogger(CronTrigger.class);
 
     private TriggerDefinition triggerDefinition;
     private SiddhiAppContext siddhiAppContext;

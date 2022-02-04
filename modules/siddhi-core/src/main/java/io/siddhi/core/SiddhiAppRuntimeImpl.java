@@ -79,7 +79,8 @@ import io.siddhi.query.api.exception.SiddhiAppContextException;
 import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.compiler.SiddhiCompiler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.beans.ExceptionListener;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ import java.util.stream.Collectors;
  * Keep streamDefinitions, partitionRuntimes, queryRuntimes of an SiddhiApp and streamJunctions and inputHandlers used.
  */
 public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
-    private static final Logger log = Logger.getLogger(SiddhiAppRuntimeImpl.class);
+    private static final Logger log = LogManager.getLogger(SiddhiAppRuntimeImpl.class);
     private final Map<String, Window> windowMap;
     private final Map<String, List<Source>> sourceMap;
     private final Map<String, List<Sink>> sinkMap;

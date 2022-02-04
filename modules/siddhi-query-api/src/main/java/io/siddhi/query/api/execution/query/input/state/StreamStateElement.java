@@ -35,11 +35,13 @@ public class StreamStateElement implements StateElement {
     }
 
     public BasicSingleInputStream getBasicSingleInputStream() {
+
         return basicSingleInputStream;
     }
 
     @Override
     public String toString() {
+
         return "StreamStateElement{" +
                 "basicSingleInputStream=" + basicSingleInputStream +
                 '}';
@@ -47,6 +49,7 @@ public class StreamStateElement implements StateElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -66,26 +69,31 @@ public class StreamStateElement implements StateElement {
 
     @Override
     public int hashCode() {
+
         return basicSingleInputStream != null ? basicSingleInputStream.hashCode() : 0;
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

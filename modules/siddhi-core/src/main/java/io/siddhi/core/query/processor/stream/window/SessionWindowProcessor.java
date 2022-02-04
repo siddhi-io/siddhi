@@ -46,7 +46,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -125,7 +126,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SessionWindowProcessor extends GroupingFindableWindowProcessor<SessionWindowProcessor.WindowState>
         implements SchedulingProcessor {
 
-    private static final Logger log = Logger.getLogger(SessionWindowProcessor.class);
+    private static final Logger log = LogManager.getLogger(SessionWindowProcessor.class);
     private static final String DEFAULT_KEY = "default-key";
     private long sessionGap = 0;
     private long allowedLatency = 0;

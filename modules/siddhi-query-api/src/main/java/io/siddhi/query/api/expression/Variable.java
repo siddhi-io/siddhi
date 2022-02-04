@@ -36,58 +36,72 @@ public class Variable extends Expression {
     private String attributeName;
 
     public Variable(String attributeName) {
+
         this.attributeName = attributeName;
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     public void setStreamId(String streamId) {
+
         this.streamId = streamId;
     }
 
     public String getAttributeName() {
+
         return attributeName;
     }
 
     public void setAttributeName(String attributeName) {
+
         this.attributeName = attributeName;
     }
 
     public boolean isInnerStream() {
+
         return isInnerStream;
     }
 
     public Integer getStreamIndex() {
+
         return streamIndex;
     }
 
     public void setStreamIndex(Integer streamIndex) {
+
         this.streamIndex = streamIndex;
     }
 
     public String getFunctionId() {
+
         return functionId;
     }
 
     public void setFunctionId(String functionId) {
+
         this.functionId = functionId;
     }
 
     public Integer getFunctionIndex() {
+
         return functionIndex;
     }
 
     public void setFunctionIndex(Integer functionIndex) {
+
         this.functionIndex = functionIndex;
     }
 
     public void setStreamId(boolean isInnerStream, String streamId) {
+
         setStreamId(isInnerStream, false, streamId);
     }
 
     public void setStreamId(boolean isInnerStream, boolean isFaultStream, String streamId) {
+
         this.isInnerStream = isInnerStream;
         if (isInnerStream) {
             if (isFaultStream) {
@@ -107,18 +121,21 @@ public class Variable extends Expression {
     }
 
     public Variable ofStream(String streamId) {
+
         this.streamId = streamId;
         this.isInnerStream = false;
         return this;
     }
 
     public Variable ofInnerStream(String streamId) {
+
         this.streamId = streamId;
         this.isInnerStream = false;
         return this;
     }
 
     public Variable ofStream(String streamId, int streamIndex) {
+
         this.streamId = streamId;
         this.streamIndex = streamIndex;
         this.isInnerStream = false;
@@ -126,6 +143,7 @@ public class Variable extends Expression {
     }
 
     public Variable ofInnerStream(String streamId, int streamIndex) {
+
         this.streamId = streamId;
         this.streamIndex = streamIndex;
         this.isInnerStream = true;
@@ -133,11 +151,13 @@ public class Variable extends Expression {
     }
 
     public Variable ofFunction(String functionId) {
+
         this.functionId = functionId;
         return this;
     }
 
     public Variable ofFunction(String functionId, int functionIndex) {
+
         this.functionId = functionId;
         this.functionIndex = functionIndex;
         return this;
@@ -145,6 +165,7 @@ public class Variable extends Expression {
 
     @Override
     public String toString() {
+
         return "Variable{" +
                 "id='" + streamId + '\'' +
                 ", isInnerStream=" + isInnerStream +
@@ -157,6 +178,7 @@ public class Variable extends Expression {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -190,6 +212,7 @@ public class Variable extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = streamId != null ? streamId.hashCode() : 0;
         result = 31 * result + (isInnerStream ? 1 : 0);
         result = 31 * result + (streamIndex != null ? streamIndex.hashCode() : 0);

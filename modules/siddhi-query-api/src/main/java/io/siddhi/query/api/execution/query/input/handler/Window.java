@@ -36,37 +36,45 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
     private int[] queryContextEndIndex;
 
     public Window(String namespace, String functionName, Expression[] parameters) {
+
         this.function = functionName;
         this.parameters = (parameters == null) ? null : Arrays.copyOfRange(parameters, 0, parameters.length);
         this.namespace = namespace;
     }
 
     public Window(String namespace, String functionName) {
+
         this(namespace, functionName, null);
     }
 
     public Window(String functionName, Expression[] parameters) {
+
         this("", functionName, parameters);
     }
 
     public Window(String functionName) {
+
         this.function = functionName;
     }
 
     public String getName() {
+
         return function;
     }
 
     public Expression[] getParameters() {
+
         return (parameters == null) ? null : Arrays.copyOfRange(parameters, 0, parameters.length);
     }
 
     public String getNamespace() {
+
         return namespace;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -88,6 +96,7 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = function != null ? function.hashCode() : 0;
         result = 31 * result + Arrays.hashCode(parameters);
         result = 31 * result + (namespace != null ? namespace.hashCode() : 0);
@@ -96,6 +105,7 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
 
     @Override
     public String toString() {
+
         return "Window{" +
                 "namespace='" + namespace + '\'' +
                 ", function='" + function + '\'' +
@@ -105,21 +115,25 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

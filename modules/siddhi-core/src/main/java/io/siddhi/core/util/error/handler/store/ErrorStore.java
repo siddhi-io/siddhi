@@ -33,7 +33,8 @@ import io.siddhi.core.util.error.handler.util.ErroneousEventType;
 import io.siddhi.core.util.error.handler.util.ErrorHandlerUtils;
 import io.siddhi.core.util.error.handler.util.ErrorOccurrence;
 import io.siddhi.core.util.error.handler.util.ErrorType;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -45,7 +46,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public abstract class ErrorStore {
 
-    private static final Logger log = Logger.getLogger(ErrorStore.class);
+    private static final Logger log = LogManager.getLogger(ErrorStore.class);
 
     private int bufferSize = 1024;
     private boolean dropWhenBufferFull = true;

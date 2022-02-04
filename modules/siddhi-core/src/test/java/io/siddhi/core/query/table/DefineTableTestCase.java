@@ -28,7 +28,8 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -39,7 +40,7 @@ import java.util.Map;
  * Created on 1/17/15.
  */
 public class DefineTableTestCase {
-    private static final Logger log = Logger.getLogger(DefineTableTestCase.class);
+    private static final Logger log = LogManager.getLogger(DefineTableTestCase.class);
 
     @Test
     public void testQuery1() throws InterruptedException {

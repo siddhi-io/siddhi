@@ -18,7 +18,8 @@
 package io.siddhi.core.util;
 
 import io.siddhi.core.event.Event;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Map;
  * Utility class to print incoming {@link Event}
  */
 public class EventPrinter {
-    private static final Logger log = Logger.getLogger(EventPrinter.class);
+    private static final Logger log = LogManager.getLogger(EventPrinter.class);
 
     public static void print(Event[] events) {
         log.info(Arrays.deepToString(events));

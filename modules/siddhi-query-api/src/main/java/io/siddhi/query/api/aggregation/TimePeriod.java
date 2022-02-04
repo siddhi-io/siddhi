@@ -36,6 +36,7 @@ public class TimePeriod implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     private TimePeriod(Operator operator) {
+
         this.durations = new ArrayList<>();
         this.operator = operator;
     }
@@ -54,15 +55,18 @@ public class TimePeriod implements SiddhiElement {
     }
 
     public Operator getOperator() {
+
         return this.operator;
     }
 
     public List<Duration> getDurations() {
+
         return this.durations;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -80,6 +84,7 @@ public class TimePeriod implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = operator.hashCode();
         result = 31 * result + (durations != null ? durations.hashCode() : 0);
         return result;
@@ -87,21 +92,25 @@ public class TimePeriod implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

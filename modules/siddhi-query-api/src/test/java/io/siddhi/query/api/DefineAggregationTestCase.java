@@ -37,6 +37,7 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 public class DefineAggregationTestCase {
+
     @Test
     public void testDefineAggregationWithTimeRage() {
 
@@ -53,6 +54,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testDefineAggregationWithExactTimeSpecifier() {
+
         AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
                 .from(InputStream.stream("StockStream"))
                 .select(Selector.basicSelector()
@@ -68,6 +70,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testAggregationJoin() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -112,6 +115,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testAggregationJoin1() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -151,6 +155,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testAggregationJoin2() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -191,6 +196,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testDefineAggregationWithExactTimeSpecifier2() {
+
         AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
                 .from(InputStream.stream("StockStream"))
                 .select(Selector.basicSelector()
@@ -206,6 +212,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testdefineAggregation() {
+
         SiddhiApp.siddhiApp("test").defineAggregation(AggregationDefinition.id("stockAggregation")).defineStream(
                 StreamDefinition.id("StockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
@@ -214,6 +221,7 @@ public class DefineAggregationTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testdefineAggregation2() {
+
         SiddhiApp.siddhiApp("test").defineAggregation(null).defineStream(
                 StreamDefinition.id("StockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
@@ -222,6 +230,7 @@ public class DefineAggregationTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testdifineAggregation3() {
+
         SiddhiApp.siddhiApp("test").defineAggregation(AggregationDefinition.id(null)).defineStream(
                 StreamDefinition.id("StockStream").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).attribute("volume",
@@ -230,6 +239,7 @@ public class DefineAggregationTestCase {
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
     public void testDefineAggregation4() {
+
         SiddhiApp.siddhiApp("Test").defineAggregation(AggregationDefinition.id("stockAggregation"))
                 .defineStream(StreamDefinition.id("stockAggregation").attribute("symbol",
                         Attribute.Type.STRING).attribute("price", Attribute.Type.INT).
@@ -238,6 +248,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testDefineAggregationWithExactTimeSpecifier3() {
+
         String basicSingleInputStream = "SingleInputStream{isFaultStream=false, isInnerStream=false, " +
                 "id='StockStream', streamReferenceId='null', streamHandlers=[], windowPosition=-1}";
 
@@ -268,6 +279,7 @@ public class DefineAggregationTestCase {
 
     @Test
     public void testDefineAggregation6() {
+
         AggregationDefinition aggregationDefinition = AggregationDefinition.id("StockAggregation")
                 .from(InputStream.stream("StockStream"))
                 .select(Selector.basicSelector()
@@ -283,7 +295,6 @@ public class DefineAggregationTestCase {
                         .select("symbol", Expression.variable("symbol").ofStream("StockStream"))
                         .select("price", Expression.variable("price").ofStream("StockStream"))
                         .groupBy(Expression.variable("price").ofStream("StockStream")));
-
 
         Assert.assertEquals(aggregationDefinition, aggregationDefinition1);
         Assert.assertEquals(aggregationDefinition.hashCode(), aggregationDefinition1.hashCode());

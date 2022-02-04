@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.state.State;
@@ -32,7 +31,6 @@ import org.testng.annotations.Test;
 
 public class PatternQueryTestCase {
 
-
 //    from e1=Stream1[price >= 30] -> e2=Stream1[ price >= 20] -> e3=Stream2[ price >= e1.price]
 //    select e1.symbol, avg(e2.price ) as avgPrice
 //    group by e1.symbol
@@ -41,6 +39,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery1() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -72,12 +71,10 @@ public class PatternQueryTestCase {
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
 
-
         );
         query.insertInto("OutputStream");
 
     }
-
 
 //    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ price >= 20] -> e3=Stream2[ price >= e1.price]
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -87,6 +84,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -119,7 +117,6 @@ public class PatternQueryTestCase {
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
 
-
         );
         query.insertInto("OutputStream");
     }
@@ -131,6 +128,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery3() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -178,7 +176,6 @@ public class PatternQueryTestCase {
 
     }
 
-
 //    from every (e1=Stream1[price >= 30] -> e2=Stream1[ price >= 20]) -> e3=Stream2[ price >= e1.price] ->
 // e4=Stream3[price>74]
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -186,6 +183,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery4() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -222,9 +220,7 @@ public class PatternQueryTestCase {
         );
         query.insertInto("OutputStream");
 
-
     }
-
 
 //    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ price >= 20] and e3=Stream2[ price >= e1.price] ->
 // e4=Stream3[price>74]
@@ -233,6 +229,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery5() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -270,7 +267,6 @@ public class PatternQueryTestCase {
 
     }
 
-
 //    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ price >= 20] or e3=Stream2[ price >= e1.price]
 // -> e4=Stream3[price>74] within 2 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -278,6 +274,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery6() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -316,7 +313,6 @@ public class PatternQueryTestCase {
 
     }
 
-
 //    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ prev.price >= 20]<3:5> -> e3=Stream2[ price >= e1.price] ->
 // e4=Stream3[price>74]
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -324,6 +320,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery7() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -371,6 +368,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery8() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -411,7 +409,6 @@ public class PatternQueryTestCase {
 
     }
 
-
 //    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ prev.price >= 20]<5:> -> e3=Stream2[ price >=
 // e1.price] -> e4=Stream3[price>74] within 3 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -419,6 +416,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery9() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -459,7 +457,6 @@ public class PatternQueryTestCase {
 
     }
 
-
 //    from every (e1=Stream1[price >= 30]) -> (e2=Stream1[ prev.price >= 20] -> e3=Stream2[ price >= e1.price])
 //      -> e4=Stream3[price>74] within 4 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
@@ -467,6 +464,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery10() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -512,6 +510,7 @@ public class PatternQueryTestCase {
 //    insert into OutputStream
     @Test
     public void testPatternQuery11() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -541,7 +540,6 @@ public class PatternQueryTestCase {
                                 Compare.Operator.GREATER_THAN,
                                 Expression.value(50)))
 
-
         );
         query.insertInto("OutputStream");
 
@@ -549,6 +547,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery12() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -585,6 +584,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery13() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -631,6 +631,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery14() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -671,6 +672,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery15() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -711,6 +713,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery16() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -751,6 +754,7 @@ public class PatternQueryTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testPatternQuery17() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(
@@ -774,6 +778,7 @@ public class PatternQueryTestCase {
 
     @Test
     public void testPatternQuery18() {
+
         Query query = Query.query();
         query.from(
                 InputStream.patternStream(

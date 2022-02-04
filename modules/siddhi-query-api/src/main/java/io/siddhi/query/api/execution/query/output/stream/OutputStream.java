@@ -31,23 +31,28 @@ public abstract class OutputStream implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public String getId() {
+
         return id;
     }
 
     public void setId(String id) {
+
         this.id = id;
     }
 
     public OutputEventType getOutputEventType() {
+
         return outputEventType;
     }
 
     public void setOutputEventType(OutputEventType outputEventType) {
+
         this.outputEventType = outputEventType;
     }
 
     @Override
     public String toString() {
+
         return "OutputStream{" +
                 "outputEventType=" + outputEventType +
                 ", id='" + id + '\'' +
@@ -56,6 +61,7 @@ public abstract class OutputStream implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -77,6 +83,7 @@ public abstract class OutputStream implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = outputEventType != null ? outputEventType.hashCode() : 0;
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
@@ -84,21 +91,25 @@ public abstract class OutputStream implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 

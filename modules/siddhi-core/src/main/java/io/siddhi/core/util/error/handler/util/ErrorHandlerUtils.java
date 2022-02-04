@@ -42,7 +42,8 @@ import java.io.StringWriter;
  */
 public class ErrorHandlerUtils {
 
-    private ErrorHandlerUtils() {}
+    private ErrorHandlerUtils() {
+    }
 
     public static byte[] getAsBytes(Object event) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

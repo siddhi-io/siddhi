@@ -28,15 +28,18 @@ public class LongConstant extends Expression implements Constant {
     protected Long value;
 
     public LongConstant(long value) {
+
         this.value = value;
     }
 
     public Long getValue() {
+
         return value;
     }
 
     @Override
     public String toString() {
+
         return "LongConstant{" +
                 "value=" + value +
                 '}';
@@ -44,6 +47,7 @@ public class LongConstant extends Expression implements Constant {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -62,6 +66,7 @@ public class LongConstant extends Expression implements Constant {
 
     @Override
     public int hashCode() {
+
         return value != null ? value.hashCode() : 0;
     }
 }

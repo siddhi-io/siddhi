@@ -24,6 +24,7 @@ import io.siddhi.query.api.expression.Expression;
  * Partition type supporting values
  */
 public class ValuePartitionType implements PartitionType {
+
     private static final long serialVersionUID = 1L;
     private Expression expression;
     private String streamId;
@@ -31,20 +32,24 @@ public class ValuePartitionType implements PartitionType {
     private int[] queryContextEndIndex;
 
     public ValuePartitionType(String streamId, Expression expression) {
+
         this.streamId = streamId;
         this.expression = expression;
     }
 
     public Expression getExpression() {
+
         return expression;
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     @Override
     public String toString() {
+
         return "ValuePartitionType{" +
                 "expression=" + expression +
                 ", id='" + streamId + '\'' +
@@ -53,6 +58,7 @@ public class ValuePartitionType implements PartitionType {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -74,6 +80,7 @@ public class ValuePartitionType implements PartitionType {
 
     @Override
     public int hashCode() {
+
         int result = expression.hashCode();
         result = 31 * result + streamId.hashCode();
         return result;
@@ -81,21 +88,25 @@ public class ValuePartitionType implements PartitionType {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

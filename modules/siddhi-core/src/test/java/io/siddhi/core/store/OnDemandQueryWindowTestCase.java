@@ -24,14 +24,15 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.OnDemandQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OnDemandQueryWindowTestCase {
 
-    private static final Logger log = Logger.getLogger(OnDemandQueryWindowTestCase.class);
+    private static final Logger log = LogManager.getLogger(OnDemandQueryWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;

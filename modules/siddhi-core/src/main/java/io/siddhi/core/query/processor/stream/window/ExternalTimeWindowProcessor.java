@@ -45,7 +45,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +91,7 @@ import java.util.Map;
 )
 public class ExternalTimeWindowProcessor
         extends SlidingFindableWindowProcessor<ExternalTimeWindowProcessor.WindowState> {
-    private static final Logger log = Logger.getLogger(ExternalTimeWindowProcessor.class);
+    private static final Logger log = LogManager.getLogger(ExternalTimeWindowProcessor.class);
     private long timeToKeep;
     private VariableExpressionExecutor timeStampVariableExpressionExecutor;
 

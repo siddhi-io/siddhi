@@ -23,7 +23,8 @@ import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 import io.siddhi.core.util.persistence.util.PersistenceConstants;
 import io.siddhi.core.util.persistence.util.PersistenceHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class IncrementalFileSystemPersistenceStore implements IncrementalPersistenceStore {
 
-    private static final Logger log = Logger.getLogger(IncrementalFileSystemPersistenceStore.class);
+    private static final Logger log = LogManager.getLogger(IncrementalFileSystemPersistenceStore.class);
     private String folder;
 
     public IncrementalFileSystemPersistenceStore() {

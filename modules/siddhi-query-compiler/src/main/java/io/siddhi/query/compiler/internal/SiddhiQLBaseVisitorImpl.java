@@ -111,6 +111,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitParse(@NotNull SiddhiQLParser.ParseContext ctx) {
+
         return visit(ctx.siddhi_app());
     }
 
@@ -123,6 +124,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public SiddhiApp visitSiddhi_app(@NotNull SiddhiQLParser.Siddhi_appContext ctx) {
+
         SiddhiApp siddhiApp = SiddhiApp.siddhiApp();
         for (SiddhiQLParser.App_annotationContext annotationContext : ctx.app_annotation()) {
             siddhiApp.annotation((Annotation) visit(annotationContext));
@@ -170,6 +172,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitDefinition_stream_final(@NotNull SiddhiQLParser.Definition_stream_finalContext ctx) {
+
         return visit(ctx.definition_stream());
     }
 
@@ -182,6 +185,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public StreamDefinition visitDefinition_stream(@NotNull SiddhiQLParser.Definition_streamContext ctx) {
+
         Source source = (Source) visit(ctx.source());
         if (source.isInnerStream) {
             throw newSiddhiParserException(ctx, " InnerStreams cannot be defined!");
@@ -212,11 +216,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitDefinition_function_final(@NotNull SiddhiQLParser.Definition_function_finalContext ctx) {
+
         return visit(ctx.definition_function());
     }
 
     @Override
     public FunctionDefinition visitDefinition_function(@NotNull SiddhiQLParser.Definition_functionContext ctx) {
+
         String functionName = (String) visitFunction_name(ctx.function_name());
         String languageName = (String) visitLanguage_name(ctx.language_name());
         Attribute.Type attributeType = (Attribute.Type) visit(ctx.attribute_type());
@@ -238,6 +244,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitFunction_name(@NotNull SiddhiQLParser.Function_nameContext ctx) {
+
         return visitId(ctx.id());
     }
 
@@ -250,6 +257,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitFunction_body(@NotNull SiddhiQLParser.Function_bodyContext ctx) {
+
         String bodyBlock = ctx.SCRIPT().getText();
         return bodyBlock.substring(1, bodyBlock.length() - 2);
     }
@@ -263,6 +271,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitLanguage_name(@NotNull SiddhiQLParser.Language_nameContext ctx) {
+
         return visitId(ctx.id());
     }
 
@@ -275,6 +284,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitDefinition_trigger_final(@NotNull SiddhiQLParser.Definition_trigger_finalContext ctx) {
+
         return visitDefinition_trigger(ctx.definition_trigger());
     }
 
@@ -287,6 +297,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitDefinition_trigger(@NotNull SiddhiQLParser.Definition_triggerContext ctx) {
+
         TriggerDefinition triggerDefinition = TriggerDefinition.id((String) visitTrigger_name(ctx.trigger_name()));
         if (ctx.time_value() != null) {
             triggerDefinition.atEvery(visitTime_value(ctx.time_value()).value());
@@ -306,6 +317,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitTrigger_name(@NotNull SiddhiQLParser.Trigger_nameContext ctx) {
+
         return visitId(ctx.id());
     }
 
@@ -318,6 +330,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitDefinition_table_final(@NotNull SiddhiQLParser.Definition_table_finalContext ctx) {
+
         return visit(ctx.definition_table());
     }
 
@@ -365,11 +378,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitDefinition_window_final(@NotNull SiddhiQLParser.Definition_window_finalContext ctx) {
+
         return visit(ctx.definition_window());
     }
 
     @Override
     public Object visitDefinition_window(@NotNull SiddhiQLParser.Definition_windowContext ctx) {
+
         Source source = (Source) visit(ctx.source());
         if (source.isInnerStream) {
             throw newSiddhiParserException(ctx, " '#' cannot be used, because Windows can't be defined " +
@@ -414,6 +429,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitPartition_final(@NotNull SiddhiQLParser.Partition_finalContext ctx) {
+
         return visit(ctx.partition());
     }
 
@@ -426,6 +442,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Partition visitPartition(@NotNull SiddhiQLParser.PartitionContext ctx) {
+
         Partition partition = Partition.partition();
         for (SiddhiQLParser.AnnotationContext annotationContext : ctx.annotation()) {
             partition.annotation((Annotation) visit(annotationContext));
@@ -481,6 +498,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public RangePartitionType.RangePartitionProperty[] visitCondition_ranges(
             @NotNull SiddhiQLParser.Condition_rangesContext ctx) {
+
         RangePartitionType.RangePartitionProperty[] rangePartitionProperties = new RangePartitionType
                 .RangePartitionProperty[ctx.condition_range().size()];
         List<SiddhiQLParser.Condition_rangeContext> condition_range = ctx.condition_range();
@@ -500,6 +518,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitCondition_range(@NotNull SiddhiQLParser.Condition_rangeContext ctx) {
+
         RangePartitionType.RangePartitionProperty rangePartitionProperty = new RangePartitionType.
                 RangePartitionProperty((String) ((StringConstant) visit(ctx.string_value()))
                 .getValue(), (Expression) visit(ctx.expression()));
@@ -517,6 +536,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitQuery_final(@NotNull SiddhiQLParser.Query_finalContext ctx) {
+
         return visit(ctx.query());
     }
 
@@ -565,6 +585,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Annotation visitApp_annotation(@NotNull SiddhiQLParser.App_annotationContext ctx) {
+
         Annotation annotation = new Annotation((String) visit(ctx.name()));
 
         for (SiddhiQLParser.Annotation_elementContext elementContext : ctx.annotation_element()) {
@@ -583,6 +604,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Annotation visitAnnotation(@NotNull SiddhiQLParser.AnnotationContext ctx) {
+
         Annotation annotation = Annotation.annotation((String) visit(ctx.name()));
 
         for (SiddhiQLParser.Annotation_elementContext elementContext : ctx.annotation_element()) {
@@ -605,6 +627,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Element visitAnnotation_element(@NotNull SiddhiQLParser.Annotation_elementContext ctx) {
+
         Element element;
         if (ctx.property_name() != null) {
             element = new Element((String) visit(ctx.property_name()), ((StringConstant) visit(ctx.property_value()))
@@ -1300,6 +1323,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public List<StreamHandler> visitBasic_source_stream_handlers(
             @NotNull SiddhiQLParser.Basic_source_stream_handlersContext ctx) {
+
         List<StreamHandler> streamHandlers = new ArrayList<StreamHandler>();
         for (SiddhiQLParser.Basic_source_stream_handlerContext handlerContext : ctx.basic_source_stream_handler()) {
             streamHandlers.add((StreamHandler) visit(handlerContext));
@@ -1315,9 +1339,9 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public String visitEvent(@NotNull SiddhiQLParser.EventContext ctx) {
+
         return ctx.getText();
     }
-
 
     /**
      * {@inheritDoc}
@@ -1459,6 +1483,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Filter visitFilter(@NotNull SiddhiQLParser.FilterContext ctx) {
+
         Filter filter = new Filter((Expression) visit(ctx.expression()));
         populateQueryContext(filter, ctx);
         return filter;
@@ -1473,6 +1498,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public StreamFunction visitStream_function(@NotNull SiddhiQLParser.Stream_functionContext ctx) {
+
         AttributeFunction attributeFunction = (AttributeFunction) visit(ctx.function_operation());
         StreamFunction streamFunction = new StreamFunction(attributeFunction.getNamespace(),
                 attributeFunction.getName(), attributeFunction.getParameters());
@@ -1489,6 +1515,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Window visitWindow(@NotNull SiddhiQLParser.WindowContext ctx) {
+
         AttributeFunction attributeFunction = (AttributeFunction) visit(ctx.function_operation());
         Window window = new Window(attributeFunction.getNamespace(), attributeFunction.getName(),
                 attributeFunction.getParameters());
@@ -1564,6 +1591,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public List<Variable> visitGroup_by(@NotNull SiddhiQLParser.Group_byContext ctx) {
+
         List<Variable> variableList = new ArrayList<Variable>(ctx.attribute_reference().size());
         for (SiddhiQLParser.Attribute_referenceContext attributeReferenceContext : ctx.attribute_reference()) {
             variableList.add((Variable) visit(attributeReferenceContext));
@@ -1580,6 +1608,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Expression visitHaving(@NotNull SiddhiQLParser.HavingContext ctx) {
+
         return (Expression) visit(ctx.expression());
     }
 
@@ -1591,6 +1620,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public List<OrderByAttribute> visitOrder_by(SiddhiQLParser.Order_byContext ctx) {
+
         List<OrderByAttribute> orderByAttributes = new ArrayList<OrderByAttribute>(ctx.order_by_reference().size());
         for (SiddhiQLParser.Order_by_referenceContext order_by_referenceContext : ctx.order_by_reference()) {
             OrderByAttribute orderByAttribute = (OrderByAttribute) visit(order_by_referenceContext);
@@ -1607,6 +1637,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public OrderByAttribute visitOrder_by_reference(SiddhiQLParser.Order_by_referenceContext ctx) {
+
         Variable variable = (Variable) visit(ctx.attribute_reference());
         if (ctx.order() != null && ctx.order().DESC() != null) {
             return new OrderByAttribute(variable, OrderByAttribute.Order.DESC);
@@ -1622,6 +1653,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Constant visitLimit(SiddhiQLParser.LimitContext ctx) {
+
         Expression expression = (Expression) visit(ctx.expression());
         if (expression instanceof Constant) {
             populateQueryContext(expression, ctx);
@@ -1640,6 +1672,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitOffset(SiddhiQLParser.OffsetContext ctx) {
+
         Expression expression = (Expression) visit(ctx.expression());
         if (expression instanceof Constant) {
             populateQueryContext(expression, ctx);
@@ -1858,6 +1891,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public UpdateSet visitSet_clause(@NotNull SiddhiQLParser.Set_clauseContext ctx) {
+
         UpdateSet updateSet = new UpdateSet();
         for (SiddhiQLParser.Set_assignmentContext setAssignmentContext : ctx.set_assignment()) {
             updateSet.set(((Variable) visit(setAssignmentContext.attribute_reference())),
@@ -1966,6 +2000,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitOr_math_operation(@NotNull SiddhiQLParser.Or_math_operationContext ctx) {
+
         if (ctx.OR() != null) {
             Expression expression = Expression.or((Expression) visit(ctx.math_operation(0)),
                     (Expression) visit(ctx.math_operation(1)));
@@ -1985,6 +2020,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Expression visitAnd_math_operation(@NotNull SiddhiQLParser.And_math_operationContext ctx) {
+
         if (ctx.AND() != null) {
             Expression expression = Expression.and((Expression) visit(ctx.math_operation(0)),
                     (Expression) visit(ctx.math_operation(1)));
@@ -2004,6 +2040,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Expression visitEquality_math_operation(@NotNull SiddhiQLParser.Equality_math_operationContext ctx) {
+
         if (ctx.eq != null) {
             Expression expression = Expression.compare((Expression) visit(ctx.math_operation(0)),
                     Compare.Operator.EQUAL, (Expression) visit(ctx.math_operation(1)));
@@ -2029,6 +2066,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public Expression visitGreaterthan_lessthan_math_operation(
             @NotNull SiddhiQLParser.Greaterthan_lessthan_math_operationContext ctx) {
+
         Expression expression;
         if (ctx.gt != null) {
             expression = Expression.compare((Expression) visit(ctx.math_operation(0)), Compare.Operator.GREATER_THAN,
@@ -2058,6 +2096,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Expression visitAddition_math_operation(@NotNull SiddhiQLParser.Addition_math_operationContext ctx) {
+
         Expression expression;
         if (ctx.add != null) {
             expression = Expression.add((Expression) visit(ctx.math_operation(0)),
@@ -2082,6 +2121,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public Expression visitMultiplication_math_operation(
             @NotNull SiddhiQLParser.Multiplication_math_operationContext ctx) {
+
         Expression expression;
         if (ctx.multiply != null) {
             expression = Expression.multiply((Expression) visit(ctx.math_operation(0)),
@@ -2108,6 +2148,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Expression visitNot_math_operation(@NotNull SiddhiQLParser.Not_math_operationContext ctx) {
+
         Expression expression = Expression.not((Expression) visit(ctx.math_operation()));
         populateQueryContext(expression, ctx);
         return expression;
@@ -2122,6 +2163,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitIn_math_operation(@NotNull SiddhiQLParser.In_math_operationContext ctx) {
+
         Expression expression = Expression.in((Expression) visit(ctx.math_operation()), (String) visit(ctx.name()));
         populateQueryContext(expression, ctx);
         return expression;
@@ -2136,6 +2178,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitBasic_math_operation(@NotNull SiddhiQLParser.Basic_math_operationContext ctx) {
+
         if (ctx.math_operation() != null) {
             return visit(ctx.math_operation());
         } else if (ctx.attribute_reference() != null) {
@@ -2160,6 +2203,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitFunction_operation(@NotNull SiddhiQLParser.Function_operationContext ctx) {
+
         Expression expression;
         if (ctx.function_namespace() != null) {
             if (ctx.attribute_list() != null) {
@@ -2191,6 +2235,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitAttribute_list(@NotNull SiddhiQLParser.Attribute_listContext ctx) {
+
         Expression[] expressionArray = new Expression[ctx.attribute().size()];
         List<SiddhiQLParser.AttributeContext> attribute = ctx.attribute();
         for (int i = 0; i < attribute.size(); i++) {
@@ -2209,6 +2254,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitNull_check(@NotNull SiddhiQLParser.Null_checkContext ctx) {
+
         Expression expression;
 
         if (ctx.stream_reference() != null) {
@@ -2256,6 +2302,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitStream_reference(@NotNull SiddhiQLParser.Stream_referenceContext ctx) {
+
         StreamReference streamReference = new StreamReference();
         if (ctx.hash != null) {
             streamReference.isInnerStream = true;
@@ -2343,6 +2390,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Integer visitAttribute_index(@NotNull SiddhiQLParser.Attribute_indexContext ctx) {
+
         int index;
         if (ctx.LAST() != null) {
             index = SiddhiConstants.LAST;
@@ -2389,6 +2437,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Source visitSource(@NotNull SiddhiQLParser.SourceContext ctx) {
+
         Source source = new Source();
         source.streamId = (String) visit(ctx.stream_id());
         source.isInnerStream = ctx.inner != null;
@@ -2411,6 +2460,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitName(@NotNull SiddhiQLParser.NameContext ctx) {
+
         if (ctx.id() != null) {
             return visit(ctx.id());
         } else if (ctx.keyword() != null) {
@@ -2429,6 +2479,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object[] visitCollect(@NotNull SiddhiQLParser.CollectContext ctx) {
+
         Object[] minMax = new Object[2];
 
         if (ctx.start == null && ctx.end == null) {
@@ -2494,6 +2545,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public JoinInputStream.Type visitJoin(@NotNull SiddhiQLParser.JoinContext ctx) {
+
         if (ctx.OUTER() != null) {
             if (ctx.FULL() != null) {
                 return JoinInputStream.Type.FULL_OUTER_JOIN;
@@ -2561,6 +2613,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public String visitId(@NotNull SiddhiQLParser.IdContext ctx) {
+
         return ctx.getText();
     }
 
@@ -2573,6 +2626,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitKeyword(@NotNull SiddhiQLParser.KeywordContext ctx) {
+
         return ctx.getText();
     }
 
@@ -2585,6 +2639,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitTime_value(@NotNull SiddhiQLParser.Time_valueContext ctx) {
+
         TimeConstant timeValueInMillis = Expression.Time.milliSec(0);
         if (ctx.millisecond_value() != null) {
             timeValueInMillis.milliSec(((TimeConstant) visit(ctx.millisecond_value())).value());
@@ -2623,6 +2678,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitYear_value(@NotNull SiddhiQLParser.Year_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.year(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2638,6 +2694,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitMonth_value(@NotNull SiddhiQLParser.Month_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.month(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2653,6 +2710,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitWeek_value(@NotNull SiddhiQLParser.Week_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.week(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2668,6 +2726,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitDay_value(@NotNull SiddhiQLParser.Day_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.day(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2683,6 +2742,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitHour_value(@NotNull SiddhiQLParser.Hour_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.hour(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2698,6 +2758,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitMinute_value(@NotNull SiddhiQLParser.Minute_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.minute(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2713,6 +2774,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitSecond_value(@NotNull SiddhiQLParser.Second_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.sec(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2728,6 +2790,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TimeConstant visitMillisecond_value(@NotNull SiddhiQLParser.Millisecond_valueContext ctx) {
+
         TimeConstant timeConstant = Expression.Time.milliSec(Long.parseLong(ctx.INT_LITERAL().getText().
                 replaceFirst("[lL]", "")));
         populateQueryContext(timeConstant, ctx);
@@ -2743,6 +2806,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public DoubleConstant visitSigned_double_value(@NotNull SiddhiQLParser.Signed_double_valueContext ctx) {
+
         DoubleConstant doubleConstant = Expression.value(Double.parseDouble(ctx.getText()));
         populateQueryContext(doubleConstant, ctx);
         return doubleConstant;
@@ -2757,6 +2821,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public LongConstant visitSigned_long_value(@NotNull SiddhiQLParser.Signed_long_valueContext ctx) {
+
         LongConstant longConstant = Expression.value(Long.parseLong(ctx.getText().replaceFirst("[lL]", "")));
         populateQueryContext(longConstant, ctx);
         return longConstant;
@@ -2771,6 +2836,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public FloatConstant visitSigned_float_value(@NotNull SiddhiQLParser.Signed_float_valueContext ctx) {
+
         FloatConstant floatConstant = Expression.value(Float.parseFloat(ctx.getText()));
         populateQueryContext(floatConstant, ctx);
         return floatConstant;
@@ -2785,6 +2851,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public IntConstant visitSigned_int_value(@NotNull SiddhiQLParser.Signed_int_valueContext ctx) {
+
         IntConstant intConstant = Expression.value(Integer.parseInt(ctx.getText()));
         populateQueryContext(intConstant, ctx);
         return intConstant;
@@ -2799,6 +2866,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public BoolConstant visitBool_value(@NotNull SiddhiQLParser.Bool_valueContext ctx) {
+
         BoolConstant boolConstant = Expression.value("true".equalsIgnoreCase(ctx.getText()));
         populateQueryContext(boolConstant, ctx);
         return boolConstant;
@@ -2813,33 +2881,37 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public StringConstant visitString_value(@NotNull SiddhiQLParser.String_valueContext ctx) {
+
         StringConstant stringConstant = Expression.value(ctx.STRING_LITERAL().getText());
         populateQueryContext(stringConstant, ctx);
         return stringConstant;
     }
 
     public SiddhiParserException newSiddhiParserException(ParserRuleContext context) {
+
         return new SiddhiParserException("Syntax error in SiddhiQL, near '" + context.getText() + "'.",
                 new int[]{context.getStart().getLine(), context.getStart().getCharPositionInLine()},
                 new int[]{context.getStop().getLine(), context.getStop().getCharPositionInLine()});
     }
 
     public SiddhiParserException newSiddhiParserException(ParserRuleContext context, String message) {
+
         return new SiddhiParserException("Syntax error in SiddhiQL, near '" + context.getText() + "', " + message + ".",
                 new int[]{context.getStart().getLine(), context.getStart().getCharPositionInLine()},
                 new int[]{context.getStop().getLine(), context.getStop().getCharPositionInLine()});
     }
 
     public SiddhiParserException newSiddhiParserException(ParserRuleContext context, String message, Throwable t) {
+
         return new SiddhiParserException("Syntax error in SiddhiQL, near '" + context.getText() + "', " + message + ".",
                 t, new int[]{context.getStart().getLine(), context.getStart().getCharPositionInLine()},
                 new int[]{context.getStop().getLine(), context.getStop().getCharPositionInLine()});
     }
 
-
     @Override
     public TimePeriod.Duration visitAggregation_time_duration(
             @NotNull SiddhiQLParser.Aggregation_time_durationContext ctx) {
+
         if (ctx.SECONDS() != null) {
             return TimePeriod.Duration.SECONDS;
         }
@@ -2870,6 +2942,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public TimePeriod visitAggregation_time_interval(@NotNull SiddhiQLParser.Aggregation_time_intervalContext ctx) {
+
         List<TimePeriod.Duration> durations = new ArrayList<TimePeriod.Duration>();
 
         for (SiddhiQLParser.Aggregation_time_durationContext context : ctx.aggregation_time_duration()) {
@@ -2918,6 +2991,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public AggregationDefinition visitDefinition_aggregation_final(
             @NotNull SiddhiQLParser.Definition_aggregation_finalContext ctx) {
+
         return (AggregationDefinition) visit(ctx.definition_aggregation());
     }
 
@@ -2958,6 +3032,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitWithin_time_range(SiddhiQLParser.Within_time_rangeContext ctx) {
+
         Within within;
         if (ctx.end_pattern == null) {
             within = Within.within((Expression) visit(ctx.start_pattern));
@@ -2970,11 +3045,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitStore_query_final(SiddhiQLParser.Store_query_finalContext ctx) {
+
         return visit(ctx.store_query());
     }
 
     @Override
     public Object visitStore_query(SiddhiQLParser.Store_queryContext ctx) {
+
         OutputStream outputStream;
         OnDemandQuery onDemandQuery = OnDemandQuery.query();
         if (ctx.FROM() != null) {
@@ -3034,6 +3111,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitStore_input(SiddhiQLParser.Store_inputContext ctx) {
+
         String sourceId = (String) visit(ctx.source_id());
         String alias = null;
         if (ctx.alias() != null) {
@@ -3055,6 +3133,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     }
 
     private void populateQueryContext(SiddhiElement siddhiElement, @NotNull ParserRuleContext ctx) {
+
         if (siddhiElement != null && siddhiElement.getQueryContextStartIndex() == null &&
                 siddhiElement.getQueryContextEndIndex() == null) {
             siddhiElement.setQueryContextStartIndex(new int[]{ctx.getStart().getLine(),
@@ -3066,12 +3145,14 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     }
 
     private static class Source {
+
         private String streamId;
         private boolean isInnerStream;
         private boolean isFaultStream;
     }
 
     private static class StreamReference {
+
         private String streamId;
         private boolean isInnerStream;
         private boolean isFaultStream;

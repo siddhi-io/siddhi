@@ -17,8 +17,9 @@
  */
 package io.siddhi.core.event;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -31,7 +32,7 @@ import java.util.NoSuchElementException;
  */
 public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, Serializable {
 
-    private static final Logger log = Logger.getLogger(ComplexEventChunk.class);
+    private static final Logger log = LogManager.getLogger(ComplexEventChunk.class);
 
     private static final long serialVersionUID = 3185987841726255019L;
     protected E first;
@@ -122,7 +123,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
         if (lastEvent != null && lastEvent.getNext() == complexEvents) {
             //to detach the loop
             lastEvent.setNext(null);
-            if (Level.WARN.isGreaterOrEqual(log.getEffectiveLevel())) {
+            if (Level.WARN.isMoreSpecificThan(log.getLevel())) {
                 //To help finding the root cause of the event loop, such that it can be fixed.
                 //if this is an legitimate usecase increase the log level to ERROR for class ComplexEventChunk
                 Exception exception = new RuntimeException("Unexpected event loop found!");

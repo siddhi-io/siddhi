@@ -27,7 +27,8 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.error.handler.model.ErroneousEvent;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,7 @@ import java.util.List;
         )
 )
 public class PassThroughSourceMapper extends SourceMapper {
-    private static final Logger LOG = Logger.getLogger(PassThroughSourceMapper.class);
+    private static final Logger LOG = LogManager.getLogger(PassThroughSourceMapper.class);
 
     @Override
     public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping>

@@ -28,7 +28,8 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class IncrementalPersistenceTestCase {
-    private static final Logger log = Logger.getLogger(IncrementalPersistenceTestCase.class);
+    private static final Logger log = LogManager.getLogger(IncrementalPersistenceTestCase.class);
     private int count;
     private boolean eventArrived;
     private Long lastValue;

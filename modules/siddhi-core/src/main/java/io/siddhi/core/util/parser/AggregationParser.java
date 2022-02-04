@@ -92,7 +92,8 @@ import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.constant.StringConstant;
 import io.siddhi.query.api.extension.Extension;
 import io.siddhi.query.api.util.AnnotationHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,7 +151,7 @@ import static io.siddhi.core.util.SiddhiConstants.TO_TIMESTAMP;
  * This is the parser class of incremental aggregation definition.
  */
 public class AggregationParser {
-    private static final Logger log = Logger.getLogger(AggregationParser.class);
+    private static final Logger log = LogManager.getLogger(AggregationParser.class);
 
     public static AggregationRuntime parse(AggregationDefinition aggregationDefinition,
                                            SiddhiAppContext siddhiAppContext,
@@ -1370,7 +1371,7 @@ public class AggregationParser {
 
             groupByT3QueryBuilder.add(dbAggregationSelectFunctionTemplates.getTimeConversionFunction().
                     replace(PLACEHOLDER_COLUMN, AGG_EXTERNAL_TIMESTAMP_COL).replace(PLACEHOLDER_DURATION,
-                    dbAggregationTimeConversionDurationMapping.getDurationMapping(duration)));
+                            dbAggregationTimeConversionDurationMapping.getDurationMapping(duration)));
 
             groupByClause = dbAggregationSelectQueryTemplate.getGroupByClause().replace(PLACEHOLDER_COLUMNS,
                     groupByQueryBuilder.toString());

@@ -27,6 +27,7 @@ public class VariableUpdateTestCase {
 
     @Test
     public void test1() throws SiddhiParserException {
+
         System.setProperty("foo", "Foo");
         String siddhiApp = "" +
                 "@app:name('Test') " +
@@ -42,6 +43,7 @@ public class VariableUpdateTestCase {
 
     @Test(expectedExceptions = SiddhiParserException.class)
     public void test2() throws SiddhiParserException {
+
         String siddhiApp = "" +
                 "@app:name('Test') " +
                 "" +
@@ -52,6 +54,7 @@ public class VariableUpdateTestCase {
 
     @Test(expectedExceptions = SiddhiParserException.class)
     public void test3() throws SiddhiParserException {
+
         String siddhiApp =
                 "define stream ${foo2} (symbol string, price float, volume long);";
         SiddhiCompiler.updateVariables(siddhiApp);
@@ -59,6 +62,7 @@ public class VariableUpdateTestCase {
 
     @Test
     public void test4() throws SiddhiParserException {
+
         System.setProperty("JAVA_HOME", "Foo");
         String siddhiApp = "" +
                 "@app:name('Test') " +
@@ -74,6 +78,7 @@ public class VariableUpdateTestCase {
 
     @Test
     public void test5() throws SiddhiParserException {
+
         String siddhiApp = "" +
                 "@app:name('Test') " +
                 "" +

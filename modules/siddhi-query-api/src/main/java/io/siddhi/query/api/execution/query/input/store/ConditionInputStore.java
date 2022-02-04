@@ -30,30 +30,36 @@ public class ConditionInputStore implements InputStore {
     protected Expression onCondition = null;
 
     protected ConditionInputStore(Store store, Expression onCondition) {
+
         this.store = store;
         this.onCondition = onCondition;
     }
 
     @Override
     public String getStoreReferenceId() {
+
         return store.getStoreReferenceId();
     }
 
     @Override
     public String getStoreId() {
+
         return store.getStoreId();
     }
 
     public Store getStore() {
+
         return store;
     }
 
     public Expression getOnCondition() {
+
         return onCondition;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -71,6 +77,7 @@ public class ConditionInputStore implements InputStore {
 
     @Override
     public int hashCode() {
+
         int result = store != null ? store.hashCode() : 0;
         result = 31 * result + (onCondition != null ? onCondition.hashCode() : 0);
         return result;
@@ -78,6 +85,7 @@ public class ConditionInputStore implements InputStore {
 
     @Override
     public String toString() {
+
         return "ConditionInputStore{" +
                 "store=" + store +
                 ", onCondition=" + onCondition +

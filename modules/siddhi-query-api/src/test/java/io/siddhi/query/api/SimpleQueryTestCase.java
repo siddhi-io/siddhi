@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
@@ -60,6 +59,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingFilterQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -95,6 +95,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery1() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -128,6 +129,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -167,6 +169,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery3() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -210,6 +213,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void testCreatingFilterQueryWithDuplicateOutputAttribute() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -246,6 +250,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingNestedFilterQuery() {
+
         Query query = Query.query();
         query.from(InputStream.stream(
                 Query.query().
@@ -276,6 +281,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQuery() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -299,9 +305,9 @@ public class SimpleQueryTestCase {
 
     }
 
-
     @Test
     public void testCreatingReturnFilterQueryWithExtension() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -326,6 +332,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQueryWithFunction() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -350,6 +357,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQueryLimitAndSort() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -376,6 +384,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQueryLimitOffsetAndSort() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream").
@@ -402,6 +411,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void testCreatingReturnFilterQueryLimitAndSortError() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream"));
@@ -416,6 +426,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void testCreatingReturnFilterQueryLimitAndSortError2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream"));
@@ -430,6 +441,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void testCreatingReturnFilterQueryLimitAndSortError3() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream"));
@@ -444,6 +456,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = UnsupportedAttributeTypeException.class)
     public void testCreatingReturnFilterQueryLimitAndSortError4() {
+
         Query query = Query.query();
         query.from(
                 InputStream.stream("StockStream"));
@@ -458,6 +471,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingFilterQueryWithFaultStream() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -493,6 +507,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingFilterQueryWithFaultStream2() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("e1", "StockStream").
@@ -526,6 +541,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingFilterQueryWithFaultStream3() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -559,6 +575,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingNestedFilterQuery2() {
+
         Query query = Query.query();
         query.from(InputStream.stream(
                 Query.query().
@@ -586,12 +603,14 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testSiddhiAppQueryNull() {
+
         Query query = null;
         SiddhiApp.siddhiApp("test").addQuery(query);
     }
 
     @Test
     public void testCreatingReturnFilterQueryWithExtension2() {
+
         Query query = Query.query();
         Window window1 = new Window("ext", "Foo");
         query.from(
@@ -616,6 +635,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingReturnFilterQueryWithExtension3() {
+
         Query query = Query.query();
         Window window1 = new Window("Foo");
         AssertJUnit.assertFalse(window1.equals("falsewindow"));
@@ -641,6 +661,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testForAttribute() {
+
         String attributeString = "Attribute{id='symbol', type=STRING}";
         Attribute symbolAttribute = new Attribute("symbol", Attribute.Type.STRING);
         AssertJUnit.assertEquals(attributeString, symbolAttribute.toString());
@@ -648,6 +669,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testCreatingFilterQueryWithExpression() {
+
         Query query = Query.query();
 
         Variable variable = new Variable("price");
@@ -686,6 +708,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery4() {
+
         StreamFunction streamFunction = new StreamFunction("function1");
 
         Query query = Query.query();
@@ -730,6 +753,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery5() {
+
         StreamFunction streamFunction = new StreamFunction("funcNameSpace", "function1");
 
         Query query = Query.query();
@@ -774,6 +798,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery6() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -798,6 +823,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery7() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -822,6 +848,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery8() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -846,6 +873,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery9() {
+
         Query query = Query.query();
         query.from(
                 InputStream.faultStream("StockStream").
@@ -870,6 +898,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void testQuery10() {
+
         TimeConstant timeConstant = new TimeConstant(1000);
 
         Query query = Query.query();
@@ -895,6 +924,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testQuery11() {
+
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream"));
         query.annotation(Annotation.annotation("info").element("name", "query1"));
@@ -934,6 +964,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test2() {
+
         String orString = "Or{leftExpression=Compare{rightExpression=DoubleConstant{value=1.02}," +
                 " operator=GREATER_THAN, leftExpression=IntConstant{value=2}}, rightExpression=Compare{" +
                 "rightExpression=IntConstant{value=3}, operator=GREATER_THAN, leftExpression=IntConstant{value=1}}}";
@@ -958,6 +989,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test3() {
+
         List<OrderByAttribute> list = new ArrayList<>();
         list.add(new OrderByAttribute(Expression.variable("avgPrice"), OrderByAttribute.Order.ASC));
 
@@ -986,6 +1018,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test4() {
+
         Selector selector = new Selector();
 
         List<OutputAttribute> list = new ArrayList<>();
@@ -1001,6 +1034,7 @@ public class SimpleQueryTestCase {
 
     @Test(expectedExceptions = DuplicateAttributeException.class)
     public void selectortest2() {
+
         Selector selector = new Selector();
 
         List<OutputAttribute> list = new ArrayList<>();
@@ -1013,6 +1047,7 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test5() {
+
         String selectorString = "Selector{selectionList=[OutputAttribute{rename='symbol', expression=Variable" +
                 "{id='null', isInnerStream=false, streamIndex=null, functionId='null', functionIndex=null, " +
                 "attributeName='symbol'}}], groupByList=[], havingExpression=null, orderByList=[], limit=null, " +
@@ -1023,9 +1058,9 @@ public class SimpleQueryTestCase {
         AssertJUnit.assertEquals(selector, selectorString);
     }
 
-
     @Test
     public void test6() {
+
         Selector selector = new Selector();
         selector.select("symbol", Expression.isNull(Expression.variable("symbol")));
         selector.select("symbol1", Expression.not(Expression.variable("symbol")));

@@ -17,7 +17,6 @@
  */
 package io.siddhi.query.api;
 
-
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -36,6 +35,7 @@ public class JoinQueryTestCase {
 
     @Test
     public void testCreatingJoinQuery() {
+
         Query query = Query.query().
                 annotation(Annotation.annotation("foo").element("name", "Query1").element("summery", "Test Query")
                         .element("Custom")).
@@ -83,6 +83,7 @@ public class JoinQueryTestCase {
 
     @Test
     public void testJoinQueryToString() {
+
         Query query = Query.query().
                 annotation(Annotation.annotation("foo").element("name", "Query1").element("summery", "Test Query")
                         .element("Custom")).
@@ -154,8 +155,10 @@ public class JoinQueryTestCase {
                 "annotations=[@foo( name = \"Query1\", summery = \"Test Query\", \"Custom\")]}";
         Assert.assertEquals(query.toString(), queryString);
     }
+
     @Test
     public void testCreatingUnidirectionalJoinQuery() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -175,6 +178,7 @@ public class JoinQueryTestCase {
 
     @Test
     public void testCreatingUnidirectionalJoinQuery2() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -189,6 +193,7 @@ public class JoinQueryTestCase {
 
     @Test
     public void testCreatingUnidirectionalJoinQuery3() {
+
         Query.query().
                 from(
                         InputStream.joinStream(
@@ -204,6 +209,7 @@ public class JoinQueryTestCase {
 
     @Test
     public void testCreatingJoinQuery1() {
+
         Query query = Query.query().
                 annotation(Annotation.annotation("foo").element("name", "Query1").element("summery", "Test Query")
                         .element("Custom")).

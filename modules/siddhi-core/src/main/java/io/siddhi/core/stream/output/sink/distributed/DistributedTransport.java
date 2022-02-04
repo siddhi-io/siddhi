@@ -32,7 +32,8 @@ import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ import java.util.Map;
  * This is the base class for Distributed transports. All distributed transport types must inherit from this class
  */
 public abstract class DistributedTransport extends Sink {
-    private static final Logger log = Logger.getLogger(DistributedTransport.class);
+    private static final Logger log = LogManager.getLogger(DistributedTransport.class);
     protected DistributionStrategy strategy;
     protected StreamDefinition streamDefinition;
     protected SiddhiAppContext siddhiAppContext;

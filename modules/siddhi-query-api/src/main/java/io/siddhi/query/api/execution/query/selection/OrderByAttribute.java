@@ -32,44 +32,53 @@ public class OrderByAttribute implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public OrderByAttribute(Variable variable, Order order) {
+
         this.order = order;
         this.variable = variable;
     }
 
     public OrderByAttribute(Variable variable) {
+
         this.variable = variable;
     }
 
     public Order getOrder() {
+
         return order;
     }
 
     public Variable getVariable() {
+
         return variable;
     }
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -85,6 +94,7 @@ public class OrderByAttribute implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = order != null ? order.hashCode() : 0;
         result = 31 * result + (variable != null ? variable.hashCode() : 0);
         return result;

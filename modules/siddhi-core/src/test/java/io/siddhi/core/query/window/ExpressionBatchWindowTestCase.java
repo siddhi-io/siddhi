@@ -24,13 +24,14 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ExpressionBatchWindowTestCase {
-    private static final Logger log = Logger.getLogger(ExpressionBatchWindowTestCase.class);
+    private static final Logger log = LogManager.getLogger(ExpressionBatchWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private int count;

@@ -25,7 +25,8 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
@@ -36,7 +37,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class PurgingTestCase {
-    private static final Logger LOG = Logger.getLogger(PurgingTestCase.class);
+    private static final Logger LOG = LogManager.getLogger(PurgingTestCase.class);
 
     @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void incrementalPurgingTest1() {

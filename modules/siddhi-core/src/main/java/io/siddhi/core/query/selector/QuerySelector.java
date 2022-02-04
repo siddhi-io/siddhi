@@ -31,7 +31,8 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.execution.query.selection.Selector;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,7 +45,7 @@ import java.util.Map;
 public class QuerySelector implements Processor {
 
 
-    private static final Logger log = Logger.getLogger(QuerySelector.class);
+    private static final Logger log = LogManager.getLogger(QuerySelector.class);
     private Selector selector;
     private SiddhiQueryContext siddhiQueryContext;
     private boolean currentOn = false;
@@ -78,7 +79,7 @@ public class QuerySelector implements Processor {
             log.trace("event is processed by selector " + id + this);
         }
         ComplexEventChunk outputComplexEventChunk = null;
-            if (complexEventChunk.isBatch() && batchingEnabled) {
+        if (complexEventChunk.isBatch() && batchingEnabled) {
             if (isGroupBy) {
                 outputComplexEventChunk = processInBatchGroupBy(complexEventChunk);
             } else if (containsAggregator) {

@@ -27,6 +27,7 @@ public class RetrieveMessageContextTestCase {
 
     @Test
     public void testFunction1() {
+
         String message = ExceptionUtil.getMessageWithContext("foo", new int[]{0, 5}, new int[]{0, 10},
                 "01234567890123456", "TestMessage");
         Assert.assertEquals(message, "Error on 'foo' @ Line: 0. Position: 10, " +
@@ -35,6 +36,7 @@ public class RetrieveMessageContextTestCase {
 
     @Test
     public void testFunction2() {
+
         String message = ExceptionUtil.getContext(new int[]{0, 5}, new int[]{0, 10},
                 "01234567890123456");
         Assert.assertEquals(message, "56789");
@@ -42,6 +44,7 @@ public class RetrieveMessageContextTestCase {
 
     @Test
     public void testFunction3() {
+
         Exception e = new Exception("TestMessage");
         String message = ExceptionUtil.getMessageWithContext(e, "foo",
                 "01234567890123456");
@@ -50,15 +53,16 @@ public class RetrieveMessageContextTestCase {
 
     @Test
     public void testFunction4() {
+
         Exception e = new SiddhiAppValidationException("TestMessage", new int[]{0, 5}, new int[]{0, 10});
         String message = ExceptionUtil.getMessageWithContext(e, "foo",
                 "01234567890123456");
         Assert.assertEquals(message, "Error on 'foo' @ Line: 0. Position: 10, near '56789'. TestMessage");
     }
 
-
     @Test
     public void testFunction5() {
+
         Exception e = new SiddhiAppValidationException("TestMessage", new int[]{2, 5}, new int[]{4, 10});
         String message = ExceptionUtil.getMessageWithContext(e, "foo",
                 "a0123456789\nb0123456789\nc0123456789\nd0123456789\n");

@@ -23,7 +23,8 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.table.holder.IndexEventHolder;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 import java.util.TreeMap;
@@ -34,7 +35,7 @@ import static io.siddhi.core.util.SiddhiConstants.CACHE_TABLE_TIMESTAMP_ADDED;
  * cache table with FIFO entry removal
  */
 public class CacheTableFIFO extends CacheTable {
-    private static final Logger log = Logger.getLogger(CacheTableFIFO.class);
+    private static final Logger log = LogManager.getLogger(CacheTableFIFO.class);
     private int cachePolicyAttributePosition;
     private int numColumns;
 

@@ -32,7 +32,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
@@ -99,7 +100,7 @@ import java.util.Arrays;
 )
 
 public class LogSink extends Sink {
-    private static final Logger logger = Logger.getLogger(LogSink.class);
+    private static final Logger logger = LogManager.getLogger(LogSink.class);
     private static final String PREFIX = "prefix";
     private static final String PRIORITY = "priority";
     private String logPrefix;

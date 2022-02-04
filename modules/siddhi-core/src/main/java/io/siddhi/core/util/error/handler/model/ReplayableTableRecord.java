@@ -41,6 +41,7 @@ public class ReplayableTableRecord implements Serializable {
 
     /**
      * For onAddError
+     *
      * @param complexEventChunk
      */
     public ReplayableTableRecord(ComplexEventChunk complexEventChunk) {
@@ -49,6 +50,7 @@ public class ReplayableTableRecord implements Serializable {
 
     /**
      * For onFindError and onContainsError
+     *
      * @param compiledCondition
      * @param stateEvent
      */
@@ -59,6 +61,7 @@ public class ReplayableTableRecord implements Serializable {
 
     /**
      * For onDeleteError
+     *
      * @param complexEventChunk
      * @param compiledCondition
      */
@@ -69,6 +72,7 @@ public class ReplayableTableRecord implements Serializable {
 
     /**
      * For onUpdateError
+     *
      * @param complexEventChunk
      * @param compiledCondition
      * @param compiledUpdateSet
@@ -82,6 +86,7 @@ public class ReplayableTableRecord implements Serializable {
 
     /**
      * For onUpdateOrAddError
+     *
      * @param complexEventChunk
      * @param compiledCondition
      * @param compiledUpdateSet
@@ -96,44 +101,44 @@ public class ReplayableTableRecord implements Serializable {
         this.addingStreamEventExtractor = addingStreamEventExtractor;
     }
 
-    public void setComplexEventChunk(ComplexEventChunk complexEventChunk) {
-        this.complexEventChunk = complexEventChunk;
-    }
-
-    public void setCompiledCondition(CompiledCondition compiledCondition) {
-        this.compiledCondition = compiledCondition;
-    }
-
-    public void setStateEvent(StateEvent stateEvent) {
-        this.stateEvent = stateEvent;
-    }
-
-    public void setCompiledUpdateSet(CompiledUpdateSet compiledUpdateSet) {
-        this.compiledUpdateSet = compiledUpdateSet;
-    }
-
-    public void setAddingStreamEventExtractor(AddingStreamEventExtractor addingStreamEventExtractor) {
-        this.addingStreamEventExtractor = addingStreamEventExtractor;
-    }
-
     public ComplexEventChunk getComplexEventChunk() {
         return complexEventChunk;
+    }
+
+    public void setComplexEventChunk(ComplexEventChunk complexEventChunk) {
+        this.complexEventChunk = complexEventChunk;
     }
 
     public CompiledCondition getCompiledCondition() {
         return compiledCondition;
     }
 
+    public void setCompiledCondition(CompiledCondition compiledCondition) {
+        this.compiledCondition = compiledCondition;
+    }
+
     public StateEvent getStateEvent() {
         return stateEvent;
+    }
+
+    public void setStateEvent(StateEvent stateEvent) {
+        this.stateEvent = stateEvent;
     }
 
     public CompiledUpdateSet getCompiledUpdateSet() {
         return compiledUpdateSet;
     }
 
+    public void setCompiledUpdateSet(CompiledUpdateSet compiledUpdateSet) {
+        this.compiledUpdateSet = compiledUpdateSet;
+    }
+
     public AddingStreamEventExtractor getAddingStreamEventExtractor() {
         return addingStreamEventExtractor;
+    }
+
+    public void setAddingStreamEventExtractor(AddingStreamEventExtractor addingStreamEventExtractor) {
+        this.addingStreamEventExtractor = addingStreamEventExtractor;
     }
 
     public boolean isFromConnectionUnavailableException() {

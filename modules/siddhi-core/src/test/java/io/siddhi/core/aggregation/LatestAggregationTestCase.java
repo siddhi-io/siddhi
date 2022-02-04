@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LatestAggregationTestCase {
 
-    private static final Logger LOG = Logger.getLogger(LatestAggregationTestCase.class);
+    private static final Logger LOG = LogManager.getLogger(LatestAggregationTestCase.class);
     private AtomicInteger inEventCount;
     private AtomicInteger removeEventCount;
     private boolean eventArrived;

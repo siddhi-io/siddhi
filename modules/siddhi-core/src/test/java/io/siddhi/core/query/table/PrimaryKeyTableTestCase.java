@@ -28,7 +28,8 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.api.exception.AttributeNotExistException;
 import io.siddhi.query.api.exception.DuplicateAnnotationException;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrimaryKeyTableTestCase {
-    private static final Logger log = Logger.getLogger(PrimaryKeyTableTestCase.class);
+    private static final Logger log = LogManager.getLogger(PrimaryKeyTableTestCase.class);
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private int removeEventCount;
     private boolean eventArrived;

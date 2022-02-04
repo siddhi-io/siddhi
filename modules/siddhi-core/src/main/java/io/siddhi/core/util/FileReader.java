@@ -18,7 +18,8 @@
 package io.siddhi.core.util;
 
 import io.siddhi.core.exception.YAMLConfigManagerException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +31,7 @@ import java.nio.file.Path;
  */
 public class FileReader {
 
-    private static final Logger LOG = Logger.getLogger(FileReader.class);
+    private static final Logger LOG = LogManager.getLogger(FileReader.class);
 
     public static String readYAMLConfigFile(Path filePath) throws YAMLConfigManagerException {
         if (!filePath.toFile().exists()) {

@@ -42,7 +42,8 @@ import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,10 +56,10 @@ import java.util.Map;
  * developer can directly work with event data.
  */
 public abstract class AbstractRecordTable extends Table {
-    private static final Logger log = Logger.getLogger(AbstractRecordTable.class);
-    private ThreadLocal<DynamicOptions> trpDynamicOptions;
+    private static final Logger log = LogManager.getLogger(AbstractRecordTable.class);
     protected StreamEventFactory storeEventPool;
     protected RecordTableHandler recordTableHandler;
+    private ThreadLocal<DynamicOptions> trpDynamicOptions;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,

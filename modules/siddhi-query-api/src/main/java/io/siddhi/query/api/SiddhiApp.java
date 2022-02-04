@@ -59,29 +59,36 @@ public class SiddhiApp implements SiddhiElement {
     private int[] queryContextEndIndex;
 
     public SiddhiApp(String name) {
+
         annotations.add(Annotation.annotation("info").element("name", name));
     }
 
     public SiddhiApp(List<Annotation> annotations) {
+
         this.annotations = annotations;
     }
 
     public SiddhiApp() {
+
     }
 
     public static SiddhiApp siddhiApp(String name) {
+
         return new SiddhiApp(name);
     }
 
     public static SiddhiApp siddhiApp() {
+
         return new SiddhiApp();
     }
 
     public Map<String, FunctionDefinition> getFunctionDefinitionMap() {
+
         return functionDefinitionMap;
     }
 
     public SiddhiApp defineStream(StreamDefinition streamDefinition) {
+
         if (streamDefinition == null) {
             throw new SiddhiAppValidationException("Stream Definition should not be null");
         } else if (streamDefinition.getId() == null) {
@@ -94,6 +101,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp defineAggregation(AggregationDefinition aggregationDefinition) {
+
         if (aggregationDefinition == null) {
             throw new SiddhiAppValidationException("Aggregation Definition should not be null");
         }
@@ -108,6 +116,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp defineTable(TableDefinition tableDefinition) {
+
         if (tableDefinition == null) {
             throw new SiddhiAppValidationException("Table Definition should not be null");
         } else if (tableDefinition.getId() == null) {
@@ -120,6 +129,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp defineWindow(WindowDefinition windowDefinition) {
+
         if (windowDefinition == null) {
             throw new SiddhiAppValidationException("Window Definition should not be null");
         } else if (windowDefinition.getId() == null) {
@@ -132,6 +142,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp defineTrigger(TriggerDefinition triggerDefinition) {
+
         if (triggerDefinition == null) {
             throw new SiddhiAppValidationException("Trigger Definition should not be null");
         } else if (triggerDefinition.getId() == null) {
@@ -162,6 +173,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     private void checkDuplicateDefinition(AbstractDefinition definition) {
+
         TableDefinition existingTableDefinition = tableDefinitionMap.get(definition.getId());
         if (existingTableDefinition != null && (!existingTableDefinition.equals(definition) || definition instanceof
                 StreamDefinition)) {
@@ -196,6 +208,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp addQuery(Query query) {
+
         if (query == null) {
             throw new SiddhiAppValidationException("Query should not be null");
         }
@@ -216,6 +229,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp addPartition(Partition partition) {
+
         if (partition == null) {
             throw new SiddhiAppValidationException("Partition should not be null");
         }
@@ -236,40 +250,49 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp annotation(Annotation annotation) {
+
         annotations.add(annotation);
         return this;
     }
 
     public List<Annotation> getAnnotations() {
+
         return annotations;
     }
 
     public List<ExecutionElement> getExecutionElementList() {
+
         return executionElementList;
     }
 
     public Map<String, StreamDefinition> getStreamDefinitionMap() {
+
         return streamDefinitionMap;
     }
 
     public Map<String, TableDefinition> getTableDefinitionMap() {
+
         return tableDefinitionMap;
     }
 
     public Map<String, TriggerDefinition> getTriggerDefinitionMap() {
+
         return triggerDefinitionMap;
     }
 
     public Map<String, WindowDefinition> getWindowDefinitionMap() {
+
         return windowDefinitionMap;
     }
 
     public Map<String, AggregationDefinition> getAggregationDefinitionMap() {
+
         return aggregationDefinitionMap;
     }
 
     @Override
     public String toString() {
+
         return "SiddhiApp{" + "streamDefinitionMap=" + streamDefinitionMap + ", tableDefinitionMap="
                 + tableDefinitionMap + ", windowDefinitionMap=" + windowDefinitionMap + ", aggregationDefinitionMap="
                 + aggregationDefinitionMap + ", executionElementList=" + executionElementList
@@ -278,6 +301,7 @@ public class SiddhiApp implements SiddhiElement {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -315,6 +339,7 @@ public class SiddhiApp implements SiddhiElement {
 
     @Override
     public int hashCode() {
+
         int result = streamDefinitionMap != null ? streamDefinitionMap.hashCode() : 0;
         result = 31 * result + (tableDefinitionMap != null ? tableDefinitionMap.hashCode() : 0);
         result = 31 * result + (aggregationDefinitionMap != null ? aggregationDefinitionMap.hashCode() : 0);
@@ -325,6 +350,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     public SiddhiApp defineFunction(FunctionDefinition functionDefinition) {
+
         if (functionDefinition == null) {
             throw new SiddhiAppValidationException("Function Definition should not be null");
         } else if (functionDefinition.getId() == null) {
@@ -346,6 +372,7 @@ public class SiddhiApp implements SiddhiElement {
     }
 
     private void checkDuplicateFunctionExist(FunctionDefinition functionDefinition) {
+
         if (this.functionDefinitionMap.get(functionDefinition.getId()) != null) {
             throw new DuplicateDefinitionException("The function definition with the same id exists " +
                     functionDefinition.getId(), functionDefinition.getQueryContextStartIndex(),
@@ -355,21 +382,25 @@ public class SiddhiApp implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

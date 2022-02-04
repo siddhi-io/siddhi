@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogicalTableTestCase {
-    private static final Logger log = Logger.getLogger(LogicalTableTestCase.class);
+    private static final Logger log = LogManager.getLogger(LogicalTableTestCase.class);
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private int removeEventCount;
     private boolean eventArrived;

@@ -37,12 +37,14 @@ public abstract class InputStream implements SiddhiElement {
 
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream) {
+
         return new JoinInputStream(leftStream, type, rightStream, null,
                 JoinInputStream.EventTrigger.ALL, null, null);
     }
 
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream, Expression onCompare) {
+
         return new JoinInputStream(leftStream, type, rightStream, onCompare,
                 JoinInputStream.EventTrigger.ALL, null, null);
     }
@@ -50,12 +52,14 @@ public abstract class InputStream implements SiddhiElement {
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream, Expression onCompare,
                                          JoinInputStream.EventTrigger trigger) {
+
         return new JoinInputStream(leftStream, type, rightStream, onCompare,
                 trigger, null, null);
     }
 
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream, JoinInputStream.EventTrigger trigger) {
+
         return new JoinInputStream(leftStream, type, rightStream, null,
                 trigger, null, null);
     }
@@ -63,6 +67,7 @@ public abstract class InputStream implements SiddhiElement {
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream, Expression onCompare,
                                          Within within, Expression per) {
+
         return new JoinInputStream(leftStream, type, rightStream, onCompare,
                 JoinInputStream.EventTrigger.ALL, within, per);
     }
@@ -70,6 +75,7 @@ public abstract class InputStream implements SiddhiElement {
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream,
                                          Within within, Expression per) {
+
         return new JoinInputStream(leftStream, type, rightStream, null,
                 JoinInputStream.EventTrigger.ALL, within, per);
     }
@@ -78,6 +84,7 @@ public abstract class InputStream implements SiddhiElement {
                                          SingleInputStream rightStream, Expression onCompare,
                                          JoinInputStream.EventTrigger trigger,
                                          Within within, Expression per) {
+
         return new JoinInputStream(leftStream, type, rightStream, onCompare,
                 trigger, within, per);
     }
@@ -85,51 +92,63 @@ public abstract class InputStream implements SiddhiElement {
     public static InputStream joinStream(SingleInputStream leftStream, JoinInputStream.Type type,
                                          SingleInputStream rightStream, JoinInputStream.EventTrigger trigger,
                                          Within within, Expression per) {
+
         return new JoinInputStream(leftStream, type, rightStream, null,
                 trigger, within, per);
     }
 
     public static StateInputStream patternStream(StateElement patternElement) {
+
         return new StateInputStream(StateInputStream.Type.PATTERN, patternElement, null);
     }
 
     public static StateInputStream patternStream(StateElement patternElement, TimeConstant timeConstant) {
+
         return new StateInputStream(StateInputStream.Type.PATTERN, patternElement, timeConstant);
     }
 
     public static StateInputStream sequenceStream(StateElement sequenceElement) {
+
         return new StateInputStream(StateInputStream.Type.SEQUENCE, sequenceElement, null);
     }
 
     public static StateInputStream sequenceStream(StateElement sequenceElement, TimeConstant timeConstant) {
+
         return new StateInputStream(StateInputStream.Type.SEQUENCE, sequenceElement, timeConstant);
     }
 
     public static BasicSingleInputStream innerStream(String streamId) {
+
         return new BasicSingleInputStream(null, streamId, true, false);
     }
 
     public static BasicSingleInputStream innerStream(String streamReferenceId, String streamId) {
+
         return new BasicSingleInputStream(streamReferenceId, streamId, true, false);
     }
 
     public static BasicSingleInputStream faultStream(String streamId) {
+
         return new BasicSingleInputStream(null, streamId, false, true);
     }
 
     public static BasicSingleInputStream faultStream(String streamReferenceId, String streamId) {
+
         return new BasicSingleInputStream(streamReferenceId, streamId, false, true);
     }
 
     public static BasicSingleInputStream stream(String streamId) {
+
         return new BasicSingleInputStream(null, streamId);
     }
 
     public static BasicSingleInputStream stream(String streamReferenceId, String streamId) {
+
         return new BasicSingleInputStream(streamReferenceId, streamId);
     }
 
     public static SingleInputStream stream(Query query) {
+
         return new AnonymousInputStream(query);
     }
 
@@ -139,21 +158,25 @@ public abstract class InputStream implements SiddhiElement {
 
     @Override
     public int[] getQueryContextStartIndex() {
+
         return queryContextStartIndex;
     }
 
     @Override
     public void setQueryContextStartIndex(int[] lineAndColumn) {
+
         queryContextStartIndex = lineAndColumn;
     }
 
     @Override
     public int[] getQueryContextEndIndex() {
+
         return queryContextEndIndex;
     }
 
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
+
         queryContextEndIndex = lineAndColumn;
     }
 }

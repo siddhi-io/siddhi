@@ -25,14 +25,15 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class StdDevAttributeAggregatorExecutorTestCase {
 
-    private static final Logger log = Logger.getLogger(StdDevAttributeAggregatorExecutorTestCase.class);
+    private static final Logger log = LogManager.getLogger(StdDevAttributeAggregatorExecutorTestCase.class);
     private final double epsilon = 0.00001; // difference threshold for two doubles to be treated distinct
     private int inEventCount; // Only used in the Test #1 and #6
 

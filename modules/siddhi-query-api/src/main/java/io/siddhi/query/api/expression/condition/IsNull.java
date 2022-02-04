@@ -34,14 +34,17 @@ public class IsNull extends Expression {
     private Expression expression;
 
     public IsNull(Expression expression) {
+
         this.expression = expression;
     }
 
     public IsNull(String streamId, Integer streamIndex, boolean isInnerStream) {
+
         this(streamId, streamIndex, isInnerStream, false);
     }
 
     public IsNull(String streamId, Integer streamIndex, boolean isInnerStream, boolean isFaultStream) {
+
         this.streamIndex = streamIndex;
         this.isInnerStream = isInnerStream;
         this.isFaultStream = isFaultStream;
@@ -62,27 +65,33 @@ public class IsNull extends Expression {
     }
 
     public Expression getExpression() {
+
         return expression;
     }
 
     public String getStreamId() {
+
         return streamId;
     }
 
     public Integer getStreamIndex() {
+
         return streamIndex;
     }
 
     public boolean isInnerStream() {
+
         return isInnerStream;
     }
 
     public boolean isFaultStream() {
+
         return isFaultStream;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
@@ -109,6 +118,7 @@ public class IsNull extends Expression {
 
     @Override
     public int hashCode() {
+
         int result = streamId != null ? streamId.hashCode() : 0;
         result = 31 * result + (streamIndex != null ? streamIndex.hashCode() : 0);
         result = 31 * result + (isInnerStream ? 1 : 0);
@@ -119,6 +129,7 @@ public class IsNull extends Expression {
 
     @Override
     public String toString() {
+
         return "IsNull{" +
                 "streamId='" + streamId + '\'' +
                 ", streamIndex=" + streamIndex +
