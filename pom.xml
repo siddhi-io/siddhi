@@ -554,6 +554,7 @@
                 <configuration>
                     <source>${wso2.maven.compiler.source}</source>
                     <target>${wso2.maven.compiler.target}</target>
+                	<fork>true</fork>
                 </configuration>
             </plugin>
             <plugin>
