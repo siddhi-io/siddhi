@@ -715,6 +715,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 }
             }
         }
+        LOG.info("Starting initialisation of executors for aggregation: " + getAggregationDefinition().getId());
         this.incrementalExecutorsInitialiser.initialiseExecutors();
         LOG.info("Finished initialisation of executors for aggregation: " + getAggregationDefinition().getId());
     }
