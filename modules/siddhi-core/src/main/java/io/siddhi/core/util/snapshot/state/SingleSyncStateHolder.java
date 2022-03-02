@@ -39,6 +39,10 @@ public class SingleSyncStateHolder implements StateHolder {
         this.allStates.put(null, groupByStates);
     }
 
+    public boolean isStatePresent() {
+        return state != null;
+    }
+
     @Override
     public State getState() {
         if (state == null) {
