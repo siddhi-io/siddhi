@@ -222,8 +222,8 @@ public class IncrementalExecutor implements Executor {
                     } catch (Throwable t) {
                         LOG.error("Exception occurred at siddhi app '" + this.siddhiAppName +
                                 "' when performing table writes of aggregation '" + this.aggregatorName +
-                                "' for duration '" + this.duration + "'. This should be investigated as this " +
-                                "can cause accuracy loss.", t);
+                                "' for duration '" + this.duration + "'. Unless state persistence has been enabled, " +
+                                "this should be investigated as this can cause accuracy loss.", t);
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Dropping Event chunk - \"" + eventChunk.toString() + "\"");
                         }

@@ -188,6 +188,10 @@ public class BaseIncrementalValueStore {
         }
     }
 
+    public StateHolder<StoreState> getStoreStateHolder() {
+        return storeStateHolder;
+    }
+
     private boolean shouldUpdate(Object data, ValueState state) {
         long timestamp = (long) data;
         if (timestamp >= state.lastTimestamp) {
