@@ -82,7 +82,7 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.quartz-scheduler.wso2</groupId>
+            <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
         <dependency>
@@ -234,7 +234,7 @@
                                     <version>${guava.bundle.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>quartz</symbolicName>
+                                    <symbolicName>org.quartz-scheduler.quartz</symbolicName>
                                     <version>${quartz.version}</version>
                                 </bundle>
                                 <bundle>
