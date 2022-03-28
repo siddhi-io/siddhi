@@ -238,12 +238,15 @@ public class Window implements FindableProcessor, MemoryCalculable {
                 if (throughputTrackerInsert != null &&
                         Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTrackerInsert.eventsIn(numberOfEvents);
+                }
+                if (latencyTrackerInsert != null &&
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerInsert.markIn();
                 }
                 // Send to the window windowProcessor
                 windowProcessor.process(new ComplexEventChunk<>(firstEvent, currentEvent));
             } finally {
-                if (throughputTrackerInsert != null &&
+                if (latencyTrackerInsert != null &&
                         Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerInsert.markOut();
                 }
@@ -261,11 +264,13 @@ public class Window implements FindableProcessor, MemoryCalculable {
         try {
             if (throughputTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 throughputTrackerFind.eventIn();
+            }
+            if (latencyTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markIn();
             }
             return ((FindableProcessor) this.internalWindowProcessor).find(matchingEvent, compiledCondition);
         } finally {
-            if (throughputTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (latencyTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markOut();
             }
         }
@@ -330,7 +335,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
         }
 
         public void process(ComplexEventChunk complexEventChunk) {
-            if (throughputTrackerInsert != null &&
+            if (latencyTrackerInsert != null &&
                     Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markOut();
             }

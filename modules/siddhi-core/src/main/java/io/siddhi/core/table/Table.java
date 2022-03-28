@@ -216,19 +216,22 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     }
 
     public void addEvents(ComplexEventChunk<StreamEvent> addingEventChunk, int noOfEvents) {
-        if (latencyTrackerInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerInsert.markIn();
-        }
-        addingEventChunk.reset();
-        add(addingEventChunk);
-        if (latencyTrackerInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerInsert.markOut();
-        }
-        if (throughputTrackerInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerInsert.eventsIn(noOfEvents);
+        try {
+            if (throughputTrackerInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                throughputTrackerInsert.eventsIn(noOfEvents);
+            }
+            if (latencyTrackerInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerInsert.markIn();
+            }
+            addingEventChunk.reset();
+            add(addingEventChunk);
+        } finally {
+            if (latencyTrackerInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerInsert.markOut();
+            }
         }
     }
 
@@ -335,18 +338,21 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
 
     public void deleteEvents(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition,
                              int noOfEvents) {
-        if (latencyTrackerDelete != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerDelete.markIn();
-        }
-        delete(deletingEventChunk, compiledCondition);
-        if (latencyTrackerDelete != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerDelete.markOut();
-        }
-        if (throughputTrackerDelete != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerDelete.eventsIn(noOfEvents);
+        try {
+            if (throughputTrackerDelete != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                throughputTrackerDelete.eventsIn(noOfEvents);
+            }
+            if (latencyTrackerDelete != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerDelete.markIn();
+            }
+            delete(deletingEventChunk, compiledCondition);
+        } finally {
+            if (latencyTrackerDelete != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerDelete.markOut();
+            }
         }
     }
 
@@ -418,18 +424,21 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
     public void updateEvents(ComplexEventChunk<StateEvent> updatingEventChunk,
                              CompiledCondition compiledCondition,
                              CompiledUpdateSet compiledUpdateSet, int noOfEvents) {
-        if (latencyTrackerUpdate != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerUpdate.markIn();
-        }
-        update(updatingEventChunk, compiledCondition, compiledUpdateSet);
-        if (latencyTrackerUpdate != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerUpdate.markOut();
-        }
-        if (throughputTrackerUpdate != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerUpdate.eventsIn(noOfEvents);
+        try {
+            if (throughputTrackerUpdate != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                throughputTrackerUpdate.eventsIn(noOfEvents);
+            }
+            if (latencyTrackerUpdate != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerUpdate.markIn();
+            }
+            update(updatingEventChunk, compiledCondition, compiledUpdateSet);
+        } finally {
+            if (latencyTrackerUpdate != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerUpdate.markOut();
+            }
         }
     }
 
@@ -506,19 +515,22 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                                   CompiledCondition compiledCondition,
                                   CompiledUpdateSet compiledUpdateSet,
                                   AddingStreamEventExtractor addingStreamEventExtractor, int noOfEvents) {
-        if (latencyTrackerUpdateOrInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerUpdateOrInsert.markIn();
-        }
-        updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
-                addingStreamEventExtractor);
-        if (latencyTrackerUpdateOrInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            latencyTrackerUpdateOrInsert.markOut();
-        }
-        if (throughputTrackerUpdateOrInsert != null &&
-                Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
-            throughputTrackerUpdateOrInsert.eventsIn(noOfEvents);
+        try {
+            if (throughputTrackerUpdateOrInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                throughputTrackerUpdateOrInsert.eventsIn(noOfEvents);
+            }
+            if (latencyTrackerUpdateOrInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerUpdateOrInsert.markIn();
+            }
+            updateOrAdd(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    addingStreamEventExtractor);
+        } finally {
+            if (latencyTrackerUpdateOrInsert != null &&
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                latencyTrackerUpdateOrInsert.markOut();
+            }
         }
     }
 
