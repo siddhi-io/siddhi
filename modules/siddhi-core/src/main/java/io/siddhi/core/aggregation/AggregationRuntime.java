@@ -341,10 +341,13 @@ public class AggregationRuntime implements MemoryCalculable {
                             SiddhiQueryContext siddhiQueryContext) {
         try {
             SnapshotService.getSkipStateStorageThreadLocal().set(true);
+            if (throughputTrackerFind != null &&
+                    Level.BASIC.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0) {
+                throughputTrackerFind.eventIn();
+            }
             if (latencyTrackerFind != null &&
                     Level.BASIC.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markIn();
-                throughputTrackerFind.eventIn();
             }
             if (!isDistributed && !isFirstEventArrived) {
                 // No need to initialise executors if it is distributed
