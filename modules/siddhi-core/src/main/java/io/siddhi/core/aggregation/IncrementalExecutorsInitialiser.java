@@ -204,7 +204,8 @@ public class IncrementalExecutorsInitialiser {
             }
             return false;
         } else {
-            IncrementalExecutor incrementalExecutor = (IncrementalExecutor) incrementalExecutorMap.get(recreateForDuration);
+            IncrementalExecutor incrementalExecutor = (IncrementalExecutor) incrementalExecutorMap.get(
+                    recreateForDuration);
             BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
             StateHolder<BaseIncrementalValueStore.StoreState> storeStateHolder =
                     baseIncrementalValueStore.getStoreStateHolder();
