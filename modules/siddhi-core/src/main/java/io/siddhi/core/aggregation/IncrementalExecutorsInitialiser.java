@@ -38,6 +38,7 @@ import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,9 @@ import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
  * This ensures that the aggregation calculations are done correctly in case of server restart.
  */
 public class IncrementalExecutorsInitialiser {
+
+    private static final Logger log = Logger.getLogger(IncrementalExecutorsInitialiser.class);
+
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, Executor> incrementalExecutorMap;
@@ -193,12 +197,20 @@ public class IncrementalExecutorsInitialiser {
     }
 
     private boolean isStatePresentForAggregationDuration(TimePeriod.Duration recreateForDuration) {
-        IncrementalExecutor incrementalExecutor = (IncrementalExecutor) incrementalExecutorMap.get(recreateForDuration);
-        BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
-        StateHolder<BaseIncrementalValueStore.StoreState> storeStateHolder =
-                baseIncrementalValueStore.getStoreStateHolder();
-        return (storeStateHolder instanceof SingleSyncStateHolder) &&
-                ((SingleSyncStateHolder) storeStateHolder).isStatePresent();
+        if (isPersistedAggregation) {
+            if (log.isDebugEnabled()) {
+                log.debug("Aggregation will be completed under the mode 'Persisted Aggregation' hence the state will"
+                        + " be ignored");
+            }
+            return false;
+        } else {
+            IncrementalExecutor incrementalExecutor = (IncrementalExecutor) incrementalExecutorMap.get(recreateForDuration);
+            BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
+            StateHolder<BaseIncrementalValueStore.StoreState> storeStateHolder =
+                    baseIncrementalValueStore.getStoreStateHolder();
+            return (storeStateHolder instanceof SingleSyncStateHolder) &&
+                    ((SingleSyncStateHolder) storeStateHolder).isStatePresent();
+        }
     }
 
     private void recreateState(Long lastData, TimePeriod.Duration recreateForDuration,
