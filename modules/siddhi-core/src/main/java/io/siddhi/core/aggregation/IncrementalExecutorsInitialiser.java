@@ -38,7 +38,8 @@ import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ import static io.siddhi.core.util.SiddhiConstants.AGG_START_TIMESTAMP_COL;
  */
 public class IncrementalExecutorsInitialiser {
 
-    private static final Logger log = Logger.getLogger(IncrementalExecutorsInitialiser.class);
+    private static final Logger log = LogManager.getLogger(IncrementalExecutorsInitialiser.class);
 
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
