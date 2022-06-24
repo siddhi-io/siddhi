@@ -128,7 +128,7 @@ public class IncrementalExecutor implements Executor {
                     executorState.nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(
                             timestamp, duration, timeZone);
                     dispatchAggregateEvents(executorState.startTimeOfAggregates);
-                    sendTimerEvent(executorState);
+                        sendTimerEvent(executorState);
                 }
                 if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
                     processAggregates(streamEvent, executorState);
