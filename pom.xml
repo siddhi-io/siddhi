@@ -262,6 +262,37 @@
                 <version>${org.jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!--Java 11 related dependencies-->
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${org.wso2.orbit.javax.xml.bind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${com.sun.xml.bind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-activation_1.1_spec</artifactId>
+                <version>${org.apache.geronimo.spec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>istack-commons-runtime</artifactId>
+                <version>${com.sun.istack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.activation</groupId>
+                <artifactId>javax.activation</artifactId>
+                <version>${com.sun.activation.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -851,6 +882,14 @@
         <maven.javadoc.plugin.version>3.1.1</maven.javadoc.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.wagon.ssh.version>3.3.3</maven.wagon.ssh.version>
+
+        <!-- Java 11 related dependencies -->
+        <javax.annotation.version>1.3.2</javax.annotation.version>
+        <org.wso2.orbit.javax.xml.bind.version>2.3.1.wso2v1</org.wso2.orbit.javax.xml.bind.version>
+        <com.sun.xml.bind.version>2.4.0-b180830.0438</com.sun.xml.bind.version>
+        <org.apache.geronimo.spec.version>1.1</org.apache.geronimo.spec.version>
+        <com.sun.istack.version>3.0.8</com.sun.istack.version>
+        <com.sun.activation.version>1.2.0</com.sun.activation.version>
     </properties>
 
     <scm>
