@@ -312,8 +312,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
                     <configuration>
-                        <source>${wso2.maven.compiler.source}</source>
-                        <target>${wso2.maven.compiler.target}</target>
+                        <release>11</release>
                     </configuration>
                 </plugin>
 
@@ -398,14 +397,14 @@
                     <version>${clirr.maven.plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>${maven.findbugsplugin.version}</version>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${maven.spotbugsplugin.version}</version>
                     <configuration>
                         <effort>Max</effort>
                         <threshold>Low</threshold>
                         <xmlOutput>true</xmlOutput>
-                        <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
+                        <spotbugsXmlOutputDirectory>${project.build.directory}/findbugs</spotbugsXmlOutputDirectory>
                         <!--Exclude sources-->
                         <excludeFilterFile>${mavan.findbugsplugin.exclude.file}</excludeFilterFile>
                     </configuration>
@@ -554,15 +553,15 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven.shadeplugin.version}</version>
             </plugin>
-            <plugin><!-- Overridden from parent pom to exclude generated sources -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${maven.findbugsplugin.version}</version>
+            <plugin> <!-- Overridden from parent pom to exclude generated sources -->
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${maven.spotbugsplugin.version}</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Medium</threshold>
                     <xmlOutput>true</xmlOutput>
-                    <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
+                    <spotbugsXmlOutputDirectory>${project.build.directory}/findbugs</spotbugsXmlOutputDirectory>
                     <!--Exclude sources-->
                     <excludeFilterFile>${mavan.findbugsplugin.exclude.file}</excludeFilterFile>
                 </configuration>
@@ -583,8 +582,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>${wso2.maven.compiler.source}</source>
-                    <target>${wso2.maven.compiler.target}</target>
+                    <release>11</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -858,7 +856,7 @@
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
-        <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
+        <maven.spotbugsplugin.version>3.1.10</maven.spotbugsplugin.version>
         <maven.compiler.plugin.version>3.8.1-jboss-1</maven.compiler.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
         <wso2.maven.compiler.target>1.8</wso2.maven.compiler.target>
@@ -866,7 +864,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!--Maven bundle plugin configuration -->
-        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>3.3.0</maven.bundle.plugin.version>
         <maven.bundle.plugin.vendor>WSO2 Inc</maven.bundle.plugin.vendor>
         <maven.bundle.plugin.extensions>true</maven.bundle.plugin.extensions>
         <bundle.classpath>.</bundle.classpath>

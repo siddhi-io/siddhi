@@ -298,4 +298,17 @@
         <Bug pattern="LI_LAZY_INIT_STATIC"/>
     </Match>
 
+    <Match>
+        <Class name="io.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorExecutor"/>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.query.output.ratelimit.event.FirstPerEventOutputRateLimiter"/>
+        <Bug pattern="VO_VOLATILE_INCREMENT"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.stream.StreamJunction"/>
+        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
+    </Match>
+
 </FindBugsFilter>
