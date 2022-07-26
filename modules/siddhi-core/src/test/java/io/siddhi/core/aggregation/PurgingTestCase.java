@@ -109,7 +109,7 @@ public class PurgingTestCase {
 
         String stockStream = "define stream stockStream (symbol string, price float, lastClosingPrice float, " +
                 "volume long , quantity int, timestamp long); ";
-        String query = " @purge(enable='true',interval='10 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'," +
+        String query = " @purge(enable='true',interval='80 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'," +
                 "days='all',months='all',years='all'))   " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +

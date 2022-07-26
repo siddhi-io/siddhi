@@ -416,29 +416,29 @@ public class IncrementalDataPurger implements Runnable {
 
     private OnDemandQuery getOnDemandQuery(Table table, long timeFrom, long timeTo) {
         List<OutputAttribute> outputAttributes = new ArrayList<>();
-        outputAttributes.add(new OutputAttribute(new Variable(AGG_START_TIMESTAMP_COL)));
+        outputAttributes.add(new OutputAttribute(new Variable(purgingTimestampField)));
         Selector selector = Selector.selector().addSelectionList(outputAttributes)
-                .groupBy(Expression.variable(AGG_START_TIMESTAMP_COL))
-                .orderBy(Expression.variable(AGG_START_TIMESTAMP_COL), OrderByAttribute.Order.DESC)
+                .groupBy(Expression.variable(purgingTimestampField))
+                .orderBy(Expression.variable(purgingTimestampField), OrderByAttribute.Order.DESC)
                 .limit(Expression.value(1));
         InputStore inputStore;
         if (timeTo != 0) {
             inputStore = InputStore.store(table.getTableDefinition().getId()).
                     on(Expression.and(
                             Expression.compare(
-                                    Expression.variable(AGG_START_TIMESTAMP_COL),
+                                    Expression.variable(purgingTimestampField),
                                     Compare.Operator.GREATER_THAN_EQUAL,
                                     Expression.value(timeFrom)
                             ),
                             Expression.compare(
-                                    Expression.variable(AGG_START_TIMESTAMP_COL),
+                                    Expression.variable(purgingTimestampField),
                                     Compare.Operator.LESS_THAN_EQUAL,
                                     Expression.value(timeTo)
                             )
                     ));
         } else {
             inputStore = InputStore.store(table.getTableDefinition().getId()).on(Expression.compare(
-                    Expression.variable(AGG_START_TIMESTAMP_COL),
+                    Expression.variable(purgingTimestampField),
                     Compare.Operator.LESS_THAN_EQUAL,
                     Expression.value(timeFrom)
             ));
