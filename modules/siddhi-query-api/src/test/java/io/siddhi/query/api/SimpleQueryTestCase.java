@@ -1095,4 +1095,9 @@ public class SimpleQueryTestCase {
         AssertJUnit.assertEquals(selector.toString(), selectorString);
     }
 
+    @Test
+    public void dummyTest() {
+        AssertJUnit.assertTrue(true);
+    }
+
 }
