@@ -67,10 +67,6 @@
             <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-        </dependency>
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <scope>test</scope>
@@ -103,16 +99,13 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.siddhi.extension.eventtable.hazelcast.internal.*
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.siddhi.extension.eventtable.hazelcast.internal.*,
                             org.wso2.siddhi.extension.eventtable.*;version="${siddhi.version}"
                         </Export-Package>
                         <Import-Package>
                             org.apache.hadoop.util.bloom;version="${hadoop.common.version}",
                             org.osgi.service.component;version="${equinox.osgi.services.imp.pkg.version.range}",
-                            com.hazelcast.*;version="${hazelcast.imp.pkg.version.range}",
                             org.wso2.siddhi.*;version="${siddhi.version}",
                             org.apache.hadoop.util.hash;version="${hadoop.common.version}",
                             org.apache.commons.logging;version="${commons.logging.import.version.range}",
