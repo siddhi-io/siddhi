@@ -61,7 +61,7 @@ Features Supported
     - Supports zero to many, one to many, and zero to one conditions
  - Event Tables
     - Support for using historical data in realtime processing
-    - Can process with the in-memory, RDBMS or Hazelcast(In-memory data grid) based data collection
+    - Can process with the in-memory or RDBMS based data collection
  - Partitions
     - Supports query partitions based on key words and value ranges 
     - Multiple queries can be grouped within a partition

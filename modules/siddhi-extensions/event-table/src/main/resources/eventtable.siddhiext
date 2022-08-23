@@ -17,4 +17,3 @@
 #
 
 rdbms=org.wso2.siddhi.extension.eventtable.RDBMSEventTable
-hazelcast=org.wso2.siddhi.extension.eventtable.HazelcastEventTable
