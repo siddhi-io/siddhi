@@ -45,25 +45,30 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         this.querySelector = (QuerySelector) ((StreamPreStateProcessor) next).getThisLastProcessor().getNextProcessor();
     }
 
+    @Override
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk) {
+        synchronized (patternSyncObject) {
+            super.process(streamEventChunk);
+        }
+    }
+
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
         ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>();
         ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<>(
         );
-        synchronized (patternSyncObject) {
-            while (streamEventChunk.hasNext()) {
-                StreamEvent streamEvent = streamEventChunk.next();
-                streamEventChunk.remove();
-                stabilizeStates(streamEvent.getTimestamp());
-                currentStreamEventChunk.add(streamEvent);
-                ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).
-                        processAndReturn(currentStreamEventChunk);
-                if (eventChunk.getFirst() != null) {
-                    retEventChunk.add(eventChunk.getFirst());
-                }
-
-                eventChunk.clear();
-                currentStreamEventChunk.clear();
+        while (streamEventChunk.hasNext()) {
+            StreamEvent streamEvent = streamEventChunk.next();
+            streamEventChunk.remove();
+            stabilizeStates(streamEvent.getTimestamp());
+            currentStreamEventChunk.add(streamEvent);
+            ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).
+                    processAndReturn(currentStreamEventChunk);
+            if (eventChunk.getFirst() != null) {
+                retEventChunk.add(eventChunk.getFirst());
             }
+
+            eventChunk.clear();
+            currentStreamEventChunk.clear();
         }
         while (retEventChunk.hasNext()) {
             StateEvent stateEvent = retEventChunk.next();

@@ -71,7 +71,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         this.siddhiDebugger = siddhiDebugger;
     }
 
-    private void process(ComplexEventChunk<StreamEvent> streamEventChunk) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk) {
         if (lockWrapper != null) {
             lockWrapper.lock();
         }
