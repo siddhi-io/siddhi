@@ -351,6 +351,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <doclint>none</doclint>
                         <excludePackageNames>
                             io.siddhi.query.compiler.internal:io.siddhi.query.compiler
                         </excludePackageNames>
