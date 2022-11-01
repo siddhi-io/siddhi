@@ -352,6 +352,7 @@
                     </executions>
                     <configuration>
                         <doclint>none</doclint>
+                        <source>1.8</source>
                         <excludePackageNames>
                             io.siddhi.query.compiler.internal:io.siddhi.query.compiler
                         </excludePackageNames>
