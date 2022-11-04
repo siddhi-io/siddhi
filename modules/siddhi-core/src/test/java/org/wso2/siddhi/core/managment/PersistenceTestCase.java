@@ -2173,7 +2173,7 @@ public class PersistenceTestCase {
 
         inputHandler.send(new Object[]{"IBM", 105f, 100});
 
-        Thread.sleep(1000);
+        Thread.sleep(5000);
 
         Assert.assertEquals(414L, lastValue);
 
