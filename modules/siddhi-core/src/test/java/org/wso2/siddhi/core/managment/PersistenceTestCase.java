@@ -2104,6 +2104,8 @@ public class PersistenceTestCase {
 
         Assert.assertTrue(count == 4);
         Assert.assertEquals(true, eventArrived);
+        executionPlanRuntime.shutdown();
+        siddhiManager.shutdown();
     }
 
     @Test
