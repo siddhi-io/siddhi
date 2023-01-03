@@ -366,7 +366,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.2.2</version>
+                    <version>4.11.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -805,7 +805,7 @@
         <log4j.imp.pkg.version.range>[2.0, 3.0)</log4j.imp.pkg.version.range>
         <slf4j.version>1.7.35</slf4j.version>
         <mvel2.version>2.4.5.Final</mvel2.version>
-        <antlr.runtime.version>4.7.2</antlr.runtime.version>
+        <antlr.runtime.version>4.11.1</antlr.runtime.version>
         <disruptor.version>3.4.2.wso2v1</disruptor.version>
         <guava.version>31.1-jre</guava.version>
         <guava.bundle.version>31.1.0.jre</guava.bundle.version>
