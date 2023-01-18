@@ -126,4 +126,6 @@ public final class SiddhiConstants {
     public static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
     public static final String AGG_SHARD_ID_COL = "SHARD_ID";
 
+    public static final int DEFAULT_THREAD_POOL_SIZE = 5;
+
 }
