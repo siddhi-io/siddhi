@@ -160,7 +160,9 @@ public class SiddhiAppParser {
                     new ThreadFactoryBuilder().setNameFormat("Siddhi-" + siddhiAppContext.getName() +
                             "-executor-thread-%d").build()));
 
-            siddhiAppContext.setScheduledExecutorService(Executors.newScheduledThreadPool(5,
+            String corePoolSize = siddhiContext.getConfigManager().extractProperty("appThreadPoolSize");
+            siddhiAppContext.setScheduledExecutorService(Executors.newScheduledThreadPool(
+                    (corePoolSize == null) ? SiddhiConstants.DEFAULT_THREAD_POOL_SIZE : Integer.parseInt(corePoolSize),
                     new ThreadFactoryBuilder().setNameFormat("Siddhi-" +
                             siddhiAppContext.getName() + "-scheduler-thread-%d").build()));
 
