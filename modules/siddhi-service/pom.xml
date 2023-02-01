@@ -20,7 +20,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>io.siddhi</groupId>
-        <version>5.1.25-SNAPSHOT</version>
+        <version>5.1.28-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -175,9 +175,9 @@
                 <version>${maven.checkstyleplugin.version}</version>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${maven.findbugsplugin.version}</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${maven.spotbugsplugin.version}</version>
             </plugin>
         </plugins>
 
@@ -221,7 +221,6 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
-        <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <mavan.findbugsplugin.exclude.file>../../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
     </properties>
 

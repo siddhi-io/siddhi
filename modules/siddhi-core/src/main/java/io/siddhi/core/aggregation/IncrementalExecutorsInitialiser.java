@@ -32,6 +32,7 @@ import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.TimePeriod;
+import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.execution.query.OnDemandQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
@@ -74,6 +75,7 @@ public class IncrementalExecutorsInitialiser {
     private boolean isInitialised;
     private boolean isReadOnly;
     private boolean isPersistedAggregation;
+    private AggregationDefinition aggregationDefinition;
 
     public IncrementalExecutorsInitialiser(List<TimePeriod.Duration> incrementalDurations,
                                            Map<TimePeriod.Duration, Table> aggregationTables,
@@ -82,7 +84,8 @@ public class IncrementalExecutorsInitialiser {
                                            MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap,
                                            Map<String, Window> windowMap,
                                            Map<String, AggregationRuntime> aggregationMap, String timeZone,
-                                           boolean isReadOnly, boolean isPersistedAggregation) {
+                                           boolean isReadOnly, boolean isPersistedAggregation,
+                                           AggregationDefinition aggregationDefinition) {
         this.timeZone = timeZone;
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
@@ -101,6 +104,7 @@ public class IncrementalExecutorsInitialiser {
         this.isInitialised = false;
         this.isReadOnly = isReadOnly;
         this.isPersistedAggregation = isPersistedAggregation;
+        this.aggregationDefinition = aggregationDefinition;
     }
 
     public synchronized void initialiseExecutors() {
@@ -108,6 +112,7 @@ public class IncrementalExecutorsInitialiser {
             // Only cleared when executors change from reading to processing state in one node deployment
             return;
         }
+        log.info("Starting initialization of executors for aggregation: " + aggregationDefinition.getId());
         Event[] events;
         Long lastData = null;
 
@@ -195,6 +200,7 @@ public class IncrementalExecutorsInitialiser {
             }
         }
         this.isInitialised = true;
+        log.info("Finished initialization of executors for aggregation: " + aggregationDefinition.getId());
     }
 
     private boolean isStatePresentForAggregationDuration(TimePeriod.Duration recreateForDuration) {

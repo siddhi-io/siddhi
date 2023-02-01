@@ -14,7 +14,7 @@
 
 language: java
 jdk:
-  - openjdk8
+  - openjdk11
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 script: mvn clean install -q -B -V | grep -v DEBUG; exit "${PIPESTATUS[0]}";
