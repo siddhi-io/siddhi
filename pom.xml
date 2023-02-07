@@ -796,7 +796,7 @@
     <properties>
         <!-- version ranges-->
         <com.lmax.disruptor.version.range>[3.0.0, 4.0.0)</com.lmax.disruptor.version.range>
-        <google.guava.version.range>[23.0.0, 24.0.0)</google.guava.version.range>
+        <google.guava.version.range>[23.0.0, 32.0.0)</google.guava.version.range>
         <org.quartz.version.range>[2.0.0, 3.0.0)</org.quartz.version.range>
 
         <awaitility.version>4.0.2</awaitility.version>
