@@ -1014,7 +1014,7 @@ public class ExpressionParser {
                                 rightExpressionExecutor);
                     default:
                         throw new OperationNotSupportedException(
-                                "sting cannot be compared with " + rightExpressionExecutor.getReturnType());
+                                "string cannot be compared with " + rightExpressionExecutor.getReturnType());
                 }
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
@@ -1137,7 +1137,7 @@ public class ExpressionParser {
                                 rightExpressionExecutor);
                     default:
                         throw new OperationNotSupportedException(
-                                "sting cannot be compared with " + rightExpressionExecutor.getReturnType());
+                                "string cannot be compared with " + rightExpressionExecutor.getReturnType());
                 }
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
