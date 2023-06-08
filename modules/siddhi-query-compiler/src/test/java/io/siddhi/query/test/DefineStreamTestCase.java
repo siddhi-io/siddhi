@@ -175,7 +175,7 @@ public class DefineStreamTestCase {
         StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition(
                 "@sink(url='http://foo.com/test/{{data}}', " +
                         "   @map(type=\"\"\"xml\"\"\", " +
-                        "@payload(\"\"\"{ \"time\":{{time}}}\"\"\") " +
+                        "@payload(\"\"\"{ \\\"time\\\":{{time}}}\"\"\") " +
                         "   )" +
                         ") " +
                         "define stream fooStream (id int, name string);"
