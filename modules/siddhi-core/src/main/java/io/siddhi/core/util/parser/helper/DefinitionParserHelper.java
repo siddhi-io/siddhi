@@ -304,6 +304,7 @@ public class DefinitionParserHelper {
             trigger.init(triggerDefinition, siddhiAppContext, streamJunction);
             siddhiAppContext.addTrigger(trigger);
             eventTriggerMap.putIfAbsent(trigger.getId(), trigger);
+            siddhiAppContext.addEternalReferencedHolder(trigger);
         }
     }
 
