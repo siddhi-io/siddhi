@@ -222,6 +222,10 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         e -> (TableDefinition) e.getValue()));
     }
 
+    public ConcurrentMap<String, AggregationRuntime> getAggregationMap() {
+        return aggregationMap;
+    }
+
     /**
      * Get the window definition map.
      *
