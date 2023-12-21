@@ -629,6 +629,15 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         StringUtil.removeCRLFCharacters(siddhiAppContext.getName()) + "'.", t);
             }
         }
+        for (Trigger trigger : siddhiAppContext.getTriggerHolders()) {
+            try {
+                trigger.stop();
+            } catch (Throwable t) {
+                log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(t, siddhiAppContext)) +
+                        " Error while stopping Trigger '" + StringUtil.removeCRLFCharacters(trigger.getId()) +
+                        "' in Siddhi app '" + StringUtil.removeCRLFCharacters(siddhiAppContext.getName()) + "'.", t);
+            }
+        }
         inputManager.disconnect();
 
         Thread thread = new Thread(new Runnable() {

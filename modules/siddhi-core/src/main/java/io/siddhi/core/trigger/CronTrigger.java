@@ -46,7 +46,7 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class CronTrigger extends AbstractTrigger implements Job {
 
-    protected static final Logger LOG = LogManager.getLogger(CronTrigger.class);
+    private static final Logger log = LogManager.getLogger(CronTrigger.class);
 
     private TriggerDefinition triggerDefinition;
     private SiddhiAppContext siddhiAppContext;
@@ -100,9 +100,12 @@ public class CronTrigger extends AbstractTrigger implements Job {
         try {
             if (scheduler != null) {
                 scheduler.deleteJob(new JobKey(jobName, jobGroup));
+                if (log.isDebugEnabled()) {
+                    log.debug("Scheduler job: " + jobName + " Group: " + jobGroup + " has successfully stopped");
+                }
             }
         } catch (SchedulerException e) {
-            LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error while removing the cron trigger job '" + jobGroup + "':'" + jobName + "'", e);
         }
     }
@@ -134,7 +137,7 @@ public class CronTrigger extends AbstractTrigger implements Job {
             scheduler.scheduleJob(job, trigger);
 
         } catch (SchedulerException e) {
-            LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error while instantiating quartz scheduler for trigger '" + triggerDefinition.getId() + "'.", e);
         }
     }
@@ -143,8 +146,8 @@ public class CronTrigger extends AbstractTrigger implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap dataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         CronTrigger cronEventTrigger = (CronTrigger) dataMap.get("trigger");
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Running Trigger Job '" + cronEventTrigger.getId() + "'");
+        if (log.isDebugEnabled()) {
+            log.debug("Running Trigger Job '" + cronEventTrigger.getId() + "'");
         }
         cronEventTrigger.sendEvent();
     }

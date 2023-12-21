@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class TemplateBuilder {
 
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*\\}\\})|[{}]");
-    private static final String SPLIT_PATTERN = "(\\{.\\{|\\}.\\})";
+    private static final String SPLIT_PATTERN = "(\\{\\.\\{|\\}\\.\\})";
     private int[] positionArray;
     private String[] splitTemplateArray;
     private boolean isObjectMessage = false;
