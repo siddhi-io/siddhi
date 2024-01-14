@@ -62,7 +62,7 @@ public class YAMLConfigManager implements ConfigManager {
 
             Yaml yaml = new Yaml(constructor);
             yaml.setBeanAccess(BeanAccess.FIELD);
-            this.rootConfiguration = yaml.load(yamlContent);
+            this.rootConfiguration = yaml.loadAs(yamlContent, RootConfiguration.class);
         } catch (Exception e) {
             throw new YAMLConfigManagerException("Unable to parse YAML string, '" + yamlContent + "'.", e);
         }
