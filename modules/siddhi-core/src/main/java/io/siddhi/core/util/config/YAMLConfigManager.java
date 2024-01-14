@@ -26,6 +26,7 @@ import io.siddhi.core.util.config.model.ReferenceChildConfiguration;
 import io.siddhi.core.util.config.model.RootConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -53,15 +54,15 @@ public class YAMLConfigManager implements ConfigManager {
      */
     private void init(String yamlContent) throws YAMLConfigManagerException {
         try {
-            CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(
-                    RootConfiguration.class, RootConfiguration.class.getClassLoader());
+            CustomClassLoaderConstructor constructor =
+                    new CustomClassLoaderConstructor(RootConfiguration.class.getClassLoader(), new LoaderOptions());
             PropertyUtils propertyUtils = new PropertyUtils();
             propertyUtils.setSkipMissingProperties(true);
             constructor.setPropertyUtils(propertyUtils);
 
             Yaml yaml = new Yaml(constructor);
             yaml.setBeanAccess(BeanAccess.FIELD);
-            this.rootConfiguration = yaml.load(yamlContent);
+            this.rootConfiguration = yaml.loadAs(yamlContent, RootConfiguration.class);
         } catch (Exception e) {
             throw new YAMLConfigManagerException("Unable to parse YAML string, '" + yamlContent + "'.", e);
         }
