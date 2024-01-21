@@ -162,6 +162,7 @@ public class SiddhiExtensionLoader {
                 while ((extensionDetails = br.readLine()) != null) {
                     resources.add(namespace + ":" + extensionDetails);
                 }
+                br.close();
             } finally {
                 inputStream.close();
             }
