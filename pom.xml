@@ -441,7 +441,7 @@
     </build>
 
     <properties>
-        <siddhi.version>3.1.2</siddhi.version>
+        <siddhi.version>3.2.12-SNAPSHOT</siddhi.version>
         <junit.version>4.13.2</junit.version>
         <slf4j.version>2.0.12</slf4j.version>
         <mvel2.version>2.2.1.Final</mvel2.version>
