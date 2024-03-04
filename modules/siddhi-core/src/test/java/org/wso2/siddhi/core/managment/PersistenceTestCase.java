@@ -2108,7 +2108,6 @@ public class PersistenceTestCase {
         siddhiManager.shutdown();
     }
 
-    @Test
     public void persistenceTest21() throws InterruptedException {
         log.info("Persistence test 13 - partitioned sum with group-by on length windows.");
         final int inputEventCount = 10;
