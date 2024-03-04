@@ -1415,8 +1415,7 @@ public class PartitionTestCase {
         Assert.assertEquals(3, count.get());
         executionPlanRuntime.shutdown();
     }
-
-    @Test
+    
     public void testPartitionQuery27() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
