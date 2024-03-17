@@ -126,6 +126,8 @@ public final class SiddhiConstants {
     public static final String TRANSPORT_CHANNEL_CREATION_IDENTIFIER = "transportChannelCreationEnabled";
 
     public static final String NAMESPACE_PURGE = "purge";
+
+    public static final String PURGE_BY_SHARD_ID_ENABLED = "purgeByShardIdEnabled";
     public static final String NAMESPACE_RETENTION_PERIOD = "retentionPeriod";
 
     public static final String PARTITION_ID_DEFAULT = "null";
