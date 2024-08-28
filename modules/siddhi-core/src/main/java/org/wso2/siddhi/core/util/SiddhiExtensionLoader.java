@@ -155,19 +155,26 @@ public class SiddhiExtensionLoader {
     public static Collection<String> readContent(String fileName, InputStream inputStream) {
         List<String> resources = new ArrayList<String>();
         String namespace = fileName.split("\\.")[0];
+        BufferedReader br = null;
         try {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream)));
-                String extensionDetails;
-                while ((extensionDetails = br.readLine()) != null) {
-                    resources.add(namespace + ":" + extensionDetails);
-                }
-                br.close();
-            } finally {
-                inputStream.close();
+            br = new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream)));
+            String extensionDetails;
+            while ((extensionDetails = br.readLine()) != null) {
+                resources.add(namespace + ":" + extensionDetails);
             }
         } catch (IOException ex) {
             log.error("unable to read file " + fileName + ex);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException ex) {
+                log.error("Error closing resources", ex);
+            }
         }
         return resources;
     }
