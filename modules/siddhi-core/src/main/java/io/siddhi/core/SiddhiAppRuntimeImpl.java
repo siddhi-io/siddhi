@@ -222,6 +222,10 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         e -> (TableDefinition) e.getValue()));
     }
 
+    public ConcurrentMap<String, AggregationRuntime> getAggregationMap() {
+        return aggregationMap;
+    }
+
     /**
      * Get the window definition map.
      *
@@ -623,6 +627,15 @@ public class SiddhiAppRuntimeImpl implements SiddhiAppRuntime {
                         " Error while stopping ExternalReferencedHolder '" +
                         StringUtil.removeCRLFCharacters(externalReferencedHolder.toString()) + "' down Siddhi app '" +
                         StringUtil.removeCRLFCharacters(siddhiAppContext.getName()) + "'.", t);
+            }
+        }
+        for (Trigger trigger : siddhiAppContext.getTriggerHolders()) {
+            try {
+                trigger.stop();
+            } catch (Throwable t) {
+                log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(t, siddhiAppContext)) +
+                        " Error while stopping Trigger '" + StringUtil.removeCRLFCharacters(trigger.getId()) +
+                        "' in Siddhi app '" + StringUtil.removeCRLFCharacters(siddhiAppContext.getName()) + "'.", t);
             }
         }
         inputManager.disconnect();

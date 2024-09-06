@@ -230,7 +230,8 @@ public class IncrementalTimeConverterUtil {
         }
     }
 
-    public static boolean isAggregationDataComplete(long timestamp, TimePeriod.Duration duration, String timeZone) {
+    public static boolean isAggregationDataCompleteAgainstTime(long timestamp, TimePeriod.Duration duration,
+            String timeZone) {
         ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
                 ZoneId.of(timeZone));
         ZonedDateTime zonedCurrentDateTime = ZonedDateTime.ofInstant(Instant.now(), ZoneId.of(timeZone));

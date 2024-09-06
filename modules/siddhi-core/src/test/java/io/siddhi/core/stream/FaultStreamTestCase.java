@@ -513,7 +513,7 @@ public class FaultStreamTestCase {
                 "@OnError(action='stream')" +
                 "define stream cseEventStream (symbol string, price float, volume long);" +
                 "\n" +
-                "@sink(type='inMemory', topic='{{symbol}}', on.error='stream', @map(type='passThrough')) " +
+                "@sink(type='inMemory', topic='sample', on.error='stream', @map(type='passThrough')) " +
                 "define stream outputStream (symbol string, price float, sym1 string);" +
                 "\n" +
                 "@info(name = 'query1') " +
@@ -548,7 +548,7 @@ public class FaultStreamTestCase {
             Thread.sleep(500);
             AssertJUnit.assertTrue(((UnitTestAppender) logger.getAppenders().
                     get("UnitTestAppender")).getMessages().contains("after consuming events from Stream " +
-                    "'outputStream', Subscriber for topic 'IBM' is unavailable. Hence, dropping event"));
+                    "'outputStream', Subscriber for topic 'sample' is unavailable. Hence, dropping event"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {

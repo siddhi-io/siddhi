@@ -22,7 +22,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>io.siddhi</groupId>
-        <version>5.1.29-SNAPSHOT</version>
+        <version>5.1.31-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -200,7 +200,7 @@
                                     <version>${slf4j.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>org.apache.logging.log4j.slf4j-impl</symbolicName>
+                                    <symbolicName>org.apache.logging.log4j.slf4j.impl</symbolicName>
                                     <version>${log4j.version}</version>
                                 </bundle>
                                 <bundle>

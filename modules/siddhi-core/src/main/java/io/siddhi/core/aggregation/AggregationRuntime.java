@@ -733,4 +733,8 @@ public class AggregationRuntime implements MemoryCalculable {
             Map<TimePeriod.Duration, Executor>> aggregationDurationExecutorMap) {
         this.aggregationDurationExecutorMap = aggregationDurationExecutorMap;
     }
+
+    public IncrementalExecutorsInitialiser getIncrementalExecutorsInitialiser() {
+        return incrementalExecutorsInitialiser;
+    }
 }

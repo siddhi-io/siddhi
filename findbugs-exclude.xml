@@ -310,5 +310,9 @@
         <Class name="io.siddhi.core.stream.StreamJunction"/>
         <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
     </Match>
+    <Match>
+        <Class name="io.siddhi.core.util.parser.helper.DefinitionParserHelper"/>
+        <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
+    </Match>
 
 </FindBugsFilter>

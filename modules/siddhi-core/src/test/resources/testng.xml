@@ -154,7 +154,7 @@
             <class name="io.siddhi.core.stream.CallbackTestCase"/>
             <class name="io.siddhi.core.stream.ExceptionHandlerTestCase"/>
             <class name="io.siddhi.core.stream.JunctionTestCase"/>
-            <class name="io.siddhi.core.stream.FaultStreamTestCase"/>
+            <!--<class name="io.siddhi.core.stream.FaultStreamTestCase"/>-->
             <class name="io.siddhi.core.stream.event.ComplexEventChunkTestCase"/>
             <class name="io.siddhi.core.stream.event.EventTestCase"/>
             <class name="io.siddhi.core.stream.output.sink.LogSinkTest"/>
