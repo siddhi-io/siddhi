@@ -800,7 +800,7 @@
         <org.quartz.version.range>[2.0.0, 3.0.0)</org.quartz.version.range>
 
         <awaitility.version>4.0.2</awaitility.version>
-        <testng.version>7.1.0</testng.version>
+        <testng.version>7.5.1</testng.version>
         <log4j.version>2.22.1</log4j.version>
         <log4j.imp.pkg.version.range>[2.0, 3.0)</log4j.imp.pkg.version.range>
         <slf4j.version>2.0.11</slf4j.version>
