@@ -55,6 +55,7 @@ import java.util.concurrent.Executors;
 
 public class ExecutionPlanParser {
     private static final Log log = LogFactory.getLog(ExecutionPlanRuntimeBuilder.class);
+    private static final String CLEAN_INTERVAL = "cleanInterval";
 
     /**
      * Parse an ExecutionPlan returning ExecutionPlanRuntime
@@ -104,6 +105,15 @@ public class ExecutionPlanParser {
 		            executionPlanContext.setCleanAggregators((value > 0));
 		            executionPlanContext.setCleanAggregatorInterval(value);
 	            }
+            } else if (System.getProperty(CLEAN_INTERVAL) != null) {
+                // Get the clean interval from the system property
+                int value = Integer.parseInt(System.getProperty(CLEAN_INTERVAL));
+                if (value > 0) {
+                    executionPlanContext.setCleanAggregators(true);
+                    executionPlanContext.setCleanAggregatorInterval(value);
+                } else {
+                    log.warn("Invalid value " + value + " for " + CLEAN_INTERVAL + ". Value should be greater than 0");
+                }
             }
 
             annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STATISTICS,
