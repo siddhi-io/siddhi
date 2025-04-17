@@ -58,6 +58,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
                     expiredTrackers = new ArrayList<ExpiredAggregatorTracker>();
                     allExpiredTrackers.put(executionPlanContext.getName(), expiredTrackers);
                 }
+                expiredTrackers.clear();
                 expiredTrackers.add(expiredAggregatorTracker);
 
                 if (aggregatorCleanTimer == null) {
