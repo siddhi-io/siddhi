@@ -38,14 +38,18 @@ public class CountAttributeAggregator extends AttributeAggregator {
     private static final Logger log = LoggerFactory.getLogger(CountAttributeAggregator.class);
     private static Attribute.Type type = Attribute.Type.LONG;
     private KeyValueStoreClient kvStoreClient;
-    private String kvStoreType;
     private String key;
     private final AtomicLong localCounter = new AtomicLong(0L);
     private final AtomicLong pendingDelta = new AtomicLong(0L);
+    private static final boolean distributedThrottleEnabled = Boolean.parseBoolean(
+            System.getProperty("distributed.throttle.enabled"));
+    private static final String kvStoreType = System.getProperty("distributed.throttle.type");
+    private static final int corePoolSize = Integer.parseInt(System.getProperty("distributed.throttle.core.pool.size"));
+    private static final int REDIS_SYNC_INTERVAL_MILLISECONDS = Integer.parseInt(System.getProperty("distributed.throttle.sync.interval"));
 
     // Static shared scheduler for all aggregators
     private static final ScheduledExecutorService redisSyncScheduler =
-            Executors.newScheduledThreadPool(2000, r -> {
+            Executors.newScheduledThreadPool(corePoolSize, r -> {
                 Thread t = new Thread(r, "Redis-Sync-Thread");
                 t.setDaemon(true);
                 return t;
@@ -55,19 +59,19 @@ public class CountAttributeAggregator extends AttributeAggregator {
     private static final ConcurrentHashMap<String, CountAttributeAggregator> activeAggregators =
             new ConcurrentHashMap<>();
 
-    // Sync interval in seconds
-    private static final int REDIS_SYNC_INTERVAL_MILLISECONDS = 1;
-
     static {
-        // Start periodic Redis sync task
-        redisSyncScheduler.scheduleAtFixedRate(() -> {
-            for (CountAttributeAggregator aggregator : activeAggregators.values()) {
-                aggregator.syncWithRedis();
-                log.error("Redis sync scheduler started with interval: {} seconds", REDIS_SYNC_INTERVAL_MILLISECONDS);
-            }
-        }, REDIS_SYNC_INTERVAL_MILLISECONDS, REDIS_SYNC_INTERVAL_MILLISECONDS, TimeUnit.SECONDS);
-
-        log.info("Redis sync scheduler started with interval: {} seconds", REDIS_SYNC_INTERVAL_MILLISECONDS);
+        // Start periodic Redis sync task only if distributed throttling is enabled
+        if (distributedThrottleEnabled) {
+            redisSyncScheduler.scheduleAtFixedRate(() -> {
+                for (CountAttributeAggregator aggregator : activeAggregators.values()) {
+                    aggregator.syncWithRedis();
+                }
+            }, REDIS_SYNC_INTERVAL_MILLISECONDS, REDIS_SYNC_INTERVAL_MILLISECONDS, TimeUnit.SECONDS);
+            
+            log.info("Redis sync scheduler started with interval: {} seconds", REDIS_SYNC_INTERVAL_MILLISECONDS);
+        } else {
+            log.info("Distributed throttling disabled. Redis sync scheduler not started.");
+        }
     }
 
     /**
@@ -78,30 +82,28 @@ public class CountAttributeAggregator extends AttributeAggregator {
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-        //        this.key = QuerySelector.getThreadLocalGroupByKey();
-
-        this.kvStoreType = System.getProperty(
-                KeyValueStoreManager.KEYVALUE_STORE_TYPE_PROPERTY,
-                KeyValueStoreManager.DEFAULT_KV_STORE_TYPE
-        ).toLowerCase();
-
-        try {
-            this.kvStoreClient = KeyValueStoreManager.getClient();
-            if (this.kvStoreClient != null) {
-                log.info("KeyValueStoreClient of type '{}' initialized and connected for aggregator with key '{}'.",
-                        kvStoreType, key);
-            } else {
-                log.warn("KeyValueStoreClient obtained for type '{}', but isConnected() is false for key '{}'. Aggregator will use fallback.",
-                        kvStoreType, key);
+        if (distributedThrottleEnabled) {
+            try {
+                this.kvStoreClient = KeyValueStoreManager.getClient();
+                if (this.kvStoreClient != null) {
+                    log.info("KeyValueStoreClient of type '{}' initialized and connected for aggregator with key '{}'.",
+                            kvStoreType, key);
+                } else {
+                    log.warn("KeyValueStoreClient obtained for type '{}', but isConnected() is false for key '{}'. Aggregator will use fallback.",
+                            kvStoreType, key);
+                    this.kvStoreClient = null;
+                }
+            } catch (KeyValueStoreException e) {
+                log.error("Failed to initialize KeyValueStoreClient for aggregator with key '{}'. Reason: {}. Operating in fallback mode.",
+                        key, e.getMessage(), e);
+                this.kvStoreClient = null;
+            } catch (Exception e) {
+                log.error("Unexpected error initializing KeyValueStoreClient for aggregator with key '{}'. Operating in fallback mode.",
+                        key, e);
                 this.kvStoreClient = null;
             }
-        } catch (KeyValueStoreException e) {
-            log.error("Failed to initialize KeyValueStoreClient for aggregator with key '{}'. Reason: {}. Operating in fallback mode.",
-                    key, e.getMessage(), e);
-            this.kvStoreClient = null;
-        } catch (Exception e) {
-            log.error("Unexpected error initializing KeyValueStoreClient for aggregator with key '{}'. Operating in fallback mode.",
-                    key, e);
+        } else {
+            log.info("Distributed throttling disabled. Using local counter only.");
             this.kvStoreClient = null;
         }
     }
@@ -114,7 +116,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
             if (this.key != null) {
                 log.info("Lazy initialization for key '{}'", this.key);
 
-                if (kvStoreClient != null) {
+                if (distributedThrottleEnabled && kvStoreClient != null) {
                     initializeFromRedis();
                     activeAggregators.put(key, this);
                 }
@@ -125,7 +127,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
     }
 
     private void initializeFromRedis() {
-        if (kvStoreClient != null) {
+        if (distributedThrottleEnabled && kvStoreClient != null) {
             try {
                 String redisValue = kvStoreClient.get(key);
                 if (redisValue != null) {
@@ -147,7 +149,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
     }
 
     private void syncWithRedis() {
-        if (kvStoreClient == null || key == null) {
+        if (!distributedThrottleEnabled || kvStoreClient == null || key == null) {
             return;
         }
         // Get and reset pending delta atomically
@@ -188,12 +190,12 @@ public class CountAttributeAggregator extends AttributeAggregator {
             // Fast local increment
             localCounter.incrementAndGet();
 
-            // Track pending change for Redis sync
-            if (kvStoreClient != null && key != null) {
+            // Track pending change for Redis sync only if distributed throttling is enabled
+            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
                 pendingDelta.incrementAndGet();
             }
-            //todo -> return localCounter instead
-            log.info("processAdd for both local and Redis counters for key '{}'", key);
+            log.info("processAdd for {} counters for key '{}'", 
+                    distributedThrottleEnabled ? "both local and Redis" : "local only", key);
             return localCounter.get();
         } catch (Exception e) {
             log.error("Error in processAdd for key '{}'. Error: {}", key, e.getMessage());
@@ -212,11 +214,12 @@ public class CountAttributeAggregator extends AttributeAggregator {
         try {
             // Fast local decrement
             localCounter.decrementAndGet();
-            // Track pending change for Redis sync
-            if (kvStoreClient != null && key != null) {
+            // Track pending change for Redis sync only if distributed throttling is enabled
+            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
                 pendingDelta.decrementAndGet();
             }
-            log.info("processRemove for both local and Redis counters for key '{}'", key);
+            log.info("processRemove for {} counters for key '{}'", 
+                    distributedThrottleEnabled ? "both local and Redis" : "local only", key);
             return localCounter.get();
 
         } catch (Exception e) {
@@ -239,13 +242,13 @@ public class CountAttributeAggregator extends AttributeAggregator {
         try {
             localCounter.set(0L);
 
-            if (kvStoreClient != null && key != null) {
+            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
                 // Reset Redis immediately for reset operations
                 kvStoreClient.set(key, "0");
                 pendingDelta.set(0L); // Clear pending changes
                 log.info("Reset both local and Redis counters for key '{}'", key);
             } else {
-                log.info("Reset local counter for key '{}' (Redis not available or key not set)", key);
+                log.info("Reset local counter for key '{}' (distributed throttling disabled or Redis not available)", key);
             }
 
             return 0L;
@@ -263,13 +266,13 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public void stop() {
-        try {
-            // Only remove if key is not null
-            if (key != null) {
+         try {
+            // Only remove if key is not null and distributed throttling is enabled
+            if (distributedThrottleEnabled && key != null) {
                 activeAggregators.remove(key);
             }
-            // Perform final sync with Redis
-            if (kvStoreClient != null && key != null) {
+            // Perform final sync with Redis only if distributed throttling is enabled
+            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
                 syncWithRedis();
                 log.info("Final sync completed for key '{}' before stop", key);
             }
@@ -282,7 +285,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
     public Object[] currentState() {
         ensureInitialized();
         long currentValue = localCounter.get();
-        if (kvStoreClient != null && key != null) {
+        if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
             try {
                 // Sync any pending changes before returning state
                 syncWithRedis();
@@ -305,7 +308,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
         localCounter.set(restoredValue);
         pendingDelta.set(0L); // Clear pending changes
 
-        if (kvStoreClient != null && key != null) {
+        if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
             try {
                 kvStoreClient.set(key, String.valueOf(restoredValue));
                 log.info("Successfully restored state for key '{}' to {} in both local and Redis counters.", key, restoredValue);
@@ -314,26 +317,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
                         key, e.getMessage());
             }
         } else {
-            log.warn("restoreState: Redis not available or key not set for key '{}'. State restored to local counter only.", key);
+            log.info("restoreState: Distributed throttling disabled or Redis not available for key '{}'. State restored to local counter only.", key);
         }
     }
 }
-
-
-
-//    private static final CopyOnWriteArrayList<Long> operationDurations = new CopyOnWriteArrayList<>();
-//    private static final ScheduledExecutorService avgLogger = Executors.newSingleThreadScheduledExecutor();
-//
-//    static {
-//        avgLogger.scheduleAtFixedRate(() -> {
-//            if (!operationDurations.isEmpty()) {
-//                long sum = 0;
-//                for (Long duration : operationDurations) {
-//                    sum += duration;
-//                }
-//                double avg = sum / (double) operationDurations.size();
-//                log.info("Average Redis increment/decrement operation duration in the last minute: {} ms ({} samples)", avg, operationDurations.size());
-//                operationDurations.clear();
-//            }
-//        }, 1, 1, TimeUnit.MINUTES);
-//    }
