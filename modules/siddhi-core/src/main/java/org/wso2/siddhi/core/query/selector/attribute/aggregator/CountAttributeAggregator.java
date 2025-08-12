@@ -199,6 +199,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public void start() {
+        //Nothing to start
     }
 
     @Override
@@ -226,8 +227,7 @@ public class CountAttributeAggregator extends AttributeAggregator {
                         key, e.getMessage());
             }
         }
-
-        return new Object[]{new AbstractMap.SimpleEntry<>("Value", localCounter.get())};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("Value", localCounter.get())};
     }
 
     @Override

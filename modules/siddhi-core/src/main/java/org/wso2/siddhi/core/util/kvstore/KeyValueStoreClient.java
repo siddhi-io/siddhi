@@ -12,17 +12,10 @@ public interface KeyValueStoreClient {
 
     /**
      * Disconnects from the key-value store and releases any associated resources.
-     * This can involve closing active connections, shutting down a connection pool,
+     * This involves closing active connections, shutting down a connection pool,
      * or other cleanup tasks.
      */
     void disconnect();
-
-    /**
-     * Checks if the client is currently connected or able to establish a connection
-     * to the key-value store.
-
-     */
-    boolean isConnected();
 
     /**
      * Retrieves the string value associated with the given key.
@@ -43,7 +36,6 @@ public interface KeyValueStoreClient {
 
     /**
      * Increments the numeric value of a key by one.
-     * If the key does not exist, it is set to 0 before performing the operation.
      *
      * @param key The key whose numeric value is to be incremented.
      * @return The value of the key after the increment operation.
@@ -52,7 +44,6 @@ public interface KeyValueStoreClient {
 
     /**
      * Decrements the numeric value of a key by one.
-     * If the key does not exist, it is set to 0 before performing the operation.
      *
      * @param key The key whose numeric value is to be decremented.
      * @return The value of the key after the decrement operation.
