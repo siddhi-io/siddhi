@@ -78,8 +78,9 @@ public class CountAttributeAggregator extends AttributeAggregator {
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-        this.key = QuerySelector.getThreadLocalGroupByKey();
-        if (DISTRIBUTED_THROTTLE_ENABLED && this.key != null) {
+        String throttleKey = QuerySelector.getThreadLocalGroupByKey();
+        if (DISTRIBUTED_THROTTLE_ENABLED && throttleKey != null) {
+            this.key = "distributed_count:" + throttleKey;
             try {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {

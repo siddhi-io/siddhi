@@ -6,11 +6,6 @@ package org.wso2.siddhi.core.util.kvstore;
 public interface KeyValueStoreClient {
 
     /**
-     * Establishes a connection to the key-value store.
-     */
-    void connect();
-
-    /**
      * Disconnects from the key-value store and releases any associated resources.
      * This involves closing active connections, shutting down a connection pool,
      * or other cleanup tasks.

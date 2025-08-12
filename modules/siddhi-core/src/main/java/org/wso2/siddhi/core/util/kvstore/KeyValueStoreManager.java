@@ -44,12 +44,8 @@ public class KeyValueStoreManager {
             }
             
             Constructor<?> constructor = clazz.getDeclaredConstructor();
-            KeyValueStoreClient client = (KeyValueStoreClient) constructor.newInstance();
             
-            client.connect();
-            log.info("Successfully created and connected KeyValueStoreClient: {}", clientClassName);
-            
-            return client;
+            return (KeyValueStoreClient) constructor.newInstance();
             
         } catch (Exception e) {
             throw new KeyValueStoreException("Error creating KeyValueStoreClient: " + clientClassName, e);
