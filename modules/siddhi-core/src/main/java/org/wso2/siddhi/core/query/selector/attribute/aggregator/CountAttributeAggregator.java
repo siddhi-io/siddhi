@@ -41,36 +41,32 @@ public class CountAttributeAggregator extends AttributeAggregator {
     private String key;
     private final AtomicLong localCounter = new AtomicLong(0L);
     private final AtomicLong pendingDelta = new AtomicLong(0L);
-    private static final boolean distributedThrottleEnabled = Boolean.parseBoolean(
+    private static final ConcurrentHashMap<String, CountAttributeAggregator> ACTIVE_AGGREGATORS =
+            new ConcurrentHashMap<>();
+
+    //Distributed setup configs
+    private static final boolean DISTRIBUTED_THROTTLE_ENABLED = Boolean.parseBoolean(
             System.getProperty("distributed.throttle.enabled"));
-    private static final String kvStoreType = System.getProperty("distributed.throttle.type");
-    private static final int corePoolSize = Integer.parseInt(System.getProperty("distributed.throttle.core.pool.size"));
-    private static final int REDIS_SYNC_INTERVAL_MILLISECONDS = Integer.parseInt(System.getProperty("distributed.throttle.sync.interval"));
+    private static final String KV_STORE_TYPE = System.getProperty("distributed.throttle.type");
+    private static final int CORE_POOL_SIZE = getIntProperty("distributed.throttle.core.pool.size", 10);
+    private static final int KV_STORE_SYNC_INTERVAL_MILLISECONDS = getIntProperty("distributed.throttle.sync.interval", 200);
 
     // Static shared scheduler for all aggregators
-    private static final ScheduledExecutorService redisSyncScheduler =
-            Executors.newScheduledThreadPool(corePoolSize, r -> {
-                Thread t = new Thread(r, "Redis-Sync-Thread");
+    private static final ScheduledExecutorService kvStoreSyncScheduler =
+            Executors.newScheduledThreadPool(CORE_POOL_SIZE, r -> {
+                Thread t = new Thread(r, "KVStore-Sync-Thread");
                 t.setDaemon(true);
                 return t;
             });
 
-    // Track all active aggregators for periodic sync
-    private static final ConcurrentHashMap<String, CountAttributeAggregator> activeAggregators =
-            new ConcurrentHashMap<>();
-
+    // Start periodic sync task only if distributed throttling is enabled
     static {
-        // Start periodic Redis sync task only if distributed throttling is enabled
-        if (distributedThrottleEnabled) {
-            redisSyncScheduler.scheduleAtFixedRate(() -> {
-                for (CountAttributeAggregator aggregator : activeAggregators.values()) {
-                    aggregator.syncWithRedis();
+        if (DISTRIBUTED_THROTTLE_ENABLED) {
+            kvStoreSyncScheduler.scheduleAtFixedRate(() -> {
+                for (CountAttributeAggregator aggregator : ACTIVE_AGGREGATORS.values()) {
+                    aggregator.syncWithKVStore();
                 }
-            }, REDIS_SYNC_INTERVAL_MILLISECONDS, REDIS_SYNC_INTERVAL_MILLISECONDS, TimeUnit.SECONDS);
-            
-            log.info("Redis sync scheduler started with interval: {} seconds", REDIS_SYNC_INTERVAL_MILLISECONDS);
-        } else {
-            log.info("Distributed throttling disabled. Redis sync scheduler not started.");
+            }, KV_STORE_SYNC_INTERVAL_MILLISECONDS, KV_STORE_SYNC_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -82,16 +78,13 @@ public class CountAttributeAggregator extends AttributeAggregator {
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-        if (distributedThrottleEnabled) {
+        this.key = QuerySelector.getThreadLocalGroupByKey();
+        if (DISTRIBUTED_THROTTLE_ENABLED && this.key != null) {
             try {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {
-                    log.info("KeyValueStoreClient of type '{}' initialized and connected for aggregator with key '{}'.",
-                            kvStoreType, key);
-                } else {
-                    log.warn("KeyValueStoreClient obtained for type '{}', but isConnected() is false for key '{}'. Aggregator will use fallback.",
-                            kvStoreType, key);
-                    this.kvStoreClient = null;
+                    initializeFromKVStore();
+                    ACTIVE_AGGREGATORS.put(key, this);
                 }
             } catch (KeyValueStoreException e) {
                 log.error("Failed to initialize KeyValueStoreClient for aggregator with key '{}'. Reason: {}. Operating in fallback mode.",
@@ -102,79 +95,44 @@ public class CountAttributeAggregator extends AttributeAggregator {
                         key, e);
                 this.kvStoreClient = null;
             }
-        } else {
-            log.info("Distributed throttling disabled. Using local counter only.");
-            this.kvStoreClient = null;
         }
     }
 
-    // Add a lazy initialization method
-    private void ensureInitialized() {
-        if (this.key == null) {
-            this.key = QuerySelector.getThreadLocalGroupByKey();
-
-            if (this.key != null) {
-                log.info("Lazy initialization for key '{}'", this.key);
-
-                if (distributedThrottleEnabled && kvStoreClient != null) {
-                    initializeFromRedis();
-                    activeAggregators.put(key, this);
-                }
+    private void initializeFromKVStore() {
+        try {
+            String kvStoreValue = kvStoreClient.get(key);
+            if (kvStoreValue != null) {
+                long initialValue = Long.parseLong(kvStoreValue);
+                localCounter.set(initialValue);
             } else {
-                log.warn("Key is still null during lazy initialization. Query context may not be properly set.");
-            }
-        }
-    }
-
-    private void initializeFromRedis() {
-        if (distributedThrottleEnabled && kvStoreClient != null) {
-            try {
-                String redisValue = kvStoreClient.get(key);
-                if (redisValue != null) {
-                    long initialValue = Long.parseLong(redisValue);
-                    localCounter.set(initialValue);
-                    log.info("Initialized local counter for key '{}' from Redis value: {}", key, initialValue);
-                } else {
-                    // Key doesn't exist in Redis, start with 0
-                    localCounter.set(0L);
-                    kvStoreClient.set(key, "0");
-                    log.info("Key '{}' not found in Redis. Initialized with value: 0", key);
-                }
-            } catch (Exception e) {
-                log.error("Error initializing from Redis for key '{}'. Starting with local value 0. Error: {}",
-                        key, e.getMessage());
                 localCounter.set(0L);
+                kvStoreClient.set(key, "0");
             }
+        } catch (Exception e) {
+            log.error("Error initializing from kvStore for key '{}'. Starting with local value 0. Error: {}",
+                    key, e.getMessage());
+            localCounter.set(0L);
         }
     }
 
-    private void syncWithRedis() {
-        if (!distributedThrottleEnabled || kvStoreClient == null || key == null) {
+    private void syncWithKVStore() {
+        if (kvStoreClient == null || key == null) {
             return;
         }
-        // Get and reset pending delta atomically
         long delta = pendingDelta.getAndSet(0L);
         if (delta == 0) {
-            //todo -> check if key exists in redis
             localCounter.set(Long.parseLong(kvStoreClient.get(key)));
-            return; // No changes to sync
+            return;
         }
         try {
             if (delta > 0) {
-                // Positive delta - increment
-                long newRedisValue = kvStoreClient.incrementBy(key, delta);
-                localCounter.set(newRedisValue);
-                log.debug("Synced +{} to Redis for key '{}'", delta, key);
+                localCounter.set(kvStoreClient.incrementBy(key, delta));
             } else {
-                // Negative delta - decrement
-                long newRedisValue = kvStoreClient.decrementBy(key, Math.abs(delta));
-                localCounter.set(newRedisValue);
-                log.debug("Synced {} to Redis for key '{}'", delta, key);
+                localCounter.set(kvStoreClient.decrementBy(key, Math.abs(delta)));
             }
         } catch (KeyValueStoreException e) {
-            log.error("Error syncing delta {} to Redis for key '{}'. Will retry on next sync. Error: {}",
+            log.error("Error syncing delta {} to kvStore for key '{}'. Will retry on next sync. Error: {}",
                     delta, key, e.getMessage());
-            // Add the delta back to pending changes for retry
             pendingDelta.addAndGet(delta);
         }
     }
@@ -185,17 +143,11 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processAdd(Object data) {
-        ensureInitialized();
         try {
-            // Fast local increment
             localCounter.incrementAndGet();
-
-            // Track pending change for Redis sync only if distributed throttling is enabled
-            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
+            if (DISTRIBUTED_THROTTLE_ENABLED && kvStoreClient != null && key != null) {
                 pendingDelta.incrementAndGet();
             }
-            log.info("processAdd for {} counters for key '{}'", 
-                    distributedThrottleEnabled ? "both local and Redis" : "local only", key);
             return localCounter.get();
         } catch (Exception e) {
             log.error("Error in processAdd for key '{}'. Error: {}", key, e.getMessage());
@@ -210,16 +162,11 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processRemove(Object data) {
-        ensureInitialized();
         try {
-            // Fast local decrement
             localCounter.decrementAndGet();
-            // Track pending change for Redis sync only if distributed throttling is enabled
-            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
+            if (DISTRIBUTED_THROTTLE_ENABLED && kvStoreClient != null && key != null) {
                 pendingDelta.decrementAndGet();
             }
-            log.info("processRemove for {} counters for key '{}'", 
-                    distributedThrottleEnabled ? "both local and Redis" : "local only", key);
             return localCounter.get();
 
         } catch (Exception e) {
@@ -230,31 +177,21 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processRemove(Object[] data) {
-        // Similar to processAdd(Object[] data)
         return processRemove((Object) data);
     }
 
     @Override
     public Object reset() {
-        // Ensure we're initialized before resetting
-        ensureInitialized();
-
         try {
             localCounter.set(0L);
-
-            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
-                // Reset Redis immediately for reset operations
+            if (DISTRIBUTED_THROTTLE_ENABLED && kvStoreClient != null && key != null) {
                 kvStoreClient.set(key, "0");
                 pendingDelta.set(0L); // Clear pending changes
-                log.info("Reset both local and Redis counters for key '{}'", key);
-            } else {
-                log.info("Reset local counter for key '{}' (distributed throttling disabled or Redis not available)", key);
             }
-
             return 0L;
 
         } catch (KeyValueStoreException e) {
-            log.error("Error resetting Redis counter for key '{}'. Local counter reset successfully. Error: {}",
+            log.error("Error resetting counter for key '{}'. Local counter reset successfully. Error: {}",
                     key, e.getMessage());
             return 0L;
         }
@@ -268,13 +205,11 @@ public class CountAttributeAggregator extends AttributeAggregator {
     public void stop() {
          try {
             // Only remove if key is not null and distributed throttling is enabled
-            if (distributedThrottleEnabled && key != null) {
-                activeAggregators.remove(key);
-            }
-            // Perform final sync with Redis only if distributed throttling is enabled
-            if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
-                syncWithRedis();
-                log.info("Final sync completed for key '{}' before stop", key);
+            if (DISTRIBUTED_THROTTLE_ENABLED && key != null) {
+                ACTIVE_AGGREGATORS.remove(key);
+                if (kvStoreClient != null) {
+                    syncWithKVStore();
+                }
             }
         } catch (Exception e) {
             log.error("Error during stop for key '{}'. Error: {}", key, e.getMessage());
@@ -283,41 +218,49 @@ public class CountAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object[] currentState() {
-        ensureInitialized();
-        long currentValue = localCounter.get();
-        if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
+        if (DISTRIBUTED_THROTTLE_ENABLED && kvStoreClient != null && key != null) {
             try {
-                // Sync any pending changes before returning state
-                syncWithRedis();
-                log.debug("Synced pending changes before returning state for key '{}'", key);
+                syncWithKVStore();
             } catch (Exception e) {
-                log.warn("Could not sync with Redis before returning state for key '{}'. Using local value: {}. Error: {}",
-                        key, currentValue, e.getMessage());
+                log.warn("Could not sync with kvStore before returning state for key '{}'. Using local value. Error: {}",
+                        key, e.getMessage());
             }
         }
 
-        return new Object[]{new AbstractMap.SimpleEntry<>("Value", currentValue)};
+        return new Object[]{new AbstractMap.SimpleEntry<>("Value", localCounter.get())};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        ensureInitialized();
         Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
         long restoredValue = (Long) stateEntry.getValue();
 
         localCounter.set(restoredValue);
-        pendingDelta.set(0L); // Clear pending changes
+        pendingDelta.set(0L);
 
-        if (distributedThrottleEnabled && kvStoreClient != null && key != null) {
+        if (DISTRIBUTED_THROTTLE_ENABLED && kvStoreClient != null && key != null) {
             try {
                 kvStoreClient.set(key, String.valueOf(restoredValue));
-                log.info("Successfully restored state for key '{}' to {} in both local and Redis counters.", key, restoredValue);
             } catch (KeyValueStoreException e) {
-                log.error("Error restoring state to Redis for key '{}'. State restored to local counter only. Error: {}",
+                log.error("Error restoring state to kvStore for key '{}'. State restored to local counter only. Error: {}",
                         key, e.getMessage());
             }
-        } else {
-            log.info("restoreState: Distributed throttling disabled or Redis not available for key '{}'. State restored to local counter only.", key);
+        }
+    }
+
+    // Helper method to safely parse integer system properties
+    private static int getIntProperty(String propertyName, int defaultValue) {
+        String propertyValue = System.getProperty(propertyName);
+        if (propertyValue == null || propertyValue.trim().isEmpty()) {
+            log.warn("System property '{}' is not set or empty. Using default value: {}", propertyName, defaultValue);
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(propertyValue.trim());
+        } catch (NumberFormatException e) {
+            log.error("Invalid value '{}' for system property '{}'. Using default value: {}. Error: {}",
+                    propertyValue, propertyName, defaultValue, e.getMessage());
+            return defaultValue;
         }
     }
 }
