@@ -136,6 +136,7 @@ import static io.siddhi.core.util.SiddhiConstants.PLACEHOLDER_INNER_QUERY_2;
 import static io.siddhi.core.util.SiddhiConstants.PLACEHOLDER_ON_CONDITION;
 import static io.siddhi.core.util.SiddhiConstants.PLACEHOLDER_SELECTORS;
 import static io.siddhi.core.util.SiddhiConstants.PLACEHOLDER_TABLE_NAME;
+import static io.siddhi.core.util.SiddhiConstants.PURGE_BY_SHARD_ID_ENABLED;
 import static io.siddhi.core.util.SiddhiConstants.SQL_AND;
 import static io.siddhi.core.util.SiddhiConstants.SQL_AS;
 import static io.siddhi.core.util.SiddhiConstants.SQL_FROM;
@@ -270,6 +271,8 @@ public class AggregationParser {
             final boolean isDistributed;
             ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
             final String shardId = configManager.extractProperty("shardId");
+            final boolean purgedBySharedId = Boolean.parseBoolean(configManager
+                    .extractProperty(PURGE_BY_SHARD_ID_ENABLED));
             boolean enablePartitioning = false;
             // check if the setup is Active Active(distributed deployment) by checking availability of partitionById
             // config
@@ -280,9 +283,10 @@ public class AggregationParser {
                 enablePartitioning = enableElement == null || Boolean.parseBoolean(enableElement);
             }
 
-            boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
-
-            if (enablePartitioning || shouldPartitionById) {
+            if (!enablePartitioning) {
+                enablePartitioning = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
+            }
+            if (enablePartitioning) {
                 if (shardId == null) {
                     throw new SiddhiAppCreationException("Configuration 'shardId' not provided for @partitionById " +
                             "annotation");
@@ -473,7 +477,7 @@ public class AggregationParser {
             IncrementalDataPurger incrementalDataPurger = new IncrementalDataPurger();
             incrementalDataPurger.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
                     , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext, aggregationDurations, timeZone,
-                    windowMap, aggregationMap);
+                    windowMap, aggregationMap, shardId, enablePartitioning, purgedBySharedId);
 
             //Recreate in-memory data from tables
             IncrementalExecutorsInitialiser incrementalExecutorsInitialiser = new IncrementalExecutorsInitialiser(
