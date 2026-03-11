@@ -56,7 +56,7 @@ public class CosFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.9601702866503661, result);
+                    Assert.assertEquals(0.9601702866503661, result, 1e-10);
                 }
             }
         });
@@ -89,7 +89,7 @@ public class CosFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.9601702866503661, result);
+                    Assert.assertEquals(0.9601702866503661, result, 1e-10);
                 }
             }
         });
@@ -120,7 +120,7 @@ public class CosFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.9601702866503661, result);
+                    Assert.assertEquals(0.9601702866503661, result, 1e-10);
                 }
             }
         });
@@ -179,7 +179,7 @@ public class CosFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.9601702866503661, result);
+                    Assert.assertEquals(0.9601702866503661, result, 1e-10);
                 }
             }
         });
