@@ -18,7 +18,6 @@
 
 package org.wso2.siddhi.extension.evalscript;
 
-//import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.function.EvalScript;
@@ -34,8 +33,7 @@ public class EvalJavaScript implements EvalScript {
     String functionName;
 
     public EvalJavaScript() {
-        //NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-        //this.engine = factory.getScriptEngine("--no-java");
+
     }
 
     @Override

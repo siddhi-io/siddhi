@@ -40,7 +40,7 @@ import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Ignore
+@Ignore ("These tests are ignored since this was based on Nashorn which is removed in JDK 15.")
 public class EvalScriptTestCase {
 
     static final Log log = LogFactory.getLog(EvalScriptTestCase.class);
