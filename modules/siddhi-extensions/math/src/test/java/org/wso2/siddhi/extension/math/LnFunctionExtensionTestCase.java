@@ -55,7 +55,7 @@ public class LnFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 2.438251704415579, result);
+                    Assert.assertEquals(2.438251704415579, result, 1e-15);
                 }
             }
         });
@@ -146,7 +146,7 @@ public class LnFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 2.3978952727983707, result);
+                    Assert.assertEquals(2.3978952727983707, result, 1e-15);
                 }
             }
         });
@@ -179,7 +179,7 @@ public class LnFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 13.931907744886864, result);
+                    Assert.assertEquals(13.931907744886864, result, 1e-15);
                 }
             }
         });
@@ -212,7 +212,7 @@ public class LnFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 4.721567374105912, result);
+                    Assert.assertEquals(4.721567374105912, result, 1e-15);
                 }
             }
         });

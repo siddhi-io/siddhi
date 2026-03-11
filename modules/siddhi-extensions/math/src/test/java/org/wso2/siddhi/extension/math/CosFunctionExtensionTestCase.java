@@ -212,7 +212,7 @@ public class CosFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.9858056295280199, result);
+                    Assert.assertEquals(0.9858056295280199, result, 1e-15);
                 }
             }
         });
