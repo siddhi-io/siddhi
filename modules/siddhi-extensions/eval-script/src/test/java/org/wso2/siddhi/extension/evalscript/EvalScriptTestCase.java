@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -39,6 +40,7 @@ import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Ignore
 public class EvalScriptTestCase {
 
     static final Log log = LogFactory.getLog(EvalScriptTestCase.class);

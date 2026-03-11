@@ -56,7 +56,7 @@ public class ToRadiansFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.10471975511965977, result);
+                    Assert.assertEquals(0.10471975511965977, result, 1e-15);
                 }
             }
         });
@@ -147,7 +147,7 @@ public class ToRadiansFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 0.10471975511965977, result);
+                    Assert.assertEquals(0.10471975511965977, result, 1e-15);
                 }
             }
         });

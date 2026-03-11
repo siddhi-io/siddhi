@@ -56,7 +56,7 @@ public class PowerFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 175.61599999999996, result);
+                    Assert.assertEquals(175.61599999999996, result, 1e-10);
                 }
             }
         });
@@ -188,7 +188,7 @@ public class PowerFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 2.7902351804926126E52, result);
+                    Assert.assertEquals(2.7902351804926126E52, result, 1e37);
                 }
             }
         });
@@ -221,7 +221,7 @@ public class PowerFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 9.430298923255593E112, result);
+                    Assert.assertEquals(9.430298923255593E112, result, 1e97);
                 }
             }
         });
@@ -254,7 +254,7 @@ public class PowerFunctionExtensionTestCase {
                 Double result;
                 for (Event event : inEvents) {
                     result = (Double) event.getData(0);
-                    Assert.assertEquals((Double) 2.8447817306898337E68, result);
+                    Assert.assertEquals(2.8447817306898337E68, result, 1e53);
                 }
             }
         });

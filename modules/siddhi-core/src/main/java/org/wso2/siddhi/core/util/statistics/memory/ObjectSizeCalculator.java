@@ -370,8 +370,9 @@ public class ObjectSizeCalculator {
                 if (type.isPrimitive()) {
                     fieldsSize += getPrimitiveFieldSize(type);
                 } else {
-                    f.setAccessible(true);
-                    referenceFields.add(f);
+                    if (f.trySetAccessible()) {
+                        referenceFields.add(f);
+                    }
                     fieldsSize += referenceSize;
                 }
             }

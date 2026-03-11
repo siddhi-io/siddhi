@@ -124,6 +124,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <basedir>${project.build.outputDirectory}/org/wso2/siddhi/extension/eventtable</basedir>
+                    <argLine>
+                        --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
