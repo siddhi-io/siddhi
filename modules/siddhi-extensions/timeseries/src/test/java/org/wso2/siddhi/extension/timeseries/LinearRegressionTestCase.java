@@ -683,7 +683,7 @@ public class LinearRegressionTestCase {
         Thread.sleep(100);
 
         Assert.assertEquals("No of events: ", 21, count);
-        Assert.assertEquals("Beta0: ", 0.996755594843574, betaTwo, 0.996755594843574 - betaTwo);
+        Assert.assertEquals("Beta0: ", 0.996755594843574, betaTwo, 1e-10);
 
         executionPlanRuntime.shutdown();
 
