@@ -19,7 +19,7 @@
 grammar SiddhiQL;
 
 @header {
-	//import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.apache.commons.lang3.StringEscapeUtils;
 }
 
 parse
@@ -865,9 +865,8 @@ STRING_LITERAL
         '\'' ( ~('\u0000'..'\u001f' | '\''| '"' ) )* '\''
         |'"' ( ~('\u0000'..'\u001f'  |'"') )* '"'
      )  {setText(getText().substring(1, getText().length()-1));}
-     |('"""'(.*?)'"""')  {setText(getText().substring(3, getText().length()-3));}
+     |('"""'(~["\\\r\n] | EscapeSequence)*'"""')  {setText(StringEscapeUtils.unescapeJava(getText().substring(3, getText().length()-3)));}
     ;
-
 //Hidden channels
 SINGLE_LINE_COMMENT
  : '--' ~[\r\n]* -> channel(HIDDEN)
@@ -888,6 +887,19 @@ UNEXPECTED_CHAR
 SCRIPT
  : '{' SCRIPT_ATOM* '}'
  ;
+
+fragment EscapeSequence
+    : '\\' 'u005c'? [btnfr"'\\]
+    | '\\' 'u005c'? ([0-3]? [0-7])? [0-7]
+    | '\\' 'u'+ HexDigit HexDigit HexDigit HexDigit
+    ;
+fragment HexDigits
+    : HexDigit ((HexDigit | '_')* HexDigit)?
+    ;
+
+fragment HexDigit
+    : [0-9a-fA-F]
+    ;
 
  fragment SCRIPT_ATOM
   : ~[{}]
