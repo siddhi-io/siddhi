@@ -99,6 +99,9 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
         }
         if (previousToLastReturned != null) {
             previousToLastReturned.setNext(lastReturned.getNext());
+            if (lastReturned.getNext() == null) {
+                last = previousToLastReturned;
+            }
         } else {
             first = lastReturned.getNext();
             if (first == null) {
