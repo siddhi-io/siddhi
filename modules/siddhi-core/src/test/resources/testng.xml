@@ -108,6 +108,7 @@
             <class name="io.siddhi.core.query.table.util.TestStore"/>
 
             <class name="io.siddhi.core.query.trigger.TriggerTestCase"/>
+            <class name="io.siddhi.core.query.trigger.CronTriggerSchedulerTestCase"/>
 
             <class name="io.siddhi.core.query.window.CronWindowTestCase"/>
             <class name="io.siddhi.core.query.window.ExpressionWindowTestCase"/>
