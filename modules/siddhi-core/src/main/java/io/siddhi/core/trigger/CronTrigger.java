@@ -54,7 +54,7 @@ public class CronTrigger extends AbstractTrigger implements Job {
     private StreamJunction streamJunction;
     private Scheduler scheduler;
     private String jobName;
-    private String jobGroup = "TriggerGroup";
+    private String jobGroup;
     private ThroughputTracker throughputTracker;
 
     @Override
@@ -123,7 +123,8 @@ public class CronTrigger extends AbstractTrigger implements Job {
         try {
             SchedulerFactory schedulerFactory = new StdSchedulerFactory();
             scheduler = schedulerFactory.getScheduler();
-            jobName = "TriggerJob_" + siddhiAppContext.getName() + "_" + elementId;
+            jobGroup = "TriggerGroup_" + siddhiAppContext.getName();
+            jobName = "TriggerJob_" + elementId;
             JobKey jobKey = new JobKey(jobName, jobGroup);
 
             if (scheduler.checkExists(jobKey)) {

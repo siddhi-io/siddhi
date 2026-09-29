@@ -72,6 +72,27 @@ public class CronTriggerSchedulerTestCase {
     }
 
     @Test(priority = 2)
+    public void testAppAndTriggerNamesWithUnderscores() throws InterruptedException {
+        log.info("App and trigger names that join to the same string do not share a cron job");
+        AtomicInteger countA = new AtomicInteger();
+        AtomicInteger countB = new AtomicInteger();
+        SiddhiAppRuntime appA = createTriggerApp("CronApp_X", "Y", countA);
+        SiddhiAppRuntime appB = createTriggerApp("CronApp", "X_Y", countB);
+        appA.start();
+        appB.start();
+
+        Thread.sleep(2500);
+        AssertJUnit.assertTrue("CronApp_X did not fire", countA.get() > 0);
+        AssertJUnit.assertTrue("CronApp did not fire", countB.get() > 0);
+
+        appA.shutdown();
+        countB.set(0);
+        Thread.sleep(2500);
+        AssertJUnit.assertTrue("CronApp stopped firing after CronApp_X shut down", countB.get() > 0);
+        appB.shutdown();
+    }
+
+    @Test(priority = 3)
     public void testSchedulerShutdownWhenIdleAndRestart() throws InterruptedException {
         log.info("Quartz scheduler is shut down when the last cron trigger stops and recreated on the next start");
         AtomicInteger count = new AtomicInteger();
@@ -92,7 +113,7 @@ public class CronTriggerSchedulerTestCase {
         redeployed.shutdown();
     }
 
-    @Test(priority = 3)
+    @Test(priority = 4)
     public void testCronWindowSurvivesTriggerShutdown() throws InterruptedException {
         log.info("Stopping the last cron trigger keeps the scheduler running for a cron window");
         String windowApp = "@app:name('CronWindowApp') " +
@@ -126,10 +147,14 @@ public class CronTriggerSchedulerTestCase {
     }
 
     private SiddhiAppRuntime createTriggerApp(String appName, AtomicInteger count) {
+        return createTriggerApp(appName, "T", count);
+    }
+
+    private SiddhiAppRuntime createTriggerApp(String appName, String triggerId, AtomicInteger count) {
         String app = "@app:name('" + appName + "') " +
-                "define trigger T at '*/1 * * * * ?';";
+                "define trigger " + triggerId + " at '*/1 * * * * ?';";
         SiddhiAppRuntime runtime = siddhiManager.createSiddhiAppRuntime(app);
-        runtime.addCallback("T", new StreamCallback() {
+        runtime.addCallback(triggerId, new StreamCallback() {
             @Override
             public void receive(Event[] events) {
                 count.addAndGet(events.length);
