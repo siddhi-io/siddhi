@@ -32,6 +32,7 @@ import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.util.CronSchedulerUtil;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
@@ -146,7 +147,9 @@ public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProce
     public void stop() {
         try {
             if (scheduler != null) {
-                scheduler.deleteJob(new JobKey(jobName, jobGroup));
+                synchronized (CronSchedulerUtil.LOCK) {
+                    CronSchedulerUtil.deleteJob(scheduler, new JobKey(jobName, jobGroup));
+                }
             }
         } catch (SchedulerException e) {
             log.error(ExceptionUtil.getMessageWithContext(e, siddhiQueryContext.getSiddhiAppContext()) +
@@ -155,6 +158,12 @@ public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProce
     }
 
     private void scheduleCronJob(String cronString) {
+        synchronized (CronSchedulerUtil.LOCK) {
+            scheduleCronJobLocked(cronString);
+        }
+    }
+
+    private void scheduleCronJobLocked(String cronString) {
         try {
             SchedulerFactory schedFact = new StdSchedulerFactory();
             scheduler = schedFact.getScheduler();

@@ -21,6 +21,7 @@ package io.siddhi.core.trigger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
+import io.siddhi.core.util.CronSchedulerUtil;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -53,7 +54,7 @@ public class CronTrigger extends AbstractTrigger implements Job {
     private StreamJunction streamJunction;
     private Scheduler scheduler;
     private String jobName;
-    private String jobGroup = "TriggerGroup";
+    private String jobGroup;
     private ThroughputTracker throughputTracker;
 
     @Override
@@ -99,7 +100,9 @@ public class CronTrigger extends AbstractTrigger implements Job {
     public void stop() {
         try {
             if (scheduler != null) {
-                scheduler.deleteJob(new JobKey(jobName, jobGroup));
+                synchronized (CronSchedulerUtil.LOCK) {
+                    CronSchedulerUtil.deleteJob(scheduler, new JobKey(jobName, jobGroup));
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Scheduler job: " + jobName + " Group: " + jobGroup + " has successfully stopped");
                 }
@@ -111,9 +114,16 @@ public class CronTrigger extends AbstractTrigger implements Job {
     }
 
     private void scheduleCronJob(String cronString, String elementId) {
+        synchronized (CronSchedulerUtil.LOCK) {
+            scheduleCronJobLocked(cronString, elementId);
+        }
+    }
+
+    private void scheduleCronJobLocked(String cronString, String elementId) {
         try {
             SchedulerFactory schedulerFactory = new StdSchedulerFactory();
             scheduler = schedulerFactory.getScheduler();
+            jobGroup = "TriggerGroup_" + siddhiAppContext.getName();
             jobName = "TriggerJob_" + elementId;
             JobKey jobKey = new JobKey(jobName, jobGroup);
 
@@ -130,7 +140,7 @@ public class CronTrigger extends AbstractTrigger implements Job {
                     .build();
 
             org.quartz.Trigger trigger = org.quartz.TriggerBuilder.newTrigger()
-                    .withIdentity("TriggerJob_" + elementId, jobGroup)
+                    .withIdentity(jobName, jobGroup)
                     .withSchedule(CronScheduleBuilder.cronSchedule(cronString))
                     .build();
 
