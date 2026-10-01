@@ -589,8 +589,48 @@ public class MultiClientDistributedSinkTestCase {
         }
     }
 
-
     @Test(dependsOnMethods = {"multiClientFailingBroadcast4"})
+    public void multiClientWaitRetryStopsOnShutdown() throws InterruptedException {
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testFailingInMemory2', on.error='wait', @map(type='passThrough'), " +
+                "   @distribution(strategy='broadcast'," +
+                "       @destination(topic = 'IBM', test='1'), " +
+                "       @destination(topic = 'WSO2', test='2'))) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+        String query = "from FooStream select * insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+        Thread publishingThread = new Thread(() -> {
+            try {
+                stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        try {
+            siddhiAppRuntime.start();
+            TestFailingInMemorySink2.fail = true;
+            publishingThread.start();
+            Thread.sleep(100);
+
+            siddhiAppRuntime.shutdown();
+            publishingThread.join(6000);
+
+            Assert.assertFalse(publishingThread.isAlive(),
+                    "Publishing thread should stop after the sink is shut down");
+        } finally {
+            TestFailingInMemorySink2.fail = false;
+            if (publishingThread.isAlive()) {
+                publishingThread.join(6000);
+            }
+        }
+    }
+    @Test(dependsOnMethods = {"multiClientWaitRetryStopsOnShutdown"})
     public void singleClientBroadcastWithRef() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params with ref");
 

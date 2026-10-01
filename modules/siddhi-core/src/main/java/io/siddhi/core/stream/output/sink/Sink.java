@@ -358,10 +358,16 @@ public abstract class Sink<S extends State> implements SinkListener {
     public void retryPublishWithWait(Object payload, DynamicOptions dynamicOptions, S state) {
         while (!isShutdown.get()) {
             while (!isConnected()) {
+                if (isShutdown.get()) {
+                    return;
+                }
                 connectWithRetry();
                 if (!isConnected()) {
                     retryWait(5000);
                 }
+            }
+            if (isShutdown.get()) {
+                return;
             }
             try {
                 publish(payload, dynamicOptions, state);
