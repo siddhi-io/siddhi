@@ -347,6 +347,33 @@ public abstract class Sink<S extends State> implements SinkListener {
         isConnected.set(connected);
     }
 
+    protected boolean isOnErrorWait() {
+        return onErrorAction == OnErrorAction.WAIT;
+    }
+
+    public void retryPublishWithWait(Object payload, DynamicOptions dynamicOptions, S state) {
+        while (!isConnected()) {
+            if (isShutdown.get()) {
+                return;
+            }
+            connectWithRetry();
+            if (!isConnected()) {
+                retryWait(5000);
+            }
+        }
+        while (!isShutdown.get()) {
+            try {
+                publish(payload, dynamicOptions, state);
+                return;
+            } catch (ConnectionUnavailableException e) {
+                setConnected(false);
+                if (connectionCallback != null) {
+                    connectionCallback.connectionFailed();
+                }
+            }
+        }
+    }
+
     @Deprecated
     void onError(Object payload, Exception e) {
         DynamicOptions dynamicOptions = trpDynamicOptions.get();

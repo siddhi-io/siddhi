@@ -569,20 +569,9 @@ public class MultiClientDistributedSinkTestCase {
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
-                        TestFailingInMemorySink2.fail = false;
-                    } catch (InterruptedException ignore) {
-                    }
-                }
-
-            }.start();
-            TestFailingInMemorySink2.fail = true;
+            TestFailingInMemorySink2.failOnce = true;
             stockStream.send(new Object[]{"IBM", 57.6f, 100L});
-            Thread.sleep(11000);
+            Thread.sleep(6000);
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
