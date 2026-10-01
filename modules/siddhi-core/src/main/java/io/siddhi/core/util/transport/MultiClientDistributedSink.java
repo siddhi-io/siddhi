@@ -128,6 +128,11 @@ public class MultiClientDistributedSink extends DistributedTransport {
         transports.forEach(Sink::disconnect);
     }
 
+    @Override
+    protected void shutdownTransport() {
+        transports.forEach(Sink::shutdown);
+    }
+
     /**
      * Will be called at the end to clean all the resources consumed
      */

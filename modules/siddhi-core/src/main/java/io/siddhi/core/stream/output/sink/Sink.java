@@ -322,13 +322,17 @@ public abstract class Sink<S extends State> implements SinkListener {
 
     public void shutdown() {
         isShutdown.set(true);
-        disconnect();
-        destroy();
+        shutdownTransport();
         setConnected(false);
         isTryingToConnect.set(false);
         if (connectionCallback != null) {
             connectionCallback.connectionFailed();
         }
+    }
+
+    protected void shutdownTransport() {
+        disconnect();
+        destroy();
     }
 
     void setTrpDynamicOptions(ThreadLocal<DynamicOptions> trpDynamicOptions) {
@@ -352,16 +356,13 @@ public abstract class Sink<S extends State> implements SinkListener {
     }
 
     public void retryPublishWithWait(Object payload, DynamicOptions dynamicOptions, S state) {
-        while (!isConnected()) {
-            if (isShutdown.get()) {
-                return;
-            }
-            connectWithRetry();
-            if (!isConnected()) {
-                retryWait(5000);
-            }
-        }
         while (!isShutdown.get()) {
+            while (!isConnected()) {
+                connectWithRetry();
+                if (!isConnected()) {
+                    retryWait(5000);
+                }
+            }
             try {
                 publish(payload, dynamicOptions, state);
                 return;
@@ -370,6 +371,7 @@ public abstract class Sink<S extends State> implements SinkListener {
                 if (connectionCallback != null) {
                     connectionCallback.connectionFailed();
                 }
+                retryWait(5000);
             }
         }
     }
