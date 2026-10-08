@@ -28,8 +28,12 @@ public class ThreadBarrier {
 
     private ReentrantLock lock = new ReentrantLock();
     private AtomicInteger counter = new AtomicInteger();
+    private ThreadLocal<MutableInteger> localEnters = ThreadLocal.withInitial(() -> new MutableInteger(0));
 
     public void enter() {
+        if (localEnters.get().incrementAndGet() > 1) {
+            return;
+        }
         if (lock.isLocked()) {
             lock.lock();
             lock.unlock();
@@ -37,9 +41,10 @@ public class ThreadBarrier {
         counter.incrementAndGet();
     }
 
-
     public void exit() {
-        counter.decrementAndGet();
+        if (localEnters.get().decrementAndGet() == 0) {
+            counter.decrementAndGet();
+        }
     }
 
     public int getActiveThreads() {
@@ -52,6 +57,26 @@ public class ThreadBarrier {
 
     public void unlock() {
         lock.unlock();
+    }
+
+    /**
+     * Simple non-thread-safe integer wrapper to be used in ThreadLocal
+     */
+    private static class MutableInteger {
+
+        private int value;
+
+        public MutableInteger(int initialValue) {
+            this.value = initialValue;
+        }
+
+        public int incrementAndGet() {
+            return ++value;
+        }
+
+        public int decrementAndGet() {
+            return --value;
+        }
     }
 
 }
