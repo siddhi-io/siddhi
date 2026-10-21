@@ -334,5 +334,61 @@ public class DeleteFromTableTestCase {
 
     }
 
+    @Test
+    public void deleteFromTableTest6() throws InterruptedException {
+        log.info("deleteFromTableTest6");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, vol long); " +
+                "define stream DeleteStockStream (symbol string, price float, vol long); " +
+                "define stream CountStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "select symbol, price, vol as volume " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream[vol>=100] " +
+                "delete StockTable " +
+                "   on StockTable.symbol==symbol ;" +
+                "" +
+                "@info(name = 'query3') " +
+                "from CountStockStream#window.length(0) join StockTable" +
+                " on CountStockStream.symbol==StockTable.symbol " +
+                "select CountStockStream.symbol as symbol " +
+                "insert into CountResultsStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        InputHandler countStockStream = siddhiAppRuntime.getInputHandler("CountStockStream");
+
+        siddhiAppRuntime.addCallback("CountResultsStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                inEventCount += events.length;
+            }
+        });
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        // Remove last event in the StockTable
+        deleteStockStream.send(new Object[]{"IBM", 57.6f, 100L});
+
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        countStockStream.send(new Object[]{"WSO2"});
+
+        Thread.sleep(500);
+        AssertJUnit.assertEquals(2, inEventCount);
+        siddhiAppRuntime.shutdown();
+
+    }
 
 }
